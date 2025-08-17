@@ -1,5 +1,6 @@
 [user]
 	name = Fabio Souza
 	email = fabiovanderlei.developer@gmail.com
+	signingkey = 9D79F9FD64781516
 [core]
 	editor = nvim
