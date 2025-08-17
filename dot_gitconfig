@@ -4,5 +4,7 @@
 	signingkey = 9D79F9FD64781516
 [core]
 	editor = nvim
+[init]
+        defaultBranch = main
 [commit]
 	gpgsign = true
