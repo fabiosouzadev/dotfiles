@@ -1,4 +1,40 @@
 packages:
   linux:
     arch:
-      - brave-nightly
+      aur:
+        - rtl8821ce-dkms-git
+        - brave-nightly-bin
+        - ferdium
+        - discord-canary
+        - vscodium-bin
+      core:
+        - gzip
+      extra:
+        - i3-wm
+        - bitwarden
+        - fastfetch
+        - flameshot
+        - bat
+        - direnv
+        - eza
+        - fd
+        - fzf
+        - git
+        - github-cli
+        - hyprland
+        - just
+        - jq
+        - lazygit
+        - linux-zen
+        - linux-zen-headers
+        - lua-language-server
+        - mpv
+        - neovim
+        - obsidian
+        - pavucontrol
+        - qutebrowser
+        - vlc
+        - yazi
+      multilib:
+        - wine
+
