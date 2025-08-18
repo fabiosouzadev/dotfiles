@@ -1,0 +1,4 @@
+[".config/nvim"]
+type = "git-repo"
+url = "https://github.com/fabiosouzadev/kickstart.nvim"
+refreshPeriod = "168h"

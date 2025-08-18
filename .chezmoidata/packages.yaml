@@ -7,6 +7,12 @@ packages:
         - ferdium
         - discord-canary
         - vscodium-bin
+        - dunst-git
+        - polybar-git
+        - spotify-dev
+        - tmux-git
+        - rofi-git
+        - rofi-greenclip
       core:
         - gzip
       extra:
@@ -35,6 +41,8 @@ packages:
         - qutebrowser
         - vlc
         - yazi
+        - xclip
+        - xsel
       multilib:
         - wine
 
