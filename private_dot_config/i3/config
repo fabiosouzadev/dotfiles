@@ -99,7 +99,7 @@ exec_always --no-startup-id dunst --config ~/.config/dunst/dunstrc
 # start using default config
 #
 # for custom config:
-#exec_always --no-startup-id picom --config ~/.config/picom.conf
+# exec_always --no-startup-id picom --config ~/.config/picom.conf
 #
 
 
@@ -107,7 +107,7 @@ exec_always --no-startup-id dunst --config ~/.config/dunst/dunstrc
 # uncomment the next line, use arandr to setup displays and save the file as monitor and set wallpaper:
 exec_always --no-startup-id sleep 3;
 exec_always --no-startup-id ~/.config/i3/scripts/i3_detect_displays.sh; feh --bg-fill --randomize ~/.config/wallpapers
-exec_always --no-startup-id ~/.config/polybar/launch.sh --my-colorblocks
+exec_always --no-startup-id ~/.config/polybar/simple/launch.sh --my-colorblocks
 # exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"
 # exec_always --no-startup-id setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'
 
@@ -269,20 +269,20 @@ bindsym $mod+Shift+b exec --no-startup-id kitty -e nixos-rebuild switch --flake 
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
 ## rofi bindings fancy application menu ($mod+d /F9 optional disabled)
-bindsym $mod+d exec --no-startup-id ~/.config/rofi/launchers/type-2/launcher.sh
-bindsym $mod+Shift+x exec --no-startup-id ~/.config/rofi/powermenu/type-2/powermenu.sh
+bindsym $mod+d exec --no-startup-id ~/.config/rofi/files/launchers/type-2/launcher.sh
+bindsym $mod+Shift+x exec --no-startup-id ~/.config/rofi/files/powermenu/type-2/powermenu.sh
 # bindsym F9 exec rofi -modi drun -show drun \
 #         -config ~/.config/rofi/rofidmenu.rasi
 
 ## rofi bindings for window menu ($mod+w /F10 optional disabled)
-bindsym $mod+w exec --no-startup-id ~/.config/rofi/launchers/type-1/window.sh
+bindsym $mod+w exec --no-startup-id ~/.config/rofi/files/launchers/type-1/window.sh
 
 ## rofi bindings for screenshot
-bindsym $mod+Shift+p exec --no-startup-id ~/.config/rofi/applets/bin/screenshot.sh
+bindsym $mod+Shift+p exec --no-startup-id ~/.config/rofi/files/applets/bin/screenshot.sh
 
 ## rofi bindings to manage clipboard (install rofi-greenclip from the AUR)
 exec --no-startup-id greenclip daemon>/dev/null
-bindsym $mod+c exec --no-startup-id ~/.config/rofi/greenclip/type-5/greenclip.sh
+bindsym $mod+c exec --no-startup-id ~/.config/rofi/files/greenclip/type-5/greenclip.sh
 
 # keybinding in fancy rofi (automated):
 #bindsym F1 exec ~/.config/i3/scripts/keyhint-2

@@ -5,19 +5,19 @@ packages:
         - rtl8821ce-dkms-git
         - brave-nightly-bin
         - ferdium
-        - discord-canary
         - vscodium-bin
         - dunst-git
         - polybar-git
         - spotify-dev
         - tmux-git
-        - rofi-git
+        - picom-git
         - rofi-greenclip
       core:
         - gzip
       extra:
         - i3-wm
         - bitwarden
+        - discord
         - fastfetch
         - flameshot
         - bat
@@ -39,6 +39,7 @@ packages:
         - obsidian
         - pavucontrol
         - qutebrowser
+        - rofi
         - vlc
         - yazi
         - xclip
