@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Exec=/home/$USER/.screenlayout/i3_detect_displays.sh
+Hidden=false
+X-GNOME-Autostart-enabled=true
+Name=Monitor Setup
+Comment=Configuração automática de monitores via xrandr
+X-GNOME-Autostart-Delay=5
