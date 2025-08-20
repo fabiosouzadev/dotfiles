@@ -8,3 +8,6 @@
         defaultBranch = main
 [commit]
 	gpgsign = true
+
+[includeIf "hasconfig:remote.*.url:git@github.com:Instivo/*"]
+	path = gitconfig.instivo.inc
