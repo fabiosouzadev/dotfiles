@@ -114,8 +114,8 @@ exec_always --no-startup-id sh -c "sleep 2 && setxkbmap -layout 'us,br' -variant
 
 
 # Autostart apps as you like
-exec --no-startup-id sleep 3 && spotify
-exec --no-startup-id sleep 3 && discord
+exec --no-startup-id spotify
+exec --no-startup-id sleep 5 && discord
 exec --no-startup-id sleep 3 && obsidian
 exec --no-startup-id sleep 3 && ghostty
 exec --no-startup-id sleep 3 && brave-nightly
