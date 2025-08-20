@@ -1,6 +1,5 @@
 #!/bin/sh
 
-sleep 3
 # Only start this up when this isn't already going.
 if xrandr | grep '^HDMI-1.* connected'; then
     MAIN_DISPLAY=$(xrandr | grep '^HDMI-1.* connected' | awk '{print $1;}')
