@@ -23,6 +23,7 @@ packages:
         - bat
         - direnv
         - eza
+        - feh
         - fd
         - fzf
         - git
