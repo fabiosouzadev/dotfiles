@@ -4,13 +4,9 @@ packages:
       aur:
         - rtl8821ce-dkms-git
         - brave-nightly-bin
-        - ferdium
+        - ferdium-bin
         - vscodium-bin
-        - dunst-git
-        - polybar-git
-        - spotify-dev
-        - tmux-git
-        - picom-git
+        - spotify
         - rofi-greenclip
       core:
         - gzip
@@ -18,6 +14,7 @@ packages:
         - i3-wm
         - bitwarden
         - discord
+        - dunst
         - fastfetch
         - flameshot
         - bat
@@ -39,8 +36,11 @@ packages:
         - neovim
         - obsidian
         - pavucontrol
+        - picom
+        - polybar
         - qutebrowser
         - rofi
+        - tmux
         - vlc
         - yazi
         - xclip
