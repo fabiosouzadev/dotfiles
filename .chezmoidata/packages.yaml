@@ -24,6 +24,7 @@ packages:
         - fd
         - fzf
         - git
+        - git-delta
         - github-cli
         - hyprland
         - just
