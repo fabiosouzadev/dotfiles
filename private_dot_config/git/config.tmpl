@@ -33,6 +33,9 @@
 	editor = nvim
 	pager  = delta
 
+[include]
+	path = "~/.config/git/themes/catppuccin.gitconfig"
+
 [delta]
 	features = "catppuccin-mocha"
 	line-numbers = true
@@ -48,8 +51,6 @@
 [interactive]
 	diffFilter = "delta --color-only"
 
-[include]
-	path = "/nix/store/zfaj8139yb640vgkim09yfq5jli7sn15-source/catppuccin.gitconfig"
 
 [includeIf "hasconfig:remote.*.url:git@github.com:Instivo/**"]
 	path = ~/.config/git/config.instivo.inc
