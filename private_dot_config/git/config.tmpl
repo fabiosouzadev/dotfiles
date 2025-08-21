@@ -2,12 +2,54 @@
 	name = Fabio Souza
 	email = fabiovanderlei.developer@gmail.com
 	signingkey = 9D79F9FD64781516
-[core]
-	editor = nvim
+[color]
+	ui = true
+
 [init]
         defaultBranch = main
+
+[merge]
+	tool = "nvimdiff"
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[rebase]
+	autoStash = true
+
+[tag]
+	gpgSign = true
+
 [commit]
 	gpgsign = true
+
+[credential]
+	helper = "gh auth git-credential"
+
+[core]
+	editor = nvim
+	pager  = delta
+
+[delta]
+	features = "catppuccin-mocha"
+	line-numbers = true
+	navigate = true
+	side-by-side = true
+
+[diff]
+	colorMoved = "zebra"
+
+[fetch]
+	prune = true
+
+[interactive]
+	diffFilter = "delta --color-only"
+
+[include]
+	path = "/nix/store/zfaj8139yb640vgkim09yfq5jli7sn15-source/catppuccin.gitconfig"
 
 [includeIf "hasconfig:remote.*.url:git@github.com:Instivo/**"]
 	path = ~/.config/git/config.instivo.inc
