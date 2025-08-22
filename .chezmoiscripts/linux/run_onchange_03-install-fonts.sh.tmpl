@@ -16,7 +16,8 @@ cd $TEMP_DIR_FONTS
 {{ range .fonts.linux -}}
 
 echo "Installing font: {{.}}"
-curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{.}}
+curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{.}}.tar.xz
+tar -xf {{.}}.tar.xz
 
 {{ end -}}
 
