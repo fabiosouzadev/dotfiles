@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+
+{{ if eq .chezmoi.osRelease.idLike "arch" }}
+echo "Installing fonts"
+
+TEMP_DIR_FONTS=$HOME/.temp-fonts
+LOCAL_SHARE_FONTS=$HOME/.local/share/fonts
+cp -rf fonts/* $LOCAL_SHARE_FONTS
+
+mkdir $LOCAL_SHARE_FONTS
+mkdir $TEMP_DIR_FONTS
+
+cd $TEMP_DIR_FONTS
+{{ range .fonts.linux -}}
+
+echo "Installing font: {{.}}"
+curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{.}}
+
+{{ end -}}
+
+cp -v *.ttf  $LOCAL_SHARE_FONTS
+fc-cache -fv
+sudo rm -r $TEMP_DIR_FONTS
+
+{{ else }}
+
+echo "This script is only for Arch based systems. Exiting..."
+exit 1
+
+{{ end }}
