@@ -2,7 +2,6 @@ packages:
   linux:
     arch:
       aur:
-        - rtl8821ce-dkms-git
         - brave-nightly-bin
         - ferdium-bin
         - vscodium-bin

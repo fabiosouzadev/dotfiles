@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+
+{{ if eq .chezmoi.osRelease.idLike "arch" }}
+
+sudo pacman -Syu --noconfirm --needed \
+              bluez \
+              bluez-utils
+sudo systemctl enable --now bluetooth
+
+{{ else }}
+
+echo "This script is only for Arch based systems. Exiting..."
+exit 1
+
+{{ end }}

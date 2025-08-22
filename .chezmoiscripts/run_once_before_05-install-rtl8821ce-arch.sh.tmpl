@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+
+{{ if eq .chezmoi.osRelease.idLike "arch" }}
+
+sudo pacman -Syu --noconfirm --needed rtl8821ce-dkms-git
+
+{{ else }}
+
+echo "This script is only for Arch based systems. Exiting..."
+exit 1
+
+{{ end }}
