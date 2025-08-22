@@ -4,7 +4,7 @@
 
 {{ if eq .chezmoi.osRelease.idLike "arch" }}
 
-sudo pacman -Syu --noconfirm --needed rtl8821ce-dkms-git
+yay -Syu --noconfirm --needed rtl8821ce-dkms-git
 
 {{ else }}
 
