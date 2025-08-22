@@ -21,12 +21,13 @@ tar -xf {{.}}.tar.xz
 
 {{ end -}}
 
-cp -v $HOME/.config/polybar/fonts/*.ttf $LOCAL_SHARE_FONTS
-cp -v $HOME/.config/polybar/fonts/panels/*.ttf $LOCAL_SHARE_FONTS
+cp -v $HOME/.config/polybar/fonts/* $LOCAL_SHARE_FONTS
+cp -v $HOME/.config/polybar/fonts/panels/* $LOCAL_SHARE_FONTS
+cp -v $HOME/.config/polybar/fonts/terminus/* $LOCAL_SHARE_FONTS
 cp -v $HOME/.config/rofi/fonts/*.ttf $LOCAL_SHARE_FONTS
 cp -v *.ttf  $LOCAL_SHARE_FONTS
 fc-cache -fv
-sudo rm -r $TEMP_DIR_FONTS
+# sudo rm -r $TEMP_DIR_FONTS
 
 {{ else }}
 
