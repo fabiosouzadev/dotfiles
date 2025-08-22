@@ -13,7 +13,7 @@ LOCAL_SHARE_FONTS=$HOME/.local/share/fonts
 
 
 cd $TEMP_DIR_FONTS
-{{ range .fonts.linux -}}
+{{ range .fonts.linux.nerdfonts -}}
 
 echo "Installing font: {{.}}"
 curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{.}}.tar.xz
