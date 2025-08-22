@@ -30,8 +30,6 @@ packages:
         - just
         - jq
         - lazygit
-        - linux-zen
-        - linux-zen-headers
         - lua-language-server
         - mpv
         - neovim
@@ -48,4 +46,3 @@ packages:
         - xsel
       multilib:
         - wine
-

@@ -1,5 +1,5 @@
 linux:
+  arch:
     kernels:
-        - linux-zen
-        - linux-zen-headers
-
+      - linux-zen
+      - linux-zen-headers

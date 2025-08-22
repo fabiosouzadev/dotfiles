@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+export PATH="$HOME/.local/bin/:$PATH"
+
+{{ if eq .chezmoi.osRelease.idLike "arch" }}
+
+echo "Installing Arch Kernels"
+
+sudo pacman -Syu --noconfirm --needed {{ range .linux.arch.kernels }} {{.}}{{end}}
+
+{{ else }}
+
+echo "This script is only for Arch based systems. Exiting..."
+exit 1
+
+{{ end }}
