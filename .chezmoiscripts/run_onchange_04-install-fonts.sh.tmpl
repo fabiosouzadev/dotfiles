@@ -7,10 +7,10 @@ echo "Installing fonts"
 
 TEMP_DIR_FONTS=$HOME/.temp-fonts
 LOCAL_SHARE_FONTS=$HOME/.local/share/fonts
-cp -rf fonts/* $LOCAL_SHARE_FONTS
 
-mkdir $LOCAL_SHARE_FONTS
-mkdir $TEMP_DIR_FONTS
+[ -d $LOCAL_SHARE_FONTS ] || mkdir $LOCAL_SHARE_FONTS
+[ -d $TEMP_DIR_FONTS ] || mkdir $TEMP_DIR_FONTS
+
 
 cd $TEMP_DIR_FONTS
 {{ range .fonts.linux -}}
@@ -21,6 +21,9 @@ tar -xf {{.}}.tar.xz
 
 {{ end -}}
 
+cp -v $HOME/.config/polybar/fonts/*.ttf $LOCAL_SHARE_FONTS
+cp -v $HOME/.config/polybar/fonts/*.ttf $LOCAL_SHARE_FONTS
+cp -v $HOME/.config/rofi/fonts/*.ttf $LOCAL_SHARE_FONTS
 cp -v *.ttf  $LOCAL_SHARE_FONTS
 fc-cache -fv
 sudo rm -r $TEMP_DIR_FONTS
