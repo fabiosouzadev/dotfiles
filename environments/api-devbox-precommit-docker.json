@@ -1,0 +1,56 @@
+{
+    "packages": {
+        "python": {
+            "version": "3.7.7",
+            "outputs": ["out"]
+        },
+        "pre-commit": "latest",
+        "python37Packages.wheel":  "0.35.1",
+        "python37Packages.setuptools": "latest",
+        "python37Packages.pip": "latest",
+        "python37Packages.libcst": "latest",
+        "postgresql_10": "latest",
+        "curl": {
+            "version": "latest",
+            "outputs": ["out", "dev"]
+        },
+        "gcc": "latest",
+        "openssl": {
+            "version": "latest",
+            "outputs": ["out", "dev"]
+        },
+        "libffi": {
+            "version": "latest",
+            "outputs": ["out", "dev"]
+        },
+        "isort": "latest",
+        "zlib": {
+            "version": "latest",
+            "outputs": ["out", "dev"]
+        },
+        "wkhtmltopdf": "latest",
+        "libxml2":{
+            "version": "latest",
+            "outputs": ["out", "dev"]
+        },
+        "libxslt":{
+            "version": "latest",
+            "outputs": ["out", "dev"]
+        },
+        "zlib": "latest",
+        "gnutls": "latest",
+        "rtmpdump_gnutls": {
+            "version": "latest",
+            "outputs": ["out", "dev"]
+        },
+        "rustup": "latest",
+        "python37Packages.pre-commit": "latest"
+    },
+    "env": {
+        // Install your virtual environment in `.venv`
+        "VENV_DIR": ".venv",
+    },
+    "shell": {
+        "init_hook": ". $VENV_DIR/bin/activate"
+    }
+}
