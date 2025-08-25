@@ -6,8 +6,17 @@
 echo "Installing nix"
 
 sudo pacman -Syu --noconfirm --needed nix
-sudo systemctl enable --now nix-daemon
 nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
 sudo gpasswd -a $USER nix-users
+echo \
+	"trusted-users = root $USER" \
+	| sudo tee -a /etc/nix/nix.conf
+
+echo \
+"extra-substituters = https://devenv.cachix.org
+extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=" | \
+	     sudo tee -a /etc/nix/nix.conf
+sudo systemctl enable --now nix-daemon
+
 
 {{ end }}
