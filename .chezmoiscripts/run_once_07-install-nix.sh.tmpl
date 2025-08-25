@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+
+{{ if eq .chezmoi.osRelease.idLike "arch" }}
+echo "Installing nix"
+
+sudo pacman -Syu --noconfirm --needed nix
+sudo systemctl enable --now nix-daemon
+
+{{ end }}
