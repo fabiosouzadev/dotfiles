@@ -8,5 +8,6 @@ echo "Installing nix"
 sudo pacman -Syu --noconfirm --needed nix
 sudo systemctl enable --now nix-daemon
 nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
+sudo gpasswd -a $USER nix-users
 
 {{ end }}
