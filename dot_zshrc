@@ -1,2 +1,0 @@
-eval "$(starship init zsh)"
-. /home/fabiosouzadev/.nix-profile/etc/profile.d/nix.sh
