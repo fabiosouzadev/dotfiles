@@ -3,3 +3,20 @@ alias -- n=nvim
 alias -- vi=nvim
 
 alias -- cat=bat
+
+#eza
+alias -- eza='eza --icons auto --git'
+alias -- l='eza -lF --time-style=long-iso --icons'
+alias -- la='eza -lah --tree'
+alias -- ll='eza -l'
+alias -- lla='eza -la'
+alias -- ls='eza -h --git --icons --color=auto --group-directories-first -s extension'
+alias -- lt='eza --tree'
+alias -- tree='eza --tree --icons --tree'
+
+
+alias -- reload='source ~/.zshrc'
+
+#direnv
+alias -- direnv-install='echo "use flake" > .envrc && /nix/store/qj6a7xr3knnl5wjs3rvr8ajbjkxbn32f-direnv-2.37.1/bin/direnv allow'
+
