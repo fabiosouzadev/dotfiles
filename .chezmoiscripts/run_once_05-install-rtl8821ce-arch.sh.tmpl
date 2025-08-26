@@ -2,6 +2,7 @@
 # vim: filetype=bash
 
 
+{{-  if eq .rtl8821ce.enabled "true" }}
 {{ if eq .chezmoi.osRelease.idLike "arch" }}
 
 yay -Syu --noconfirm --needed rtl8821ce-dkms-git
@@ -12,3 +13,5 @@ echo "This script is only for Arch based systems. Exiting..."
 exit 1
 
 {{ end }}
+exit 1
+{{- end }}

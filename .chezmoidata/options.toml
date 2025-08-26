@@ -1,0 +1,6 @@
+[kernels]
+install = true
+
+[rtl8821ce]
+enabled = false
+enabled = false
