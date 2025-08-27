@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # vim: filetype=bash
 
-{{- if eq .kernels.install "true" }}
+{{ if .kernels.install }}
 
 {{ if eq .chezmoi.osRelease.idLike "arch" }}
 
@@ -15,4 +15,5 @@ sudo pacman -Syu --noconfirm --needed {{ range .linux.arch.kernels }} {{.}}{{end
 echo "This script is only for Arch based systems. Exiting..."
 exit 1
 
-{{- end }}
+{{ end }}
+{{ end }}

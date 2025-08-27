@@ -2,7 +2,7 @@
 # vim: filetype=bash
 
 
-{{-  if eq .rtl8821ce.enabled "true" }}
+{{-  if .rtl8821ce.enabled }}
 {{ if eq .chezmoi.osRelease.idLike "arch" }}
 
 yay -Syu --noconfirm --needed rtl8821ce-dkms-git
