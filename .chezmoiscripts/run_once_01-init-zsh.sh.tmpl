@@ -28,6 +28,11 @@ success "Zsh installed."
 # source ~/.zshrc
 {{ end }}
 
+# Configure keyboard
+[ ! -d /etc/X11/xorg.conf.d ] && sudo mkdir -p /etc/X11/xorg.conf.d/
+sudo cp "{{ .chezmoi.sourceDir }}/private_dot_config/xorg.conf.d/20-keyboard.conf" /etc/X11/xorg.conf.d/
+
+
 # Install starship
 curl -sS https://starship.rs/install.sh | sh
 

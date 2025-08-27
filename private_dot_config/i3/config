@@ -110,15 +110,16 @@ exec_always --no-startup-id sleep 1 && ~/.screenlayout/i3_detect_displays.sh && 
 exec_always --no-startup-id feh --bg-fill --randomize ~/.config/wallpapers
 # exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"
 # exec_always --no-startup-id setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'
-exec_always --no-startup-id sh -c "sleep 2 && setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'"
+# exec_always --no-startup-id sh -c "sleep 2 && setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'"
 
 
 # Autostart apps as you like
-exec --no-startup-id spotify
+exec --no-startup-id sleep 1 && spotify
 exec --no-startup-id sleep 1 && obsidian
-exec --no-startup-id sleep 1 && ghostty
+# exec --no-startup-id sleep 1 && ghostty
 exec --no-startup-id sleep 1 && brave-nightly
 exec --no-startup-id sleep 1 && discord
+exec --no-startup-id sleep 1 && kitty
 # exec --no-startup-id slack
 #exec --no-startup-id sleep 3 && thunar
 
@@ -451,6 +452,7 @@ assign [class="obsidian"] $ws2
 assign [class="^Slack$|^discord$"] $ws3
 assign [class="Brave-browser-*"] $ws4
 assign [class="com.mitchellh.ghostty"] $ws5
+assign [class="Kitty"] $ws5
 
 # assign [class="org.wezfurlong.wezterm"] $ws5
 # assign [class="Todoist"] $ws3
@@ -467,6 +469,12 @@ assign [class="com.mitchellh.ghostty"] $ws5
 #workspace $ws3 output HDMI-0
 #workspace $ws4 output HDMI-0
 #workspace $ws5 output HDMI-0
+
+workspace $ws1 output eDP-1
+workspace $ws2 output HDMI-1
+workspace $ws3 output HDMI-1
+workspace $ws4 output HDMI-1
+workspace $ws5 output HDMI-1
 
 
 ######################################
