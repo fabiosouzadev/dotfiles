@@ -2,4 +2,4 @@
 install = true
 
 [rtl8821ce]
-enabled = false
+enabled = true
