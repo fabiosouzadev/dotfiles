@@ -1,29 +1,37 @@
 #!/usr/bin/env bash
 # vim: filetype=bash
+{{ if eq .chezmoi.os "linux" -}}
+set -euo pipefail
 
+# Pretty print functions
+info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
+error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
-{{ if eq .chezmoi.osRelease.idLike "arch" }}
-echo "Installing nix"
+info "Installing nix"
+#curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+export RUST_BACKTRACE=full && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+# curl -L https://nixos.org/nix/install | sh -s -- --daemon
+# nix-shell -p nix-info --run "nix-info -m"
 
-sudo pacman -Syu --noconfirm --needed nix
-
-sudo systemctl enable --now nix-daemon
-
-echo "Installing devenv"
-
-nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
-
-sudo gpasswd -a $USER nix-users
-echo \
-	"trusted-users = root $USER" \
-	| sudo tee -a /etc/nix/nix.conf
-
-echo \
-"extra-substituters = https://devenv.cachix.org
-extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=" | \
-	     sudo tee -a /etc/nix/nix.conf
-
-sudo systemctl restart nix-daemon
+# sudo systemctl enable --now nix-daemon
+#
+# echo "Installing devenv"
+#
+# nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
+#
+# sudo gpasswd -a $USER nix-users
+# echo \
+# 	"trusted-users = root $USER" \
+# 	| sudo tee -a /etc/nix/nix.conf
+#
+# echo \
+# "extra-substituters = https://devenv.cachix.org
+# extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=" | \
+# 	     sudo tee -a /etc/nix/nix.conf
+#
+# sudo systemctl restart nix-daemon
 
 
 {{ end }}
