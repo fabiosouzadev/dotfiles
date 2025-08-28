@@ -11,11 +11,24 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 info "Installing nix"
 #curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-export RUST_BACKTRACE=full && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-success nix --version
-nix-shell -p nix-info --run "nix-info -m"
+export RUST_BACKTRACE=full && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm 
+info "Nix version: $(nix --version)"
+. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+
 
 info "Installing devenv"
 nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
+
+echo \
+	"trusted-users = root $USER" \
+	| sudo tee -a /etc/nix/nix.conf
+
+echo \
+"extra-substituters = https://devenv.cachix.org
+extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=" | \
+	     sudo tee -a /etc/nix/nix.conf
+
+sudo systemctl restart nix-daemon
+
 
 {{ end }}
