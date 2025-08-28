@@ -28,12 +28,18 @@ success "Zsh installed."
 # source ~/.zshrc
 {{ end }}
 
+
 # Configure keyboard
 [ ! -d /etc/X11/xorg.conf.d ] && sudo mkdir -p /etc/X11/xorg.conf.d/
 sudo cp "{{ .chezmoi.sourceDir }}/private_dot_config/xorg.conf.d/20-keyboard.conf" /etc/X11/xorg.conf.d/
 
-
 # Install starship
 curl -sS https://starship.rs/install.sh | sh
+
+PERSONAL_DIR="$HOME/Projects/Personal"
+WORK_DIR="$HOME/Projects/Work/Instivo"
+
+[ ! -d $PERSONAL_DIR ] || mkdir -p $PERSONAL_DIR
+[ ! -d $WORK_DIR ] || mkdir -p $WORK_DIR
 
 {{ end -}}
