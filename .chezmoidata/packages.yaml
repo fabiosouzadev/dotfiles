@@ -4,9 +4,12 @@ packages:
       aur:
         - brave-nightly-bin
         - ferdium-bin
-        - vscodium-bin
         - spotify
         - rofi-greenclip
+        - nosqlbooster-mongodb
+        - mongodb-compass-bin
+        - vi-mongo
+        - vscodium-insiders
       core:
         - gzip
       extra:
@@ -18,6 +21,7 @@ packages:
         - flameshot
         - bat
         - direnv
+        - dbeaver
         - eza
         - feh
         - fd

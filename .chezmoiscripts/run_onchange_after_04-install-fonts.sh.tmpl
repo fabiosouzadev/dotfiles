@@ -28,6 +28,9 @@ cp -v *.ttf  $LOCAL_SHARE_FONTS
 fc-cache -fv
 sudo rm -r $TEMP_DIR_FONTS
 
+# Bat theme
+bat cache --build
+
 {{ else }}
 
 echo "This script is only for Arch based systems. Exiting..."
