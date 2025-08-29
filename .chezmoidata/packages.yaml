@@ -3,13 +3,17 @@ packages:
     arch:
       aur:
         - brave-nightly-bin
-        - ferdium-bin
+        # - ferdium-nightly-bin
+        - ferretdb-bin
         - spotify
-        - rofi-greenclip
+        - greenclip
         - nosqlbooster-mongodb
-        - mongodb-compass-bin
+        - mongodb-compass-beta-bin
+        - streamlink-twitch-gui-bin
+        - twitch-dl-bin
         - vi-mongo
-        - vscodium-insiders
+        - vscodium-insiders-bin
+        - vscodium-insiders-bin-marketplace
       core:
         - gzip
       extra:
