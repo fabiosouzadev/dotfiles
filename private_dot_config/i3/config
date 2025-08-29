@@ -105,21 +105,22 @@ exec_always --no-startup-id dunst --config ~/.config/dunst/dunstrc
 
 # start a script to setup displays
 # uncomment the next line, use arandr to setup displays and save the file as monitor and set wallpaper:
-exec_always --no-startup-id sleep 1 && ~/.screenlayout/i3_detect_displays.sh && ~/.config/polybar/simple/launch.sh --my-colorblocks
+exec_always --no-startup-id ~/.screenlayout/i3_detect_displays.sh 
+exec_always --no-startup-id sleep 3 && ~/.config/polybar/simple/launch.sh --my-colorblocks
 
-exec_always --no-startup-id feh --bg-fill --randomize ~/.config/wallpapers
+exec_always --no-startup-id sleep 3 && feh --bg-fill --randomize ~/.config/wallpapers
 # exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"
 # exec_always --no-startup-id setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'
 # exec_always --no-startup-id sh -c "sleep 2 && setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'"
 
 
 # Autostart apps as you like
-exec --no-startup-id sleep 1 && spotify
-exec --no-startup-id sleep 1 && obsidian
+exec --no-startup-id sleep 3 && spotify
+exec --no-startup-id sleep 3 && obsidian
 # exec --no-startup-id sleep 1 && ghostty
-exec --no-startup-id sleep 1 && brave-nightly
-exec --no-startup-id sleep 1 && discord
-exec --no-startup-id sleep 1 && kitty
+exec --no-startup-id sleep 3 && brave-nightly
+exec --no-startup-id sleep 3 && discord
+exec --no-startup-id sleep 3 && kitty
 # exec --no-startup-id slack
 #exec --no-startup-id sleep 3 && thunar
 
@@ -254,7 +255,7 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 # bindsym $mod+Shift+e exit
 
 #build nixos
-bindsym $mod+Shift+b exec --no-startup-id kitty -e nixos-rebuild switch --flake ~/.dotfiles.nix/.#work --impure --use-remote-sudo --show-trace --print-build-logs --verbose
+# bindsym $mod+Shift+b exec --no-startup-id kitty -e nixos-rebuild switch --flake ~/.dotfiles.nix/.#work --impure --use-remote-sudo --show-trace --print-build-logs --verbose
 
 
 # start dmenu (a program launcher)
@@ -452,7 +453,7 @@ assign [class="obsidian"] $ws2
 assign [class="^Slack$|^discord$"] $ws3
 assign [class="Brave-browser-*"] $ws4
 assign [class="com.mitchellh.ghostty"] $ws5
-assign [class="Kitty"] $ws5
+assign [class="kitty"] $ws5
 
 # assign [class="org.wezfurlong.wezterm"] $ws5
 # assign [class="Todoist"] $ws3
