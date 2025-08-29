@@ -56,3 +56,5 @@ packages:
         - xsel
       multilib:
         - wine
+      paru:
+        - opencode-bin

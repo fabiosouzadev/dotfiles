@@ -14,9 +14,14 @@ if type -P yay >/dev/null 2>&1; then
   yay -Syu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
 fi
 
+
+if type -P paru >/dev/null 2>&1; then
+  paru -S --noconfirm --needed {{ range .packages.linux.arch.paru }} {{.}}{{ end }}
+fi
+
 {{ else }}
 
 echo "This script is only for Arch based systems. Exiting..."
 exit 1
 
-{{ end }}
+{ end }}
