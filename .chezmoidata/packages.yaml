@@ -3,7 +3,8 @@ packages:
     arch:
       aur:
         - brave-nightly-bin
-        # - ferdium-nightly-bin
+        - brave-beta-bin
+        - ferdium-nightly-bin
         - ferretdb-bin
         - spotify
         - greenclip
