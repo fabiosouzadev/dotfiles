@@ -3,7 +3,6 @@ packages:
     arch:
       aur:
         - brave-nightly-bin
-        - brave-beta-bin
         - ferdium-nightly-bin
         - ferretdb-bin
         - spotify
@@ -15,6 +14,7 @@ packages:
         - vi-mongo
         - vscodium-insiders-bin
         - vscodium-insiders-bin-marketplace
+        - zoxide
       core:
         - gzip
       extra:
@@ -48,6 +48,7 @@ packages:
         - picom
         - polybar
         - qutebrowser
+        - qbittorrent
         - rofi
         - tmux
         - vlc
