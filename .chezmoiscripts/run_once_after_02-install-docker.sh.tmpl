@@ -12,17 +12,15 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 {{ if eq .chezmoi.osRelease.idLike "arch" }}
 
 info "Installing Devops core packages"
-
 sudo pacman -Syu --noconfirm --needed {{ range .packages.linux.arch.devops.core }} {{.}}{{end}}
-
 success "Installed Devops core packages"
-
 
 if type -P yay >/dev/null 2>&1; then
+  info "Installing Devops AUR packages"
   yay -Syu --noconfirm --needed {{ range .packages.linux.arch.devops.aur }} {{.}}{{ end }}
+  success "Installed Devops AUR packages"
 fi
 
-success "Installed Devops core packages"
 {{ else }}
 
 error "This script is only for Arch based systems. Exiting..."

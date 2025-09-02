@@ -71,8 +71,9 @@ packages:
           - podman-compose # - podman-docker
           - k9s
         aur: 
-          - lazydocker-bin #- dokku
-          - lando-bin
           - docksal
+          - devpod-bin
+          - lazydocker-bin #- dokku
+          - lando-beta
           - openlens-bin # - cloudlens
 
