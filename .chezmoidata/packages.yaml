@@ -59,3 +59,20 @@ packages:
         - wine
       paru:
         - opencode-bin
+      devops:
+        core:
+          - nerdctl
+          - distrobox
+          - docker
+          - docker-buildx
+          - docker-compose
+          - ducker
+          - podman
+          - podman-compose # - podman-docker
+          - k9s
+        aur: 
+          - lazydocker-bin #- dokku
+          - lando-bin
+          - docksal
+          - openlens-bin # - cloudlens
+

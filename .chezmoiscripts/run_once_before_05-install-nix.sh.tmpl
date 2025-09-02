@@ -10,7 +10,6 @@ error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 info "Installing nix"
-#curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 export RUST_BACKTRACE=full && curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm 
 info "Nix version: $(nix --version)"
 . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
