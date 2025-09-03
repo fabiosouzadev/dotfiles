@@ -2,4 +2,12 @@ export EDITOR=nvim
 export GPG_TTY=$TTY
 export OPENCODE_CONFIG=$HOME/.config/opencode/custom-config.json
 export BW_SESSION=$(rbw unlock)
+
+#AI
+export ANTHROPIC_API_KEY={{ (rbw "ANTHROPIC_API_KEY").data.password }}
+export DEEPSEEK_API_KEY={{ (rbw "DEEPSEEK_API_KEY").data.password }}
 export GEMINI_API_KEY={{ (rbw "GEMINI_API_KEY").data.password }}
+export GROQ_API_KEY={{ (rbw "GROQ_API_KEY").data.password }}
+export OPENAI_API_KEY={{ (rbw "OPENAI_API_KEY").data.password }}
+export SRC_ENDPOINT={{ (rbw "sourcegraph.com").data.username }}
+export SRC_ACCESS_TOKEN={{ (rbw "sourcegraph.com").data.password }}

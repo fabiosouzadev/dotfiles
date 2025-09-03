@@ -52,6 +52,7 @@ packages:
         - qbittorrent
         - rbw #bitwarden
         - rofi
+        - rofi-rbw
         - tmux
         - vlc
         - yazi
