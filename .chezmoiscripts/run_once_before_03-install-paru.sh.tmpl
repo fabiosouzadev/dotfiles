@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # vim: filetype=bash
-{{ if eq .chezmoi.os "linux" -}}
+
+{{ if eq .chezmoi.osRelease.idLike "arch" }}
 set -euo pipefail
 
 # Pretty print functions
@@ -9,12 +10,18 @@ warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
-info "Installing Paru"
-sudo pacman -S --needed base-devel git
-git clone https://aur.archlinux.org/paru.git
-cd paru
-makepkg -si
-success "Paru Installed"
 
+if type -P paru >/dev/null 2>&1; then
+	info "Installing Paru"
+	sudo pacman -S --needed base-devel git
+	cd /tmp && git clone https://aur.archlinux.org/paru.git
+	cd paru
+	makepkg -rsi --noconfirm
+	cd ~ && rm -Rf /temp/paru/
+	sudo sed -i -e 's/^#Color/Color/' --e 's/^#BottomUp/BottomUp/' -e 's/^#SudoLoop/SudoLoop/' -e 's/^#CombinedUpgrade/CombinedUpgrade/' -e 's/^#UpgradeMenu/UpgradeMenu/' -e 's/^#NewsOnUpgrade/NewsOnUpgrade/' /etc/paru.conf
+	echo "SkipReview" | sudo tee -a /etc/paru.conf > /dev/null
+	paru --gendb;
+	success "Paru Installed"
+fi
 
 {{ end -}}

@@ -5,10 +5,11 @@ packages:
         - brave-nightly-bin
         - ferdium-nightly-bin
         - ferretdb-bin
+        - lmstudio #LLM
         - spotify
         - greenclip
         - nosqlbooster-mongodb
-        - mongodb-compass-beta-bin
+        - mongodb-compass-bin #opencode-bin
         - streamlink-twitch-gui-bin
         - twitch-dl-bin
         - vi-mongo
@@ -18,8 +19,8 @@ packages:
       core:
         - gzip
       extra:
+        - atuin
         - i3-wm
-        - bitwarden
         - discord
         - dunst
         - fastfetch
@@ -49,6 +50,7 @@ packages:
         - polybar
         - qutebrowser
         - qbittorrent
+        - rbw #bitwarden
         - rofi
         - tmux
         - vlc
@@ -57,8 +59,6 @@ packages:
         - xsel
       multilib:
         - wine
-      paru:
-        - opencode-bin
       devops:
         core:
           - nerdctl
