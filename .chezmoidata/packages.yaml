@@ -20,7 +20,7 @@ packages:
       core:
         - gzip
       extra:
-        - atuin
+        - age
         - i3-wm
         - discord
         - dunst
