@@ -4,7 +4,6 @@ packages:
       aur:
         - brave-nightly-bin
         - ferdium-nightly-bin
-        - ferretdb-bin
         - lmstudio #LLM
         - spotify
         - greenclip
@@ -13,7 +12,6 @@ packages:
         - opencode-bin
         - streamlink-twitch-gui-bin
         - twitch-dl-bin
-        - vi-mongo
         - vscodium-insiders-bin
         - vscodium-insiders-bin-marketplace
         - zoxide
