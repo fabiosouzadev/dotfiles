@@ -1,1 +1,2 @@
-export BW_SESSION=$(bw login --apikey && bw unlock --raw)
+export $BITWARDEN_EMAIL="fabiovanderlei.developer@gmail.com"
+export BW_SESSION=$(bw login $BITWARDEN_EMAIL --raw) 
