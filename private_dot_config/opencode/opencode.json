@@ -1,4 +1,5 @@
-{ "$schema": "https://opencode.ai/config.json",
+{
+  "$schema": "https://opencode.ai/config.json",
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
@@ -7,17 +8,11 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "qwen2.5-coder:7b": {
-          "name": "qwen2.5-coder:7b (Ollama)",
-          "tools": true
-        },
-        "deepseek-coder:6.7b": {
-          "name": "deepseek-coder:6.7b (Ollama)",
-          "tools": true
-        },
-        "qwen3:4b": {
-          "name": "qwen3:4b",
-          "tools": true,
+        "qwen3:latest": {
+          "name": "qwen3 (local)",
+	  "tools": true,
+          "reasoning": true,
+	  "options": { "num_ctx": 65536 }
         }
       }
     }
