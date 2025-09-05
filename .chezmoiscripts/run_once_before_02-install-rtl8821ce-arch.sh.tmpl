@@ -5,7 +5,12 @@
 {{-  if .rtl8821ce.enabled }}
 
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-yay -Syu --noconfirm --needed rtl8821ce-dkms-git
+
+if type -P paru >/dev/null 2>&1; then
+  paru -Syu --noconfirm --needed rtl8821ce-dkms-git
+elif type -P yay >/dev/null 2>&1; then
+  yay -Syu --noconfirm --needed rtl8821ce-dkms-git
+fi
 
 {{ else }}
 
