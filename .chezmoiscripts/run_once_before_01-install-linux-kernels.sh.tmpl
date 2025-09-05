@@ -3,7 +3,7 @@
 
 {{ if .kernels.install }}
 
-{{ if eq .chezmoi.osRelease.idLike "arch" }}
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
 
 echo "Installing Arch Kernels"
