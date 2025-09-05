@@ -74,4 +74,14 @@ packages:
           - lazydocker-bin #- dokku
           - lando-beta
           - openlens-bin # - cloudlens
+      virtualisation:
+        core:
+          - virt-manager
+          - qemu
+          - libvirt
+          - edk2-ovmf
+          - dnsmasq
+          - bridge-utils 
+          - openbsd-netcat 
+          - iptables-nft
 
