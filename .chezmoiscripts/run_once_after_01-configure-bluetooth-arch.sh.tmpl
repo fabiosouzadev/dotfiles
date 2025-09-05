@@ -2,7 +2,7 @@
 # vim: filetype=bash
 
 
-{{ if eq .chezmoi.osRelease.idLike "arch" }}
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
 sudo pacman -Syu --noconfirm --needed \
               bluez \

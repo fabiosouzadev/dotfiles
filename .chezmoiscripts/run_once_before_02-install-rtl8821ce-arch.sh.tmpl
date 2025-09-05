@@ -3,8 +3,8 @@
 
 
 {{-  if .rtl8821ce.enabled }}
-{{ if eq .chezmoi.osRelease.idLike "arch" }}
 
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 yay -Syu --noconfirm --needed rtl8821ce-dkms-git
 
 {{ else }}

@@ -6,7 +6,7 @@ packages:
         - ferdium-nightly-bin
         - lmstudio #LLM
         - spotify
-        - greenclip
+        - rofi-greenclip
         - nosqlbooster-mongodb
         - mongodb-compass-bin 
         - opencode-bin
