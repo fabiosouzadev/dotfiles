@@ -10,6 +10,7 @@ packages:
         - nosqlbooster-mongodb
         - mongodb-compass-bin 
         - opencode-bin
+        - postman-bin
         - streamlink-twitch-gui-bin
         - twitch-dl-bin
         - vscodium-insiders-bin
@@ -55,6 +56,7 @@ packages:
         - yazi
         - xclip
         - xsel
+        - xorg-xhost
       multilib:
         - wine
       devops:
