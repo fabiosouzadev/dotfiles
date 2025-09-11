@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+set -euo pipefail
+
+# Pretty print functions
+info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
+error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+success() { echo -e "\033[1;32m✅ $*\033[0m"; }
+
+#Install Gemini Cli
+info "Installing aider"
+
+curl -LsSf https://aider.chat/install.sh | sh
+
+success "Aider Installed"
+
