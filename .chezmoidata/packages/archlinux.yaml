@@ -20,7 +20,9 @@ packages:
         - gzip
       extra:
         - age
+        - aichat
         - btop
+        - blueman
         - i3-wm
         - discord
         - dunst
@@ -46,6 +48,7 @@ packages:
         - lua-language-server
         - kitty
         - mpv
+        - network-manager-applet
         - neovim
         - obsidian
         - pavucontrol
