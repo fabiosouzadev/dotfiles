@@ -20,6 +20,7 @@ packages:
         - gzip
       extra:
         - age
+        - btop
         - i3-wm
         - discord
         - dunst
@@ -29,6 +30,7 @@ packages:
         - direnv
         - dbeaver
         - eza
+        - fastfetch
         - feh
         - fd
         - fzf
@@ -37,6 +39,7 @@ packages:
         - git-delta
         - github-cli
         - hyprland
+        - htop
         - just
         - jq
         - lazygit
