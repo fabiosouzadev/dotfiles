@@ -26,3 +26,13 @@ clients:
               threshold: BLOCK_NONE
             - category: HARM_CATEGORY_DANGEROUS_CONTENT
               threshold: BLOCK_NONE
+- type: openai-compatible
+  name: openrouter
+  api_base: https://openrouter.ai/api/v1
+  # api_key: xxx
+  models:
+    - name: moonshotai/kimi-dev-72b:free  # Model deployment name
+      max_input_tokens: 128000
+      supports_vision: true
+      supports_function_calling: true
+
