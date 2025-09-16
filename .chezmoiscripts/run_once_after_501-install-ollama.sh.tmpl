@@ -9,10 +9,13 @@ warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
-#Install ollama
+# ============================================
+# 1. Instalando Ollama
+# ============================================
 curl -fsSL https://ollama.com/install.sh | sh
+sudo systemctl daemon-reload
+sudo systemctl enable --now ollama
+
 success "Ollama Installed version: $(ollama -v)"
 
-info "Serve Ollama and Install deepseek-coder:6.7b-instruct-q4_K_M" 
-# ollama pull deepseek-coder:6.7b-instruct-q4_K_M
 {{ end -}}

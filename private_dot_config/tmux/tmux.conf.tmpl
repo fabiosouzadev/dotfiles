@@ -28,8 +28,6 @@
 #   - Move to left:    Prefix + {
 #   - Move to right:   Prefix +
 
-# - Reload
-#   - Reload Configs  Prefix + R
 # ==========================
 # ===  General settings  ===
 # ==========================
@@ -76,8 +74,9 @@ bind -r K resize-pane -U 5
 bind -r L resize-pane -R 5
 
 # Source .tmux.conf as suggested in `man tmux`
-bind R source-file '~/.config/tmux/tmux.conf'
-
+# bind s \
+#     source-file ~/.config/tmux/tmux.conf \;\
+#     display 'Reloaded tmux config.'
 # Increase tmux messages display duration from 750ms to 4s
 set -g display-time 4000
 
