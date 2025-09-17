@@ -1,7 +1,9 @@
 models:
   ollama:
-    - codegpt/deepseek-coder-1.3b-typescript:latest
-    - deepseek-coder:6.7b-instruct-q4_K_M
-    - deepseek-coder:1.3b-instruct-q4_K_M
-    - llama2:13b-q4_K_M
-    - mistral:7b-q4_K_M
+    - deepseek-coder:1.3b-instruct-q4_K_M #autocomple (Menos indicado)
+    - deepseek-coder:6.7b-instruct-q4_K_M #Revisão
+    - phi4-mini:3.8b-q4_K_M #autocomplete (Mais indicado)
+    - codellama:7b-instruct-q4_K_M #otimo pra tudo (Mais indicado)
+    - mistral:7b-instruct-v0.2-q4_K_M #otimo pra tudo
+  custom:
+    - codellama-7b

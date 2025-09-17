@@ -10,7 +10,6 @@ packages:
         - nosqlbooster-mongodb
         - mongodb-compass-bin 
         - opencode-bin
-        - openvpn3
         - postman-bin
         - streamlink-twitch-gui-bin
         - twitch-dl-bin
@@ -22,6 +21,7 @@ packages:
       extra:
         - age
         - aichat
+        - aws-cli-v2
         - btop
         - blueman
         - i3-wm
