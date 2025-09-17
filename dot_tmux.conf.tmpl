@@ -1,3 +1,4 @@
+# vim: filetype=conf
 ### : << eof
 ### https://github.com/fabiosouzadev/dotfiles
 ###
@@ -75,7 +76,7 @@ bind -r L resize-pane -R 5
 
 # Source .tmux.conf as suggested in `man tmux`
 # bind s \
-#     source-file ~/.config/tmux/tmux.conf \;\
+#     source-file ~/.tmux.conf \;\
 #     display 'Reloaded tmux config.'
 # Increase tmux messages display duration from 750ms to 4s
 set -g display-time 4000
@@ -200,16 +201,15 @@ set -g @plugin 'tmux-plugins/tmux-yank'
 
 ### Resurrect ###
 set -g @plugin 'tmux-plugins/tmux-resurrect'
-
-set -g @resurrect-dir '$HOME/.config/tmux/resurrect'
+set -g @resurrect-dir '$HOME/.tmux/resurrect'
 
 # persist tmux sessions after computer restart (prefix + Ctrl-s - save  |  prefix + Ctrl-r - restore) 
 set -g @resurrect-save 'S'
 set -g @resurrect-restore 'R'
 set -g @resurrect-capture-pane-contents 'on'
 
-set -g @resurrect-hook-post-save-all 'eval $(xdotool getwindowgeometry --shell $WINDOWID); echo 0,$X,$Y,$WIDTH,$HEIGHT > $HOME/.config/tmux/resurrect/geometry'
-set -g @resurrect-hook-pre-restore-all 'wmctrl -i -r $WINDOWID -e $(cat $HOME/.config/tmux/resurrect/geometry)'
+set -g @resurrect-hook-post-save-all 'eval $(xdotool getwindowgeometry --shell $WINDOWID); echo 0,$X,$Y,$WIDTH,$HEIGHT > $HOME/.tmux/resurrect/geometry'
+set -g @resurrect-hook-pre-restore-all 'wmctrl -i -r $WINDOWID -e $(cat $HOME/.tmux/resurrect/geometry)'
 
 # for neovim
 set -g @resurrect-strategy-nvim 'session'
