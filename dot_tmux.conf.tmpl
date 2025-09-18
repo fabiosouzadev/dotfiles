@@ -131,10 +131,22 @@ if -b '[ -c /dev/clipboard ]' 'bind y run -b "tmux save-buffer - > /dev/clipboar
 # ==============================================
 # Display lazygit
 bind -r g display-popup -d '#{pane_current_path}' -w90% -h90% -E lazygit
-bind -r o display-popup -d '#{pane_current_path}' -w90% -h90% -E lazydocker
+# bind -r o display-popup -d '#{pane_current_path}' -w90% -h90% -E lazydocker
 bind -r k display-popup -d '#{pane_current_path}' -w90% -h90% -E k9s
 bind -r z display-popup -d '#{pane_current_path}' -w90% -h90% -E yazi
 
+# ============================
+# ===       Run AI        ===
+# ============================#
+
+# Aichat
+bind -r C-a display-popup -d '#{pane_current_path}' -w90% -h90% -E "aichat"
+
+# LLM
+# bind C-l display-popup -d '#{pane_current_path}' -w90% -h90% -E "llm -m ollama:llama3"
+
+# Aider
+# bind C-i display-popup -d '#{pane_current_path}' -w90% -h90% -E "aider --model ollama:deepdeek-coder"
 # ==============================================
 # ===                 Yazi                  ===
 # ==============================================
@@ -194,6 +206,7 @@ set -ag status-right "#{E:@catppuccin_status_host}"
 # ===       Plugins        ===
 # ============================
 
+set -g @plugin 'tmux-plugins/tpm'  #prefix + I (Install), prefix + U (update), prefix + alt + U (remove)
 # Yank
 set -g @plugin 'tmux-plugins/tmux-yank'
 
@@ -203,7 +216,6 @@ set -g @plugin 'tmux-plugins/tmux-yank'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @resurrect-dir '$HOME/.tmux/resurrect'
 
-# persist tmux sessions after computer restart (prefix + Ctrl-s - save  |  prefix + Ctrl-r - restore) 
 set -g @resurrect-save 'S'
 set -g @resurrect-restore 'R'
 set -g @resurrect-capture-pane-contents 'on'
@@ -223,11 +235,11 @@ set -g @continuum-save-interval '10'
 
 
 set -g @plugin 'christoomey/vim-tmux-navigator'
-set -g @plugin 'tmux-plugins/tpm'  #prefix + I (Install), prefix + U (update), prefix + alt + U (remove)
 
 # ============================
 # ===       Run TPM        ===
 # ============================
-
+if "test ! -d ~/.tmux/plugins/tpm" \
+   "run 'git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && ~/.tmux/plugins/tpm/bin/install_plugins'"
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
-run '~/.config/tmux/plugins/tpm/tpm'
+run '$HOME/.tmux/plugins/tpm/tpm'

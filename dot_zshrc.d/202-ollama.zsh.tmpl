@@ -1,10 +1,11 @@
+# vim: filetype=bash
 # LLM Local (Ollama)
 export OLLAMA_API_BASE=http://127.0.0.1:11434
-export OLLAMA_CONTEXT_LENGTH=4096
+export OLLAMA_CONTEXT_LENGTH=2048
 export OMP_NUM_THREADS=4      # nº de núcleos físicos (não hyperthreading)
 export OLLAMA_NUM_THREADS=4   # força o Ollama a usar 4 threads
 export OLLAMA_MAX_LOADED_MODELS=1  # evita swap de modelos
-export OLLAMA_KEEP_ALIVE=600s # cache do modelo em memória por 10min
+# export OLLAMA_KEEP_ALIVE=600s # cache do modelo em memória por 10min
 
 
 #Alias
