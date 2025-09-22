@@ -18,6 +18,9 @@ packages:
         - zoxide
       core:
         - gzip
+        - tar
+        - make
+        - zlib
       extra:
         - age
         - aichat
@@ -64,6 +67,7 @@ packages:
         - xclip
         - xsel
         - xorg-xhost
+        - zip
       multilib:
         - wine
       devops:

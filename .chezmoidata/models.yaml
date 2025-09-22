@@ -2,10 +2,9 @@ models:
   ollama:
     - deepseek-coder:1.3b-instruct-q4_K_M #autocomple (Menos indicado)
     - deepseek-coder:6.7b-instruct-q4_K_M #Revisão
-    - phi4-mini:3.8b-q4_K_M #autocomplete (Mais indicado)
-    - codellama:7b-instruct-q4_K_M #otimo pra tudo (Mais indicado)
-    - mistral:7b-instruct-v0.2-q4_K_M #otimo pra tudo
-    - gemma3:12b-it-q4_K_M
+    - qwen2.5-coder:0.5b #minuet
+    - qwen2.5-coder:1.5b #minuet
+    - qwen2.5-coder:3b #minuet
   custom:
     - codellama-7b
-    - gemma3-12b
+    - deepseek-typescript
