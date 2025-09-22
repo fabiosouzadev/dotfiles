@@ -13,10 +13,12 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
+info "Updating Arch packages"
+sudo pacman -Syu
+success "Updated Arch packages"
+
 info "Installing Arch packages"
-
-sudo pacman -Syu --noconfirm --needed {{ range .packages.linux.arch.core }} {{.}}{{end}} {{ range .packages.linux.arch.extra }} {{.}}{{end}} {{ range .packages.linux.arch.multilib }} {{.}}{{end}}
-
+sudo pacman -S --noconfirm --needed {{ range .packages.linux.arch.core }} {{.}}{{end}} {{ range .packages.linux.arch.extra }} {{.}}{{end}} {{ range .packages.linux.arch.multilib }} {{.}}{{end}}
 
 if type -P paru >/dev/null 2>&1; then
   paru -Syu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
