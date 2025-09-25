@@ -2,7 +2,7 @@
 # vim: filetype=bash
 
 {{ if .kernels.install }}
-{{ if eq .chezmoi.osRelease.id "endeavouros" }}
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
 set -euo pipefail
 
