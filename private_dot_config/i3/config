@@ -1,3 +1,4 @@
+# vim: filetype=config
 #########################################################
 #█▀▀ ▄▀█ █▄▄ █ █▀█ █▀ █▀█ █░█ ▀█ ▄▀█ █▀▄ █▀▀ █░█        #
 #█▀░ █▀█ █▄█ █ █▄█ ▄█ █▄█ █▄█ █▄ █▀█ █▄▀ ██▄ ▀▄▀        #
@@ -107,8 +108,7 @@ exec_always --no-startup-id dunst --config ~/.config/dunst/dunstrc
 # uncomment the next line, use arandr to setup displays and save the file as monitor and set wallpaper:
 exec_always --no-startup-id ~/.screenlayout/i3_detect_displays.sh 
 exec_always --no-startup-id sleep 3 && ~/.config/polybar/simple/launch.sh --my-colorblocks
-
-exec_always --no-startup-id sleep 3 && feh --bg-fill --randomize ~/.config/wallpapers
+exec_always --no-startup-id sleep 1 && feh --bg-fill --randomize ~/.config/wallpapers
 # exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"
 # exec_always --no-startup-id setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'
 # exec_always --no-startup-id sh -c "sleep 2 && setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'"
@@ -119,7 +119,8 @@ exec --no-startup-id sleep 3 && spotify
 exec --no-startup-id sleep 3 && obsidian
 # exec --no-startup-id sleep 1 && ghostty
 exec --no-startup-id sleep 3 && brave-nightly
-exec --no-startup-id sleep 3 && discord
+# exec --no-startup-id sleep 3 && discord
+exec --no-startup-id sleep 3 && vesktop
 exec --no-startup-id sleep 3 && kitty
 # exec --no-startup-id slack
 #exec --no-startup-id sleep 3 && thunar
@@ -174,8 +175,9 @@ bindsym XF86MonBrightnessUp exec xbacklight +5 && notify-send "Brightness - $(xb
 bindsym XF86MonBrightnessDown exec xbacklight -5 && notify-send "Brightness - $(xbacklight -get | cut -d '.' -f 1)%"
 
 ### App shortcuts
-bindsym $mod+b exec brave
-bindsym $mod+Shift+u exec librewolf --private-window
+bindsym $mod+b exec brave-nightly
+# bindsym $mod+Shift+u exec librewolf --private-window
+bindsym $mod+Shift+u exec brave-nightly --incognito
 bindsym $mod+n exec thunar
 #bindsym Print exec scrot ~/%Y-%m-%d-%T-screenshot.png && notify-send "Screenshot saved to ~/$(date +"%Y-%m-%d-%T")-screenshot.png"
 bindsym $mod+p exec --no-startup-id flameshot gui
@@ -450,7 +452,7 @@ bindsym $mod+Shift+n exec ~/.config/i3/scripts/empty_workspace
 
 assign [class="Spotify"] $ws1
 assign [class="obsidian"] $ws2
-assign [class="^Slack$|^discord$"] $ws3
+assign [class="^Slack$|^discord|^vesktop$"] $ws3
 assign [class="Brave-browser-*"] $ws4
 assign [class="com.mitchellh.ghostty"] $ws5
 assign [class="kitty"] $ws5

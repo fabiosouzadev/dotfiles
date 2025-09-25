@@ -4,17 +4,17 @@ packages:
       aur:
         - brave-nightly-bin
         - ferdium-nightly-bin
-        - lmstudio #LLM
         - spotify
         - rofi-greenclip
         - nosqlbooster-mongodb
         - mongodb-compass-bin 
+        - neovim-nightly-bin
         - opencode-bin
         - postman-bin
         - streamlink-twitch-gui-bin
         - twitch-dl-bin
+        - vesktop
         - vscodium-insiders-bin
-        - vscodium-insiders-bin-marketplace
         - zoxide
       core:
         - gzip
@@ -28,7 +28,6 @@ packages:
         - btop
         - blueman
         - i3-wm
-        - discord
         - dunst
         - fastfetch
         - flameshot
@@ -46,6 +45,7 @@ packages:
         - github-cli
         - hyprland
         - htop
+        - impala
         - just
         - jq
         - lazygit
@@ -53,7 +53,6 @@ packages:
         - kitty
         - mpv
         - network-manager-applet
-        - neovim
         - obsidian
         - pavucontrol
         - picom
@@ -89,12 +88,20 @@ packages:
           - openlens-bin # - cloudlens
       virtualisation:
         core:
-          - virt-manager
-          - qemu
-          - libvirt
-          - edk2-ovmf
-          - dnsmasq
           - bridge-utils 
-          - openbsd-netcat 
+          - dnsmasq
+          - edk2-ovmf
+          - guestfs-tools
+          - libosinfo
+          - libvirt
           - iptables-nft
+          - openbsd-netcat 
+          - qemu-desktop
+          - qemu-full
+          - qemu-img
+          - swtpm
+          - tuned
+          - virt-install
+          - virt-manager
+          - virt-viewer
 
