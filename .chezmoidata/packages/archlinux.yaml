@@ -20,7 +20,6 @@ packages:
         - gzip
         - tar
         - make
-        - zlib
       extra:
         - age
         - aichat
@@ -60,6 +59,7 @@ packages:
         - qutebrowser
         - qbittorrent
         - rofi
+        - sysbench
         - tmux
         - vlc
         - yazi

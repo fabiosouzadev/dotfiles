@@ -3,3 +3,13 @@ linux:
     kernels:
       - linux-zen
       - linux-zen-headers
+  cachyos:
+    kernels:
+      - linux-zen
+      - linux-zen-headers
+      - cachyos-v4/linux-cachyos-gcc
+      - cachyos-v4/linux-cachyos-gcc-headers
+      - cachyos-v4/linux-cachyos-hardened-lto
+      - cachyos-v4/linux-cachyos-hardened-lto-headers
+      - cachyos-v4/linux-cachyos-lts-lto
+      - cachyos-v4/linux-cachyos-lts-lto-headers

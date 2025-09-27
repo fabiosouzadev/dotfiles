@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # vim: filetype=bash
 
-{{ if .kernels.install }}
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-
+{{ if eq .chezmoi.os "linux" -}}
 set -euo pipefail
 
 # Pretty print functions
@@ -12,6 +10,7 @@ warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
+{{ if eq .chezmoi.osRelease.id "endeavouros" }}
 info "Swapfile + Zram"
 if [ ! -f /swapfile ]; then
     if type -P btrfs >/dev/null 2>&1; then 
@@ -56,10 +55,11 @@ fi
 # info "$(free -h)"
 success "Configured - Swapfile + Zram - working after reboot"
 
-{{ else }}
-
-error "This script is only for Arch based systems. Exiting..."
-exit 1
+# {{ else }}
+#
+# error "This script is only for Arch based systems. Exiting..."
+# exit 1
 
 {{ end }}
-{{ end }}
+
+{{ end -}}

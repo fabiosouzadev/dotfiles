@@ -2,8 +2,6 @@
 # vim: filetype=bash
 
 {{ if .kernels.install }}
-{{ if eq .chezmoi.osRelease.id "endeavouros" }}
-
 set -euo pipefail
 
 # Pretty print functions
@@ -12,16 +10,31 @@ warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
+{{ if eq .chezmoi.osRelease.id "endeavouros" }}
+
+
 info "Installing Arch Kernels"
 
-sudo pacman -Syu --noconfirm --needed {{ range .linux.arch.kernels }} {{.}}{{end}}
+sudo pacman -Sy --noconfirm --needed {{ range .linux.arch.kernels }} {{.}}{{end}}
 
 
 success "Installed Arch Kernels"
+
+{{ else }}
+
+#CachyOS	
+{{ if eq .chezmoi.osRelease.id "cachyos" }}
+info "Installing CachyOs Kernels"
+
+sudo pacman -Sy --noconfirm --needed {{ range .linux.cachyos.kernels }} {{.}}{{end}}
+
+
+success "Installed CachyOs Kernels"
 {{ else }}
 
 error "This script is only for Arch based systems. Exiting..."
 exit 1
 
+{{ end }}
 {{ end }}
 {{ end }}
