@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+{{-  if .work.instivo }}
+{{ if eq .chezmoi.os "linux" -}}
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+set -euo pipefail
+
+# Pretty print functions
+info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
+error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+success() { echo -e "\033[1;32m✅ $*\033[0m"; }
+
+# ============================================
+# 1. Configurando VPN
+# ============================================
+
+info "Configurando VPN Instivo"
+export INSTIVO_OVPN_FILE=$HOME/.local/share/vpn/instivo.ovpn
+export VPN_INSTIVO_CONFIG_NAME="instivo"
+
+openvpn3 config-import --config ${INSTIVO_OVPN_FILE} --name ${VPN_INSTIVO_CONFIG_NAME} --persistent
+
+success "VPN Instivo Configurada"
+{{ end -}}
+{{ end -}}
+{{ end -}}
