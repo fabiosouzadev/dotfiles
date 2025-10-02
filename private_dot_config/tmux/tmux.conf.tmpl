@@ -214,14 +214,14 @@ set -g @plugin 'tmux-plugins/tmux-yank'
 
 ### Resurrect ###
 set -g @plugin 'tmux-plugins/tmux-resurrect'
-set -g @resurrect-dir '$HOME/.config/tmux/resurrect'
+set -g @resurrect-dir '$HOME/.local/share/tmux/resurrect'
 
 set -g @resurrect-save 'S'
 set -g @resurrect-restore 'R'
 set -g @resurrect-capture-pane-contents 'on'
 
-set -g @resurrect-hook-post-save-all 'eval $(xdotool getwindowgeometry --shell $WINDOWID); echo 0,$X,$Y,$WIDTH,$HEIGHT > $HOME/.config/tmux/resurrect/geometry'
-set -g @resurrect-hook-pre-restore-all 'wmctrl -i -r $WINDOWID -e $(cat $HOME/.config/tmux/resurrect/geometry)'
+set -g @resurrect-hook-post-save-all 'eval $(xdotool getwindowgeometry --shell $WINDOWID); echo 0,$X,$Y,$WIDTH,$HEIGHT > $HOME/.local/share/tmux/resurrect/geometry'
+set -g @resurrect-hook-pre-restore-all 'wmctrl -i -r $WINDOWID -e $(cat $HOME/.local/share/tmux/resurrect/geometry)'
 
 # for neovim
 set -g @resurrect-strategy-nvim 'session'
