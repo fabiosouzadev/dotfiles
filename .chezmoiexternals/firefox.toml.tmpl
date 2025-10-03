@@ -1,0 +1,14 @@
+# vim: filetype=toml
+[".mozilla/firefox/fabiosouzadev.dev-edition-default/chrome"]
+type = "archive"
+url = "https://github.com/Godiesc/firefox-gx/releases/download/v.10.9/FirefoxGX_Release_v.143.zip"
+exact = true
+stripComponents = 2 
+refreshPeriod = "168h"
+include = ["*/chrome/**"]
+
+[".mozilla/firefox/fabiosouzadev.dev-edition-default/user.js"]
+type = "archive-file"
+url = "https://github.com/Godiesc/firefox-gx/releases/download/v.10.9/FirefoxGX_Release_v.143.zip"
+path = "FirefoxGX_Release_v.143/user.js"
+
