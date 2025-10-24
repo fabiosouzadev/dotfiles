@@ -7,15 +7,25 @@ linux:
     kernels:
       - linux-zen
       - linux-zen-headers
-      - cachyos-v4/linux-cachyos-lto
-      - cachyos-v4/linux-cachyos-lto-headers
-      - cachyos-v4/linux-cachyos-bore-lto
-      - cachyos-v4/linux-cachyos-bore-lto-headers
+      - cachyos-v4/linux-cachyos
+      - cachyos-v4/linux-cachyos-headers
+      - cachyos-v4/linux-cachyos-bmq
+      - cachyos-v4/linux-cachyos-bmq-headers
       - cachyos-v4/linux-cachyos-bmq-lto
       - cachyos-v4/linux-cachyos-bmq-lto-headers
-      - cachyos-v4/linux-cachyos-rc-lto
-      - cachyos-v4/linux-cachyos-rc-lto-headers
+      - cachyos-v4/linux-cachyos-bore
+      - cachyos-v4/linux-cachyos-bore-headers
+      - cachyos-v4/linux-cachyos-bore-lto
+      - cachyos-v4/linux-cachyos-bore-lto-headers
       - cachyos-v4/linux-cachyos-gcc
       - cachyos-v4/linux-cachyos-gcc-headers
+      - cachyos-v4/linux-cachyos-lts
+      - cachyos-v4/linux-cachyos-lts-headers
       - cachyos-v4/linux-cachyos-lts-lto
       - cachyos-v4/linux-cachyos-lts-lto-headers
+      - cachyos-v4/linux-cachyos-rc
+      - cachyos-v4/linux-cachyos-rc-headers
+      - cachyos-v4/linux-cachyos-rc-gcc
+      - cachyos-v4/linux-cachyos-rc-gcc-headers
+      - cachyos-v4/linux-cachyos-rc-lto
+      - cachyos-v4/linux-cachyos-rc-lto-headers
