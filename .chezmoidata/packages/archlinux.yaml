@@ -10,7 +10,7 @@ packages:
         - mongodb-compass-bin 
         - neovim-nightly-bin
         - opencode-bin
-        - openvpn3
+        # - openvpn3
         - postman-bin
         - streamlink-twitch-gui-bin
         - twitch-dl-bin

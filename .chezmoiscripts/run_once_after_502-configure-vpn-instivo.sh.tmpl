@@ -16,13 +16,16 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 # 1. Configurando VPN
 # ============================================
 
-info "Configurando VPN Instivo"
-export INSTIVO_OVPN_FILE=$HOME/.local/share/vpn/instivo.ovpn
-export VPN_INSTIVO_CONFIG_NAME="instivo"
+if [ -x /usr/bin/openvpn3 ]; then
+	info "Configurando VPN Instivo"
+	export INSTIVO_OVPN_FILE=$HOME/.local/share/vpn/instivo.ovpn
+	export VPN_INSTIVO_CONFIG_NAME="instivo"
 
-openvpn3 config-import --config ${INSTIVO_OVPN_FILE} --name ${VPN_INSTIVO_CONFIG_NAME} --persistent
+	openvpn3 config-import --config ${INSTIVO_OVPN_FILE} --name ${VPN_INSTIVO_CONFIG_NAME} --persistent
 
-success "VPN Instivo Configurada"
+	success "VPN Instivo Configurada"
+fi
+
 {{ end -}}
 {{ end -}}
 {{ end -}}
