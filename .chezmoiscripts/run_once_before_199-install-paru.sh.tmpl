@@ -11,13 +11,13 @@ error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 
-if type -P paru >/dev/null 2>&1; then
+if ! command -v "paru" > /dev/null; then
 	info "Installing Paru"
 	sudo pacman -S --needed base-devel git
 	cd /tmp && git clone https://aur.archlinux.org/paru.git
 	cd paru
 	makepkg -rsi --noconfirm
-	cd ~ && rm -Rf /temp/paru/
+	cd ~ && rm -Rf /tmp/paru/
 	sudo sed -i -e 's/^#Color/Color/' --e 's/^#BottomUp/BottomUp/' -e 's/^#SudoLoop/SudoLoop/' -e 's/^#CombinedUpgrade/CombinedUpgrade/' -e 's/^#UpgradeMenu/UpgradeMenu/' -e 's/^#NewsOnUpgrade/NewsOnUpgrade/' /etc/paru.conf
 	echo "SkipReview" | sudo tee -a /etc/paru.conf > /dev/null
 	paru --gendb;

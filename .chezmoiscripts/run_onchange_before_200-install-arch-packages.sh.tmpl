@@ -20,7 +20,7 @@ success "Updated Arch packages"
 info "Installing Arch packages"
 sudo pacman -S --noconfirm --needed {{ range .packages.linux.arch.core }} {{.}}{{end}} {{ range .packages.linux.arch.extra }} {{.}}{{end}} {{ range .packages.linux.arch.multilib }} {{.}}{{end}}
 
-if type -P paru >/dev/null 2>&1; then
+if command -v "paru" > /dev/null; then
   paru -Syu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
 elif type -P yay >/dev/null 2>&1; then
   # yay -Syu --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
