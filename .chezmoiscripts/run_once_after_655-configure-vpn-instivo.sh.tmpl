@@ -16,7 +16,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 # 1. Configurando VPN
 # ============================================
 
-if [ -x /usr/bin/openvpn3 ]; then
+if command -v "openvpn3" > /dev/null; then
 	info "Configurando VPN Instivo"
 	export INSTIVO_OVPN_FILE=$HOME/.local/share/vpn/instivo.ovpn
 	export VPN_INSTIVO_CONFIG_NAME="instivo"
