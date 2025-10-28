@@ -4,13 +4,13 @@ packages:
       aur:
         - brave-nightly-bin
         - ferdium-nightly-bin
-        - spotify
-        - rofi-greenclip
-        - nosqlbooster-mongodb
+        - localsend-bin
         - mongodb-compass-bin 
         - neovim-nightly-bin
         - opencode-bin
         - postman-bin
+        - rofi-greenclip
+        - spotify
         - streamlink-twitch-gui-bin
         - twitch-dl-bin
         - vesktop
@@ -45,6 +45,7 @@ packages:
         - github-cli
         - hyprland
         - htop
+        - iwd
         - impala
         - just
         - jq
