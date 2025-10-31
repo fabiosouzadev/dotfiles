@@ -62,6 +62,7 @@ packages:
         - qbittorrent
         - rofi
         - sysbench
+        - sops
         - tmux
         - vlc
         - yazi
