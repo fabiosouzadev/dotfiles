@@ -16,7 +16,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 # 1. Installing openvpn3
 # ============================================
 AUR_INSTALLER="yay"
-if ! command -v "paru" > /dev/null; then
+if command -v "paru" > /dev/null; then
 	AUR_INSTALLER="paru"
 fi
 
