@@ -4,8 +4,10 @@
     GREET = "devenv";
     SHELL = "${pkgs.zsh}/bin/zsh";
     DATABASE_URL = "postgresql://fabiosouzadev:123@localhost:5432/auth?schema=public";
+    # DATABASE_URL = "postgresql://msauth:TroqueEstaSenha!@172.16.254.11:5432/auth?schema=public";
    
-    PRISMA_MIGRATION_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/migration-engine";
+    # PRISMA_MIGRATION_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/migration-engine";
+    PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
     PRISMA_QUERY_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/query-engine";
     PRISMA_QUERY_ENGINE_LIBRARY = "${pkgs.prisma-engines}/lib/libquery_engine.node";
     PRISMA_INTROSPECTION_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/introspection-engine";
@@ -13,6 +15,10 @@
     PATH = "$NODE_PATH/bin:$PATH";
 
     #Auth
+    JWT_ACCESS_SECRET = "TOMA_AQUI_SEU_TOKEN";
+    JWT_REFRESH_SECRET = "TOMA_AQUI_SEU_TOKEN";
+    ACCESS_TOKEN_EXPIRES_IN = "1h";
+    REFRESH_TOKEN_EXPIRES_IN = "8h";
   };
 
   # https://devenv.sh/packages/
@@ -50,7 +56,7 @@
     listen_addresses = "*";
     initialDatabases = [
       {
-        name = "receiving-conference";
+        name = "auth";
       }
     ];
     # initialScript = builtins.readFile ./data/dump.sql;
@@ -69,6 +75,7 @@
   # https://devenv.sh/scripts/
   scripts = {
     dev.exec = "npm run start:dev";
+    debug.exec = "npm run debug";
     migrate.exec = "prisma migrate dev";
     generate.exec = "prisma generate";
   };
@@ -84,8 +91,7 @@
     echo ""
     echo "Comandos disponíveis:"
     echo "dev      - Inicia servidor Nest.js (npm start:dev)"
-    echo "dbreset  - Reseta banco de dados"
-    echo "dbshell  - Acessa shell do MongoDB"
+    echo "debug    - Inicia servidor Nest.js em mode de debug"
     echo "migrate  - Prisma Migrate"
     echo "generate - Prisma generate"
     echo ""
