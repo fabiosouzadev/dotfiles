@@ -20,13 +20,6 @@ if type ollama >/dev/null 2>&1; then
 	  ollama pull {{.}}
   {{ end }}
 
-  # info "Installing Ollama Custom models"
-  # {{ range .ollama.custom }} 
-  #  info "Ollama create {{ . }}" 
-  #  ollama create {{.}} -f ~/.ollama/Modelfiles/{{.}}.Modelfile || true
-  #  success "Ollama created {{ . }}" 
-  # {{ end }}
-
 fi
 
 success "Installed Ollama models"

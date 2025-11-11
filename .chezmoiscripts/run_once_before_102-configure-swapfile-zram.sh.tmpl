@@ -81,11 +81,12 @@ vm.dirty_expire_centisecs = 2000
 vm.compact_memory = 1
 kernel.sched_migration_cost_ns=5000000
 vm.max_map_count=524288
+fs.file-max=65536
 EOF
 
 sudo sysctl --system >/dev/null
 sudo udevadm control --reload-rules && sudo udevadm trigger
-sudo modprobe -r zram && sudo modprobe zram num_devices=2
+sudo modprobe -r zram
 
 # --- 5 - CONFIGURA UDEV ---
 UDEV_RULES_FILE="/usr/lib/udev/rules.d/30-zram.rules"

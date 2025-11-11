@@ -1,9 +1,0 @@
-FROM gemma3:12b-it-q4_K_M
-
-# DESCRIPTION: Model otimizado para code review e geração de patches (determinístico).
-
-PARAMETER num_ctx 2048
-PARAMETER num_batch 128
-PARAMETER temperature 0.2
-PARAMETER top_p 0.9
-PARAMETER repeat_penalty 1.1
