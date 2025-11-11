@@ -13,20 +13,19 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 info "Installing Ollama models"
 
-if type -P ollama >/dev/null 2>&1; then
+if type ollama >/dev/null 2>&1; then
   info "Installing Ollama models"
-  {{ range .models.ollama }} 
-	  info "Ollama pulling {{ . }}" 
+  {{ range .ollama.models }} 
+    info "📥 Ollama pulling {{ . }} ..."
 	  ollama pull {{.}}
-	  success "Ollama pulled {{ . }}" 
   {{ end }}
 
-  info "Installing Ollama Custom models"
-  {{ range .models.custom }} 
-	  info "Ollama create {{ . }}" 
-	  ollama create {{.}} -f ~/.ollama/Modelfiles/{{.}}.Modelfile || true
-	  success "Ollama created {{ . }}" 
-  {{ end }}
+  # info "Installing Ollama Custom models"
+  # {{ range .ollama.custom }} 
+  #  info "Ollama create {{ . }}" 
+  #  ollama create {{.}} -f ~/.ollama/Modelfiles/{{.}}.Modelfile || true
+  #  success "Ollama created {{ . }}" 
+  # {{ end }}
 
 fi
 

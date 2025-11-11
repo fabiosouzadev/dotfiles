@@ -1,20 +1,18 @@
 # vim: filetype=bash
 # LLM Local (Ollama)
-export OLLAMA_API_BASE=http://127.0.0.1:11434
-export OLLAMA_CONTEXT_LENGTH=2048
-export OMP_NUM_THREADS=4      # nº de núcleos físicos (não hyperthreading)
-export OLLAMA_NUM_THREADS=4   # força o Ollama a usar 4 threads
-export OLLAMA_MAX_LOADED_MODELS=1  # evita swap de modelos
-# export OLLAMA_KEEP_ALIVE=600s # cache do modelo em memória por 10min
+
+{{ range .ollama.environments -}}
+export {{.}}
+{{ end -}}
 
 
 #Alias
-export OLLAMA_CODER_MODEL="deepseek-coder:14b-q4_K_M"
-export OLLAMA_DESIGN_MODEL="llama2:13b-q4_K_M"
-export OLLAMA_CHAT_MODEL="mistral:7b-q4_K_M"
-
-alias -- ollama-coder="OLLAMA_MODEL=\$OLLAMA_CODER_MODEL ollama run \$OLLAMA_MODEL"
-alias -- ollama-design="OLLAMA_MODEL=\$OLLAMA_DESIGN_MODEL ollama run \$OLLAMA_MODEL"
-alias -- ollama-chat="OLLAMA_MODEL=\$OLLAMA_CHAT_MODEL ollama run \$OLLAMA_MODEL"
+# export OLLAMA_CODER_MODEL="deepseek-coder:14b-q4_K_M"
+# export OLLAMA_DESIGN_MODEL="llama2:13b-q4_K_M"
+# export OLLAMA_CHAT_MODEL="mistral:7b-q4_K_M"
+#
+# alias -- ollama-coder="OLLAMA_MODEL=\$OLLAMA_CODER_MODEL ollama run \$OLLAMA_MODEL"
+# alias -- ollama-design="OLLAMA_MODEL=\$OLLAMA_DESIGN_MODEL ollama run \$OLLAMA_MODEL"
+# alias -- ollama-chat="OLLAMA_MODEL=\$OLLAMA_CHAT_MODEL ollama run \$OLLAMA_MODEL"
 
 
