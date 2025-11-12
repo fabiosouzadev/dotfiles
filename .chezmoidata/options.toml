@@ -8,4 +8,4 @@ install = true
 enabled = true
 
 [ollama]
-compiled = true
+compiled = false 

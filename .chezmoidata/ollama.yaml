@@ -1,14 +1,14 @@
 ollama:
   environments:
     - OLLAMA_HOST=127.0.0.1:11434
-    - OLLAMA_MLOCK=1
     - OLLAMA_KV_CACHE_TYPE=q4_0
     - OLLAMA_NEW_ENGINE=1
     - OLLAMA_NUM_PARALLEL=4
     - OLLAMA_FLASH_ATTENTION=1
-    - OLLAMA_CONTEXT_LENGTH=4096
+    - OLLAMA_CONTEXT_LENGTH=2048
     - OLLAMA_KEEP_ALIVE=30m
     - OLLAMA_MAX_LOADED_MODELS=2
+    - OLLAMA_LLM_LIBRARY="cpu_avx2"
   models:
     - qwen2.5-coder:0.5b
     - qwen2.5-coder:1.5b #entende bem ts, Nestjs, prisma
@@ -18,7 +18,7 @@ ollama:
     - phi4-mini:3.8b
     - llama3.2:1b
     - llama3.2:3b
-    - cogito:3b
+    # - cogito:3b
     - stable-code:3b #Entende bem Prisma+Graph+Nestjs
     - codegemma:2b
     - gemma3n:e2b
