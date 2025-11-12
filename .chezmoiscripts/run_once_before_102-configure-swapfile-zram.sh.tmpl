@@ -36,15 +36,22 @@ SWAP_PRIORITY=200
 info ">>> Gerando /etc/systemd/zram-generator.conf ..."
 sudo tee /etc/systemd/zram-generator.conf > /dev/null <<'EOF'
 [zram0]
-zram-fraction = 0.75
+zram-size = ram
 compression-algorithm = zstd
 swap-priority = 200
-max-zram-pages = 0
+# max-zram-pages = 0
 EOF
 
 # --- 3. SWAP físico ---
 SWAP_FILE="/swapfile"
-SWAP_SIZE="16G"
+# SWAP_SIZE="16G"
+SWAP_SIZE="2G"
+
+# Adicionado para forçar a criação:
+if [ -f "$SWAP_FILE" ]; then
+  info ">>> Removendo swapfile existente para forçar recriação..."
+  sudo rm -f "$SWAP_FILE"
+fi
 
 if [ ! -f "$SWAP_FILE" ]; then
   info ">>> Criando arquivo de swap de ${SWAP_SIZE} em SSD..."
@@ -55,8 +62,6 @@ if [ ! -f "$SWAP_FILE" ]; then
   fi
   sudo chmod 600 $SWAP_FILE
   sudo mkswap $SWAP_FILE
-else
-    warn ">>> Swapfile já existe, pulando criação."
 fi
 
 if ! grep -q "$SWAP_FILE" /etc/fstab; then
@@ -74,16 +79,16 @@ EOF
 sudo tee /etc/sysctl.d/99-zram-extreme.conf > /dev/null <<'EOF'
 vm.swappiness = 200
 vm.vfs_cache_pressure = 60
-vm.min_free_kbytes = 131072
-vm.overcommit_memory = 1
-vm.overcommit_ratio = 100
-vm.dirty_expire_centisecs = 2000
-vm.compact_memory = 1
-kernel.sched_migration_cost_ns=5000000
-vm.max_map_count=524288
-fs.file-max=65536
+# vm.min_free_kbytes = 131072
+# vm.overcommit_memory = 1
+# vm.overcommit_ratio = 100
+# vm.dirty_expire_centisecs = 2000
+# vm.compact_memory = 1
+# kernel.sched_migration_cost_ns=5000000
+# vm.max_map_count=524288
+# fs.file-max=65536
 EOF
-
+#
 sudo sysctl --system >/dev/null
 sudo udevadm control --reload-rules && sudo udevadm trigger
 sudo modprobe -r zram
@@ -96,16 +101,16 @@ NEW_RULE='ACTION=="change", KERNEL=="zram0", ATTR{initstate}=="1", SYSCTL{vm.swa
     RUN+="/bin/sh -c '\''echo N > /sys/module/zswap/parameters/enabled'\''"'
 
 if [ -f "$UDEV_RULES_FILE" ]; then
-    # BACKUP_FILE="${UDEV_RULES_FILE}.bak_$(date +%Y%m%d%H%M%S)"
-    BACKUP_FILE="${UDEV_RULES_FILE}.bak"
+    BACKUP_FILE="${UDEV_RULES_FILE}.bak_$(date +%Y%m%d%H%M%S)"
+    # BACKUP_FILE="${UDEV_RULES_FILE}.bak"
     sudo cp "$UDEV_RULES_FILE" "$BACKUP_FILE"
-    info "Backup criado: $BACKUP_FILE"
+    info ">>> Backup criado: $BACKUP_FILE"
 fi
 
 echo "$NEW_RULE" | sudo tee "$UDEV_RULES_FILE" > /dev/null
 
 if sudo grep -q 'SYSCTL{vm.swappiness}="200"' "$UDEV_RULES_FILE"; then
-    info "Regra UDEV aplicada com sucesso."
+    info ">>> Regra UDEV aplicada com sucesso."
 else
     error "Falha ao aplicar regra UDEV. Restaurando backup..."
     if [ -f "$BACKUP_FILE" ]; then
@@ -119,7 +124,7 @@ fi
 
 sudo udevadm control --reload-rules
 sudo udevadm trigger
-info "Regras UDEV recarregadas e aplicadas."
+info ">>> Regras UDEV recarregadas e aplicadas."
 
 # --- 5. Ativar tudo ---
 info ">>> Ativando ZRAM e SWAP..."
@@ -130,34 +135,47 @@ sudo swapon --show || sudo swapon "$SWAP_FILE"
 info ">>> Ajustando GRUB para parâmetros de ZRAM e otimização de kernel..."
 
 GRUB_FILE="/etc/default/grub"
-KERNEL_FLAGS="zram.enabled=1 zswap.compressor=zstd zswap.max_pool_percent=50 zswap.zpool=zsmalloc"
+KERNEL_FLAGS="zswap.enabled=1 zram.enabled=1 zswap.compressor=zstd zswap.max_pool_percent=50 zswap.zpool=zsmalloc"
 # KERNEL_FLAGS="zram.enabled=1 transparent_hugepage=always hugepagesz=1G default_hugepagesz=1G mitigations=off nohibernate page_alloc.shuffle=1 vmalloc=512M pti=off intel_pstate=active intel_idle.max_cstate=9 processor.max_cstate=9"
 
 
-# Cria backup se ainda não existir
-if [ ! -f "${GRUB_FILE}.bak" ]; then
-    sudo cp "$GRUB_FILE" "${GRUB_FILE}.bak"
-    info ">>> Backup criado em ${GRUB_FILE}.bak"
-fi
 
 # Se já contiver os flags, não faz nada
 if ! grep -q "zswap.enabled=1" "$GRUB_FILE"; then
-  info "🧬 Atualizando parâmetros do kernel no GRUB..."
+
+  if [ -f "$GRUB_FILE" ]; then
+    BACKUP_FILE="${GRUB_FILE}.bak_$(date +%Y%m%d%H%M%S)"
+    # BACKUP_FILE="${UDEV_RULES_FILE}.bak"
+    sudo cp "$GRUB_FILE" "$BACKUP_FILE"
+    info ">>> Backup criado: $BACKUP_FILE"
+  fi
+
+  info "🧬 Atualizando parâmetros do kernel no GRUB...."
 
   sudo sed -i -E "s|^(GRUB_CMDLINE_LINUX_DEFAULT=['\"])([^'\"]*)(['\"])|\1\2 ${KERNEL_FLAGS}\3|" "$GRUB_FILE"
+
+  # Se 'zswap.enabled=0' existir (agora ou antes), remove-o
+  sudo sed -i -E \
+    -e '/^GRUB_CMDLINE_LINUX_DEFAULT=/ {
+      s/(\s|^)zswap\.enabled=0(\s|$)//g; # Remove 'zswap.enabled=0' com espaços adjacentes ou início/fim da string.
+      s/\s+/ /g;                       # Substitui múltiplos espaços por um único espaço.
+      s/GRUB_CMDLINE_LINUX_DEFAULT=" "/GRUB_CMDLINE_LINUX_DEFAULT=""/g; # Lida com o caso em que 'zswap.enabled=0' era a única opção, deixando um espaço.
+    }' "$GRUB_FILE"
+  
   sudo grub-mkconfig -o /boot/grub/grub.cfg
+
 else
   info "⚙️  Parâmetros ZSWAP já presentes no GRUB. Nenhuma modificação necessária."
 fi
 
-# info "$(swapon --show)"
+info "$(swapon --show)"
 
 # --- 6. Status ---
-success ">>> ✅ Configuração EXTREMA (ZRAM) aplicada com sucesso!"
+success ">>> Configuração EXTREMA (ZRAM) aplicada com sucesso!"
 info "$(free -h)"
 info "$(sysctl vm.swappiness)"
 info "$(zramctl)"
-success " >>> ✅ ZRAM + ZSWAP configurados com sucesso."
+success " >>> ZRAM + ZSWAP configurados com sucesso."
 
 {{ end }}
 {{ end -}}
