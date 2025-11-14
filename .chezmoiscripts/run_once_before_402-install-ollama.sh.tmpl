@@ -12,7 +12,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 # ====================================================================
 # 1. REMOVER VERSÃO ATUAL DO OLLAMA
 # ====================================================================
-info "🗑️  Removendo versão atual do Ollama..."
+info ">>> 🗑️  Removendo versão atual do Ollama..."
 
 if command -v ollama &>/dev/null; then
 if [ -f /etc/systemd/system/ollama.service ]; then
@@ -31,13 +31,13 @@ OLLAMA_BIN=$(which ollama)
 
 if [[ "$OLLAMA_BIN" == */bin/* ]]; then
   OLLAMA_LIB="${OLLAMA_BIN//\/bin\//\/lib\/}"
-  echo "📚 Caminho da biblioteca calculado: $OLLAMA_LIB"
+  echo ">>> 📚 Caminho da biblioteca calculado: $OLLAMA_LIB"
 
         if [ -d "$OLLAMA_LIB" ]; then
-          echo "🧹 Removendo diretório de bibliotecas: $OLLAMA_LIB"
+          echo ">>> 🧹 Removendo diretório de bibliotecas: $OLLAMA_LIB"
           sudo rm -rf "$OLLAMA_LIB"
         else
-          echo "ℹ️ Diretório de bibliotecas não encontrado: $OLLAMA_LIB"
+          echo ">>> ℹ️ Diretório de bibliotecas não encontrado: $OLLAMA_LIB"
         fi
 fi
 
@@ -53,7 +53,7 @@ fi
 # 2. INSTALAR DEPENDÊNCIAS PARA COMPILAÇÃO
 # ====================================================================
 
-info "📦 Instalando dependências de compilação..."
+info ">>> 📦 Instalando dependências de compilação..."
 
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
@@ -62,7 +62,7 @@ sudo pacman -Sy --noconfirm base-devel git cmake make gcc go
 {{ end }} # TODO: Mudar para ELSE quando colocar ubuntu
 
 
-info "🔧 Compilando Ollama ..."
+info ">>> 🔧 Compilando Ollama ..."
 [ ! -d "$HOME/ollama-source" ] || rm -rf $HOME/ollama-source/
 git clone https://github.com/ollama/ollama.git ~/ollama-source
 cd ~/ollama-source
@@ -72,10 +72,10 @@ cd ~/ollama-source
 # ====================================================================
 # 3. COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA TIGER LAKE
 # ====================================================================
-info "🔧 Compilando Ollama com otimizações para i5-1135G7..."
+info ">>> 🔧 Compilando Ollama com otimizações para i5-1135G7..."
 
 # Compila com flags específicas para Tiger Lake
-echo "⚡ Compilando com flags AVX2 otimizadas..."
+info ">>> ⚡ Compilando com flags AVX2 otimizadas..."
 export CGO_CFLAGS="-O3 -march=native -mtune=native -mavx2 -mfma -fno-plt"
 export CGO_LDFLAGS="-O3 -march=native -mtune=native -mavx2 -mfma"
 export CPU_FLAGS="-O3 -march=tigerlake -mtune=tigerlake -pipe -flto -ffast-math -fomit-frame-pointer"

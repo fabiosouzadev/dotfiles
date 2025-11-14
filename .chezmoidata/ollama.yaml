@@ -1,11 +1,11 @@
 ollama:
   environments:
     - OLLAMA_HOST=127.0.0.1:11434
-    - OLLAMA_KV_CACHE_TYPE=q4_0
+    - OLLAMA_KV_CACHE_TYPE=q5_0
     - OLLAMA_NEW_ENGINE=1
-    - OLLAMA_NUM_PARALLEL=4
+    - OLLAMA_NUM_PARALLEL=2
     - OLLAMA_FLASH_ATTENTION=1
-    - OLLAMA_CONTEXT_LENGTH=2048
+    - OLLAMA_CONTEXT_LENGTH=4096
     - OLLAMA_KEEP_ALIVE=30m
     - OLLAMA_MAX_LOADED_MODELS=2
     - OLLAMA_LLM_LIBRARY="cpu_avx2"
@@ -14,14 +14,10 @@ ollama:
     - qwen2.5-coder:1.5b #entende bem ts, Nestjs, prisma
     - qwen2.5-coder:3b
     - deepseek-coder:1.3b #autocomplete (1.3b) Bom para autocomplete
-    - deepseek-r1:1.5b
     - deepseek-r1:7b
     - phi4-mini:3.8b
-    - llama2:7b
     - llama3.2:1b
     - llama3.2:3b
-    - llama3.1:8b
-    - codellama:7b
     - gemma3n:e2b
     - gemma3n:e4b
     - opencoder:1.5b #autocomplete

@@ -79,14 +79,14 @@ EOF
 sudo tee /etc/sysctl.d/99-zram-extreme.conf > /dev/null <<'EOF'
 vm.swappiness = 200
 vm.vfs_cache_pressure = 60
-# vm.min_free_kbytes = 131072
-# vm.overcommit_memory = 1
-# vm.overcommit_ratio = 100
-# vm.dirty_expire_centisecs = 2000
-# vm.compact_memory = 1
-# kernel.sched_migration_cost_ns=5000000
-# vm.max_map_count=524288
-# fs.file-max=65536
+vm.min_free_kbytes = 131072
+vm.overcommit_memory = 1
+vm.overcommit_ratio = 100
+vm.dirty_expire_centisecs = 2000
+vm.compact_memory = 1
+kernel.sched_migration_cost_ns=5000000
+vm.max_map_count=524288
+fs.file-max=65536
 EOF
 #
 sudo sysctl --system >/dev/null
