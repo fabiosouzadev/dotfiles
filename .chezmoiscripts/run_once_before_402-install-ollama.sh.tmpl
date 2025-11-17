@@ -57,7 +57,7 @@ info ">>> 📦 Instalando dependências de compilação..."
 
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
-sudo pacman -Sy --noconfirm base-devel git cmake make gcc go
+sudo pacman -Sy --noconfirm base-devel git cmake make gcc go clang
 
 {{ end }} # TODO: Mudar para ELSE quando colocar ubuntu
 

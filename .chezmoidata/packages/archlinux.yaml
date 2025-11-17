@@ -26,6 +26,7 @@ packages:
         - aws-cli-v2
         - btop
         - blueman
+        - clang
         - i3-wm
         - dunst
         - fastfetch
