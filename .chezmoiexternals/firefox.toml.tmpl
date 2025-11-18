@@ -1,4 +1,11 @@
 # vim: filetype=toml
+[".mozilla/firefox/fabiosouzadev.default/chrome"]
+type = "archive"
+url = "https://github.com/soulhotel/FF-ULTIMA/releases/download/4.2/ffultima4.2.zip"
+exact = true
+refreshPeriod = "168h"
+exclude = ["*.md", "LICENSE"]
+
 [".mozilla/firefox/fabiosouzadev.dev-edition-default/chrome"]
 type = "archive"
 url = "https://github.com/Godiesc/firefox-gx/releases/download/v.10.9/FirefoxGX_Release_v.143.zip"
@@ -6,3 +13,4 @@ exact = true
 stripComponents = 2 
 refreshPeriod = "168h"
 include = ["*/chrome/**"]
+
