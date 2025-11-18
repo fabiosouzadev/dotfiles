@@ -204,7 +204,7 @@ tiling_drag modifier titlebar
 
 
 # set floating (nontiling) for apps needing it
-# to get class in terminal type: `xprop | grep WM_CLASS | awk '{ print $4 }'`
+# to get class in terminal type: `xprop | grep WM_CLASS | awk '{ pr/nt $4 }'`
 
 for_window [class="pavucontrol" instance="pavucontrol"] floating enable
 for_window [class="pavucontrol" instance="pavucontrol"] resize set 1024 768
@@ -452,11 +452,12 @@ bindsym $mod+Shift+n exec ~/.config/i3/scripts/empty_workspace
 assign [class="Spotify"] $ws1
 assign [class="obsidian"] $ws2
 assign [class="^Slack$|^discord|^vesktop$"] $ws3
-assign [class="firefox-developer-edition"] $ws4
+assign [class="^firefox$"] $ws4
+assign [class="^firefox-developer-edition$"] $ws5
 assign [class="com.mitchellh.ghostty"] $ws5
 assign [class="kitty"] $ws5
+assign [title="(Firefox Private)"] $w5
 # assign [class="Brave-browser-*"] $ws6
-assign [class="firefox"] $ws6
 
 # assign [class="org.wezfurlong.wezterm"] $ws5
 # assign [class="Todoist"] $ws3
