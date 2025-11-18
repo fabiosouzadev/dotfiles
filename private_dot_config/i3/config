@@ -1,4 +1,3 @@
-# vim: filetype=config
 #########################################################
 #█▀▀ ▄▀█ █▄▄ █ █▀█ █▀ █▀█ █░█ ▀█ ▄▀█ █▀▄ █▀▀ █░█        #
 #█▀░ █▀█ █▄█ █ █▄█ ▄█ █▄█ █▄█ █▄ █▀█ █▄▀ ██▄ ▀▄▀        #
@@ -175,9 +174,9 @@ bindsym XF86MonBrightnessUp exec xbacklight +5 && notify-send "Brightness - $(xb
 bindsym XF86MonBrightnessDown exec xbacklight -5 && notify-send "Brightness - $(xbacklight -get | cut -d '.' -f 1)%"
 
 ### App shortcuts
-bindsym $mod+b exec brave-nightly
-# bindsym $mod+Shift+u exec librewolf --private-window
-bindsym $mod+Shift+u exec brave-nightly --incognito
+bindsym $mod+b exec firefox
+# bindsym $mod+b exec brave-nightly
+bindsym $mod+Shift+u exec firefox --private-window
 bindsym $mod+n exec thunar
 #bindsym Print exec scrot ~/%Y-%m-%d-%T-screenshot.png && notify-send "Screenshot saved to ~/$(date +"%Y-%m-%d-%T")-screenshot.png"
 bindsym $mod+p exec --no-startup-id flameshot gui
@@ -456,7 +455,8 @@ assign [class="^Slack$|^discord|^vesktop$"] $ws3
 assign [class="firefox-developer-edition"] $ws4
 assign [class="com.mitchellh.ghostty"] $ws5
 assign [class="kitty"] $ws5
-assign [class="Brave-browser-*"] $ws6
+# assign [class="Brave-browser-*"] $ws6
+assign [class="firefox"] $ws6
 
 # assign [class="org.wezfurlong.wezterm"] $ws5
 # assign [class="Todoist"] $ws3
@@ -548,3 +548,4 @@ client.background        $base
 #         status_command i3status
 # }
 
+# vim: filetype=config
