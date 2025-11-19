@@ -456,7 +456,8 @@ assign [class="^firefox$"] $ws4
 assign [class="^firefox-developer-edition$"] $ws5
 assign [class="com.mitchellh.ghostty"] $ws5
 assign [class="kitty"] $ws5
-assign [title="(Firefox Private)"] $w5
+assign [class="^(?i)firefox" title=".*(Private).*"] $ws7
+for_window [class="^(?i)firefox" title=".*(Private Browsing).*"] move to workspace $ws7
 # assign [class="Brave-browser-*"] $ws6
 
 # assign [class="org.wezfurlong.wezterm"] $ws5
