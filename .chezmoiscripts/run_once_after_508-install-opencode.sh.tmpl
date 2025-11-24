@@ -10,14 +10,22 @@ error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 #Install opencode
-info "Installing opencode"
+info ">>> Installing opencode"
 
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if command -v "paru" > /dev/null; then
+  info ">>> Installing opencode using paru"
+  paru -Sy --noconfirm --needed opencode-bin
+  success ">>> Installed Opencode"
+else
+  info ">>> Installing opencode using curl"
+  curl -fsSL https://opencode.ai/install | bash
+  success ">>> Installed Opencode"
+fi
 
-npm install -g --force opencode-ai
-
-success "Opencode Installed"
+{{ else }}
+  info ">>> Installing opencode using curl"
+  curl -fsSL https://opencode.ai/install | bash
+{{ end }}
 

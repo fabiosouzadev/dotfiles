@@ -13,7 +13,7 @@ error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 
-info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)..."
+info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)....."
 
 # --- 0 - LIMPA CONFIGURAÇÕES EXISTENTES ---
 info ">>> Desativando SWAPs existentes..."
@@ -39,13 +39,12 @@ sudo tee /etc/systemd/zram-generator.conf > /dev/null <<'EOF'
 zram-size = ram
 compression-algorithm = zstd
 swap-priority = 200
-# max-zram-pages = 0
+fs-type = swap
 EOF
 
 # --- 3. SWAP físico ---
 SWAP_FILE="/swapfile"
-# SWAP_SIZE="16G"
-SWAP_SIZE="2G"
+SWAP_SIZE="4G"
 
 # Adicionado para forçar a criação:
 if [ -f "$SWAP_FILE" ]; then
@@ -66,7 +65,7 @@ fi
 
 if ! grep -q "$SWAP_FILE" /etc/fstab; then
     info ">>> Adicionando swapfile ao /etc/fstab..."
-    echo "$SWAP_FILE none swap defaults,pri=-1 0 0" | sudo tee -a /etc/fstab
+    echo "$SWAP_FILE none swap defaults,pri=-10 0 0" | sudo tee -a /etc/fstab
 fi
 
 # --- 4. Sysctl agressivo ---
@@ -78,7 +77,7 @@ EOF
 
 sudo tee /etc/sysctl.d/99-zram-extreme.conf > /dev/null <<'EOF'
 vm.swappiness = 200
-vm.vfs_cache_pressure = 60
+vm.vfs_cache_pressure = 10
 vm.min_free_kbytes = 131072
 vm.overcommit_memory = 1
 vm.overcommit_ratio = 100
