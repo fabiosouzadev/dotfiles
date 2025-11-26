@@ -27,6 +27,7 @@ packages:
         - blueman
         - clang
         - i3-wm
+        - direnv
         - dunst
         - fastfetch
         - flameshot
@@ -87,9 +88,11 @@ packages:
         aur: 
           - docksal
           - devpod-bin
-          - lazydocker-bin #- dokku
+          - lazydocker-bin
+          - dokku
           - lando-beta
-          - openlens-bin # - cloudlens
+          - openlens-bin 
+          - cloudlens
       virtualisation:
         core:
           - bridge-utils 
