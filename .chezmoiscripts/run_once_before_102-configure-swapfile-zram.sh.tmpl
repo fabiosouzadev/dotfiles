@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# vim: filetype=bash
 
 {{ if eq .chezmoi.os "linux" -}}
 
@@ -31,20 +30,22 @@ if ! command -v zramctl >/dev/null 2>&1; then
 fi
 
 # --- 2. ZRAM ---
-SWAP_PRIORITY=200
+ZRAM_PRIORITY="200"
+ZRAM_SIZE="12G"
 
 info ">>> Gerando /etc/systemd/zram-generator.conf ..."
-sudo tee /etc/systemd/zram-generator.conf > /dev/null <<'EOF'
+sudo tee /etc/systemd/zram-generator.conf > /dev/null <<EOF
 [zram0]
-zram-size = ram
+zram-size = $ZRAM_SIZE
 compression-algorithm = zstd
-swap-priority = 200
+swap-priority = $ZRAM_PRIORITY
 fs-type = swap
 EOF
 
 # --- 3. SWAP físico ---
 SWAP_FILE="/swapfile"
 SWAP_SIZE="4G"
+SWAP_PRIORITY="-10"
 
 # Adicionado para forçar a criação:
 if [ -f "$SWAP_FILE" ]; then
@@ -61,31 +62,43 @@ if [ ! -f "$SWAP_FILE" ]; then
   fi
   sudo chmod 600 $SWAP_FILE
   sudo mkswap $SWAP_FILE
+  sudo swapon $SWAP_FILE -p -10
 fi
 
 if ! grep -q "$SWAP_FILE" /etc/fstab; then
     info ">>> Adicionando swapfile ao /etc/fstab..."
-    echo "$SWAP_FILE none swap defaults,pri=-10 0 0" | sudo tee -a /etc/fstab
+    echo "$SWAP_FILE none swap sw,pri=$SWAP_PRIORITY 0 0" | sudo tee -a /etc/fstab
 fi
 
+
+success ">>> ZRAM configurado: $ZRAM_SIZE com prioridade $ZRAM_PRIORITY + swapfile de fallback com $SWAP_SIZE"
+
 # --- 4. Sysctl agressivo ---
-#
 info ">>> Aplicando parâmetros agressivos de memória..."
-sudo tee /etc/modprobe.d/zram.conf > /dev/null <<'EOF'
+sudo tee /etc/modprobe.d/zram.conf > /dev/null <<EOF
 options zram comp_algorithm=zstd
 EOF
 
-sudo tee /etc/sysctl.d/99-zram-extreme.conf > /dev/null <<'EOF'
-vm.swappiness = 200
-vm.vfs_cache_pressure = 10
-vm.min_free_kbytes = 131072
-vm.overcommit_memory = 1
-vm.overcommit_ratio = 100
-vm.dirty_expire_centisecs = 2000
-vm.compact_memory = 1
+
+SWAPPINESS="80"
+CACHE_PRESSURE="50"
+sudo tee /etc/sysctl.d/99-zram-extreme.conf > /dev/null <<EOF
+# Otimizações para LLMs baseadas no hardware
+vm.swappiness=$SWAPPINESS
+vm.vfs_cache_pressure=$CACHE_PRESSURE
+vm.dirty_ratio=15
+vm.dirty_background_ratio=5
+vm.overcommit_memory=1
+vm.overcommit_ratio=100
+vm.max_map_count=2147483647
+
+# Afinidade de CPU para processos de IA
 kernel.sched_migration_cost_ns=5000000
-vm.max_map_count=524288
-fs.file-max=65536
+kernel.sched_autogroup_enabled=0
+
+# Melhora performance de I/O para SSD NVMe
+vm.dirty_writeback_centisecs=500
+vm.dirty_expire_centisecs=500
 EOF
 #
 sudo sysctl --system >/dev/null
@@ -96,7 +109,7 @@ sudo modprobe -r zram
 UDEV_RULES_FILE="/usr/lib/udev/rules.d/30-zram.rules"
 
 info ">>> Atualizando regras do udev para ZRAM/ZSWAP..."
-NEW_RULE='ACTION=="change", KERNEL=="zram0", ATTR{initstate}=="1", SYSCTL{vm.swappiness}="200", \
+NEW_RULE='ACTION=="change", KERNEL=="zram0", ATTR{initstate}=="1", SYSCTL{vm.swappiness}="80", \
     RUN+="/bin/sh -c '\''echo N > /sys/module/zswap/parameters/enabled'\''"'
 
 if [ -f "$UDEV_RULES_FILE" ]; then
@@ -108,7 +121,7 @@ fi
 
 echo "$NEW_RULE" | sudo tee "$UDEV_RULES_FILE" > /dev/null
 
-if sudo grep -q 'SYSCTL{vm.swappiness}="200"' "$UDEV_RULES_FILE"; then
+if sudo grep -q "SYSCTL{vm.swappiness}=\"$SWAPPINESS\"" "$UDEV_RULES_FILE"; then
     info ">>> Regra UDEV aplicada com sucesso."
 else
     error "Falha ao aplicar regra UDEV. Restaurando backup..."
@@ -178,3 +191,5 @@ success " >>> ZRAM + ZSWAP configurados com sucesso."
 
 {{ end }}
 {{ end -}}
+
+# vim: filetype=bash
