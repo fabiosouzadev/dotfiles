@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# vim: filetype=bash
 
 set -euo pipefail
 
@@ -26,8 +25,8 @@ elif type -P yay >/dev/null 2>&1; then
     success "Installed Devops AUR packages"
 fi
 
-sudo usermod -aG docker ${USER}
-newgrp docker
+#sudo usermod -aG docker ${USER}
+#newgrp docker ## Command crashes this file
 # sudo systemctl start docker.service
 
 {{ else }}
@@ -35,3 +34,4 @@ newgrp docker
 error "This script is only for Arch based systems. Exiting..."
 
 {{ end }}
+# vim: filetype=bash
