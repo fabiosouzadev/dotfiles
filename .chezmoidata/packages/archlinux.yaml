@@ -89,10 +89,10 @@ packages:
           - docksal
           - devpod-bin
           - lazydocker-bin
-          - dokku
+          # - dokku
           - lando-beta
           - openlens-bin 
-          - cloudlens
+          # - cloudlens
       virtualisation:
         core:
           - bridge-utils 

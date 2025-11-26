@@ -15,36 +15,36 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 info ">>> 🗑️  Removendo versão atual do Ollama..."
 
 if command -v ollama &>/dev/null; then
-if [ -f /etc/systemd/system/ollama.service ]; then
-  sudo systemctl stop ollama
-  sudo systemctl disable ollama
-  sudo rm /etc/systemd/system/ollama.service
-fi 
+  if [ -f /etc/systemd/system/ollama.service ]; then
+    sudo systemctl stop ollama
+    sudo systemctl disable ollama
+    sudo rm /etc/systemd/system/ollama.service
+  fi 
 
-if [ -d /usr/share/ollama ]; then
-  sudo userdel ollama
-  sudo groupdel ollama
-  sudo rm -r /usr/share/ollama
-fi
+  if [ -d /usr/share/ollama ]; then
+    sudo userdel ollama
+    sudo groupdel ollama
+    sudo rm -r /usr/share/ollama
+  fi
 
-OLLAMA_BIN=$(which ollama)
+  OLLAMA_BIN=$(which ollama)
 
-if [[ "$OLLAMA_BIN" == */bin/* ]]; then
-  OLLAMA_LIB="${OLLAMA_BIN//\/bin\//\/lib\/}"
-  echo ">>> 📚 Caminho da biblioteca calculado: $OLLAMA_LIB"
+  if [[ "$OLLAMA_BIN" == */bin/* ]]; then
+    OLLAMA_LIB="${OLLAMA_BIN//\/bin\//\/lib\/}"
+    echo ">>> 📚 Caminho da biblioteca calculado: $OLLAMA_LIB"
 
-        if [ -d "$OLLAMA_LIB" ]; then
-          echo ">>> 🧹 Removendo diretório de bibliotecas: $OLLAMA_LIB"
-          sudo rm -rf "$OLLAMA_LIB"
-        else
-          echo ">>> ℹ️ Diretório de bibliotecas não encontrado: $OLLAMA_LIB"
-        fi
-fi
+          if [ -d "$OLLAMA_LIB" ]; then
+            echo ">>> 🧹 Removendo diretório de bibliotecas: $OLLAMA_LIB"
+            sudo rm -rf "$OLLAMA_LIB"
+          else
+            echo ">>> ℹ️ Diretório de bibliotecas não encontrado: $OLLAMA_LIB"
+          fi
+  fi
 
-if [ -f $(which ollama) ]; then
-  sudo rm $(which ollama)
-  sudo rm -rf ~/.ollama
-fi
+  if [ -d "$HOME/.ollama" ]; then
+    sudo rm $(which ollama)
+    sudo rm -rf ~/.ollama
+  fi
 fi
 
 {{ if .ollama.compiled }}
@@ -150,23 +150,23 @@ sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null <<'EOF'
 Environment={{.}}
 {{ end -}}
 
-# Prioridade de CPU para evitar travamentos
-Nice=-5
-CPUSchedulingPolicy=rr
-CPUSchedulingPriority=1
+# # Prioridade de CPU para evitar travamentos
+# Nice=-5
+# CPUSchedulingPolicy=rr
+# CPUSchedulingPriority=1
 
-# Limites de memória realistas para 16GB
-MemoryHigh=12G
-MemoryMax=14G
-#MemorySwapMax=0
+# Prioridade de scheduling reduzida
+Nice=5
+CPUSchedulingPolicy=idle
+
+# # Limites de memória realistas para 16GB
+# MemoryHigh=12G
+# MemoryMax=14G
+# MemorySwapMax=0
 
 # Permissões para mlock (mas não ativado por padrão)
 #LimitMEMLOCK=infinity
 #MemoryLock=false
-
-# Reinicia automaticamente
-Restart=always
-
 EOF
 
 sudo systemctl daemon-reload
