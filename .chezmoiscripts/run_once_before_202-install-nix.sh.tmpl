@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# vim: filetype=bash
 {{ if eq .chezmoi.os "linux" -}}
 set -euo pipefail
 
@@ -18,16 +17,16 @@ info "Nix version: $(nix --version)"
 info "Installing devenv"
 nix-env --install --attr devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
 
-echo \
-	"trusted-users = root $USER" \
-	| sudo tee -a /etc/nix/nix.conf
 
-echo \
-"extra-substituters = https://devenv.cachix.org
-extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=" | \
-	     sudo tee -a /etc/nix/nix.conf
+sudo tee /etc/nix/nix.custom.conf > /dev/null <<'EOF'
+eval-cores = 0
+trusted-users = root ${USER}
+extra-substituters = https://devenv.cachix.org
+extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
+EOF
 
 sudo systemctl restart nix-daemon
 
-
 {{ end -}}
+
+# vim: filetype=bash
