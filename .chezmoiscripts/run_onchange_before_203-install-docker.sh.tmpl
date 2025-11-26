@@ -15,11 +15,20 @@ info "Installing Devops core packages"
 sudo pacman -Syu --noconfirm --needed {{ range .packages.linux.arch.devops.core }} {{.}}{{end}}
 success "Installed Devops core packages"
 
-if type -P yay >/dev/null 2>&1; then
-  info "Installing Devops AUR packages"
-  yay -Syu --noconfirm --needed {{ range .packages.linux.arch.devops.aur }} {{.}}{{ end }}
-  success "Installed Devops AUR packages"
+
+if type -P paru >/dev/null 2>&1; then
+    info "Installing Devops AUR packages with paru"
+    paru -Syu --noconfirm --needed {{ range .packages.linux.arch.devops.aur }} {{.}}{{ end }}
+    success "Installed Devops AUR packages"
+elif type -P yay >/dev/null 2>&1; then
+    info "Installing Devops AUR packages with yay"
+    yay -Syu --noconfirm --needed {{ range .packages.linux.arch.devops.aur }} {{.}}{{ end }}
+    success "Installed Devops AUR packages"
 fi
+
+sudo usermod -aG docker ${USER}
+newgrp docker
+# sudo systemctl start docker.service
 
 {{ else }}
 
