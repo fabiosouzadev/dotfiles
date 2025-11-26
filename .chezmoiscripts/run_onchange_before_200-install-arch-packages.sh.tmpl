@@ -23,7 +23,6 @@ sudo pacman -S --noconfirm --needed {{ range .packages.linux.arch.core }} {{.}}{
 if command -v "paru" > /dev/null; then
   paru -Syu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
 elif type -P yay >/dev/null 2>&1; then
-  # yay -Syu --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
   yay -Syu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
 fi
 
