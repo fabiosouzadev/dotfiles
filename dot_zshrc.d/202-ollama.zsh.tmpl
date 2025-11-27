@@ -1,19 +1,17 @@
-# vim: filetype=bash
 # LLM Local (Ollama)
 
 {{ range .ollama.environments -}}
 export {{.}}
 {{ end -}}
 
+unset OLLAMA_MLOCK
 
 #Alias
-alias -- ollamaui="docker run -d --network=host -v open-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name open-webui --restart always ghcr.io/open-webui/open-webui:main"
-# export OLLAMA_CODER_MODEL="deepseek-coder:14b-q4_K_M"
-# export OLLAMA_DESIGN_MODEL="llama2:13b-q4_K_M"
-# export OLLAMA_CHAT_MODEL="mistral:7b-q4_K_M"
-#
-# alias -- ollama-coder="OLLAMA_MODEL=\$OLLAMA_CODER_MODEL ollama run \$OLLAMA_MODEL"
-# alias -- ollama-design="OLLAMA_MODEL=\$OLLAMA_DESIGN_MODEL ollama run \$OLLAMA_MODEL"
-# alias -- ollama-chat="OLLAMA_MODEL=\$OLLAMA_CHAT_MODEL ollama run \$OLLAMA_MODEL"
+alias -- ollama-start="sudo systemctl start ollama.service"
+alias -- ollama-stop="sudo systemctl stop ollama.service"
+alias -- ollama-restart="sudo systemctl restart ollama.service"
+alias -- ollama-status="sudo systemctl status ollama.service"
 
+alias -- ollama-ui="docker run -d --network=host -v open-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name open-webui --restart always ghcr.io/open-webui/open-webui:main"
 
+# vim: filetype=bash

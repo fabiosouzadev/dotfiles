@@ -4,12 +4,13 @@ ollama:
     - OLLAMA_CONTEXT_LENGTH=2048
     - OLLAMA_MAX_LOADED_MODELS=2
     - OLLAMA_KEEP_ALIVE=30m
-    - OLLAMA_NUM_PARALLEL=2
-    - OLLAMA_NUM_THREADS=2
-    - OLLAMA_KV_CACHE_TYPE=q4_0
+    - OLLAMA_NUM_PARALLEL=4
+    - OLLAMA_NUM_THREADS=8
+    - OLLAMA_KV_CACHE_TYPE=q5_0
     - OLLAMA_NEW_ENGINE=1
     - OLLAMA_FLASH_ATTENTION=1
-    - OLLAMA_LLM_LIBRARY="cpu_avx2"
+    - OLLAMA_LLM_LIBRARY="cpu"
+    - OLLAMA_GPU_OVERHEAD=0
   models:
     - qwen2.5-coder:0.5b
     - qwen2.5-coder:1.5b #entende bem ts, Nestjs, prisma
@@ -17,6 +18,7 @@ ollama:
     - qwen3:1.7b
     - qwen3 #(8b)
     - deepseek-r1:1.5b #autocomplete
+    - deepseek-coder:1.3b #autocomplete
     - phi4-mini:3.8b #(3.8b)
     - llama3.2:1b
     - llama3.2:3b

@@ -1,14 +1,14 @@
 [dell3520]
 enabled = false
 
+[rtl8821ce]
+enabled = false
+
 [dell3530]
 enabled = true
 
 [kernels]
 install = true
-
-[rtl8821ce]
-enabled = false
 
 [ollama]
 compiled = true 

@@ -68,6 +68,29 @@ git clone https://github.com/ollama/ollama.git ~/ollama-source
 cd ~/ollama-source
 
 
+{{ if .dell3530.enabled }}
+# ====================================================================
+# 3. COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA ALDER LAKE-U
+# ====================================================================
+info ">>> 🔧 Compilando Ollama com otimizações para Alder Lake-U (i7-1355U)"
+
+# Compila com flags específicas para Tiger Lake
+info ">>> ⚡ Compilando com flags Alder Lake-U (i7-1355U)"
+export CGO_CFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -flto -fno-plt -fassociative-math -freciprocal-math -fno-signed-zeros -fno-trapping-math"
+export CGO_LDFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -flto -fno-plt"
+# export CGO_CFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -fno-plt"
+# export CGO_LDFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma"
+export CPU_FLAGS="-O3 -march=alderlake -mtune=alderlake -pipe -flto -ffast-math -fomit-frame-pointer"
+export CC=clang
+export CXX=clang++
+export CFLAGS="$CPU_FLAGS"
+export CXXFLAGS="$CPU_FLAGS"
+export LDFLAGS="-Wl,-O1 -Wl,--as-needed -Wl,-z,now -Wl,-z,relro"
+export CGO_ENABLED=1
+export OLLAMA_THREADS=10
+export OLLAMA_PARALLEL=8
+{{ end }} # dell3530
+
 {{ if .dell3520.enabled }}
 # ====================================================================
 # 3. COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA TIGER LAKE
@@ -87,12 +110,15 @@ export LDFLAGS="-Wl,-O1 -Wl,--as-needed -Wl,-z,now -Wl,-z,relro"
 export CGO_ENABLED=1
 {{ end }} # dell3520
 
+
+export GOFLAGS="-buildmode=pie -trimpath -ldflags=-s -ldflags=-w"
+
 #Compilação
 INSTALL_DIR="/usr/local/bin"
 go clean
 go mod tidy
 go build \
-  -tags "avx2" \
+  -tags "avx avx2" \
   -ldflags="-s -w -extldflags '-static' -X main.version=custom-cachyos" \
   -o ollama .
 
@@ -150,23 +176,16 @@ sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null <<'EOF'
 Environment={{.}}
 {{ end -}}
 
-# # Prioridade de CPU para evitar travamentos
-# Nice=-5
-# CPUSchedulingPolicy=rr
-# CPUSchedulingPriority=1
+# Prioridade de CPU para evitar travamentos
+Nice=-5
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority=1
 
-# Prioridade de scheduling reduzida
-Nice=5
-CPUSchedulingPolicy=idle
+# Limites de memória realistas para 16GB
+MemoryHigh=12G
+MemoryMax=14G
+MemorySwapMax=4G
 
-# # Limites de memória realistas para 16GB
-# MemoryHigh=12G
-# MemoryMax=14G
-# MemorySwapMax=0
-
-# Permissões para mlock (mas não ativado por padrão)
-#LimitMEMLOCK=infinity
-#MemoryLock=false
 EOF
 
 sudo systemctl daemon-reload

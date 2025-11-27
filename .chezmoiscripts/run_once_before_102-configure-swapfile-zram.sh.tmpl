@@ -15,10 +15,10 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)....."
 
 # --- 0 - LIMPA CONFIGURAÇÕES EXISTENTES ---
-info ">>> Desativando SWAPs existentes..."
+info ">>> Desativando SWAPs existentes......"
 sudo swapoff -a || true
 
-info ">>> Removendo ZRAMs antigos..."
+info ">>> Removendo ZRAMs antigos....."
 for dev in /dev/zram*; do
     [[ -b "$dev" ]] && sudo zramctl --reset "$dev" || true
 done
@@ -30,22 +30,19 @@ if ! command -v zramctl >/dev/null 2>&1; then
 fi
 
 # --- 2. ZRAM ---
-ZRAM_PRIORITY="200"
-ZRAM_SIZE="12G"
-
 info ">>> Gerando /etc/systemd/zram-generator.conf ..."
 sudo tee /etc/systemd/zram-generator.conf > /dev/null <<EOF
 [zram0]
-zram-size = $ZRAM_SIZE
+zram-size = ram * 0.75
 compression-algorithm = zstd
-swap-priority = $ZRAM_PRIORITY
+swap-priority = 200
 fs-type = swap
 EOF
 
 # --- 3. SWAP físico ---
 SWAP_FILE="/swapfile"
 SWAP_SIZE="4G"
-SWAP_PRIORITY="-10"
+SWAP_PRIORITY=-10
 
 # Adicionado para forçar a criação:
 if [ -f "$SWAP_FILE" ]; then
@@ -56,22 +53,21 @@ fi
 if [ ! -f "$SWAP_FILE" ]; then
   info ">>> Criando arquivo de swap de ${SWAP_SIZE} em SSD..."
   if type -P btrfs >/dev/null 2>&1; then 
-    sudo btrfs filesystem mkswapfile --size $SWAP_SIZE $SWAP_FILE
+    sudo btrfs filesystem mkswapfile --size $SWAP_SIZE $SWAP_FILE 2>/dev/null
   else
-    sudo fallocate -l $SWAP_SIZE $SWAP_FILE
+    sudo fallocate -l $SWAP_SIZE $SWAP_FILE 2>/dev/null
   fi
   sudo chmod 600 $SWAP_FILE
   sudo mkswap $SWAP_FILE
-  sudo swapon $SWAP_FILE -p -10
+  sudo swapon $SWAP_FILE -p $SWAP_PRIORITY
 fi
 
 if ! grep -q "$SWAP_FILE" /etc/fstab; then
     info ">>> Adicionando swapfile ao /etc/fstab..."
-    echo "$SWAP_FILE none swap sw,pri=$SWAP_PRIORITY 0 0" | sudo tee -a /etc/fstab
+    echo "$SWAP_FILE none swap sw,pri=$SWAP_PRIORITY 0 0" | sudo tee -a /etc/fstab >/dev/null 2>&1 || true
 fi
 
-
-success ">>> ZRAM configurado: $ZRAM_SIZE com prioridade $ZRAM_PRIORITY + swapfile de fallback com $SWAP_SIZE"
+success ">>> ZRAM configurado: 12g com prioridade 200 + swapfile de fallback com $SWAP_SIZE"
 
 # --- 4. Sysctl agressivo ---
 info ">>> Aplicando parâmetros agressivos de memória..."
