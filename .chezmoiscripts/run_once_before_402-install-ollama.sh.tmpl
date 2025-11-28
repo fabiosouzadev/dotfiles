@@ -12,7 +12,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 # ====================================================================
 # 1. REMOVER VERSÃO ATUAL DO OLLAMA
 # ====================================================================
-info ">>> 🗑️  Removendo versão atual do Ollama..."
+info ">>> 🗑️  Removendo versão atual do Ollama...."
 
 if command -v ollama &>/dev/null; then
   if [ -f /etc/systemd/system/ollama.service ]; then
