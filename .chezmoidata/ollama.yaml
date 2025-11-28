@@ -24,5 +24,4 @@ ollama:
     - llama3.2:3b
     - gemma3n:e2b
     - codegemma:2b #autocomplete
-    - opencoder:1.5b #autocomplete
-    - deepcoder:1.5b #autocomplete
+    - starcoder2:3b
