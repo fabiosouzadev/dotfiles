@@ -21,8 +21,9 @@ success "Installed Mise Version:$(~/.local/bin/mise --version)"
 {{ end }}
 {{ end -}}
 
-~/.local/bin/mise use --global node@24 # install node 24 and set it as the global default
-~/.local/bin/mise use -g npm:npx
-~/.local/bin/mise use -g npm:prettier
+~/.local/bin/mise doctor
+~/.local/bin/mise use --global node@24 -y # install node 24 and set it as the global default
+~/.local/bin/mise use -g npm:npx -y
+~/.local/bin/mise use -g npm:prettier -y
 success ">>> Mise Installed"
 # vim: filetype=bash
