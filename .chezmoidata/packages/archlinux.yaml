@@ -10,6 +10,7 @@ packages:
         - opencode-bin
         - postman-bin
         - rofi-greenclip
+        - spotify
         - streamlink-twitch-gui-bin
         - twitch-dl-bin
         - vesktop
@@ -63,7 +64,6 @@ packages:
         - qbittorrent
         - rofi
         - sops
-        - spotify-launcher
         - sysbench
         - tmux
         - vlc
