@@ -12,19 +12,26 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
-info ">>>> Installing Mise"
+info ">> Installing Mise"
 
 curl https://mise.run | sh
 
 
 {{ end }}
-~/.local/bin/mise install -y
-~/.local/bin/mise doctor
+
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+~/.local/bin/mise activate
+mise install -y
+mise doctor
 #~/.local/bin/mise use --global node@24 -y # install node 24 and set it as the global default
 #~/.local/bin/mise use -g npm:npx -y
 #~/.local/bin/mise use -g npm:prettier -y
 {{ end -}} #Linux
 
+success ">>>> Node Path: $(which node)"
+success ">>>> Node Version: $(node -v)"
+success ">>>> NPM Path: $(which npm)" 
+success ">>>> NPM Version: $(npm -v)" 
 success ">>>> Installed Mise Version:$(~/.local/bin/mise --version)"
 # vim: filetype=bash
 
