@@ -20,10 +20,11 @@ curl https://mise.run | sh
 {{ end }}
 ~/.local/bin/mise install -y
 ~/.local/bin/mise doctor
-# ~/.local/bin/mise use --global node@24 -y # install node 24 and set it as the global default
-# ~/.local/bin/mise use -g npm:npx -y
-# ~/.local/bin/mise use -g npm:prettier -y
+#~/.local/bin/mise use --global node@24 -y # install node 24 and set it as the global default
+#~/.local/bin/mise use -g npm:npx -y
+#~/.local/bin/mise use -g npm:prettier -y
 {{ end -}} #Linux
 
-success "Installed Mise Version:$(~/.local/bin/mise --version)"
+success ">>>> Installed Mise Version:$(~/.local/bin/mise --version)"
 # vim: filetype=bash
+

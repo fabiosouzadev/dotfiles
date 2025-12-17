@@ -156,7 +156,7 @@ if ! grep -q "zswap.enabled=1" "$GRUB_FILE"; then
     # BACKUP_FILE="${UDEV_RULES_FILE}.bak"
     sudo cp "$GRUB_FILE" "$BACKUP_FILE"
     info ">>> Backup criado: $BACKUP_FILE"
-  fi
+ 
 
   info "🧬 Atualizando parâmetros do kernel no GRUB...."
 
@@ -171,7 +171,7 @@ if ! grep -q "zswap.enabled=1" "$GRUB_FILE"; then
     }' "$GRUB_FILE"
   
   sudo grub-mkconfig -o /boot/grub/grub.cfg
-
+fi
 else
   info "⚙️  Parâmetros ZSWAP já presentes no GRUB. Nenhuma modificação necessária."
 fi
