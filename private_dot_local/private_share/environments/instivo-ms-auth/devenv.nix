@@ -42,13 +42,13 @@
 
   # https://devenv.sh/processes/
   # processes.cargo-watch.exec = "cargo-watch";
-  process.managers.process-compose.settings = {
-    availability = {
-      backoff_seconds = 2;
-      max_restarts = 2;
-      restart = "on_failure";
-    };
-  };
+  # process.managers.process-compose.settings = {
+  #   availability = {
+  #     backoff_seconds = 2;
+  #     max_restarts = 2;
+  #     restart = "on_failure";
+  #   };
+  # };
 
   # https://devenv.sh/services/
   services.postgres = {
