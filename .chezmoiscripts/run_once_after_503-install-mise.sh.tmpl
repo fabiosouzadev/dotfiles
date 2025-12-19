@@ -19,8 +19,9 @@ curl https://mise.run | sh
 
 {{ end }}
 
-export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+# export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 ~/.local/bin/mise activate
+~/.local/bin/mise activate --shims
 mise install -y
 mise doctor
 #~/.local/bin/mise use --global node@24 -y # install node 24 and set it as the global default

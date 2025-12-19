@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# vim: filetype=bash
 
 set -euo pipefail
 
@@ -15,14 +14,14 @@ info "Installing gemini-cli"
 success ">>>> NPM Path: $(npm -v)" 
 success ">>>> NPM Version: $(which npm)" 
 if [ -f ~/.local/bin/mise ]; then
- # eval "$(~/.local/bin/mise activate bash)"
-  export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
  ~/.local/bin/mise activate
+ ~/.local/bin/mise activate --shims
 fi
 
 success ">>>> NPM Path: $(npm -v)" 
 success ">>>> NPM Version: $(which npm)" 
-npm install -g --force @google/gemini-cli@nightly
+npm install -g @google/gemini-cli@preview
 
-success ">>> Gemini Cli Installed"
+success ">>> Gemini Cli Installed Version: $(gemini -v)"
 
+# vim: filetype=bash
