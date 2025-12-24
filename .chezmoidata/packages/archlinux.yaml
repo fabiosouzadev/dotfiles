@@ -15,6 +15,7 @@ packages:
         - twitch-dl-bin
         - vesktop
         - vscodium-insiders-bin
+        - xob
         - zoxide
       core:
         - gzip
@@ -28,6 +29,7 @@ packages:
         - blueman
         - clang
         - i3-wm
+        - dex
         - direnv
         - dunst
         - fastfetch

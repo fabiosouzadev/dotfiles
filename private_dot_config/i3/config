@@ -18,11 +18,32 @@
 
 set $mod Mod4
 
+
+set $term kitty
+set $browser firefox
+set $file_manager thunar
+
+set $work_browser firefox-developer-edition
+set $work_communication vesktop
+
 set $up k
 set $right l
 set $down j
 set $left h
 
+
+# Define names for default workspaces for which we configure key bindings later on.
+# We use variables to avoid repeating the names in multiple places.
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -58,7 +79,7 @@ for_window [class="^.*"] border pixel 0
 
 # Set inner/outer gaps
 gaps inner 6
-gaps outer 6
+gaps outer 3
 
 # show window title bars (not officially supported with i3gaps)
 #default_border normal
@@ -67,68 +88,14 @@ gaps outer 6
 #title_align center
 
 
-#############################################
-# autostart applications/services on login: #
-#############################################
-# Start XDG autostart .desktop files using dex. See also
-# https://wiki.archlinux.org/index.php/XDG_Autostart
-exec --no-startup-id dex --autostart --environment i3
+########################################################################
+########################################################################
+####
+####                   Floated windows
+####
+########################################################################
+########################################################################
 
-# The combination of xss-lock, nm-applet and pactl is a popular choice, so
-# they are included here as an example. Modify as you see fit.
-
-# xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
-# screen before suspend. Use loginctl lock-session to lock your screen.
-#exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
-
-# NetworkManager is the most popular way to manage wireless networks on Linux,
-# and nm-applet is a desktop environment-independent system tray GUI for it.
-exec --no-startup-id nm-applet
-
-## Dunst
-exec_always --no-startup-id dunst --config ~/.config/dunst/dunstrc
-
-######################
-# compositor - picom #
-######################
-# picom: https://wiki.archlinux.org/title/Picom
-# manpage: https://man.archlinux.org/man/picom.1.en
-# The default configuration is available in /etc/xdg/picom.conf
-# For modifications, it can be copied to ~/.config/picom/picom.conf or ~/.config/picom.conf
-# install picom package (yay -S picom)
-# start using default config
-#
-# for custom config:
-# exec_always --no-startup-id picom --config ~/.config/picom/picom.conf
-#
-
-
-# start a script to setup displays
-# uncomment the next line, use arandr to setup displays and save the file as monitor and set wallpaper:
-exec_always --no-startup-id ~/.screenlayout/i3_detect_displays.sh 
-exec_always --no-startup-id sleep 3 && ~/.config/polybar/simple/launch.sh --my-colorblocks
-exec_always --no-startup-id sleep 3 && feh --bg-fill --randomize ~/.config/wallpapers
-# exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"
-# exec_always --no-startup-id setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'
-# exec_always --no-startup-id sh -c "sleep 2 && setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'"
-
-
-# Autostart apps as you like
-exec --no-startup-id sleep 3 && spotify
-exec --no-startup-id sleep 3 && obsidian
-# exec --no-startup-id sleep 1 && ghostty
-exec --no-startup-id sleep 3 && firefox-developer-edition
-# exec --no-startup-id sleep 3 && discord
-exec --no-startup-id sleep 3 && vesktop
-exec --no-startup-id sleep 3 && kitty
-# exec --no-startup-id slack
-#exec --no-startup-id sleep 3 && thunar
-
-# exec --no-startup-id ~/.screenlayout/i3_detect_displays.sh
-
-##################
-# floating rules #
-##################
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
@@ -170,10 +137,60 @@ for_window [window_role="task_dialog"] floating enable
 # set position of floating window
 #for_window [class=".*"] move position center
 
+##########################################
+# configuration for workspace behaviour: #
+##########################################
+# bind program to workspace and focus to them on startup:
+# to get class in terminal type: `xprop | grep WM_CLASS | awk '{ print $4 }'`
 
-######################################
-#          keybindings               #
-######################################
+# Inicie aplicativos nos workspaces corretos
+# Use "assign [class="..."] $wsX" para que apps sempre abram onde devem
+
+assign [class="^(?i)spotify"] $ws1
+assign [class="obsidian"] $ws2
+assign [class="^Slack$|^discord|^vesktop$"] $ws3
+assign [class="^firefox$"] $ws4
+assign [class="^firefox-developer-edition$"] $ws5
+assign [class="com.mitchellh.ghostty"] $ws5
+assign [class="kitty"] $ws5
+assign [class="^(?i)firefox" title=".*(Private).*"] $ws7
+for_window [class="^(?i)firefox" title=".*(Private Browsing).*"] move to workspace $ws7
+# assign [class="Brave-browser-*"] $ws6
+
+# assign [class="org.wezfurlong.wezterm"] $ws5
+# assign [class="Todoist"] $ws3
+# assign [class="Slack"] $ws2
+#assign [class="Kitty"] $ws5
+#assign [class="Thunar"] $ws6
+
+
+# use workspaces on different displays:
+# where you have to replace VGA-0/HDMI-0 with the names for your displays
+# you can get from xrandr command 
+#workspace $ws1 output eDP-1
+#workspace $ws2 output VGA-0
+#workspace $ws3 output HDMI-0
+#workspace $ws4 output HDMI-0
+#workspace $ws5 output HDMI-0
+
+workspace $ws1 output eDP-1
+workspace $ws2 output HDMI-1
+workspace $ws3 output HDMI-1
+workspace $ws4 output HDMI-1
+workspace $ws5 output HDMI-1
+workspace $ws6 output HDMI-1
+workspace $ws7 output HDMI-1
+workspace $ws8 output HDMI-1
+workspace $ws9 output HDMI-1
+
+########################################################################
+########################################################################
+####
+####                   HOTKEYS
+####
+########################################################################
+########################################################################
+
 
 # Use pactl to adjust volume in PulseAudio.
 #set $refresh_i3status killall -SIGUSR1 i3status
@@ -223,26 +240,15 @@ bindsym XF86MonBrightnessUp exec xbacklight +5 && notify-send "Brightness - $(xb
 bindsym XF86MonBrightnessDown exec xbacklight -5 && notify-send "Brightness - $(xbacklight -get | cut -d '.' -f 1)%"
 
 ### App shortcuts
-bindsym $mod+b exec firefox
-bindsym $mod+Shift+b exec firefox-developer-edition
+bindsym $mod+b exec $browser
+bindsym $mod+Shift+b exec $work_browser
 bindsym $mod+Shift+u exec firefox --private-window
-bindsym $mod+n exec thunar
+bindsym $mod+n exec $file_manager
 #bindsym Print exec scrot ~/%Y-%m-%d-%T-screenshot.png && notify-send "Screenshot saved to ~/$(date +"%Y-%m-%d-%T")-screenshot.png"
 bindsym $mod+Shift+p exec --no-startup-id flameshot gui
 
-# Scratchpad para um terminal rápido (drop-down)
-# Move a primeira janela do Alacritty que encontrar para o scratchpad
-for_window [class="^kitty$" instance="^kitty-scratchpad$"] move to scratchpad
-# Atalho para invocar/esconder o terminal
-bindsym $mod+Shift+Return exec kitty --class kitty-scratchpad; [class="^kitty$" instance="^kitty-scratchpad$"] scratchpad show
-
-# Scratchpad para Git (lazygit)
-for_window [title="^lazygit$"] move to scratchpad
-# Atalho para invocar/esconder o lazygit
-bindsym $mod+g exec kitty -t lazygit -e lazygit; [title="^lazygit$"] scratchpad show
-
 # start a terminal
-bindsym $mod+Return exec kitty
+bindsym $mod+Return exec $term
 
 # kill focused window
 bindsym $mod+q kill
@@ -324,6 +330,7 @@ bindsym $mod+Shift+Right move right
 # split (vertical,horizontal,toggle)
 bindsym $mod+x split horizontal
 bindsym $mod+v split vertical
+bindsym $mod+Shift+v split toggle
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
@@ -332,6 +339,7 @@ bindsym $mod+f fullscreen toggle
 bindsym $mod+s layout stacking
 bindsym $mod+t layout tabbed
 bindsym $mod+e layout toggle split
+bindsym $mod+Shift+w sticky toggle
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -344,19 +352,6 @@ bindsym $mod+a focus parent
 
 # focus the child container
 #bindsym $mod+d focus child
-
-# Define names for default workspaces for which we configure key bindings later on.
-# We use variables to avoid repeating the names in multiple places.
-set $ws1 "1"
-set $ws2 "2"
-set $ws3 "3"
-set $ws4 "4"
-set $ws5 "5"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
-set $ws9 "9"
-set $ws10 "10"
 
 ##########################################
 # configurations for workspace keybinds: #
@@ -441,53 +436,13 @@ bindsym $mod+m mode "move"
 # open new empty workspace
 bindsym $mod+Shift+n exec ~/.config/i3/scripts/empty_workspace
 
-##########################################
-# configuration for workspace behaviour: #
-##########################################
-# bind program to workspace and focus to them on startup:
-# to get class in terminal type: `xprop | grep WM_CLASS | awk '{ print $4 }'`
-
-# Inicie aplicativos nos workspaces corretos
-# Use "assign [class="..."] $wsX" para que apps sempre abram onde devem
-
-assign [class="^(?i)spotify"] $ws1
-assign [class="obsidian"] $ws2
-assign [class="^Slack$|^discord|^vesktop$"] $ws3
-assign [class="^firefox$"] $ws4
-assign [class="^firefox-developer-edition$"] $ws5
-assign [class="com.mitchellh.ghostty"] $ws5
-assign [class="kitty"] $ws5
-assign [class="^(?i)firefox" title=".*(Private).*"] $ws7
-for_window [class="^(?i)firefox" title=".*(Private Browsing).*"] move to workspace $ws7
-# assign [class="Brave-browser-*"] $ws6
-
-# assign [class="org.wezfurlong.wezterm"] $ws5
-# assign [class="Todoist"] $ws3
-# assign [class="Slack"] $ws2
-#assign [class="Kitty"] $ws5
-#assign [class="Thunar"] $ws6
-
-
-# use workspaces on different displays:
-# where you have to replace VGA-0/HDMI-0 with the names for your displays
-# you can get from xrandr command 
-#workspace $ws1 output eDP-1
-#workspace $ws2 output VGA-0
-#workspace $ws3 output HDMI-0
-#workspace $ws4 output HDMI-0
-#workspace $ws5 output HDMI-0
-
-workspace $ws1 output eDP-1
-workspace $ws2 output HDMI-1
-workspace $ws3 output HDMI-1
-workspace $ws4 output HDMI-1
-workspace $ws5 output HDMI-1
-workspace $ws6 output HDMI-1
-
-
-######################################
-# color settings for bar and windows #
-######################################
+########################################################################
+########################################################################
+####
+####        color settings for bar and windows #
+####
+########################################################################
+########################################################################
 
 # Set colours various window states
 # Syntax: client.<class> <border> <background> <text> [<indicator> [<child_border>]]
@@ -550,5 +505,74 @@ client.background        $base
 # bar {
 #         status_command i3status
 # }
+
+
+########################################################################
+########################################################################
+####
+####    autostart applications/services on login:
+####
+########################################################################
+########################################################################
+
+# The combination of xss-lock, nm-applet and pactl is a popular choice, so
+# they are included here as an example. Modify as you see fit.
+
+# xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
+# screen before suspend. Use loginctl lock-session to lock your screen.
+#exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+
+# NetworkManager is the most popular way to manage wireless networks on Linux,
+# and nm-applet is a desktop environment-independent system tray GUI for it.
+exec --no-startup-id nm-applet
+
+## Dunst
+exec --no-startup-id /usr/bin/dunst --config ~/.config/dunst/dunstrc
+
+######################
+# compositor - picom #
+######################
+# picom: https://wiki.archlinux.org/title/Picom
+# manpage: https://man.archlinux.org/man/picom.1.en
+# The default configuration is available in /etc/xdg/picom.conf
+# For modifications, it can be copied to ~/.config/picom/picom.conf or ~/.config/picom.conf
+# install picom package (yay -S picom)
+# start using default config
+#
+# for custom config:
+exec_always --no-startup-id picom --config ~/.config/picom/picom.conf
+
+
+# dex execute .desktop files + apps using /etc/xdg/autostart.
+# when second to i3 a DE is installed or mixed usage of i3 + xfce4 or GNOME
+# in this cases better disable dex and use manual starting apps using xdg/autostart
+# if enabled you should comment welcome app.
+# https://github.com/jceb/dex
+exec --no-startup-id dex -a -s /etc/xdg/autostart/:~/.config/autostart/
+# exec --no-startup-id dex --autostart --environment i3
+exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+
+# start a script to setup displays
+# uncomment the next line, use arandr to setup displays and save the file as monitor and set wallpaper:
+exec_always --no-startup-id ~/.screenlayout/i3_detect_displays.sh 
+exec_always --no-startup-id sleep 3 && ~/.config/polybar/simple/launch.sh --my-colorblocks
+exec_always --no-startup-id sleep 3 && feh --bg-fill --randomize ~/.config/wallpapers
+# exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"
+# exec_always --no-startup-id setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'
+# exec_always --no-startup-id sh -c "sleep 2 && setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'"
+
+
+# Autostart apps as you like
+exec --no-startup-id sleep 3 && spotify
+exec --no-startup-id sleep 3 && obsidian
+# exec --no-startup-id sleep 1 && ghostty
+exec --no-startup-id sleep 3 && $work_browser
+# exec --no-startup-id sleep 3 && discord
+exec --no-startup-id sleep 3 && $work_communication 
+exec --no-startup-id sleep 3 && $term
+# exec --no-startup-id slack
+#exec --no-startup-id sleep 3 && thunar
+
+exec_always mkfifo /tmp/xobpipe && tail -f /tmp/xobpipe | xob -t 2170 & disown
 
 # vim: filetype=config
