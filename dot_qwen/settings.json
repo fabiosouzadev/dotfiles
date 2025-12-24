@@ -1,0 +1,14 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "qwen-oauth"
+    }
+  },
+  "$version": 2,
+  "ui": {
+    "theme": "GitHub"
+  },
+  "general": {
+    "vimMode": true
+  }
+}
