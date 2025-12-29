@@ -19,26 +19,25 @@ packages:
         - zoxide
       core:
         - gzip
-        - tar
+        - libsecret
         - make
+        - tar
       extra:
         - age
         - aichat
         - aws-cli-v2
-        - btop
+        - bat
         - blueman
+        - btop
         - clang
-        - i3-wm
+        - dbeaver
         - dex
         - direnv
         - dunst
+        - eza
         - fastfetch
         - flameshot
         - firefox-developer-edition-i18n-pt-br
-        - bat
-        - direnv
-        - dbeaver
-        - eza
         - fastfetch
         - feh
         - fd
@@ -47,8 +46,10 @@ packages:
         - git
         - git-delta
         - github-cli
+        - gnome-keyring
         - hyprland
         - htop
+        - i3-wm
         - iwd
         - impala
         - just
