@@ -1,33 +1,54 @@
 {
   "LOG": true,
   "API_TIMEOUT_MS": 600000,
+  "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+  "GEMINI_API_KEY": "${GEMINI_API_KEY}",
   "Providers": [
     {
       "name": "openrouter",
       "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
-      "api_key": "${OPENROUTER_API_KEY}",
-      "models": ["qwen/qwen3-coder:free", "openai/gpt-oss-20b:free"]
+      "api_key": "$OPENROUTER_API_KEY",
+      "models": [
+        "google/gemma-3n-e2b-it:free",
+        "qwen/qwen3-coder:free",
+        "openai/gpt-oss-20b:free",
+        "mistralai/devstral-2512:free"
+      ],
       "transformer": {
-        "use": ["openrouter"]
+        "use": [
+          "openrouter"
+        ]
       }
     },
     {
       "name": "ollama",
       "api_base_url": "http://localhost:11434/v1/chat/completions",
       "api_key": "ollama",
-      "models": ["qwen2.5-coder:latest"]
+      "models": [
+        "qwen2.5-coder:1.5b"
+      ]
     },
     {
       "name": "gemini",
       "api_base_url": "https://generativelanguage.googleapis.com/v1beta/models/",
-      "api_key": "${GEMINI_API_KEY}",
-      "models": ["gemini-2.5-flash", "gemini-2.5-pro"],
+      "api_key": "$GEMINI_API_KEY",
+      "models": [
+        "gemini-2.5-flash",
+        "gemini-2.5-pro"
+      ],
       "transformer": {
-        "use": ["gemini"]
+        "use": [
+          "gemini"
+        ]
       }
     }
   ],
   "Router": {
-    "default": "gemini,openrouter"
+    "default": "gemini,gemini-2.5-flash",
+    "background": "ollama,qwen2.5-coder:1.5b",
+    "think": "openrouter,openai/gpt-oss-20b:free",
+    "longContext": "openrouter,openai/gpt-oss-20b:free",
+    "longContextThreshold": 60000,
+    "webSearch": "gemini,gemini-2.5-flash"
   }
 }
