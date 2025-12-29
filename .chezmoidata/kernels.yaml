@@ -7,25 +7,25 @@ linux:
     kernels:
       - linux-zen
       - linux-zen-headers
-      - cachyos-v4/linux-cachyos
-      - cachyos-v4/linux-cachyos-headers
-      - cachyos-v4/linux-cachyos-bmq
-      - cachyos-v4/linux-cachyos-bmq-headers
-      - cachyos-v4/linux-cachyos-bmq-lto
-      - cachyos-v4/linux-cachyos-bmq-lto-headers
-      - cachyos-v4/linux-cachyos-bore
-      - cachyos-v4/linux-cachyos-bore-headers
-      - cachyos-v4/linux-cachyos-bore-lto
-      - cachyos-v4/linux-cachyos-bore-lto-headers
-      - cachyos-v4/linux-cachyos-gcc
-      - cachyos-v4/linux-cachyos-gcc-headers
-      - cachyos-v4/linux-cachyos-lts
-      - cachyos-v4/linux-cachyos-lts-headers
-      - cachyos-v4/linux-cachyos-lts-lto
-      - cachyos-v4/linux-cachyos-lts-lto-headers
-      - cachyos-v4/linux-cachyos-rc
-      - cachyos-v4/linux-cachyos-rc-headers
-      - cachyos-v4/linux-cachyos-rc-gcc
-      - cachyos-v4/linux-cachyos-rc-gcc-headers
-      - cachyos-v4/linux-cachyos-rc-lto
-      - cachyos-v4/linux-cachyos-rc-lto-headers
+      - linux-cachyos
+      - linux-cachyos-headers
+      - linux-cachyos-bmq
+      - linux-cachyos-bmq-headers
+      - linux-cachyos-bmq-lto
+      - linux-cachyos-bmq-lto-headers
+      - linux-cachyos-bore
+      - linux-cachyos-bore-headers
+      - linux-cachyos-bore-lto
+      - linux-cachyos-bore-lto-headers
+      - linux-cachyos-gcc
+      - linux-cachyos-gcc-headers
+      - linux-cachyos-lts
+      - linux-cachyos-lts-headers
+      - linux-cachyos-lts-lto
+      - linux-cachyos-lts-lto-headers
+      - linux-cachyos-rc
+      - linux-cachyos-rc-headers
+      - linux-cachyos-rc-gcc
+      - linux-cachyos-rc-gcc-headers
+      - linux-cachyos-rc-lto
+      - linux-cachyos-rc-lto-headers
