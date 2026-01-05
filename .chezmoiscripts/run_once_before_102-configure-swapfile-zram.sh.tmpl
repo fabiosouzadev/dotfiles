@@ -33,7 +33,7 @@ fi
 info ">>> Gerando /etc/systemd/zram-generator.conf ..."
 sudo tee /etc/systemd/zram-generator.conf > /dev/null <<EOF
 [zram0]
-zram-size = ram * 0.75
+zram-size = ram
 compression-algorithm = zstd
 swap-priority = 200
 fs-type = swap
@@ -67,7 +67,7 @@ if ! grep -q "$SWAP_FILE" /etc/fstab; then
     echo "$SWAP_FILE none swap sw,pri=$SWAP_PRIORITY 0 0" | sudo tee -a /etc/fstab >/dev/null 2>&1 || true
 fi
 
-success ">>> ZRAM configurado: 12g com prioridade 200 + swapfile de fallback com $SWAP_SIZE"
+success ">>> ZRAM configurado: 16g com prioridade 200 + swapfile de fallback com $SWAP_SIZE"
 
 # --- 4. Sysctl agressivo ---
 info ">>> Aplicando parâmetros agressivos de memória..."
