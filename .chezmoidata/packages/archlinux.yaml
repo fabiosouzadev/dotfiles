@@ -2,7 +2,9 @@ packages:
   linux:
     arch:
       aur:
+        - antigravity
         - brave-nightly-bin
+        - cursor-bin
         - ferdium-nightly-bin
         - localsend-bin
         - mongodb-compass-bin 
