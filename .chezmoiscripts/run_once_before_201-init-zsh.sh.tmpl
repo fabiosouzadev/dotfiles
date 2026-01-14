@@ -14,7 +14,9 @@ sudo apt update
 info "Installing Zsh..."
 sudo apt install -y zsh
 info "Setting Zsh as the default shell..."
-chsh -s /usr/bin/zsh
+grep -q -f $(which zsh) /etc/shells || echo $(which zsh) | sudo tee -a /etc/shells
+chsh -s $(which zsh)
+#chsh -s /usr/bin/zsh
 success "Zsh installed."
 {{ end }}
 

@@ -12,7 +12,6 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 info ">>> Installing Claude Code"
 
 if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate
  ~/.local/bin/mise activate --shims
 fi
 
@@ -23,7 +22,7 @@ npm install -g @anthropic-ai/claude-code
 success ">>> Claude Code Installed Version: $(claude --version)"
 
 npm install -g @musistudio/claude-code-router # ccr code, ccr ui, ccr start , ccr model
-success ">>> Claude Code Router Installed Version: $(ccr -v)"
+success ">>>> Claude Code Router Installed Version: $(ccr -v)"
 
 
 # vim: filetype=bash

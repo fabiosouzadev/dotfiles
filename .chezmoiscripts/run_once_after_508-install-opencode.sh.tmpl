@@ -10,22 +10,7 @@ error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 #Install opencode
-info ">>> Installing opencode"
-
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-
-if command -v "paru" > /dev/null; then
-  info ">>> Installing opencode using paru"
-  paru -Sy --noconfirm --needed opencode-bin
-  success ">>> Installed Opencode"
-else
-  info ">>> Installing opencode using curl"
-  curl -fsSL https://opencode.ai/install | bash
-  success ">>> Installed Opencode"
-fi
-
-{{ else }}
-  info ">>> Installing opencode using curl"
-  curl -fsSL https://opencode.ai/install | bash
-{{ end }}
+info ">>> Installing opencode using curl"
+curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
+success ">>> Installed Opencode"
 

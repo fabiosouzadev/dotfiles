@@ -11,15 +11,10 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 #Install Gemini Cli
 info "Installing gemini-cli"
 
-success ">>>> NPM Path: $(npm -v)" 
-success ">>>> NPM Version: $(which npm)" 
 if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate
  ~/.local/bin/mise activate --shims
 fi
 
-success ">>>> NPM Path: $(npm -v)" 
-success ">>>> NPM Version: $(which npm)" 
 npm install -g @google/gemini-cli@preview
 
 success ">>> Gemini Cli Installed Version: $(gemini -v)"

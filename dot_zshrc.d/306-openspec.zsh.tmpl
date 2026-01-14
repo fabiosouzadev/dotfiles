@@ -1,0 +1,13 @@
+autoload -Uz compinit
+compinit
+
+
+OPENSPEC_COMPLETION="$HOME/.local/share/zsh/site-functions/_openspec"
+
+if [ -f $OPENSPEC_COMPLETION ]; then
+	zinit ice as"completion"
+	zinit snippet $OPENSPEC_COMPLETION
+fi
+
+# vim: noet ci pi sts=0 sw=4 ts=4
+# vim: filetype=bash

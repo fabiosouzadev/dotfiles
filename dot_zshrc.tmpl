@@ -1,4 +1,11 @@
-#This is this first file. My configs are in "~/.zshrc.d"
-for i in $HOME/.zshrc.d/*.zsh; do
-	source $i
-done
+#### This is this first file. My configs are in "~/.zshrc.d"
+
+# Set default Zsh configuration directories
+export ZDOTDIR=$HOME
+
+# Source .zshrc.d directory for modular configuration
+if [ -d "$ZDOTDIR/.zshrc.d" ]; then
+  for i in $ZDOTDIR/.zshrc.d/*.zsh; do
+    source $i
+  done
+fi
