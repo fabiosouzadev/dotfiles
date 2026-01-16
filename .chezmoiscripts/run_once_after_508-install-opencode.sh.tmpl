@@ -11,6 +11,11 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 #Install opencode
 info ">>> Installing opencode using curl"
-curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
-success ">>> Installed Opencode"
+
+if [ -f ~/.local/bin/mise ]; then
+ ~/.local/bin/mise activate --shims
+fi
+
+npm install -g opencode-ai
+success ">>> Installed Opencode: $(opencode --version) version"
 

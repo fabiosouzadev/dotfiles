@@ -1,19 +1,13 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "theme": "catppuccin",
+  "autoupdate": true,
+  "model": "google/gemini-3-pro-preview",
   "provider": {
-    "ollama": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama (local)",
+    "google": {
+      "models": {},
       "options": {
-        "baseURL": "http://localhost:11434/v1"
-      },
-      "models": {
-        "qwen3:latest": {
-          "name": "qwen3 (local)",
-	  "tools": true,
-          "reasoning": true,
-	  "options": { "num_ctx": 65536 }
-        }
+        "apiKey": "{env:INSTIVO_GEMINI_API_KEY_2}"
       }
     }
   }
