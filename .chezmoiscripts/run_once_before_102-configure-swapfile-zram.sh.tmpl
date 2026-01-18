@@ -2,7 +2,6 @@
 
 {{ if eq .chezmoi.os "linux" -}}
 
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 set -euo pipefail
 
 # Pretty print functions
@@ -185,7 +184,6 @@ info "$(sysctl vm.swappiness)"
 info "$(zramctl)"
 success " >>> ZRAM + ZSWAP configurados com sucesso."
 
-{{ end }}
 {{ end -}}
 
 # vim: filetype=bash

@@ -25,10 +25,4 @@ echo "group = \"$(whoami)\"" | sudo tee -a /etc/libvirt/qemu.conf > /dev/null
 
 success "Installed virtualization tools\n"
 
-
-{{ else }}
-
-error "This script is only for Arch based systems. Exiting..."
-exit 1
-
 {{ end -}}

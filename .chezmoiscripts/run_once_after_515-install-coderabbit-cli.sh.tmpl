@@ -22,11 +22,11 @@ sudo apt update && sudo apt install gnome-keyring libsecret-1-0 libsecret-tools
 
 {{ end -}}
 {{ end -}}
+
 #Install CodeRabbit CLI
 info ">>>>> Installing CodeRabbit CLI"
 
 if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate
  ~/.local/bin/mise activate --shims
 fi
 
