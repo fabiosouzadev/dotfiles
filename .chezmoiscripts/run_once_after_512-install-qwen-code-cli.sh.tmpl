@@ -11,15 +11,6 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 #Install Qwen Code Cli
 info "Installing Qwen Code"
 
-success ">>>> NPM Path: $(npm -v)" 
-success ">>>> NPM Version: $(which npm)" 
-if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate
- ~/.local/bin/mise activate --shims
-fi
-
-success ">>>> NPM Path: $(npm -v)" 
-success ">>>> NPM Version: $(which npm)" 
 npm install -g @qwen-code/qwen-code
 
 success ">>> Qwen Code Installed Version: $(qwen -v)"

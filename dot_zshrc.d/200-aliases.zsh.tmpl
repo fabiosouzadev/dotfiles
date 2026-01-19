@@ -4,7 +4,13 @@ alias -- vi=nvim
 alias -- vim=nvim
 
 #bat
+{{ if eq .chezmoi.osRelease.id "ubuntu" -}}
+
+alias -- bat=batcat
+alias -- cat=batcat
+{{ else }}
 alias -- cat=bat
+{{ end }}
 
 #eza
 alias -- eza='eza --icons auto --git'

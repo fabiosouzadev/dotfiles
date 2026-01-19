@@ -8,27 +8,41 @@ set -euo pipefail
 info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
 warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
-success() { echo -e "\033[1;32m✅ $*\033[0m"; }
+success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
 
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+info "Installing Mise"
 
-info ">>> Installing Mise"
+if [ ! -x "$HOME/.local/bin/mise" ]; then
+  curl -fsSL https://mise.run | sh
+else
+  warn "Mise already installed"
+fi
 
-curl https://mise.run | sh
+# PATH correto para ambiente não-interativo
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
-{{ end }}
+# Zsh completions
+mkdir -p "$HOME/.local/share/zsh/site-functions"
+"$HOME/.local/bin/mise" completion zsh \
+  > "$HOME/.local/share/zsh/site-functions/_mise"
 
-# export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
-~/.local/bin/mise activate --shims
-~/.local/bin/mise completion zsh  > ~/.local/share/zsh/site-functions/_mise
+info "Installing tool versions via mise"
 mise install -y
-mise doctor
-{{ end -}} #Linux
 
-success ">>>> Node Path: $(which node)"
-success ">>>> Node Version: $(node -v)"
-success ">>>> NPM Path: $(which npm)" 
-success ">>>> NPM Version: $(npm -v)" 
-success ">>>> Installed Mise Version:$(~/.local/bin/mise --version)"
+info "Running mise doctor"
+mise doctor
+
+success "Mise installation completed"
+
+{{ end -}} # Linux
+
+# Diagnostics (executam só se tudo deu certo)
+success "Node path: $(command -v node)"
+success "Node version: $(node -v)"
+success "NPM path: $(command -v npm)"
+success "NPM version: $(npm -v)"
+success "Mise version: $(mise --version)"
+
 # vim: filetype=bash
+
 

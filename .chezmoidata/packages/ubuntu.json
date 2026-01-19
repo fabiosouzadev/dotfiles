@@ -2,11 +2,18 @@
   "packages": {
     "linux": {
       "ubuntu": {
-        "core": [
+        "apt": [
+          "bat",
+          "clang",
           "i3",
           "gzip"
         ],
-        "deb": [],
+        "ppas": [
+          {
+            "name": "ubuntu-mozilla-daily/ppa",
+            "packages": ["firefox-trunk"]
+          }
+        ],
         "sources": [
           {
             "name": "antigravity",
@@ -44,10 +51,10 @@
             "packages": ["code-insiders"]
           }
         ],
-        "ppas": [
+        "debs": [
           {
-            "name": "ubuntu-mozilla-daily/ppa",
-            "packages": ["firefox-trunk"]
+            "name": "vencord",
+            "url": "https://release-assets.githubusercontent.com/github-production-release-asset/621059019/054f0e99-6a7a-4eb8-8f88-f0d73ef5c382?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-01-19T03%3A57%3A58Z&rscd=attachment%3B+filename%3Dvesktop_1.6.3_amd64.deb&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-01-19T02%3A57%3A03Z&ske=2026-01-19T03%3A57%3A58Z&sks=b&skv=2018-11-09&sig=wRDbqX7uj%2Fq3nsJSjtyxwM%2BEwsOWcnEqihi2NjKi080%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc2ODc5NDA2NiwibmJmIjoxNzY4NzkyMjY2LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.WKos8qJYDmsqlTTftvh44JxdE9aEdq4TC4vXqVJfN-Q&response-content-disposition=attachment%3B%20filename%3Dvesktop_1.6.3_amd64.deb&response-content-type=application%2Foctet-stream"
           }
         ]
       }

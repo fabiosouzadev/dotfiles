@@ -11,13 +11,6 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 #Install Kilo Code Cli
 info "Installing Kilo Code Cli"
 
-if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate
- ~/.local/bin/mise activate --shims
-fi
-
-info ">>>> NPM Path: $(npm -v)"
-info ">>>> NPM Version: $(which npm)" 
 npm install -g @kilocode/cli
 
 success ">>> Kilo Code Cli Installed Version: $(kilocode -V)"

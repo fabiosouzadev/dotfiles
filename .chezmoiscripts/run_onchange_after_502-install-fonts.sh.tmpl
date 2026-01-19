@@ -1,40 +1,76 @@
 #!/usr/bin/env bash
-# vim: filetype=bash
 
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{ if eq .chezmoi.os "linux" }}
 
-echo "Installing fonts"
+set -euo pipefail
 
-TEMP_DIR_FONTS=$HOME/.temp-fonts
-LOCAL_SHARE_FONTS=$HOME/.local/share/fonts
+# Pretty print functions
+info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
+error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
 
-[ -d $LOCAL_SHARE_FONTS ] || mkdir $LOCAL_SHARE_FONTS
-[ -d $TEMP_DIR_FONTS ] || mkdir $TEMP_DIR_FONTS
+info "Installing fonts"
 
+TEMP_DIR_FONTS="$HOME/.temp-fonts"
+LOCAL_SHARE_FONTS="$HOME/.local/share/fonts"
 
-cd $TEMP_DIR_FONTS
-{{ range .fonts.linux.nerdfonts -}}
+mkdir -p "$TEMP_DIR_FONTS"
+mkdir -p "$LOCAL_SHARE_FONTS"
 
-echo "Installing font: {{.}}"
-curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{.}}.tar.xz
-tar -xf {{.}}.tar.xz
+cd "$TEMP_DIR_FONTS"
 
-{{ end -}}
+{{ range .fonts.linux.nerdfonts }}
+info "Installing Nerd Font: {{ . }}"
 
-cp -v $HOME/.config/polybar/fonts/* $LOCAL_SHARE_FONTS
-cp -v $HOME/.config/polybar/fonts/panels/* $LOCAL_SHARE_FONTS
-cp -v $HOME/.config/polybar/fonts/terminus/* $LOCAL_SHARE_FONTS
-cp -v $HOME/.config/rofi/fonts/*.ttf $LOCAL_SHARE_FONTS
-cp -v *.ttf  $LOCAL_SHARE_FONTS
+ARCHIVE="{{ . }}.tar.xz"
+
+if [ ! -f "$ARCHIVE" ]; then
+  curl -fL -o "$ARCHIVE" \
+    "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{ . }}.tar.xz"
+else
+  warn "Archive already exists: $ARCHIVE"
+fi
+
+tar -xf "$ARCHIVE"
+{{ end }}
+
+info "Copying local fonts"
+
+# Polybar fonts
+if [ -d "$HOME/.config/polybar/fonts" ]; then
+  cp -vr "$HOME/.config/polybar/fonts/." "$LOCAL_SHARE_FONTS/"
+fi
+
+if [ -d "$HOME/.config/polybar/fonts/panels" ]; then
+  cp -vr "$HOME/.config/polybar/fonts/panels/." "$LOCAL_SHARE_FONTS/"
+fi
+
+if [ -d "$HOME/.config/polybar/fonts/terminus" ]; then
+  cp -vr "$HOME/.config/polybar/fonts/terminus/." "$LOCAL_SHARE_FONTS/"
+fi
+
+# Rofi fonts
+if [ -d "$HOME/.config/rofi/fonts" ]; then
+  find "$HOME/.config/rofi/fonts" -type f -name "*.ttf" -exec cp -v {} "$LOCAL_SHARE_FONTS/" \;
+fi
+
+info "Rebuilding font cache"
 fc-cache -fv
-sudo rm -r $TEMP_DIR_FONTS
 
-# Bat theme
-bat cache --build
+info "Cleaning up temporary files"
+rm -rf "$TEMP_DIR_FONTS"
 
+# Bat theme cache
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+info "Rebuilding bat cache (Ubuntu)"
+batcat cache --build
 {{ else }}
+info "Rebuilding bat cache"
+bat cache --build
+{{ end }}
 
-echo "This script is only for Arch based systems. Exiting..."
-exit 1
+success "Font installation completed successfully"
 
 {{ end }}
+# vim: filetype=bash

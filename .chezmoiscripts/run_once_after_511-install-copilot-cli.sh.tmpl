@@ -10,16 +10,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 #Install Copilot Cli
 info "Installing copilot-cli"
-
-success ">>>> NPM Path: $(npm -v)" 
-success ">>>> NPM Version: $(which npm)" 
-if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate
- ~/.local/bin/mise activate --shims
-fi
-
-success ">>>> NPM Path: $(npm -v)" 
-success ">>>> NPM Version: $(which npm)" 
+ 
 npm install -g @github/copilot@prerelease
 
 success ">>> Copilot Cli Installed Version: $(copilot -v)"

@@ -11,10 +11,6 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 #Install Gemini Cli
 info "Installing gemini-cli"
 
-if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate --shims
-fi
-
 npm install -g @google/gemini-cli@preview
 
 success ">>> Gemini Cli Installed Version: $(gemini -v)"

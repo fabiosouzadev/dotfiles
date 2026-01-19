@@ -11,12 +11,6 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 #Install AMP CLI
 info ">>> Installing AMP CLI"
 
-if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate --shims
-fi
-
-success ">>>> NPM Path: $(npm -v)" 
-success ">>>> NPM Version: $(which npm)" 
 npm install -g @sourcegraph/amp@latest
 
 success ">>> AMP Cli Installed Version: $(amp --version)"

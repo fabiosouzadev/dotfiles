@@ -26,13 +26,6 @@ sudo apt update && sudo apt install gnome-keyring libsecret-1-0 libsecret-tools
 #Install CodeRabbit CLI
 info ">>>>> Installing CodeRabbit CLI"
 
-if [ -f ~/.local/bin/mise ]; then
- ~/.local/bin/mise activate --shims
-fi
-
-success ">>>> NPM Path: $(npm -v)" 
-success ">>>> NPM Version: $(which npm)" 
-
 curl -fsSL https://cli.coderabbit.ai/install.sh | sh
 
 success ">>> CodeRabbit Cli Installed Version: $(coderabbit --version)"
