@@ -5,8 +5,23 @@
         "apt": [
           "bat",
           "clang",
+          "direnv",
+          "dunst",
+          "eza",
+          "feh",
+          "flameshot",
+          "gzip",
+          "htop",
           "i3",
-          "gzip"
+          "kitty",
+          "pavucontrol",
+          "picom",
+          "polybar",
+          "rofi",
+          "tmux",
+          "xclip",
+          "xsel",
+          "zoxide"
         ],
         "ppas": [
           {
@@ -30,6 +45,13 @@
             "packages": ["dbeaver-ce"]
           },
           {
+            "name": "firefox",
+            "keyring_path": "/etc/apt/keyrings/mozilla-linux.gpg",
+            "key_url": "https://packages.mozilla.org/apt/repo-signing-key.gpg",
+            "repo": "deb [signed-by=/etc/apt/keyrings/mozilla-linux.gpg] https://packages.mozilla.org/apt mozilla main",
+            "packages": ["firefox-devedition", "firefox-beta"]
+          },
+                    {
             "name": "google-chrome",
             "key_url": "https://dl-ssl.google.com/linux/linux_signing_key.pub",
             "keyring_path": "/etc/apt/keyrings/google-linux.gpg",
@@ -37,24 +59,34 @@
             "packages": ["google-chrome-unstable"]
           },
           {
-            "name": "firefox",
-            "keyring_path": "/etc/apt/keyrings/mozilla-linux.gpg",
-            "key_url": "https://packages.mozilla.org/apt/repo-signing-key.gpg",
-            "repo": "deb [signed-by=/etc/apt/keyrings/mozilla-linux.gpg] https://packages.mozilla.org/apt mozilla main",
-            "packages": ["firefox-devedition", "firefox-beta"]
-          },
-          {
             "name": "vscode",
             "keyring_path": "/etc/apt/keyrings/microsoft.gpg",
             "key_url": "https://packages.microsoft.com/keys/microsoft.asc",
             "repo": "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main",
             "packages": ["code-insiders"]
+          },
+          {
+            "name": "spotify",
+            "keyring_path": "/etc/apt/keyrings/spotify.gpg",
+            "key_url": "https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc",
+            "repo": "deb [signed-by=/etc/apt/keyrings/spotify.gpg] https://repository.spotify.com stable non-free",
+            "packages": ["spotify-client"]
           }
         ],
         "debs": [
           {
-            "name": "vencord",
-            "url": "https://release-assets.githubusercontent.com/github-production-release-asset/621059019/054f0e99-6a7a-4eb8-8f88-f0d73ef5c382?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-01-19T03%3A57%3A58Z&rscd=attachment%3B+filename%3Dvesktop_1.6.3_amd64.deb&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-01-19T02%3A57%3A03Z&ske=2026-01-19T03%3A57%3A58Z&sks=b&skv=2018-11-09&sig=wRDbqX7uj%2Fq3nsJSjtyxwM%2BEwsOWcnEqihi2NjKi080%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc2ODc5NDA2NiwibmJmIjoxNzY4NzkyMjY2LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.WKos8qJYDmsqlTTftvh44JxdE9aEdq4TC4vXqVJfN-Q&response-content-disposition=attachment%3B%20filename%3Dvesktop_1.6.3_amd64.deb&response-content-type=application%2Foctet-stream"
+            "name": "fd",
+            "url": "https://github.com/sharkdp/fd/releases/download/v10.3.0/fd_10.3.0_amd64.deb"
+
+          },
+          {
+            "name": "obsidian",
+            "url": "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.11.4/obsidian_1.11.4_amd64.deb"
+
+          },
+          {
+            "name": "vesktop",
+            "url": "https://vencord.dev/download/vesktop/amd64/deb"
           }
         ]
       }

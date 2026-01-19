@@ -20,7 +20,7 @@ success "Updated Ubuntu packages"
 
 info "Installing Ubuntu APT packages"
 
-sudo apt install -y {{ range .packages.linux.ubuntu.core }} {{.}}{{end}}
+sudo apt install -y {{ range .packages.linux.ubuntu.apt }} {{.}}{{end}}
 
 success "Installed Ubuntu APT packages"
 

@@ -9,7 +9,6 @@ packages:
         - localsend-bin
         - mongodb-compass-bin 
         - neovim-nightly-bin
-        - opencode-bin
         - postman-bin
         - rofi-greenclip
         - spotify
@@ -40,7 +39,6 @@ packages:
         - fastfetch
         - flameshot
         - firefox-developer-edition-i18n-pt-br
-        - fastfetch
         - feh
         - fd
         - fzf

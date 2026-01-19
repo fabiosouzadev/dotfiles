@@ -10,18 +10,21 @@ error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 
-info "Installing Ollama models"
+info "Installing fzf"
 
-if type ollama >/dev/null 2>&1; then
-  info "Installing Ollama models"
-  {{ range .ollama.models }} 
-    info "📥 Ollama pulling {{ . }} ..."
-	  ollama pull {{.}}
-  {{ end }}
+FZF_DIR="$HOME/.fzf"
 
+
+if [ -d "$FZF_DIR" ]; then
+    sudo rm -r $FZF_DIR
 fi
 
-success "Installed Ollama models"
+git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_DIR"
+~/.fzf/install --completion --key-bindings --no-update-rc
+
+source <(fzf --$shell)
+
+success ">>>Installed fzf version: $(fzf --version)"
 
 {{ end -}}
 # vim: filetype=bash
