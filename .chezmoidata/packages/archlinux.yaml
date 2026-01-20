@@ -41,7 +41,6 @@ packages:
         - firefox-developer-edition-i18n-pt-br
         - feh
         - fd
-        - fzf
         - ghostty
         - git
         - git-delta
