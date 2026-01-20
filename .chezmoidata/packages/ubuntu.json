@@ -10,10 +10,12 @@
           "eza",
           "feh",
           "flameshot",
+          "gnome-keyring",
           "gzip",
           "htop",
           "i3",
           "kitty",
+          "mpv",
           "pavucontrol",
           "picom",
           "polybar",
@@ -87,6 +89,10 @@
           {
             "name": "vesktop",
             "url": "https://vencord.dev/download/vesktop/amd64/deb"
+          },
+          {
+            "name": "yazi",
+            "url": "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-x86_64-unknown-linux-gnu.deb"
           }
         ]
       }

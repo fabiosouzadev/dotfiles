@@ -21,7 +21,7 @@ mkdir -p "$LOCAL_SHARE_FONTS"
 cd "$TEMP_DIR_FONTS"
 
 {{ range .fonts.linux.nerdfonts }}
-info "Installing Nerd Font: {{ . }}"
+info ">>> Installing Nerd Font: {{ . }}"
 
 ARCHIVE="{{ . }}.tar.xz"
 
@@ -34,6 +34,9 @@ fi
 
 tar -xf "$ARCHIVE"
 {{ end }}
+
+info "Installing downloaded Nerd Fonts into local font directory"
+find "$TEMP_DIR_FONTS" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp -v {} "$LOCAL_SHARE_FONTS/" \;
 
 info "Copying local fonts"
 
@@ -56,7 +59,7 @@ if [ -d "$HOME/.config/rofi/fonts" ]; then
 fi
 
 info "Rebuilding font cache"
-fc-cache -fv
+fc-cache -fv "$LOCAL_SHARE_FONTS"
 
 info "Cleaning up temporary files"
 rm -rf "$TEMP_DIR_FONTS"
