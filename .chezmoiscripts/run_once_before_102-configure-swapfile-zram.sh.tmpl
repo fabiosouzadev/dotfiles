@@ -17,16 +17,16 @@ info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)....."
 info ">>> Desativando SWAPs existentes......"
 sudo swapoff -a || true
 
-info ">>> Removendo ZRAMs antigos....."
-for dev in /dev/zram*; do
-    [[ -b "$dev" ]] && sudo zramctl --reset "$dev" || true
-done
-
 # --- 1. Dependências ---
 if ! command -v zramctl >/dev/null 2>&1; then
     info ">>> Instalando zram-generator..."
     sudo pacman -Sy --needed --noconfirm zram-generator
 fi
+
+info ">>> Removendo ZRAMs antigos....."
+for dev in /dev/zram*; do
+    [[ -b "$dev" ]] && sudo zramctl --reset "$dev" || true
+done
 
 # --- 2. ZRAM ---
 info ">>> Gerando /etc/systemd/zram-generator.conf ..."
@@ -134,7 +134,7 @@ sudo udevadm trigger
 info ">>> Regras UDEV recarregadas e aplicadas."
 
 # --- 5. Ativar tudo ---
-info ">>> Ativando ZRAM e SWAP..."
+info " Ativando ZRAM e SWAP..."
 sudo systemctl restart systemd-zram-setup@zram0.service || true
 sudo swapon --show || sudo swapon "$SWAP_FILE"
 
