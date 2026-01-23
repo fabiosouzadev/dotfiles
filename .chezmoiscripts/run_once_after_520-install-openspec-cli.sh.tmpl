@@ -11,6 +11,9 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 #Install OpenSpec CLI -> Spec Framework
 info ">>> Installing OpenSpec CLI"
 
+# PATH correto para ambiente não-interativo
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+
 OPENSPEC_NO_COMPLETIONS=1 npm install -g @fission-ai/openspec@latest
 openspec completion generate zsh > ~/.local/share/zsh/site-functions/_openspec
 

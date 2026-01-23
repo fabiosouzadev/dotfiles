@@ -8,28 +8,37 @@ set -euo pipefail
 info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
 warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
-success() { echo -e "\033[1;32m✅ $*\033[0m"; }
+success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
 
+info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)"
 
-info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)....."
-
-# --- 0 - LIMPA CONFIGURAÇÕES EXISTENTES ---
-info ">>> Desativando SWAPs existentes......"
+# --- 0. Desativar swaps existentes ---
+info ">>> Desativando SWAPs existentes..."
 sudo swapoff -a || true
 
-# --- 1. Dependências ---
-if ! command -v zramctl >/dev/null 2>&1; then
-    info ">>> Instalando zram-generator..."
-    sudo pacman -Sy --needed --noconfirm zram-generator
-fi
+# --- 1. Instalar dependências ---
 
-info ">>> Removendo ZRAMs antigos....."
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+info ">>> Instalando zram-generator (Arch)..."
+sudo pacman -Sy --needed --noconfirm zram-generator
+{{ end }}
+
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+info ">>> Instalando zram-tools (Ubuntu)..."
+sudo apt update -y
+sudo apt install -y zram-tools util-linux
+{{ end }}
+
+# --- 2. Limpar ZRAM antigo ---
+info ">>> Removendo dispositivos ZRAM antigos..."
 for dev in /dev/zram*; do
-    [[ -b "$dev" ]] && sudo zramctl --reset "$dev" || true
+  [[ -b "$dev" ]] && sudo zramctl --reset "$dev" || true
 done
 
-# --- 2. ZRAM ---
-info ">>> Gerando /etc/systemd/zram-generator.conf ..."
+# --- 3. Configurar ZRAM ---
+
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+info ">>> Gerando /etc/systemd/zram-generator.conf (Arch)..."
 sudo tee /etc/systemd/zram-generator.conf > /dev/null <<EOF
 [zram0]
 zram-size = ram
@@ -37,48 +46,51 @@ compression-algorithm = zstd
 swap-priority = 200
 fs-type = swap
 EOF
+{{ end }}
 
-# --- 3. SWAP físico ---
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+info ">>> Configurando /etc/default/zramswap (Ubuntu)..."
+sudo tee /etc/default/zramswap > /dev/null <<EOF
+PERCENT=100
+PRIORITY=200
+COMPRESSOR=zstd
+EOF
+{{ end }}
+
+# --- 4. Criar SWAP físico de fallback ---
 SWAP_FILE="/swapfile"
 SWAP_SIZE="4G"
 SWAP_PRIORITY=-10
 
-# Adicionado para forçar a criação:
 if [ -f "$SWAP_FILE" ]; then
-  info ">>> Removendo swapfile existente para forçar recriação..."
+  info ">>> Removendo swapfile existente..."
+  sudo swapoff "$SWAP_FILE" || true
   sudo rm -f "$SWAP_FILE"
 fi
 
-if [ ! -f "$SWAP_FILE" ]; then
-  info ">>> Criando arquivo de swap de ${SWAP_SIZE} em SSD..."
-  if type -P btrfs >/dev/null 2>&1; then 
-    sudo btrfs filesystem mkswapfile --size $SWAP_SIZE $SWAP_FILE 2>/dev/null
-  else
-    sudo fallocate -l $SWAP_SIZE $SWAP_FILE 2>/dev/null
-  fi
-  sudo chmod 600 $SWAP_FILE
-  sudo mkswap $SWAP_FILE
-  sudo swapon $SWAP_FILE -p $SWAP_PRIORITY
+info ">>> Criando swapfile de ${SWAP_SIZE}..."
+
+if type -P btrfs >/dev/null 2>&1; then
+  sudo btrfs filesystem mkswapfile --size "$SWAP_SIZE" "$SWAP_FILE"
+else
+  sudo fallocate -l "$SWAP_SIZE" "$SWAP_FILE"
 fi
+
+sudo chmod 600 "$SWAP_FILE"
+sudo mkswap "$SWAP_FILE"
+sudo swapon "$SWAP_FILE" -p "$SWAP_PRIORITY"
 
 if ! grep -q "$SWAP_FILE" /etc/fstab; then
-    info ">>> Adicionando swapfile ao /etc/fstab..."
-    echo "$SWAP_FILE none swap sw,pri=$SWAP_PRIORITY 0 0" | sudo tee -a /etc/fstab >/dev/null 2>&1 || true
+  echo "$SWAP_FILE none swap sw,pri=$SWAP_PRIORITY 0 0" | sudo tee -a /etc/fstab >/dev/null
 fi
 
-success ">>> ZRAM configurado: 16g com prioridade 200 + swapfile de fallback com $SWAP_SIZE"
-
-# --- 4. Sysctl agressivo ---
+# --- 5. Sysctl agressivo ---
 info ">>> Aplicando parâmetros agressivos de memória..."
-sudo tee /etc/modprobe.d/zram.conf > /dev/null <<EOF
-options zram comp_algorithm=zstd
-EOF
-
 
 SWAPPINESS="80"
 CACHE_PRESSURE="50"
+
 sudo tee /etc/sysctl.d/99-zram-extreme.conf > /dev/null <<EOF
-# Otimizações para LLMs baseadas no hardware
 vm.swappiness=$SWAPPINESS
 vm.vfs_cache_pressure=$CACHE_PRESSURE
 vm.dirty_ratio=15
@@ -87,102 +99,75 @@ vm.overcommit_memory=1
 vm.overcommit_ratio=100
 vm.max_map_count=2147483647
 
-# Afinidade de CPU para processos de IA
 kernel.sched_migration_cost_ns=5000000
 kernel.sched_autogroup_enabled=0
 
-# Melhora performance de I/O para SSD NVMe
 vm.dirty_writeback_centisecs=500
 vm.dirty_expire_centisecs=500
 EOF
-#
+
 sudo sysctl --system >/dev/null
-sudo udevadm control --reload-rules && sudo udevadm trigger
-sudo modprobe -r zram
 
-# --- 5 - CONFIGURA UDEV ---
-UDEV_RULES_FILE="/usr/lib/udev/rules.d/30-zram.rules"
+# --- 6. Ativar serviços ---
 
-info ">>> Atualizando regras do udev para ZRAM/ZSWAP..."
-NEW_RULE='ACTION=="change", KERNEL=="zram0", ATTR{initstate}=="1", SYSCTL{vm.swappiness}="80", \
-    RUN+="/bin/sh -c '\''echo N > /sys/module/zswap/parameters/enabled'\''"'
-
-if [ -f "$UDEV_RULES_FILE" ]; then
-    BACKUP_FILE="${UDEV_RULES_FILE}.bak_$(date +%Y%m%d%H%M%S)"
-    # BACKUP_FILE="${UDEV_RULES_FILE}.bak"
-    sudo cp "$UDEV_RULES_FILE" "$BACKUP_FILE"
-    info ">>> Backup criado: $BACKUP_FILE"
-fi
-
-echo "$NEW_RULE" | sudo tee "$UDEV_RULES_FILE" > /dev/null
-
-if sudo grep -q "SYSCTL{vm.swappiness}=\"$SWAPPINESS\"" "$UDEV_RULES_FILE"; then
-    info ">>> Regra UDEV aplicada com sucesso."
-else
-    error "Falha ao aplicar regra UDEV. Restaurando backup..."
-    if [ -f "$BACKUP_FILE" ]; then
-        sudo mv "$BACKUP_FILE" "$UDEV_RULES_FILE"
-        info "Backup restaurado."
-    else
-        error "Nenhum backup encontrado! Verifique manualmente."
-    fi
-    exit 1
-fi
-
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-info ">>> Regras UDEV recarregadas e aplicadas."
-
-# --- 5. Ativar tudo ---
-info " Ativando ZRAM e SWAP..."
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+info ">>> Reiniciando systemd-zram-setup..."
+sudo systemctl daemon-reexec
 sudo systemctl restart systemd-zram-setup@zram0.service || true
+{{ end }}
+
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+info ">>> Reiniciando zramswap..."
+sudo systemctl restart zramswap.service || true
+{{ end }}
+
 sudo swapon --show || sudo swapon "$SWAP_FILE"
 
-# --- 9. Configuração automática do GRUB (ZRAM duplo + otimizações de desempenho) ---
-info ">>> Ajustando GRUB para parâmetros de ZRAM e otimização de kernel..."
+# --- 7. Ajustar GRUB (zswap) ---
+info ">>> Ajustando parâmetros de ZSWAP no GRUB..."
 
 GRUB_FILE="/etc/default/grub"
-KERNEL_FLAGS="zswap.enabled=1 zram.enabled=1 zswap.compressor=zstd zswap.max_pool_percent=50 zswap.zpool=zsmalloc"
-# KERNEL_FLAGS="zram.enabled=1 transparent_hugepage=always hugepagesz=1G default_hugepagesz=1G mitigations=off nohibernate page_alloc.shuffle=1 vmalloc=512M pti=off intel_pstate=active intel_idle.max_cstate=9 processor.max_cstate=9"
+KERNEL_FLAGS="zswap.enabled=1 zswap.compressor=zstd zswap.max_pool_percent=50 zswap.zpool=zsmalloc"
 
-
-
-# Se já contiver os flags, não faz nada
 if ! grep -q "zswap.enabled=1" "$GRUB_FILE"; then
 
-  if [ -f "$GRUB_FILE" ]; then
-    BACKUP_FILE="${GRUB_FILE}.bak_$(date +%Y%m%d%H%M%S)"
-    # BACKUP_FILE="${UDEV_RULES_FILE}.bak"
-    sudo cp "$GRUB_FILE" "$BACKUP_FILE"
-    info ">>> Backup criado: $BACKUP_FILE"
- 
-
-  info "🧬 Atualizando parâmetros do kernel no GRUB...."
+  BACKUP_FILE="${GRUB_FILE}.bak_$(date +%Y%m%d%H%M%S)"
+  sudo cp "$GRUB_FILE" "$BACKUP_FILE"
+  info ">>> Backup do GRUB criado: $BACKUP_FILE"
 
   sudo sed -i -E "s|^(GRUB_CMDLINE_LINUX_DEFAULT=['\"])([^'\"]*)(['\"])|\1\2 ${KERNEL_FLAGS}\3|" "$GRUB_FILE"
 
-  # Se 'zswap.enabled=0' existir (agora ou antes), remove-o
-  sudo sed -i -E \
-    -e '/^GRUB_CMDLINE_LINUX_DEFAULT=/ {
-      s/(\s|^)zswap\.enabled=0(\s|$)//g; # Remove 'zswap.enabled=0' com espaços adjacentes ou início/fim da string.
-      s/\s+/ /g;                       # Substitui múltiplos espaços por um único espaço.
-      s/GRUB_CMDLINE_LINUX_DEFAULT=" "/GRUB_CMDLINE_LINUX_DEFAULT=""/g; # Lida com o caso em que 'zswap.enabled=0' era a única opção, deixando um espaço.
-    }' "$GRUB_FILE"
-  
+  # Remover possíveis conflitos
+  sudo sed -i -E 's/(^| )zswap\.enabled=0( |$)//g' "$GRUB_FILE"
+
+  {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
   sudo grub-mkconfig -o /boot/grub/grub.cfg
-fi
+  {{ end }}
+
+  {{ if eq .chezmoi.osRelease.id "ubuntu" }}
+  sudo update-grub
+  {{ end }}
+
 else
-  info "⚙️  Parâmetros ZSWAP já presentes no GRUB. Nenhuma modificação necessária."
+  info ">>> Parâmetros ZSWAP já presentes no GRUB."
 fi
 
-info "$(swapon --show)"
+# --- 8. Status final ---
+success ">>> Configuração EXTREMA aplicada com sucesso"
 
-# --- 6. Status ---
-success ">>> Configuração EXTREMA (ZRAM) aplicada com sucesso!"
-info "$(free -h)"
-info "$(sysctl vm.swappiness)"
-info "$(zramctl)"
-success " >>> ZRAM + ZSWAP configurados com sucesso."
+info ">>> SWAP ativo:"
+swapon --show
+
+info ">>> Memória:"
+free -h
+
+info ">>> Swappiness:"
+sysctl vm.swappiness
+
+info ">>> ZRAM:"
+zramctl || true
+
+success ">>> ZRAM + ZSWAP configurados com sucesso. Reinicie o sistema para efeito completo."
 
 {{ end -}}
 

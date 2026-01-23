@@ -10,164 +10,120 @@ warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
 success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
 
-info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)"
+ZSH_BIN="$(command -v zsh || true)"
 
-# --- 0. Desativar swaps existentes ---
-info ">>> Desativando SWAPs existentes..."
-sudo swapoff -a || true
-
-# --- 1. Instalar dependências ---
-
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-info ">>> Instalando zram-generator (Arch)..."
-sudo pacman -Sy --needed --noconfirm zram-generator
-{{ end }}
-
+# ----------------------------
+# Ubuntu
+# ----------------------------
 {{ if eq .chezmoi.osRelease.id "ubuntu" }}
-info ">>> Instalando zram-tools (Ubuntu)..."
+
+info ">>> Atualizando pacotes (apt)"
 sudo apt update -y
-sudo apt install -y zram-tools util-linux
-{{ end }}
 
-# --- 2. Limpar ZRAM antigo ---
-info ">>> Removendo dispositivos ZRAM antigos..."
-for dev in /dev/zram*; do
-  [[ -b "$dev" ]] && sudo zramctl --reset "$dev" || true
-done
-
-# --- 3. Configurar ZRAM ---
-
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-info ">>> Gerando /etc/systemd/zram-generator.conf (Arch)..."
-sudo tee /etc/systemd/zram-generator.conf > /dev/null <<EOF
-[zram0]
-zram-size = ram
-compression-algorithm = zstd
-swap-priority = 200
-fs-type = swap
-EOF
-{{ end }}
-
-{{ if eq .chezmoi.osRelease.id "ubuntu" }}
-info ">>> Configurando /etc/default/zramswap (Ubuntu)..."
-sudo tee /etc/default/zramswap > /dev/null <<EOF
-PERCENT=100
-PRIORITY=200
-COMPRESSOR=zstd
-EOF
-{{ end }}
-
-# --- 4. Criar SWAP físico de fallback ---
-SWAP_FILE="/swapfile"
-SWAP_SIZE="4G"
-SWAP_PRIORITY=-10
-
-if [ -f "$SWAP_FILE" ]; then
-  info ">>> Removendo swapfile existente..."
-  sudo swapoff "$SWAP_FILE" || true
-  sudo rm -f "$SWAP_FILE"
-fi
-
-info ">>> Criando swapfile de ${SWAP_SIZE}..."
-
-if type -P btrfs >/dev/null 2>&1; then
-  sudo btrfs filesystem mkswapfile --size "$SWAP_SIZE" "$SWAP_FILE"
+if ! command -v zsh >/dev/null 2>&1; then
+  info ">>> Instalando Zsh (Ubuntu)"
+  sudo apt install -y zsh
 else
-  sudo fallocate -l "$SWAP_SIZE" "$SWAP_FILE"
+  info ">>> Zsh já instalado"
 fi
 
-sudo chmod 600 "$SWAP_FILE"
-sudo mkswap "$SWAP_FILE"
-sudo swapon "$SWAP_FILE" -p "$SWAP_PRIORITY"
+ZSH_BIN="$(command -v zsh)"
 
-if ! grep -q "$SWAP_FILE" /etc/fstab; then
-  echo "$SWAP_FILE none swap sw,pri=$SWAP_PRIORITY 0 0" | sudo tee -a /etc/fstab >/dev/null
-fi
+info ">>> Registrando Zsh em /etc/shells"
+grep -q "^$ZSH_BIN$" /etc/shells || echo "$ZSH_BIN" | sudo tee -a /etc/shells >/dev/null
 
-# --- 5. Sysctl agressivo ---
-info ">>> Aplicando parâmetros agressivos de memória..."
-
-SWAPPINESS="80"
-CACHE_PRESSURE="50"
-
-sudo tee /etc/sysctl.d/99-zram-extreme.conf > /dev/null <<EOF
-vm.swappiness=$SWAPPINESS
-vm.vfs_cache_pressure=$CACHE_PRESSURE
-vm.dirty_ratio=15
-vm.dirty_background_ratio=5
-vm.overcommit_memory=1
-vm.overcommit_ratio=100
-vm.max_map_count=2147483647
-
-kernel.sched_migration_cost_ns=5000000
-kernel.sched_autogroup_enabled=0
-
-vm.dirty_writeback_centisecs=500
-vm.dirty_expire_centisecs=500
-EOF
-
-sudo sysctl --system >/dev/null
-
-# --- 6. Ativar serviços ---
-
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-info ">>> Reiniciando systemd-zram-setup..."
-sudo systemctl daemon-reexec
-sudo systemctl restart systemd-zram-setup@zram0.service || true
-{{ end }}
-
-{{ if eq .chezmoi.osRelease.id "ubuntu" }}
-info ">>> Reiniciando zramswap..."
-sudo systemctl restart zramswap.service || true
-{{ end }}
-
-sudo swapon --show || sudo swapon "$SWAP_FILE"
-
-# --- 7. Ajustar GRUB (zswap) ---
-info ">>> Ajustando parâmetros de ZSWAP no GRUB..."
-
-GRUB_FILE="/etc/default/grub"
-KERNEL_FLAGS="zswap.enabled=1 zswap.compressor=zstd zswap.max_pool_percent=50 zswap.zpool=zsmalloc"
-
-if ! grep -q "zswap.enabled=1" "$GRUB_FILE"; then
-
-  BACKUP_FILE="${GRUB_FILE}.bak_$(date +%Y%m%d%H%M%S)"
-  sudo cp "$GRUB_FILE" "$BACKUP_FILE"
-  info ">>> Backup do GRUB criado: $BACKUP_FILE"
-
-  sudo sed -i -E "s|^(GRUB_CMDLINE_LINUX_DEFAULT=['\"])([^'\"]*)(['\"])|\1\2 ${KERNEL_FLAGS}\3|" "$GRUB_FILE"
-
-  # Remover possíveis conflitos
-  sudo sed -i -E 's/(^| )zswap\.enabled=0( |$)//g' "$GRUB_FILE"
-
-  {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-  sudo grub-mkconfig -o /boot/grub/grub.cfg
-  {{ end }}
-
-  {{ if eq .chezmoi.osRelease.id "ubuntu" }}
-  sudo update-grub
-  {{ end }}
-
+if [ "$SHELL" != "$ZSH_BIN" ]; then
+  info ">>> Definindo Zsh como shell padrão"
+  chsh -s "$ZSH_BIN"
 else
-  info ">>> Parâmetros ZSWAP já presentes no GRUB."
+  info ">>> Zsh já é o shell padrão"
 fi
 
-# --- 8. Status final ---
-success ">>> Configuração EXTREMA aplicada com sucesso"
+success ">>> Zsh pronto no Ubuntu"
 
-info ">>> SWAP ativo:"
-swapon --show
+{{ end }}
 
-info ">>> Memória:"
-free -h
+# ----------------------------
+# Arch / EndeavourOS / CachyOS
+# ----------------------------
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
-info ">>> Swappiness:"
-sysctl vm.swappiness
+if ! command -v zsh >/dev/null 2>&1; then
+  info ">>> Instalando Zsh (Arch)"
+  sudo pacman -Syu --noconfirm --needed zsh
+else
+  info ">>> Zsh já instalado"
+fi
 
-info ">>> ZRAM:"
-zramctl || true
+ZSH_BIN="$(command -v zsh)"
 
-success ">>> ZRAM + ZSWAP configurados com sucesso. Reinicie o sistema para efeito completo."
+info ">>> Definindo Zsh como shell padrão"
+if [ "$SHELL" != "$ZSH_BIN" ]; then
+  chsh -s "$ZSH_BIN"
+else
+  info ">>> Zsh já é o shell padrão"
+fi
+
+success ">>> Zsh pronto no Arch"
+
+{{ end }}
+
+# ----------------------------
+# $HOME/.profile config
+# ----------------------------
+
+PROFILE_FILE="$HOME/.profile"
+
+info ">>> Forçando Zsh como shell em sessões gráficas (XFCE fix)"
+
+if ! grep -q 'exec /usr/bin/zsh' "$PROFILE_FILE" 2>/dev/null; then
+  cat >> "$PROFILE_FILE" <<'EOF'
+
+# Force Zsh in graphical sessions (XFCE fix)
+if [ -x /usr/bin/zsh ] && [ "$SHELL" != "/usr/bin/zsh" ]; then
+  export SHELL="/usr/bin/zsh"
+  exec /usr/bin/zsh -l
+fi
+EOF
+else
+  info ">>> Hook de Zsh já presente em ~/.profile"
+fi
+
+# ----------------------------
+# Xorg keyboard config
+# ----------------------------
+KEYBOARD_SRC="{{ .chezmoi.sourceDir }}/private_dot_config/xorg.conf.d/20-keyboard.conf"
+KEYBOARD_DST="/etc/X11/xorg.conf.d/20-keyboard.conf"
+
+if [ -f "$KEYBOARD_SRC" ]; then
+  info ">>> Configurando layout de teclado"
+  sudo mkdir -p /etc/X11/xorg.conf.d
+  sudo cp -f "$KEYBOARD_SRC" "$KEYBOARD_DST"
+else
+  warn "Arquivo de teclado não encontrado: $KEYBOARD_SRC"
+fi
+
+# ----------------------------
+# Starship prompt
+# ----------------------------
+if ! command -v starship >/dev/null 2>&1; then
+  info ">>> Instalando Starship"
+  curl -fsSL https://starship.rs/install.sh | sh -s -- -y
+else
+  info ">>> Starship já instalado"
+fi
+
+# ----------------------------
+# Estrutura de diretórios
+# ----------------------------
+PERSONAL_DIR="$HOME/Projects/Personal"
+WORK_DIR="$HOME/Projects/Work/Instivo"
+
+info ">>> Criando diretórios de projetos"
+mkdir -p "$PERSONAL_DIR"
+mkdir -p "$WORK_DIR"
+
+success ">>> Bootstrap Zsh + Starship finalizado com sucesso"
 
 {{ end -}}
 

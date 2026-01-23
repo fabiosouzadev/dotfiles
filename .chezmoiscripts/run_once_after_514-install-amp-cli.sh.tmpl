@@ -11,6 +11,9 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 #Install AMP CLI
 info ">>> Installing AMP CLI"
 
+# PATH correto para ambiente não-interativo
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+
 npm install -g @sourcegraph/amp@latest
 
 success ">>> AMP Cli Installed Version: $(amp --version)"

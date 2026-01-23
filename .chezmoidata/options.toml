@@ -1,11 +1,11 @@
 [dell3520]
-enabled = false
+enabled = true
 
 [rtl8821ce]
 enabled = false
 
 [dell3530]
-enabled = true
+enabled = false
 
 [kernels]
 install = false

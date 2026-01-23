@@ -461,13 +461,13 @@ bindsym $mod+Shift+n exec ~/.config/i3/scripts/empty_workspace
 # child_border: The border around the view itself.
 
 # The default colors are:
-# class	        border	background	text    indicator	child_border
-# background	n/a	    #ffffff     n/a	    n/a	        n/a
+# class	            border	background	      text         indicator	                child_border
+# background	    n/a	         #ffffff            n/a	   n/a	               n/a
 # focused	    #4c7899	#285577	    #ffffff	#2e9ef4	    #285577
-# focused_inactive	#333333	#5f676a	#ffffff	#484e50	    #5f676a
+# focused_inactive  #333333	#5f676a	    #ffffff	#484e50	    #5f676a
 # unfocused	    #333333	#222222	    #888888	#292d2e	    #222222
 # urgent	    #2f343a	#900000	    #ffffff	#900000	    #900000
-# placeholder	#000000	#0c0c0c	    #ffffff	#000000 	#0c0c0c
+# placeholder	    #000000	#0c0c0c	    #ffffff	#000000 	    #0c0c0c
 
 # client.focused           #9aa5ce #364A82 #c0caf5 #9aa5ce   #9aa5ce
 # client.focused_inactive  #16161d #16161d #c0caf5 #16161d   #16161d
@@ -559,7 +559,7 @@ exec_always --no-startup-id sleep 3 && ~/.config/polybar/simple/launch.sh --my-c
 exec_always --no-startup-id sleep 3 && feh --bg-fill --randomize ~/.config/wallpapers
 # exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"
 # exec_always --no-startup-id setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'
-# exec_always --no-startup-id sh -c "sleep 2 && setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'"
+exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'" # for Ubuntu
 
 
 # Autostart apps as you like
@@ -573,6 +573,6 @@ exec --no-startup-id sleep 3 && $term
 # exec --no-startup-id slack
 #exec --no-startup-id sleep 3 && thunar
 
-exec_always mkfifo /tmp/xobpipe && tail -f /tmp/xobpipe | xob -t 2170 & disown
+#exec_always mkfifo /tmp/xobpipe && tail -f /tmp/xobpipe | xob -t 2170 & disown # For Arch
 
 # vim: filetype=config

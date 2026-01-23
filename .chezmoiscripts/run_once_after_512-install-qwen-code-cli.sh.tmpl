@@ -11,6 +11,9 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 #Install Qwen Code Cli
 info "Installing Qwen Code"
 
+# PATH correto para ambiente não-interativo
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+
 npm install -g @qwen-code/qwen-code
 
 success ">>> Qwen Code Installed Version: $(qwen -v)"
