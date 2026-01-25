@@ -35,3 +35,5 @@ alias -- direnv-install='echo "use flake" > .envrc && direnv allow'
 alias -- work='cd ~/Projects/Work/Instivo'
 alias -- personal='cd ~/Projects/Personal'
 
+alias -- turn_off_edp1="xrandr --output eDP-1 --off && pkill polybar && MONITOR=HDMI-1 polybar -r -c \"$HOME/.config/polybar/simple/my-colorblocks/config.ini\" -q main 2>&1 | tee -a /tmp/polybar-monitor-HDMI-1.log &"
+
