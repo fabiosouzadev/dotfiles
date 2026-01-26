@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+### ---------- CONFIG ----------
+CUSTOM_MODE_NAME="2560x1080x49.94"
+CUSTOM_WIDTH="2560"
+CUSTOM_HEIGHT="1080"
+CUSTOM_RATE="49.94"
+MODELINE="150.25 2560 2608 2640 2720 1080 1083 1087 1106 +HSync -VSync"
+INTERNAL_REGEX='^(eDP|LVDS)'
+POLYBAR="$HOME/.config/polybar/simple/launch.sh"
+### ----------------------------
+
+info()  { echo "[DISPLAY] $*"; }
+warn()  { echo "[WARN]    $*" >&2; }
+die()   { echo "[ERROR]   $*" >&2; exit 1; }
+
+MODE="${1:-auto}"
+
+### ---------- DETECT MONITORS ----------
+mapfile -t CONNECTED < <(xrandr --query | awk '/ connected/{print $1}')
+
+INTERNAL="$(printf '%s\n' "${CONNECTED[@]}" | grep -E "$INTERNAL_REGEX" | head -n1 || true)"
+
+EXTERNALS=()
+for m in "${CONNECTED[@]}"; do
+  [[ "$m" != "$INTERNAL" ]] && EXTERNALS+=("$m")
+done
+
+PRIMARY_EXTERNAL="${EXTERNALS[0]:-}"
+
+### ---------- HELPERS ----------
+ensure_mode() {
+  local output="$1"
+
+  # 1) Cria o mode se não existir no X server
+  if ! xrandr --query | grep -Fq "$CUSTOM_MODE_NAME"; then
+    info "Criando mode custom: $CUSTOM_MODE_NAME"
+    xrandr --newmode "$CUSTOM_MODE_NAME" $MODELINE || warn "newmode falhou (talvez já exista)"
+  else
+    info "Mode $CUSTOM_MODE_NAME já existe no X server"
+  fi
+
+  # 2) Associa ao output se ainda não estiver associado
+  if ! xrandr --query | awk -v out="$output" -v mode="$CUSTOM_MODE_NAME" '
+    $1 == out { inside=1; next }
+    inside && $1 == mode { found=1 }
+    inside && $0 !~ /^[[:space:]]/ { exit }
+    END { exit !found }
+  '; then
+    info "Associando mode $CUSTOM_MODE_NAME ao output $output"
+    xrandr --addmode "$output" "$CUSTOM_MODE_NAME" || warn "addmode falhou (talvez já esteja associado)"
+  else
+    info "Mode $CUSTOM_MODE_NAME já associado a $output"
+  fi
+}
+
+apply_external_mode() {
+  local output="$1"
+
+  info "Ativando modo ${CUSTOM_WIDTH}x${CUSTOM_HEIGHT}@${CUSTOM_RATE} em $output"
+
+  # Forma compatível (real)
+  if ! xrandr --output "$output" --mode "$CUSTOM_WIDTH"x"$CUSTOM_HEIGHT" --rate "$CUSTOM_RATE" --pos 0x0 --rotate normal; then
+    warn "Fallback para nome lógico do mode"
+    xrandr --output "$output" --mode "$CUSTOM_MODE_NAME" --pos 0x0 --rotate normal
+  fi
+}
+
+launch_polybar() {
+  local extra="${1:-}"
+  sleep 1
+  if [[ -x "$POLYBAR" ]]; then
+    "$POLYBAR" --my-colorblocks $extra
+  else
+    warn "Polybar launcher não encontrado: $POLYBAR"
+  fi
+}
+
+### ---------- MODES ----------
+apply_clamshell() {
+  [[ -z "$PRIMARY_EXTERNAL" ]] && die "Nenhum monitor externo detectado."
+
+  info "Modo CLAMSHELL"
+  info "Interno: ${INTERNAL:-<nenhum>}"
+  info "Externo: $PRIMARY_EXTERNAL"
+
+  ensure_mode "$PRIMARY_EXTERNAL"
+
+  apply_external_mode "$PRIMARY_EXTERNAL"
+
+  if [[ -n "$INTERNAL" ]]; then
+    xrandr --output "$INTERNAL" --off
+  fi
+
+  pkill -x polybar || true
+  sleep 0.5
+
+  export MONITOR="$PRIMARY_EXTERNAL"
+  launch_polybar --external
+}
+
+apply_dual() {
+  [[ -z "$PRIMARY_EXTERNAL" || -z "$INTERNAL" ]] && die "Dual requer monitor interno + externo."
+
+  info "Modo DUAL"
+  info "Interno: $INTERNAL"
+  info "Externo: $PRIMARY_EXTERNAL"
+
+  ensure_mode "$PRIMARY_EXTERNAL"
+
+  apply_external_mode "$PRIMARY_EXTERNAL"
+
+  xrandr \
+    --output "$INTERNAL" --mode 1920x1080 --pos "$((CUSTOM_WIDTH + 1))x0" --rotate normal
+  
+  pkill -x polybar || true
+  sleep 0.5
+  launch_polybar
+}
+
+apply_auto() {
+  if [[ -n "$PRIMARY_EXTERNAL" ]]; then
+    info "Externo detectado: $PRIMARY_EXTERNAL"
+
+    ensure_mode "$PRIMARY_EXTERNAL"
+    apply_external_mode "$PRIMARY_EXTERNAL"
+
+    if [[ -n "$INTERNAL" ]]; then
+      info "Layout: externo primário + interno à direita"
+      xrandr \
+        --output "$INTERNAL" --mode 1920x1080 --pos "$((CUSTOM_WIDTH + 1))x0" --rotate normal
+    fi
+
+    launch_polybar
+  else
+    info "Nenhum externo. Usando apenas tela interna."
+
+    if [[ -n "$INTERNAL" ]]; then
+      xrandr --output "$INTERNAL" --primary --auto
+      launch_polybar
+    else
+      warn "Nenhum display utilizável detectado."
+    fi
+  fi
+}
+
+### ---------- DISPATCH ----------
+case "$MODE" in
+  clamshell) apply_clamshell ;;
+  dual)      apply_dual ;;
+  auto)      apply_auto ;;
+  *)
+    die "Modo inválido: $MODE (use: auto | dual | clamshell)"
+    ;;
+esac
+
+# vim: filetype=bash
