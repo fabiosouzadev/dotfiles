@@ -1,0 +1,13 @@
+{
+  "repos": {
+    "personal": [
+      { "repo": "fabiosouzadev/polybar-themes",
+         "path": "polybar-themes"
+      },
+      { "repo": "fabiosouzadev/wallpapers",
+         "path": "wallpapers"
+      }
+    ],
+    "work": []
+  }
+}

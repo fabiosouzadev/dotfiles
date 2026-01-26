@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+{{ if eq .chezmoi.os "linux" -}}
+set -euo pipefail
+
+# Pretty print functions
+info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
+error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+success() { echo -e "\033[1;32m✅ $*\033[0m"; }
+
+if ! command -v "git" > /dev/null; then
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+        sudo apt update
+        sudo apt install -y git
+{{ end }}
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+        sudo pacman -Syu --noconfirm --needed git
+{{ end }}
+fi
+
+if ! command -v "jq" > /dev/null; then
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+        sudo apt update
+        sudo apt install -y jq
+{{ end }}
+{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+        sudo pacman -Syu --noconfirm --needed jq
+{{ end }}
+fi
+
+clone_or_update() {
+  local repo="$1"
+  local target="$2"
+  local url="git@github.com:$repo.git"
+
+  mkdir -p "$(dirname "$target")"
+
+  if [ -d "$target/.git" ]; then
+    warn "Pull failed: $repo"
+  else
+    info "Cloning $url → $target"
+    git clone "$url" "$target"
+  fi
+}
+
+
+BASE_PERSONAL="$HOME/Projects/Personal"
+BASE_WORK="$HOME/Projects/Work"
+
+if [ ! -d "$BASE_PERSONAL" ]; then
+	mkdir -p "$BASE_PERSONAL" 
+fi
+
+if [ ! -d "$BASE_WORK" ]; then
+	mkdir -p "$BASE_WORK" 
+fi
+
+
+#Personal repos
+{{ if .repos.personal  }}
+{{ range .repos.personal }}
+repo="{{ .repo }}"
+path="{{ .path }}"
+target="$BASE_PERSONAL/$path"
+clone_or_update "$repo" "$target"
+{{ end }}
+{{ else }}
+warn "No personal repository defined"
+{{ end }}
+
+# Work repos
+{{ if .repos.work  }}
+{{ range .repos.work }}
+repo="{{ .repo }}"
+path="{{ .path }}"
+target="$BASE_WORK/$path"
+clone_or_update "$repo" "$target"
+{{ end }}
+{{ else }}
+warn "No working repository defined"
+{{ end }}
+
+
+success ">>>> All repositories processed successfully."
+
+{{ end -}}
