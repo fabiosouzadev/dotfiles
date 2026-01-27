@@ -20,10 +20,10 @@ set $mod Mod4
 
 
 set $term kitty
-set $browser firefox
+set $browser firefox-beta
 set $file_manager thunar
 
-set $work_browser firefox-developer-edition
+set $work_browser firefox-devedition
 set $work_communication vesktop
 
 set $up k
@@ -560,7 +560,7 @@ exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # uncomment the next line, use arandr to setup displays and save the file as monitor and set wallpaper:
 #exec_always --no-startup-id ~/.screenlayout/i3_detect_displays.sh
 exec_always --no-startup-id ~/.screenlayout/monitor.sh clamshell
-#exec_always --no-startup-id sleep 3 && ~/.config/polybar/simple/launch.sh --my-colorblocks
+exec_always --no-startup-id sleep 3 && ~/.config/polybar/simple/launch.sh --my-colorblocks --external
 exec_always --no-startup-id sleep 3 && feh --bg-fill --randomize ~/.config/wallpapers
 # exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"
 # exec_always --no-startup-id setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle,caps:swapescape'
