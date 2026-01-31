@@ -33,54 +33,73 @@
           "wine",
           "zoxide"
         ],
-        "ppas": [
-          {
-            "name": "ubuntu-mozilla-daily/ppa",
-            "packages": ["firefox-trunk"]
-          }
-        ],
+        "ppas": [],
         "sources": [
           {
             "name": "antigravity",
             "keyring_path": "/etc/apt/keyrings/antigravity.gpg",
             "key_url": "https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg",
-            "repo": "deb [signed-by=/etc/apt/keyrings/antigravity.gpg] https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/ antigravity-debian main",
+            "uri": "https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/",
+            "suites": "antigravity-debian",
+            "components":"main",
+            "architectures":[], 
+            "types": "deb",
             "packages": ["antigravity"]
           },
           {
             "name": "dbeaver",
             "keyring_path": "/etc/apt/keyrings/dbeaver.gpg",
             "key_url": "https://dbeaver.io/debs/dbeaver.gpg.key",
-            "repo": "deb [signed-by=/etc/apt/keyrings/dbeaver.gpg] https://dbeaver.io/debs/dbeaver-ce /",
+            "uri":"https://dbeaver.io/debs/dbeaver-ce/",
+            "suites": "/",
+            "components":" ",
+            "architectures":[], 
+            "types":"deb",
             "packages": ["dbeaver-ce"]
           },
           {
             "name": "firefox",
-            "keyring_path": "/etc/apt/keyrings/mozilla-linux.gpg",
+            "keyring_path": "/etc/apt/keyrings/firefox.gpg",
             "key_url": "https://packages.mozilla.org/apt/repo-signing-key.gpg",
-            "repo": "deb [signed-by=/etc/apt/keyrings/mozilla-linux.gpg] https://packages.mozilla.org/apt mozilla main",
-            "packages": ["firefox-devedition", "firefox-beta"]
-          },
-                    {
-            "name": "google-chrome",
-            "key_url": "https://dl-ssl.google.com/linux/linux_signing_key.pub",
-            "keyring_path": "/etc/apt/keyrings/google-linux.gpg",
-            "repo": "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main",
-            "packages": ["google-chrome-unstable"]
+            "uri": "https://packages.mozilla.org/apt/",
+            "suites": "mozilla",
+            "components": "main",
+            "types": "deb",
+            "architectures":[], 
+            "packages": ["firefox-devedition", "firefox-beta", "firefox-beta-l10n-pt-br", "firefox-devedition-l10n-pt-br"]
           },
           {
-            "name": "vscode",
-            "keyring_path": "/etc/apt/keyrings/microsoft.gpg",
-            "key_url": "https://packages.microsoft.com/keys/microsoft.asc",
-            "repo": "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main",
-            "packages": ["code-insiders"]
+            "name": "google-chrome",
+            "keyring_path": "/etc/apt/keyrings/google-chrome.gpg",
+            "key_url": "https://dl-ssl.google.com/linux/linux_signing_key.pub",
+            "uri": "http://dl.google.com/linux/chrome/deb/",
+            "suites": "stable",
+            "components": "main",
+            "architectures":[], 
+            "types": "deb",
+            "packages": ["google-chrome-beta", "google-chrome-unstable", "google-chrome-canary"]
           },
           {
             "name": "spotify",
             "keyring_path": "/etc/apt/keyrings/spotify.gpg",
             "key_url": "https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc",
-            "repo": "deb [signed-by=/etc/apt/keyrings/spotify.gpg] https://repository.spotify.com stable non-free",
+            "uri": "https://repository.spotify.com/",
+            "suites": "stable",
+            "components": "non-free",
+            "architectures":[], 
+            "types": "deb",
             "packages": ["spotify-client"]
+          },
+          {
+            "name": "vscode",
+            "keyring_path": "/etc/apt/keyrings/microsoft.gpg",
+            "key_url": "https://packages.microsoft.com/keys/microsoft.asc",
+            "uri": "https://packages.microsoft.com/repos/code",
+            "suites": "stable",
+            "components": "main",
+            "architectures": ["amd64", "arm64", "armhf"],
+            "types": "deb",
+            "packages": ["code-insiders"]
           }
         ],
         "debs": [
@@ -101,6 +120,9 @@
           {
             "name": "yazi",
             "url": "https://github.com/sxyazi/yazi/releases/download/nightly/yazi-x86_64-unknown-linux-gnu.deb"
+          },
+          { "name": "proton-authenticator",
+            "url": "https://proton.me/download/authenticator/linux/ProtonAuthenticator_1.1.4_amd64.deb"
           }
         ]
       }

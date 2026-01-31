@@ -41,7 +41,7 @@ clone_or_update() {
     warn "Pull failed: $repo"
   else
     info "Cloning $url → $target"
-    git clone "$url" "$target"
+    git clone "$url" "$target" >/dev/null
   fi
 }
 

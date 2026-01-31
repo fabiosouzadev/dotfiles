@@ -11,4 +11,7 @@ enabled = false
 install = false
 
 [ollama]
-compiled = true 
+compiled = true
+
+[openclaw]
+install = false

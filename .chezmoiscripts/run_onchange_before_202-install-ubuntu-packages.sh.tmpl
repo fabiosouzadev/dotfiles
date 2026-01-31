@@ -14,19 +14,26 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
 
 info "Updating Ubuntu packages"
-sudo apt update -y
-sudo apt upgrade -y
+#sudo apt update -y
+#sudo apt upgrade -y
 success "Updated Ubuntu packages"
 
 info "Installing Ubuntu APT packages"
 
-sudo apt install -y {{ range .packages.linux.ubuntu.apt }} {{.}}{{end}}
+{{ if .packages.linux.ubuntu.apt -}} # if apt packages
+
+#sudo apt install -y {{ range .packages.linux.ubuntu.apt }} {{.}}{{end}}
 
 success "Installed Ubuntu APT packages"
 
-{{ range .packages.linux.ubuntu.ppas -}} 
+{{ end -}} # if apt packages
 
-info "Processando PPA: ppa:{{.name}}"
+
+{{ if .packages.linux.ubuntu.ppas -}} # if ppas
+
+{{ range .packages.linux.ubuntu.ppas -}} # range ppas
+
+info ">>> Processando PPA: ppa:{{.name}}"
 
 if ! grep -R "ppa.launchpad.net/{{.name}}" /etc/apt/sources.list.d >/dev/null 2>&1; then
     info ">> Adicionando PPA {{.name}}"
@@ -47,27 +54,40 @@ else
 fi
 {{ end -}}
 
-{{ end -}}
+{{ end -}} # range ppas
 
 success "Installed Ubuntu PPA packages"
 
+{{ end -}} # if ppas
+
+
+
+{{ if .packages.linux.ubuntu.sources  -}} # if sources
+
 {{ range .packages.linux.ubuntu.sources -}} 
 
-
-SOURCE_FILE="/etc/apt/sources.list.d/{{.name}}.list"
+SOURCE_FILE="/etc/apt/sources.list.d/{{.name}}.sources"
 
 info "Processando source: {{.name}}"
 
 if [ ! -f "{{.keyring_path}}" ]; then
-info "Importando chave GPG"
-curl -fsSL {{.key_url}} | sudo gpg --dearmor --yes -o "{{.keyring_path}}"
+    info "Importando chave GPG"
+    curl -fsSL {{.key_url}} | sudo gpg --dearmor --yes -o "{{.keyring_path}}"
 else
-warn "Chave GPG já existente"
+    warn "Chave GPG já existente"
 fi
 
 if [ ! -f "$SOURCE_FILE" ]; then
-echo "  Adicionando repositório APT"
-echo "{{.repo}}" | sudo tee "$SOURCE_FILE" >/dev/null
+    echo ">>>>Adicionando repositório APT"
+    sudo tee $SOURCE_FILE > /dev/null <<EOF
+Types: {{ .types }}
+URIs: {{ .uri }}
+Suites: {{ .suites }}
+Components: {{ .components }}
+Architectures: {{ if .architectures }}{{ range .architectures }}{{.}} {{ end }}{{ else }}amd64{{ end }}
+Signed-By: {{ .keyring_path }}
+EOF
+
 else
 warn "Repositório já configurado"
 fi
@@ -87,6 +107,9 @@ fi
 
 success "Installed Ubuntu Sources packages"
 
+{{ end -}} # if sources
+
+{{ if .packages.linux.ubuntu.debs  -}} # if debs
 
 # debs
 TEMP_DIR="$HOME/.temp-debs"
@@ -129,6 +152,8 @@ info "Cleaning temporary files"
 rm -rf "$TEMP_DIR"
 
 success "All .deb packages processed successfully"
+
+{{ end -}} # if debs
 
 
 success "Installed Ubuntu packages"
