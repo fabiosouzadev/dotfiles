@@ -149,10 +149,11 @@ for_window [window_role="task_dialog"] floating enable
 assign [class="^(?i)spotify"] $ws1
 assign [class="obsidian"] $ws2
 assign [class="^Slack$|^discord|^vesktop$"] $ws3
-#assign [class="^firefox$"] $ws4
+assign [class=".*(?i)firefox.*"] $ws4
 #assign [class="^firefox-developer-edition$"] $ws5
 assign [class="com.mitchellh.ghostty"] $ws5
 assign [class="kitty"] $ws5
+assign [class="^(?i)code.*"] $ws6
 assign [class="^(?i)firefox" title=".*(Private).*"] $ws7
 for_window [class="^(?i)firefox" title=".*(Private Browsing).*"] move to workspace $ws7
 # assign [class="Brave-browser-*"] $ws6
@@ -558,8 +559,8 @@ exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 # start a script to setup displays
 # uncomment the next line, use arandr to setup displays and save the file as monitor and set wallpaper:
-#exec_always --no-startup-id ~/.screenlayout/i3_detect_displays.sh
-exec_always --no-startup-id ~/.screenlayout/monitor.sh clamshell
+exec_always --no-startup-id ~/.screenlayout/i3_detect_displays.sh
+#exec_always --no-startup-id ~/.screenlayout/monitor.sh clamshell
 exec_always --no-startup-id sleep 3 && ~/.config/polybar/simple/launch.sh --my-colorblocks --external
 exec_always --no-startup-id sleep 3 && feh --bg-fill --randomize ~/.config/wallpapers
 # exec_always --no-startup-id "setxkbmap -layout 'us,br' -variant 'alt-intl,abnt2' -option 'grp:alt_caps_toggle' -option 'caps:escape'"

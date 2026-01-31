@@ -11,7 +11,8 @@ if xrandr | grep '^HDMI-1.* connected'; then
     xrandr --newmode "2560x1080x49.94"  150.25  2560 2608 2640 2720  1080 1083 1087 1106  +HSync -VSync
     xrandr --addmode $MAIN_DISPLAY 2560x1080x49.94
     sleep 2
-    xrandr --output $LAPTOP_DISPLAY --mode 1920x1080 --pos 2561x0 --rotate normal --output $MAIN_DISPLAY --primary --mode 2560x1080x49.94 --pos 0x0 --rotate normal
+    xrandr --output $LAPTOP_DISPLAY --mode 1920x1080 --pos 2561x0 --rotate normal 
+    xrandr --output $MAIN_DISPLAY --primary --mode 2560x1080x49.94 --pos 0x0 --rotate normal
 else
 
   xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --off --output DP-2 --off --output HDMI-1 --off --output VIRTUAL-1 --off
