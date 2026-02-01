@@ -33,7 +33,16 @@
           "wine",
           "zoxide"
         ],
-        "ppas": [],
+        "ppas": [
+          {
+            "name": "ubuntu-mozilla-daily/ppa",
+            "packages": ["firefox-trunk"]
+          },
+          {
+            "name": "xtradeb/apps",
+            "packages": ["chromium", "ungoogled-chromium"]
+          }
+        ],
         "sources": [
           {
             "name": "antigravity",
@@ -100,6 +109,17 @@
             "architectures": ["amd64", "arm64", "armhf"],
             "types": "deb",
             "packages": ["code-insiders"]
+          },
+          {
+            "name": "vscodium",
+            "keyring_path": "/etc/apt/keyrings/vscodium-archive-keyring.gpg",
+            "key_url": "https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg",
+            "uri": "https://download.vscodium.com/debs",
+            "suites": "vscodium",
+            "components": "main",
+            "architectures": ["amd64", "arm64"],
+            "types": "deb",
+            "packages": ["codium"]
           }
         ],
         "debs": [
