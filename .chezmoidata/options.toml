@@ -2,7 +2,7 @@
 enabled = true
 
 [rtl8821ce]
-enabled = false
+enabled = true
 
 [dell3530]
 enabled = false

@@ -13,10 +13,18 @@ if type -P paru >/dev/null 2>&1; then
 elif type -P yay >/dev/null 2>&1; then
   yay -Sy --noconfirm --needed rtl8821ce-dkms-git
 fi
-
-{{ else }}
-
-echo "This script is only for Arch based systems. Exiting..."
-exit 1
 {{ end }}
+
+{{ if eq .chezmoi.osRelease.id "ubuntu" -}}
+sudo apt install -y bc module-assistant build-essential dkms
+sudo m-a prepare
+git clone https://github.com/tomaspinho/rtl8821ce.git /tmp/rtl8821ce
+cd /tmp/rtl8821ce
+sudo ./dkms-install.sh
+
+cd ~
+sudo rm -vr /tmp/rtl8821ce
+
+{{ end }}
+
 {{- end }}
