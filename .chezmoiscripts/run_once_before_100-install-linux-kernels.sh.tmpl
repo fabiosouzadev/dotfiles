@@ -31,9 +31,15 @@ sudo pacman -Sy --noconfirm --needed {{ range .linux.cachyos.kernels }} {{.}}{{e
 
 success "Installed CachyOs Kernels"
 {{ else }}
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+sudo add-apt-repository -y ppa:damentz/liquorix
+sudo apt update -y
+sudo apt install -y \
+    linux-image-liquorix-amd64 \
+    linux-headers-liquorix-amd64
+success "Installed Liquorix Kernel on Ubuntu"
+{{ end }}
 
-error "This script is only for Arch based systems. Exiting..."
-exit 1
 
 {{ end }}
 {{ end }}

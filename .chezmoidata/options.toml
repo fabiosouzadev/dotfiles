@@ -8,7 +8,7 @@ enabled = true
 enabled = false
 
 [kernels]
-install = false
+install = true
 
 [ollama]
 compiled = true
