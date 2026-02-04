@@ -1,6 +1,9 @@
 {
   "repos": {
     "personal": [
+      { "repo": "fabiosouzadev/personal",
+         "path": "personal"
+      },
       { "repo": "fabiosouzadev/polybar-themes",
          "path": "polybar-themes"
       },
@@ -8,6 +11,16 @@
          "path": "wallpapers"
       }
     ],
-    "work": []
+    "work": [
+      { 
+        "workplace": "nexialab",
+        "repos": [
+          {
+            "repo": "nexialab/aurea-chat-omni",
+            "path": "aurea-chat-omni"
+          }
+        ]
+      }
+    ]
   }
 }

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# vim: filetype=bash
 
 {{ if eq .chezmoi.os "linux" -}}
 set -euo pipefail
@@ -71,13 +70,18 @@ warn "No personal repository defined"
 {{ end }}
 
 # Work repos
-{{ if .repos.work  }}
+{{ if .repos.work -}}
 {{ range .repos.work }}
+workplace="{{ .workplace }}"
+{{ if .repos  }}
+{{ range .repos }}
 repo="{{ .repo }}"
 path="{{ .path }}"
-target="$BASE_WORK/$path"
+target="$BASE_WORK/$workplace/$path"
 clone_or_update "$repo" "$target"
 {{ end }}
+{{ end }}
+{{ end -}}
 {{ else }}
 warn "No working repository defined"
 {{ end }}
@@ -86,3 +90,5 @@ warn "No working repository defined"
 success ">>>> All repositories processed successfully."
 
 {{ end -}}
+
+# vim: filetype=bash
