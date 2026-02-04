@@ -56,6 +56,9 @@ fi
 if [ -f /usr/local/bin/tmux ]; then
   sudo rm /usr/local/bin/tmux 
 fi
+if [ -f $HOME/.local/bin/tmux ]; then
+  sudo rm $HOME/.local/bin/tmux 
+fi
 if [ -d $HOME/.local/src/tmux ]; then 
   sudo rm -r $HOME/.local/src/tmux 
 fi
@@ -81,10 +84,10 @@ if [ `uname` = 'Darwin' ]; then
 elif [ `uname` = 'Linux' ]; then 
   #./configure
   # Test config (https://github.com/tmux/tmux/issues/3218)
-  ./configure --enable-debug --prefix=$HOME/.local
+  sudo ./configure --enable-debug
 fi
-make 
-make install
+sudo make 
+sudo make install
 
 success ">>> Tmux build process finished successfully"
 
