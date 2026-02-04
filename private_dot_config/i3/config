@@ -23,7 +23,7 @@ set $term kitty
 set $browser firefox-beta
 set $file_manager thunar
 
-set $work_browser firefox-devedition
+set $work_browser google-chrome 
 set $work_communication vesktop
 
 set $up k
@@ -148,14 +148,16 @@ for_window [window_role="task_dialog"] floating enable
 
 assign [class="^(?i)spotify"] $ws1
 assign [class="obsidian"] $ws2
-assign [class="^Slack$|^discord|^vesktop$"] $ws3
-assign [class=".*(?i)firefox.*"] $ws4
+# assign [class="^Slack$|^discord|^vesktop$"] $ws3
 #assign [class="^firefox-developer-edition$"] $ws5
-assign [class="com.mitchellh.ghostty"] $ws5
-assign [class="kitty"] $ws5
-assign [class="^(?i)code.*"] $ws6
-assign [class="^(?i)firefox" title=".*(Private).*"] $ws7
-for_window [class="^(?i)firefox" title=".*(Private Browsing).*"] move to workspace $ws7
+assign [class=".*(?i)google-chrome.*"] $ws3
+assign [class="com.mitchellh.ghostty"] $ws3
+assign [class="kitty"] $ws3
+assign [class="^(?i)code.*"] $ws4
+assign [class="^(?i)antigravity.*"] $ws4
+assign [class="^(?i)firefox" title=".*(Private).*"] $ws5
+assign [class=".*(?i)firefox.*"] $ws6
+for_window [class="^(?i)firefox" title=".*(Private Browsing).*"] move to workspace $ws6
 # assign [class="Brave-browser-*"] $ws6
 
 # assign [class="org.wezfurlong.wezterm"] $ws5
