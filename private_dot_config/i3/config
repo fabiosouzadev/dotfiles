@@ -153,11 +153,11 @@ assign [class="obsidian"] $ws2
 assign [class=".*(?i)google-chrome.*"] $ws3
 assign [class="com.mitchellh.ghostty"] $ws3
 assign [class="kitty"] $ws3
-assign [class="^(?i)code.*"] $ws4
-assign [class="^(?i)antigravity.*"] $ws4
+assign [class="^(?i)code.*"] $ws3
+assign [class="^(?i)antigravity.*"] $ws3
+assign [class=".*(?i)firefox.*"] $ws4
 assign [class="^(?i)firefox" title=".*(Private).*"] $ws5
-assign [class=".*(?i)firefox.*"] $ws6
-for_window [class="^(?i)firefox" title=".*(Private Browsing).*"] move to workspace $ws6
+for_window [class="^(?i)firefox" title=".*(Private Browsing).*"] move to workspace $ws8
 # assign [class="Brave-browser-*"] $ws6
 
 # assign [class="org.wezfurlong.wezterm"] $ws5
