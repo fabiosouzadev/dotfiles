@@ -51,6 +51,17 @@
             "packages": ["antigravity"]
           },
           {
+            "name": "brave",
+            "keyring_path": "/etc/apt/keyrings/brave-browser-nightly-archive-keyring.gpg",
+            "key_url": "https://brave-browser-apt-nightly.s3.brave.com/brave-browser-nightly-archive-keyring.gpg",
+            "uri": "https://brave-browser-apt-nightly.s3.brave.com",
+            "suites": "stable",
+            "components":"main",
+            "architectures":["amd64","arm64"], 
+            "types": "deb",
+            "packages": ["brave-browser-nightly"]
+          },
+          {
             "name": "dbeaver",
             "keyring_path": "/etc/apt/keyrings/dbeaver.gpg",
             "key_url": "https://dbeaver.io/debs/dbeaver.gpg.key",
@@ -138,6 +149,10 @@
           },
           { "name": "proton-authenticator",
             "url": "https://proton.me/download/authenticator/linux/ProtonAuthenticator_1.1.4_amd64.deb"
+          },
+          {
+            "name": "enth-auth",
+            "url": "https://github.com/ente-io/ente/releases/download/auth-v4.4.15/ente-auth-v4.4.15-x86_64.deb"
           }
         ]
       }

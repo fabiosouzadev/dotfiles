@@ -13,7 +13,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
 
-info "Updating Ubuntu packages"
+info ">>> Updating Ubuntu packages"
 sudo apt update -y
 sudo apt upgrade -y
 success "Updated Ubuntu packages"
