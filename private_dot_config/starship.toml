@@ -28,7 +28,7 @@ disabled = true
 [cmd_duration]
 min_time = 500
 
-[directory]
-truncation_length = 255
-truncate_to_repo = false
-use_logical_path = false
+# [directory]
+# truncation_length = 255
+# truncate_to_repo = false
+# use_logical_path = false
