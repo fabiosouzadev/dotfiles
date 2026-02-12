@@ -31,7 +31,7 @@ if command -v ollama &>/dev/null; then
 
   if [[ "$OLLAMA_BIN" == */bin/* ]]; then
     OLLAMA_LIB="${OLLAMA_BIN//\/bin\//\/lib\/}"
-    echo ">>> 📚 Caminho da biblioteca calculado: $OLLAMA_LIB"
+    echo ">>>> 📚 Caminho da biblioteca calculado: $OLLAMA_LIB"
 
           if [ -d "$OLLAMA_LIB" ]; then
             echo ">>> 🧹 Removendo diretório de bibliotecas: $OLLAMA_LIB"
