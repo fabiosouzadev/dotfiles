@@ -1,11 +1,34 @@
 add_newline = true
 
-[direnv]
-disabled = false
-
 [nix_shell]
 heuristic = true
 symbol = " "
 
 [sudo]
+disabled = true
+
+[direnv]
 disabled = false
+
+[package]
+disabled = true
+
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[azure]
+disabled = true
+
+# [nodejs]
+# disabled = true
+
+[cmd_duration]
+min_time = 500
+
+[directory]
+truncation_length = 255
+truncate_to_repo = false
+use_logical_path = false

@@ -1,7 +1,9 @@
-HISTSIZE=1000000
-HISTFILE=~/.zsh_history
-SAVEHIST=$HISTSIZE
-HISTDUP=erase
+export HISTSIZE=1000000000
+export SAVEHIST=$HISTSIZE
+export HISTFILE=~/.zsh_history
+export HISTDUP=erase
+setopt EXTENDED_HISTORY
+setopt autocd
 setopt inc_append_history
 setopt share_history
 setopt hist_ignore_space

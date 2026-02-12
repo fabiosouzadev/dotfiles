@@ -1,6 +1,10 @@
 {
   "repos": {
     "personal": [
+      {
+        "repo": "AL-MARID/Lorph.git",
+        "path": "Lorph"
+      },
       { "repo": "fabiosouzadev/personal",
          "path": "personal"
       },

@@ -1,4 +1,10 @@
+set -o vi
+# Fix for backspace in vi mode
+bindkey -v '^?' backward-delete-char
+
 bindkey -e
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 bindkey '^[w' kill-region
+
+# vim: filetype=bash
