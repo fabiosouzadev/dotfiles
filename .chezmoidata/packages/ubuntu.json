@@ -51,7 +51,18 @@
             "packages": ["antigravity"]
           },
           {
-            "name": "brave",
+            "name": "brave-browser-beta",
+            "keyring_path": "/etc/apt/keyrings/brave-browser-beta-archive-keyring.gpg",
+            "key_url": "https://brave-browser-apt-beta.s3.brave.com/brave-browser-beta-archive-keyring.gpg",
+            "uri": "https://brave-browser-apt-beta.s3.brave.com",
+            "suites": "stable",
+            "components":"main",
+            "architectures":["amd64","arm64"], 
+            "types": "deb",
+            "packages": ["brave-browser-beta","brave-keyring"]
+          },
+          {
+            "name": "brave-browser-nightly",
             "keyring_path": "/etc/apt/keyrings/brave-browser-nightly-archive-keyring.gpg",
             "key_url": "https://brave-browser-apt-nightly.s3.brave.com/brave-browser-nightly-archive-keyring.gpg",
             "uri": "https://brave-browser-apt-nightly.s3.brave.com",
@@ -59,7 +70,7 @@
             "components":"main",
             "architectures":["amd64","arm64"], 
             "types": "deb",
-            "packages": ["brave-browser-nightly", "brave-keyring"]
+            "packages": ["brave-browser-nightly","brave-keyring"]
           },
           {
             "name": "firefox",
@@ -84,9 +95,20 @@
             "packages": ["google-chrome-stable", "google-chrome-beta", "google-chrome-unstable", "google-chrome-canary"]
           },
           {
+            "name": "signal-desktop",
+            "keyring_path": "/etc/apt/keyrings/signal-desktop-keyring.gpg",
+            "key_url": "https://updates.signal.org/desktop/apt/keys.asc",
+            "uri": "https://updates.signal.org/desktop/apt",
+            "suites": "xenial",
+            "components": "main",
+            "architectures":["amd64"], 
+            "types": "deb",
+            "packages": ["signal-desktop"]
+          },
+          {
             "name": "spotify",
             "keyring_path": "/etc/apt/keyrings/spotify.gpg",
-            "key_url": "https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc",
+            "key_url": "https://download.spotify.com/debian/pubkey_5384ce82ba52c83a.asc",
             "uri": "https://repository.spotify.com/",
             "suites": "stable",
             "components": "non-free",

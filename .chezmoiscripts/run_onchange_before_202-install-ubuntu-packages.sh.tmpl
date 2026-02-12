@@ -45,11 +45,11 @@ fi
 sudo apt update -y
 
 {{ range .packages -}}
-if ! dpkg -s "{{.}}" >/dev/null 2>&1; then
+if dpkg -l | grep -q "^ii  {{.}} "; then
+    success "Pacote já instalado: {{.}}"
+else
     info ">> Instalando pacote: {{.}}"
     sudo apt install -y "{{.}}"
-else
-    success "Pacote já instalado: {{.}}"
 fi
 {{ end -}}
 
@@ -95,11 +95,11 @@ sudo apt list --upgradable
 sudo apt update -y
 
 {{ range .packages -}}
-if ! dpkg -s "{{.}}" >/dev/null 2>&1; then
+if dpkg -l | grep -q "^ii  {{.}} "; then
+    success "Pacote já instalado: {{.}}"
+else
     info ">> Instalando pacote: {{.}}"
     sudo apt install -y "{{.}}"
-else
-    success "Pacote já instalado: {{.}}"
 fi
 {{ end -}}
 
