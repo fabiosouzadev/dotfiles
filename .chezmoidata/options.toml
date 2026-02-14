@@ -14,4 +14,4 @@ install = true
 compiled = true
 
 [openclaw]
-install = false
+install = true
