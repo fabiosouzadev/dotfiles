@@ -64,14 +64,18 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "ollama/glm-4.7:cloud",
+        "primary": "ollama/kimi-k2.5:cloud",
         "fallbacks": [
-          "ollama/glm-4.7:cloud"
+          "ollama/glm-4.7:cloud",
+          "google/gemini-3-pro-preview",
+          "openrouter/anthropic/claude-sonnet-4-5"
         ]
       },
       "models": {
+        "ollama/kimi-k2.5:cloud": {},
         "ollama/glm-4.7:cloud": {},
-        "ollama/kimi-k2.5:cloud": {}
+        "google/gemini-3-pro-preview": {},
+        "openrouter/anthropic/claude-sonnet-4-5": {}
       },
       "workspace": "/home/fabiosouzadev/.openclaw/workspace",
       "contextPruning": {
