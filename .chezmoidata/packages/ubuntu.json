@@ -146,6 +146,10 @@
             "url": "https://dbeaver.io/debs/dbeaver-ce/dbeaver-ce_25.3.4_amd64.deb"
           },
           {
+            "name": "draw.io",
+            "url": "https://github.com/jgraph/drawio-desktop/releases/download/v24.7.1/drawio-desktop-24.7.1.deb"
+          },
+          {
             "name": "enth-auth",
             "url": "https://github.com/ente-io/ente/releases/download/auth-v4.4.15/ente-auth-v4.4.15-x86_64.deb"
           },
@@ -153,6 +157,10 @@
             "name": "fd",
             "url": "https://github.com/sharkdp/fd/releases/download/v10.3.0/fd_10.3.0_amd64.deb"
 
+          },
+          {
+            "name": "kiro-code",
+            "url": "https://prod.download.desktop.kiro.dev/releases/stable/linux-x64/signed/0.9.40/deb/kiro-ide-0.9.40-stable-linux-x64.deb"
           },
           {
             "name": "obsidian",
