@@ -12,7 +12,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 # Remove old OpenClaw installation if it exists
 if command -v openclaw &> /dev/null; then
-    warn "OpenClaw is already installed. Removing old version..."
+    warn ">>> OpenClaw is already installed. Removing old version..."
     openclaw uninstall --all --yes --non-interactive
     openclaw gateway stop
     openclaw gateway uninstall
@@ -35,10 +35,6 @@ if command -v openclaw &> /dev/null; then
         bun remove -g openclaw || true
     fi
 
-    if [ -d "$HOME/.openclaw" ]; then
-        rm -rf "$HOME/.openclaw"
-    fi
-
     if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service" ]; then
         if command -v systemctl &> /dev/null; then
             systemctl --user disable --now openclaw-gateway.service || true
@@ -52,10 +48,6 @@ fi
 
 if [ -d "$HOME/openclaw" ]; then
     rm -rf "$HOME/openclaw"
-fi
-
-if [ -d "$HOME/.openclaw" ]; then
-    rm -rf "$HOME/.openclaw"
 fi
 
 # PATH correto para ambiente não-interativo
