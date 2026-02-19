@@ -56,8 +56,11 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 #Install OpenClaw
 info ">>> Installing OpenClaw"
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --beta --no-onboard
+#openclaw gateway install
+#openclaw gateway
+#systemctl --user start openclaw-gateway.service
 
-success ">>>>>> OpenClaw Installed Version: $(openclaw --version)"
+success ">>>>>> OpenClaw Installed Version: $(openclaw --version) <<<<<<"
 
 {{-  end }}
 
