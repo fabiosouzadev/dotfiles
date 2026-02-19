@@ -1,0 +1,12 @@
+autoload -Uz compinit
+compinit
+
+
+OPENCLAW_COMPLETION="$HOME/.openclaw/completions/openclaw.zsh"
+
+if [ -f $OPENSPEC_COMPLETION ]; then
+	zinit ice as"completion"
+	zinit snippet $OPENCLAW_COMPLETION
+fi
+
+# vim: filetype=bash
