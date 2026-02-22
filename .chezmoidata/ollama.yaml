@@ -12,16 +12,9 @@ ollama:
     - OLLAMA_LLM_LIBRARY="cpu"
     - OLLAMA_GPU_OVERHEAD=0
   models:
-    - qwen2.5-coder:0.5b
-    - qwen2.5-coder:1.5b #entende bem ts, Nestjs, prisma
-    - qwen2.5-coder:3b
-    - qwen3:1.7b
-    - qwen3 #(8b)
-    - deepseek-r1:1.5b #autocomplete
-    - deepseek-coder:1.3b #autocomplete
-    - phi4-mini:3.8b #(3.8b)
-    - llama3.2:1b
-    - llama3.2:3b
-    # - gemma3n:e2b
-    - codegemma:2b #autocomplete
-    - starcoder2:3b
+    - qwen2.5-coder:0.5b #Completion entende bem ts, Nestjs, prisma
+    - qwen2.5-coder:1.5b #Completion entende bem ts, Nestjs, prisma
+    - qwen2.5-coder:3b #Completion entende bem ts, Nestjs, prisma #Openclaw Coding
+    - qwen3:4b #4b Openclaw Fast answers
+    - llama3.2:3b #Openclaw General
+    - gemma3n:e2b #Openclaw General
