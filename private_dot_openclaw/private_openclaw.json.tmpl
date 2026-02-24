@@ -18,16 +18,32 @@
   "browser": {
     "executablePath": "/usr/bin/google-chrome"
   },
-  "models": {
+ "models": {
     "providers": {
       "ollama": {
-        "baseUrl": "http://127.0.0.1:11434/v1",
-        "apiKey": "ollama-local",
         "api": "openai-completions",
+        "apiKey": "ollama-local",
+        "baseUrl": "http://127.0.0.1:11434/v1",
         "models": [
           {
-            "id": "glm-4.7:cloud",
-            "name": "glm-4.7:cloud",
+            "id": "minimax-m2.5:cloud",
+            "name": "minimax-m2.5:cloud",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 16384
+          },
+          {
+            "id": "glm-5:cloud",
+            "name": "glm-5:cloud",
             "reasoning": false,
             "input": [
               "text"
@@ -56,6 +72,22 @@
             },
             "contextWindow": 131072,
             "maxTokens": 16384
+          },
+          {
+            "id": "glm-4.7:cloud",
+            "name": "glm-4.7:cloud",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 16384
           }
         ]
       }
@@ -64,18 +96,32 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "ollama/kimi-k2.5:cloud",
+        "primary": "ollama/minimax-m2.5:cloud",
         "fallbacks": [
+          "openrouter/openrouter/free",
+          "opencode/glm-5-free",
+          "google/gemini-2.5-flash-lite",
           "ollama/glm-4.7:cloud",
-          "google/gemini-3-pro-preview",
-          "openrouter/anthropic/claude-sonnet-4-5"
+          "openrouter/z-ai/glm-4.5-air:free",
+          "opencode/kimi-k2.5-free",
+          "google/gemini-2.5-pro"
         ]
       },
       "models": {
+        "ollama/minimax-m2.5:cloud": {},
         "ollama/kimi-k2.5:cloud": {},
         "ollama/glm-4.7:cloud": {},
+        "openrouter/z-ai/glm-4.5-air:free": {},
         "google/gemini-3-pro-preview": {},
-        "openrouter/anthropic/claude-sonnet-4-5": {}
+        "google/gemini-2.5-flash-lite": {},
+        "google/gemini-2.5-pro": {},
+        "google/gemini-3-flash-preview": {},
+        "opencode/kimi-k2.5-free": {},
+        "opencode/minimax-m2.5-free": {},
+        "openrouter/openrouter/free": {},
+        "openrouter/stepfun/step-3.5-flash:free": {},
+        "opencode/glm-5-free": {},
+        "openrouter/openai/gpt-oss-120b:free": {}
       },
       "workspace": "/home/fabiosouzadev/.openclaw/workspace",
       "contextPruning": {
@@ -117,12 +163,13 @@
   "gateway": {
     "port": 9091,
     "mode": "local",
-    "bind": "loopback",
+    "bind": "auto",
     "auth": {
-      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+      "token": "${OPENCLAW_GATEWAY_TOKEN}",
+      "allowTailscale": true
     },
     "tailscale": {
-      "mode": "off",
+      "mode": "serve",
       "resetOnExit": false
     }
   },
