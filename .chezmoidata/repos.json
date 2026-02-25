@@ -1,10 +1,6 @@
 {
   "repos": {
     "personal": [
-      {
-        "repo": "AL-MARID/Lorph.git",
-        "path": "Lorph"
-      },
       { "repo": "fabiosouzadev/personal",
          "path": "personal"
       },
@@ -15,16 +11,6 @@
          "path": "wallpapers"
       }
     ],
-    "work": [
-      { 
-        "workplace": "nexialab",
-        "repos": [
-          {
-            "repo": "nexialab/aurea-chat-omni",
-            "path": "aurea-chat-omni"
-          }
-        ]
-      }
-    ]
+    "work": []
   }
 }

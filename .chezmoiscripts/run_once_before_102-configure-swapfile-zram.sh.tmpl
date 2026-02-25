@@ -129,29 +129,30 @@ info ">>> Ajustando parâmetros de ZSWAP no GRUB..."
 GRUB_FILE="/etc/default/grub"
 KERNEL_FLAGS="zswap.enabled=1 zswap.compressor=zstd zswap.max_pool_percent=50 zswap.zpool=zsmalloc"
 
-if ! grep -q "zswap.enabled=1" "$GRUB_FILE"; then
+if [ -f "$GRUB_FILE" ];then
+  if ! grep -q "zswap.enabled=1" "$GRUB_FILE"; then
 
-  BACKUP_FILE="${GRUB_FILE}.bak_$(date +%Y%m%d%H%M%S)"
-  sudo cp "$GRUB_FILE" "$BACKUP_FILE"
-  info ">>> Backup do GRUB criado: $BACKUP_FILE"
+    BACKUP_FILE="${GRUB_FILE}.bak_$(date +%Y%m%d%H%M%S)"
+    sudo cp "$GRUB_FILE" "$BACKUP_FILE"
+    info ">>> Backup do GRUB criado: $BACKUP_FILE"
 
-  sudo sed -i -E "s|^(GRUB_CMDLINE_LINUX_DEFAULT=['\"])([^'\"]*)(['\"])|\1\2 ${KERNEL_FLAGS}\3|" "$GRUB_FILE"
+    sudo sed -i -E "s|^(GRUB_CMDLINE_LINUX_DEFAULT=['\"])([^'\"]*)(['\"])|\1\2 ${KERNEL_FLAGS}\3|" "$GRUB_FILE"
 
-  # Remover possíveis conflitos
-  sudo sed -i -E 's/(^| )zswap\.enabled=0( |$)//g' "$GRUB_FILE"
+    # Remover possíveis conflitos
+    sudo sed -i -E 's/(^| )zswap\.enabled=0( |$)//g' "$GRUB_FILE"
 
-  {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-  sudo grub-mkconfig -o /boot/grub/grub.cfg
-  {{ end }}
+    {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+    {{ end }}
 
-  {{ if eq .chezmoi.osRelease.id "ubuntu" }}
-  sudo update-grub
-  {{ end }}
+    {{ if eq .chezmoi.osRelease.id "ubuntu" }}
+    sudo update-grub
+    {{ end }}
 
-else
-  info ">>> Parâmetros ZSWAP já presentes no GRUB."
+  else
+    info ">>> Parâmetros ZSWAP já presentes no GRUB."
+  fi
 fi
-
 # --- 8. Status final ---
 success ">>> Configuração EXTREMA aplicada com sucesso"
 

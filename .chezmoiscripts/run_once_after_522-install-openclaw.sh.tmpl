@@ -19,10 +19,6 @@ if command -v openclaw &> /dev/null; then
     npx -y openclaw uninstall --all --yes --non-interactive
     rm -rf "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
 
-    if [ -f "$HOME/.local/bin/openclaw" ]; then
-        rm -f "$HOME/.local/bin/openclaw"
-    fi
-
     if command -v npm &> /dev/null; then
         npm uninstall -g openclaw || true
     fi
@@ -43,6 +39,14 @@ if command -v openclaw &> /dev/null; then
         rm -f "$HOME/.config/systemd/user/openclaw-gateway.service"
     fi
 
+    if [ -f "$HOME/.local/bin/openclaw" ]; then
+        rm -f "$HOME/.local/bin/openclaw"
+    fi
+
+    if [ -f "$HOME/.npm-global/bin/openclaw" ]; then
+        rm -f "$HOME/.npm-global/bin/openclaw"
+    fi
+
     success "OpenClaw was uninstalled"
 fi
 
@@ -60,6 +64,9 @@ curl -fsSL https://openclaw.ai/install.sh | bash -s -- --beta --no-onboard
 if [ ! -d "$HOME/.local/share/zsh/site-functions" ]; then
     mkdir -p "$HOME/.local/share/zsh/site-functions"
 fi
+
+# PATH correto para ambiente não-interativo
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
 openclaw completion -s zsh \
   > "$HOME/.local/share/zsh/site-functions/_openclaw"
