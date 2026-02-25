@@ -50,7 +50,7 @@ success ">>> Zsh pronto no Ubuntu"
 
 if ! command -v zsh >/dev/null 2>&1; then
   info ">>> Instalando Zsh (Arch)"
-  sudo pacman -Syu --noconfirm --needed zsh
+  sudo pacman -S --noconfirm --needed zsh
 else
   info ">>> Zsh já instalado"
 fi

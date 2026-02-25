@@ -59,14 +59,12 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
 #Install OpenClaw
 info ">>>>> Installing OpenClaw <<<<<<"
-curl -fsSL https://openclaw.ai/install.sh | bash -s -- --beta --no-onboard
+
+npm install -g openclaw@beta
 
 if [ ! -d "$HOME/.local/share/zsh/site-functions" ]; then
     mkdir -p "$HOME/.local/share/zsh/site-functions"
 fi
-
-# PATH correto para ambiente não-interativo
-export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
 openclaw completion -s zsh \
   > "$HOME/.local/share/zsh/site-functions/_openclaw"

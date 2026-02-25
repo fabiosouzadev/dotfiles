@@ -15,7 +15,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 info "Installing Arch Kernels"
 
-sudo pacman -Sy --noconfirm --needed {{ range .linux.arch.kernels }} {{.}}{{end}}
+sudo pacman -S --noconfirm --needed {{ range .linux.arch.kernels }} {{.}}{{end}}
 
 
 success "Installed Arch Kernels"
@@ -26,7 +26,7 @@ success "Installed Arch Kernels"
 {{ if eq .chezmoi.osRelease.id "cachyos" }}
 info "Installing CachyOs Kernels"
 
-sudo pacman -Sy --noconfirm --needed {{ range .linux.cachyos.kernels }} {{.}}{{end}}
+sudo pacman -S --noconfirm --needed {{ range .linux.cachyos.kernels }} {{.}}{{end}}
 
 
 success "Installed CachyOs Kernels"

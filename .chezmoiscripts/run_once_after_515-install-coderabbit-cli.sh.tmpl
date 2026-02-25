@@ -12,7 +12,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 {{ if eq .chezmoi.os "linux" -}}
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
-sudo pacman -S gnome-keyring libsecret
+sudo pacman -S --noconfirm --needed gnome-keyring libsecret
 
 {{ end -}}
 

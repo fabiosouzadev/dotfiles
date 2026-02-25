@@ -20,7 +20,7 @@ sudo swapoff -a || true
 
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 info ">>> Instalando zram-generator (Arch)..."
-sudo pacman -Sy --needed --noconfirm zram-generator
+sudo pacman -S --noconfirm --needed zram-generator
 {{ end }}
 
 {{ if eq .chezmoi.osRelease.id "ubuntu" }}

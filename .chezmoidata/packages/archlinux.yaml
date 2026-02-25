@@ -72,6 +72,7 @@ packages:
         - xclip
         - xsel
         - xorg-xhost
+        - xorg-xrandr
         - zip
       multilib:
         - wine
