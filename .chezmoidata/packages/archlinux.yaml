@@ -6,16 +6,15 @@ packages:
         - brave-nightly-bin
         - cursor-bin
         - ferdium-nightly-bin
+        - intellij-idea-community-edition-bin
         - localsend-bin
         - mongodb-compass-bin
         - postman-bin
-        - rofi-greenclip
         - spotify
         - streamlink-twitch-gui-bin
         - twitch-dl-bin
         - vesktop
         - vscodium-insiders-bin
-        - xob
         - zoxide
       core:
         - gzip
@@ -25,6 +24,7 @@ packages:
       extra:
         - age
         - aichat
+        - arandr
         - aws-cli-v2
         - bat
         - blueman
@@ -33,21 +33,17 @@ packages:
         - dbeaver
         - dex
         - direnv
-        - dunst
         - eza
         - fastfetch
         - flameshot
         - firefox-developer-edition-i18n-pt-br
-        - feh
         - fd
         - ghostty
         - git
         - git-delta
         - github-cli
         - gnome-keyring
-        - hyprland
         - htop
-        - i3-wm
         - iwd
         - impala
         - just
@@ -59,25 +55,19 @@ packages:
         - network-manager-applet
         - obsidian
         - pavucontrol
-        - picom
-        - polybar
         - qutebrowser
         - qbittorrent
-        - rofi
         - sops
         - sysbench
-        - tmux
         - vlc
         - yazi
         - xclip
         - xsel
-        - xorg-xhost
-        - xorg-xrandr
         - zip
       multilib:
         - wine
       devops:
-        core:
+        arch:
           - nerdctl
           - distrobox
           - docker
@@ -96,14 +86,14 @@ packages:
           - openlens-bin 
           # - cloudlens
       virtualisation:
-        core:
+        arch:
           - dnsmasq
           - edk2-ovmf
           - guestfs-tools
           - libosinfo
           - libvirt
           - iptables-nft
-          - openbsd-netcat 
+          - openbsd-netcat
           - qemu-desktop
           - qemu-full
           - qemu-img

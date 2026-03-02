@@ -11,7 +11,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
 info "Installing Devops core packages"
-sudo pacman -Syu --noconfirm --needed {{ range .packages.linux.arch.devops.core }} {{.}}{{end}}
+sudo pacman -Syu --noconfirm --needed {{ range .packages.linux.arch.devops.arch }} {{.}}{{end}}
 success "Installed Devops core packages"
 
 

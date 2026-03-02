@@ -1,0 +1,69 @@
+{
+  "packages": {
+    "linux": {
+      "wm": [
+        {
+          "name": "i3",
+          "flavors": {
+            "ubuntu": {
+              "packages": [
+                "i3",
+                "dunst",
+                "feh",
+                "picom",
+                "polybar",
+                "rofi",
+                "xorg-xhost",
+                "xrandr"
+              ]
+            },
+            "arch": {
+              "packages": [
+                "i3-wm",
+                "dunst",
+                "feh",
+                "picom",
+                "polybar",
+                "rofi",
+                "xorg-xhost",
+                "xorg-xrandr"
+              ],
+              "aur-packages": [
+                "rofi-greenclip",
+                "xob"
+              ]
+            }
+          }
+        },
+        {
+          "name": "niri",
+          "flavors": {
+            "ubuntu": {
+              "packages": []
+            },
+            "arch": {
+              "packages": [
+                "cava",
+                "cliphist",
+                "ddcutil",
+                "fuzzel",
+                "mako",
+                "swaybg",
+                "swayidle",
+                "waybar",
+                "wlsunset",
+                "xdg-desktop-portal-gtk",
+                "xdg-desktop-portal-gnome",
+                "xwayland-satellite"
+              ],
+              "aur-packages": [
+                "niri",
+                "noctalia-shell"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

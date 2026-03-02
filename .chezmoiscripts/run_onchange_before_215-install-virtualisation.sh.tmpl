@@ -14,7 +14,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 info "Installing virtualisation tools"
 
-sudo pacman -Syu --noconfirm --needed {{ range .packages.linux.arch.virtualisation.core }} {{.}}{{end}}
+sudo pacman -Syu --noconfirm --needed {{ range .packages.linux.arch.virtualisation.arch }} {{.}}{{ end }}
 sudo systemctl enable --now libvirtd.service
 sudo usermod -a -G libvirt $(whoami)
 

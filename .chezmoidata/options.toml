@@ -15,3 +15,9 @@ compiled = true
 
 [openclaw]
 install = true
+
+[i3]
+install = true
+
+[niri]
+install = true
