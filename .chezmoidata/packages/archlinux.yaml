@@ -30,6 +30,7 @@ packages:
         - blueman
         - btop
         - clang
+        - cmake
         - dbeaver
         - dex
         - direnv
