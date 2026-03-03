@@ -50,6 +50,7 @@
                 "mako",
                 "swaybg",
                 "swayidle",
+                "swaylock",
                 "waybar",
                 "wlsunset",
                 "xdg-desktop-portal-gtk",
@@ -58,7 +59,8 @@
               ],
               "aur-packages": [
                 "niri",
-                "noctalia-shell"
+                "noctalia-shell",
+                "sddm"
               ]
             }
           }
