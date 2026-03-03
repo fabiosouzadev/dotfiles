@@ -15,7 +15,7 @@ sudo pacman -Syyu --noconfirm --needed {{ range .packages.linux.arch.devops.arch
 success "Installed Devops core packages"
 
 
-if type -P paru >/dev/null 2>&1; thend
+if type -P paru >/dev/null 2>&1; then
     info "Installing Devops AUR packages with paru"
     paru -Syyu --noconfirm --needed {{ range .packages.linux.arch.devops.aur }} {{.}}{{ end }}
     success "Installed Devops AUR packages"
