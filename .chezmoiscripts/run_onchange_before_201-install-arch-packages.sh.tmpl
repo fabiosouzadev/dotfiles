@@ -14,16 +14,16 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
 info "Updating Arch packages"
-sudo pacman -Syu
+sudo pacman -Syyu
 success "Updated Arch packages"
 
 info "Installing Arch packages"
-sudo pacman -S --noconfirm --needed {{ range .packages.linux.arch.core }} {{.}}{{end}} {{ range .packages.linux.arch.extra }} {{.}}{{end}} {{ range .packages.linux.arch.multilib }} {{.}}{{end}}
+sudo pacman -Syyu --noconfirm --needed {{ range .packages.linux.arch.core }} {{.}}{{end}} {{ range .packages.linux.arch.extra }} {{.}}{{end}} {{ range .packages.linux.arch.multilib }} {{.}}{{end}}
 
 if command -v "paru" > /dev/null; then
-  paru -Syu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
+  paru -Syyu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
 elif type -P yay >/dev/null 2>&1; then
-  yay -Syu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
+  yay -Syyu --noconfirm --needed {{ range .packages.linux.arch.aur }} {{.}}{{ end }}
 fi
 
 success "Installed Arch packages"

@@ -23,16 +23,16 @@
                     {{- $archPackages := index $wmFlavors.arch "packages" }}
                     {{- if and $archPackages (gt (len $archPackages) 0) }}
                         info "Installing Arch {{ $wmName }} packages:"
-                        sudo pacman -Syu --noconfirm --needed {{ range $archPackages }}{{.}} {{ end }}
+                        sudo pacman -Syyu --noconfirm --needed {{ range $archPackages }}{{.}} {{ end }}
                     {{- end }}
 
                     {{- $aurPackages := index $wmFlavors.arch "aur-packages" }}
                     {{- if and $aurPackages (gt (len $aurPackages) 0) }}
                         info "Installing AUR packages:"
                         if command -v "paru" > /dev/null; then
-                            paru -Syu --noconfirm --needed {{ range $aurPackages}} {{.}}{{ end }}
+                            paru -Syyu --noconfirm --needed {{ range $aurPackages}} {{.}}{{ end }}
                         elif type -P yay >/dev/null 2>&1; then
-                            yay -Syu --noconfirm --needed {{ range $aurPackages}} {{.}}{{ end }}
+                            yay -Syyu --noconfirm --needed {{ range $aurPackages}} {{.}}{{ end }}
                         fi
                     {{- end }}
                 {{- else }}

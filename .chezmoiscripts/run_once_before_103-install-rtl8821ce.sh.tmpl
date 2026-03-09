@@ -6,12 +6,12 @@
 
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
-sudo pacman -S --noconfirm --needed linux-headers dkms bc
+sudo pacman -Syyu --noconfirm --needed linux-headers dkms bc
 
 if type -P paru >/dev/null 2>&1; then
-  paru -Sy --noconfirm --needed rtl8821ce-dkms-git
+  paru -Syyu --noconfirm --needed rtl8821ce-dkms-git
 elif type -P yay >/dev/null 2>&1; then
-  yay -Sy --noconfirm --needed rtl8821ce-dkms-git
+  yay -Syyu --noconfirm --needed rtl8821ce-dkms-git
 fi
 {{ end }}
 

@@ -4,7 +4,7 @@
 
 {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
-sudo pacman -S --noconfirm --needed \
+sudo pacman -Syyu --noconfirm --needed \
               bluez \
               bluez-utils
 sudo systemctl enable --now bluetooth

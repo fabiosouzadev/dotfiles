@@ -543,7 +543,7 @@ exec --no-startup-id /usr/bin/dunst --config ~/.config/dunst/dunstrc
 # manpage: https://man.archlinux.org/man/picom.1.en
 # The default configuration is available in /etc/xdg/picom.conf
 # For modifications, it can be copied to ~/.config/picom/picom.conf or ~/.config/picom.conf
-# install picom package (yay -S picom)
+# install picom package (yay -Syu picom)
 # start using default config
 #
 # for custom config:

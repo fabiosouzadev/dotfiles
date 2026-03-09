@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # vim: filetype=bash
 
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{ if (eq .chezmoi.osRelease.id "endeavouros") }}
 set -euo pipefail
 
 # Pretty print functions
@@ -13,7 +13,7 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 
 if ! command -v "paru" > /dev/null; then
 	info "Installing Paru"
-	sudo pacman -S --noconfirm --needed base-devel git
+	sudo pacman -Syyu --noconfirm --needed base-devel git
 	cd /tmp # && git clone https://aur.archlinux.org/paru.git
 	cd paru
 	makepkg -rsi --noconfirm
