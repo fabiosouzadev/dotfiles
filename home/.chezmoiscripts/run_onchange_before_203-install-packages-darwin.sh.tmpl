@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+
+{{ if eq .chezmoi.os "darwin" -}}
+
+# Install Homebrew
+BREW_DIR="$HOME/.config/homebrew"
+if ! command_exists brew && [ -f "$BREW_DIR/Brewfile" ]; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+brew bundle --file=/dev/stdin <<EOF
+
+# Taps
+tap 'homebrew/core'
+tap 'homebrew/cask'
+tap 'homebrew/bundle'
+tap 'homebrew/cask-fonts'
+tap 'homebrew/cask-versions'
+tap 'nicoverbruggen/homebrew-cask'
+tap 'jesseduffield/lazygit'
+tap 'ferdium/ferdium'
+
+#CLI
+brew 'gnupg'
+brew 'lazygit'
+brew 'neofetch'
+brew 'direnv'
+brew 'ranger'
+brew 'duf'
+brew 'bat'
+brew 'git-delta'
+brew 'eza'
+brew 'hey' # Like a ab (ApacheBench)
+brew 'yazi'
+brew 'fd'
+brew 'mpv'
+brew 'zoxide'
+brew 'age'
+brew 'lazydocker'
+brew 'distrobox'
+brew 'ducker'
+brew 'podman'
+brew 'podman-compose'
+brew 'podman-tui'
+brew 'podlet'
+brew 'lazyjournal'
+brew 'k9s'
+
+#BROWSERS
+cask 'chromium'
+cask 'brave-browser-nightly'
+cask 'opera-gx'
+cask 'google-chrome-canary'
+cask 'vivaldi-snapshot'
+cask 'firefox-nightly'
+cask 'opera-developer'
+
+# Apps
+brew 'mas' # Mac App Store manager
+cask 'antigravity'
+cask 'ente-auth'
+cask 'bitwarden'
+cask 'macs-fan-control'
+cask 'spotify'
+cask 'appcleaner'
+cask 'microsoft-teams'
+cask 'notion'
+cask 'dbeaver-community'
+cask 'intellij-idea-ce'
+cask 'transmission'
+cask 'vlc'
+cask 'stack-stack'
+cask 'keepingyouawake'
+cask 'appcleaner'
+#cask 'figma'
+#cask 'rectangle'
+cask 'zoom'
+cask 'signal'
+cask 'visual-studio-code'
+cask 'visual-studio-code@insiders'
+cask 'vscodium'
+cask 'vscodium@insiders'
+#cask 'miro'
+cask 'drawio'
+cask 'kiro'
+cask 'obsidian'
+cask 'kitty'
+cask 'ghostty'
+cask 'localsend'
+cask 'cursor'
+cask 'streamlink-twitch-gui'
+cask 'copilot-cli'
+cask 'github@beta'
+cask 'podman-desktop'
+cask 'openlens'
+cask 'devpod'
+
+
+
+# Mac App Store
+mas "Battery Health", id: 490192174
+mas "ColorSlurp", id: 1287239339
+mas "Memory Diag", id: 748212890
+mas "Speedtest", id: 1153157709
+mas "Xcode", id: 497799835
+
+
+EOF
+
+{{ end -}}
+# vim: filetype=bash

@@ -83,7 +83,6 @@ packages:
           - devpod-bin
           - lazydocker-bin
           # - dokku
-          - lando-beta
           - openlens-bin 
           # - cloudlens
       virtualisation:
