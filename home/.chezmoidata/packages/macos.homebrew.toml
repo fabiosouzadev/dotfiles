@@ -1,0 +1,122 @@
+# -*-mode:toml-*- vim:ft=toml
+
+[packages.homebrew]
+
+tap = [
+    'homebrew/core',
+    'homebrew/cask',
+    'homebrew/bundle',
+    'homebrew/cask-fonts',
+    'homebrew/cask-versions',
+    'nicoverbruggen/homebrew-cask',
+    'jesseduffield/lazygit',
+    'ferdium/ferdium'
+]
+
+brew = [
+    # Cli
+    'gnupg',
+    'lazygit',
+    'neofetch',
+    'direnv',
+    'ranger',
+    'duf',
+    'bat',
+    'git-delta',
+    'eza',
+    'hey', # Like a ab (ApacheBench)
+    'yazi',
+    'fd',
+    'mpv',
+    'zoxide',
+    'age',
+
+    # DEVOPS
+    'lazydocker',
+    'distrobox',
+    'ducker',
+    'podman',   
+    'podman-compose',
+    'podman-tui',
+    'podlet',
+    'lazyjournal',
+    'k9s',
+
+    # Mac App Store manager
+    'mas' 
+]
+
+cask = [
+    # App
+    'ente-auth',
+    'bitwarden',
+    'macs-fan-control',
+    'spotify',
+    'appcleaner',
+    'microsoft-teams',
+    'notion',
+    'dbeaver-community',
+    'transmission',
+    'vlc',
+    'stack-stack',
+    'keepingyouawake',
+    'appcleaner',
+    'figma',
+    'rectangle',
+    'zoom',
+    'signal',
+    'drawio',
+    'obsidian',
+    'localsend',
+    'streamlink-twitch-gui',
+
+    # terminal
+    'kitty',
+    'ghostty',
+    'wezterm',
+    
+    # Ide
+    'antigravity',
+    'intellij-idea-ce',
+    'visual-studio-code',
+    'visual-studio-code@insiders',
+    'vscodium',
+    'vscodium@insiders',
+    'cursor',
+
+    # BROWSERS    
+    'chromium',
+    'brave-browser-nightly',
+    'google-chrome-beta',
+    'firefox-beta',
+
+    # environment
+    'github@beta',
+    'podman-desktop',
+    'openlens',
+    'devpod'
+]
+
+[[packages.homebrew.mas]]
+name = "The Unarchiver"
+id   = 425424353
+
+[[packages.homebrew.mas]]
+name = "Battery Health"
+id   = 490192174
+
+[[packages.homebrew.mas]]
+name = "ColorSlurp"
+id   = 1287239339
+
+[[packages.homebrew.mas]]
+name = "Memory Diag"
+id   = 748212890
+
+[[packages.homebrew.mas]]
+name = "Speedtest"
+id   = 1153157709
+
+[[packages.homebrew.mas]]
+name = "Xcode"
+id   = 497799835
