@@ -12,6 +12,7 @@ install = true
 
 [ollama]
 compiled = true
+localmodels = false
 
 [openclaw]
 install = true

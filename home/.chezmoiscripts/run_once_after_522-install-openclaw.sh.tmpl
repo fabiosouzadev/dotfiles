@@ -14,10 +14,10 @@ success() { echo -e "\033[1;32m✅ $*\033[0m"; }
 if command -v openclaw &> /dev/null; then
     warn ">>> OpenClaw is already installed. Removing old version..."
     openclaw uninstall --all --yes --non-interactive
-    openclaw gateway stop
-    openclaw gateway uninstall
     npx -y openclaw uninstall --all --yes --non-interactive
-    rm -rf "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
+    #openclaw gateway stop
+    #openclaw gateway uninstall
+    rm -rfv "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
 
     if command -v npm &> /dev/null; then
         npm uninstall -g openclaw || true
