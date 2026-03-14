@@ -1,19 +1,14 @@
 #!/usr/bin/env bash
 
-{{ if eq .chezmoi.os "linux" -}}
-
 set -euo pipefail
 
-# Pretty print functions
-info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
-warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
-error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
-success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
+{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . }}
 
 # ----------------------------
 # Ubuntu
 # ----------------------------
-{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+{{- if .osid | lower | contains "ubuntu" }}
 
 info ">>> Install dependencies Nvim (Ubuntu)"
 
@@ -31,17 +26,14 @@ sudo apt-get install -y ninja-build \
   doxygen
 
 
-{{ end }}
+{{- end }}
 
 # ----------------------------
 # Arch / EndeavourOS / CachyOS
 # ----------------------------
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
 info ">>> Install dependencies Nvim (Arch)"
-
-
-{{ end }}
+{{- end }}
 
 # ----------------------------
 # Remove previous Neovim installations
@@ -80,7 +72,4 @@ make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$HOME/.local
 make install
 
 success ">>> Neovim build process finished successfully"
-
-{{ end -}}
-
 # vim: filetype=bash

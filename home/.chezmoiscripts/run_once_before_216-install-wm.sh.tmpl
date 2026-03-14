@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . }}
+
+info ">> Installing WM packages"
+
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+
+{{-     range .packages.linux.wm }}
+{{-         $wmName := .name }}
+{{-         $wmFlavors := .flavors }}
+info "Processing WM: {{ $wmName }}"
+
+{{-         if $wmFlavors }}
+{{-             if $wmFlavors.arch }}
+{{-                 $archPackages := index $wmFlavors.arch "packages" }}
+{{-                 if and $archPackages (gt (len $archPackages) 0) }}
+info "Installing Arch {{ $wmName }} packages:"
+sudo pacman -Syyu --noconfirm --needed {{ range $archPackages }}{{.}} {{ end }}
+{{-                 end }}
+
+{{-                 $aurPackages := index $wmFlavors.arch "aur-packages" }}
+{{-                     if and $aurPackages (gt (len $aurPackages) 0) }}
+info "Installing AUR packages:"
+if command -v "paru" > /dev/null; then
+paru -Syyu --noconfirm --needed {{ range $aurPackages}} {{.}}{{ end }}
+elif type -P yay >/dev/null 2>&1; then
+yay -Syyu --noconfirm --needed {{ range $aurPackages}} {{.}}{{ end }}
+fi
+{{-                      end }}
+{{-                     else }}
+warn "No arch flavor defined for '{{ $wmName }}'"
+{{-                     end }}
+{{-                     else }}
+warn "No flavors defined for '{{ $wmName }}'"
+{{-                     end }}
+{{-                 end }}
+{{- end }}
+
+{{- if .osid | lower | contains "ubuntu" }}
+
+{{-     range .packages.linux.wm }}
+{{-         $wmName := .name }}
+{{-             $wmFlavors := .flavors }}
+info "Processing WM: {{ $wmName }}"
+
+{{-                 if $wmFlavors }}
+{{-                     if $wmFlavors.ubuntu }}
+{{-                         $ubuntuPackages := index $wmFlavors.ubuntu "packages" }}
+{{-                             if and $ubuntuPackages (gt (len $ubuntuPackages) 0) }}
+info "Installing Ubuntu {{ $wmName }} packages:"
+sudo apt-get update -qq
+sudo apt-get install -y --no-install-recommends {{ range $ubuntuPackages }}{{.}} {{ end }}
+{{-                             else }}
+info "No Ubuntu packages defined for '{{ $wmName }}'"
+{{-                             end }}
+{{-                         else }}
+warn "No ubuntu flavor defined for '{{ $wmName }}'"
+{{-                     end }}
+{{-                 else }}
+warn "No flavors defined for '{{ $wmName }}'"
+{{-                 end }}
+{{-     end }}
+
+{{- end }}
+# vim: filetype=bash

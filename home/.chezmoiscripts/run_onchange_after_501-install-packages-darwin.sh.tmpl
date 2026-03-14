@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "darwin/script_darwin_only" . }}
+{{ template "common/script_helper" . }}
+
+# Install Homebrew
+info "Install Homebrew"
+BREW_DIR="$HOME/.config/homebrew"
+if ! command -v "brew" && [ -f "$BREW_DIR/Brewfile" ]; then
+ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# Install Homebrew packages
+brew bundle -v --file="$BREW_DIR/Brewfile"
+brew bundle -v --file="$BREW_DIR/Caskfile"
+#brew bundle -v --file="$BREW_DIR/Masfile"
+
+brew list
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
+# vim: filetype=bash

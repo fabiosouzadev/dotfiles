@@ -4,23 +4,23 @@ alias -- vi=nvim
 alias -- vim=nvim
 
 #bat
-{{ if eq .chezmoi.osRelease.id "ubuntu" -}}
+{{- if .osid | lower | contains "ubuntu" }}
 
 alias -- bat=batcat
 alias -- cat=batcat
-{{ else }}
+{{- else }}
 alias -- cat=bat
-{{ end }}
+{{- end }}
 
 #eza
-alias -- eza='eza --icons auto --git'
-alias -- l='eza -lF --time-style=long-iso --icons'
-alias -- la='eza -lah --tree'
-alias -- ll='eza -l'
-alias -- lla='eza -la'
-alias -- ls='eza -h --git --icons --color=auto --group-directories-first -s extension'
-alias -- lt='eza --tree'
-alias -- tree='eza --tree --icons --tree'
+#alias -- eza='eza --icons auto --git'
+#alias -- l='eza -lF --time-style=long-iso --icons'
+#alias -- la='eza -lah --tree'
+#alias -- ll='eza -l'
+#alias -- lla='eza -la'
+#alias -- ls='eza -h --git --icons --color=auto --group-directories-first -s extension'
+#alias -- lt='eza --tree'
+#alias -- tree='eza --tree --icons --tree'
 
 #grep
 alias -- grep='rg'

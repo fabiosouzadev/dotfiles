@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
-# vim: filetype=bash
 
 set -euo pipefail
+
+{{ template "linux/script_ubuntu_only" . }}
+{{ template "common/script_helper" . }}
 export PATH="$HOME/.local/bin/:$PATH"
-
-
-# Pretty print functions
-info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
-warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
-error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
-success() { echo -e "\033[1;32m✅ $*\033[0m"; }
-
-{{ if eq .chezmoi.osRelease.id "ubuntu" -}}
 
 info ">>> Updating Ubuntu packages"
 sudo apt update -y
@@ -156,5 +149,5 @@ success "All .deb packages processed successfully"
 
 
 success "Installed Ubuntu packages"
-
-{{ end -}}
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
+# vim: filetype=bash

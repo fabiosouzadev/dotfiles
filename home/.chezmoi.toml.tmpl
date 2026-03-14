@@ -1,8 +1,47 @@
 encryption = "age"
 
 [age]
-identity = "key.txt"
+identity = "~/.config/chezmoi/key.txt"
 recipient = "age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy"
+
+
+{{/* boolean feature tags */}}
+{{- $docker     := false -}}{{/* true if this machine should have Docker installed */}}
+{{- $ephemeral  := false -}}{{/* true if this machine is ephemeral, e.g. a cloud or VM instance */}}
+{{- $headless   := false -}}{{/* true if this machine does not have a screen and keyboard */}}
+{{- $cloud      := false -}}{{/* true if this machine is going to use cloud */}}
+{{- $wsl        := false -}}{{/* true if this machine is a wsl instance */}}
+{{- "" -}}
+
+
+{{- $osID := .chezmoi.os -}}
+{{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
+{{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+{{/* detect GitHub Actions, GitHub codespaces, VSCode remote containers, Docker containers, Multipass VMs, and Vagrant boxes */}}
+{{- if or (env "GITHUB_TOKEN") (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") -}}
+{{-   $ephemeral = true -}}
+{{-   $headless = true -}}
+{{- end -}}
+
+{{/* detect if is a WSL instance */}}
+{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{-   $wsl      = true -}}
+{{-   $headless = true -}}
+{{- end -}}
+
+{{- $hostname := .chezmoi.hostname -}}
+
+
+[data]
+docker    = {{ $docker }}
+ephemeral = {{ $ephemeral }}
+headless  = {{ $headless }}
+hostname  = {{ $hostname | quote }}
+cloud     = {{ $cloud }}
+wsl       = {{ $wsl }}
+osid      = {{ $osID | quote }}
 
 [edit]
 command = "nvim"

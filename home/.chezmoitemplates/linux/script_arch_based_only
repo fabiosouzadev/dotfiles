@@ -1,0 +1,6 @@
+{{- if not (or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos")) }}
+exit 0
+{{- end }}
+
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
+# vim: filetype=bash

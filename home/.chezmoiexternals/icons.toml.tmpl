@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.os "linux" }}
 [".local/share/icons"]
 type = "archive"
 url = "https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/archive/refs/tags/20250501.zip"
@@ -12,5 +13,7 @@ url = "https://github.com/EliverLara/candy-icons/archive/refs/heads/master.zip"
 exact = true
 refreshPeriod = "168h"
 stripComponents = 1
+
+{{- end }}
 
 # vim: filetype=toml

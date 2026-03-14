@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "linux/script_arch_based_only" . }}
+{{ template "common/script_helper" . }}
+
+sudo pacman -Syyu --noconfirm --needed \
+              bluez \
+              bluez-utils
+sudo systemctl enable --now bluetooth
+
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
+# vim: filetype=bash

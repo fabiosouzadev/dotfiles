@@ -15,7 +15,7 @@ tap = [
 
 brew = [
     # Cli
-    'gnupg',
+    #'gnupg',
     'lazygit',
     'neofetch',
     'direnv',
@@ -23,27 +23,25 @@ brew = [
     'duf',
     'bat',
     'git-delta',
-    'eza',
+    #'eza',
     'hey', # Like a ab (ApacheBench)
     'yazi',
     'fd',
-    'mpv',
+    #'mpv',
     'zoxide',
     'age',
 
     # DEVOPS
-    'lazydocker',
-    'distrobox',
-    'ducker',
+    #'docker',
+    #'lazydocker',
+    #'ducker',
     'podman',   
     'podman-compose',
     'podman-tui',
     'podlet',
     'lazyjournal',
     'k9s',
-
-    # Mac App Store manager
-    'mas' 
+    #'distrobox'
 ]
 
 cask = [
@@ -58,7 +56,7 @@ cask = [
     'dbeaver-community',
     'transmission',
     'vlc',
-    'stack-stack',
+    #'stack-stack',
     'keepingyouawake',
     'appcleaner',
     'figma',
@@ -86,9 +84,9 @@ cask = [
 
     # BROWSERS    
     'chromium',
-    'brave-browser-nightly',
-    'google-chrome-beta',
-    'firefox-beta',
+    'brave-browser@nightly',
+    'google-chrome@beta',
+    'firefox@beta',
 
     # environment
     'github@beta',

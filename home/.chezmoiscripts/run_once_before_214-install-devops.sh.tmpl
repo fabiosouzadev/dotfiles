@@ -2,13 +2,8 @@
 
 set -euo pipefail
 
-# Pretty print
-info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
-warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
-error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
-success() { echo -e "\033[1;32m✅ $*\033[0m"; }
-
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{ template "linux/script_arch_based_only" . }}
+{{ template "common/script_helper" . }}
 
 info "Installing Devops core packages"
 sudo pacman -Syyu --noconfirm --needed {{ range .packages.linux.arch.devops.arch }} {{.}}{{end}}
@@ -29,9 +24,5 @@ fi
 #newgrp docker ## Command crashes this file
 # sudo systemctl start docker.service
 
-{{ else }}
-
-error "This script is only for Arch based systems. Exiting..."
-
-{{ end }}
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
 # vim: filetype=bash

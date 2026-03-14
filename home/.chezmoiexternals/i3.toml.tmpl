@@ -1,4 +1,4 @@
-# vim: filetype=toml
+{{- if eq .chezmoi.os "linux" }}
 [".config/polybar"]
 type = "archive"
 url = "https://github.com/fabiosouzadev/polybar-themes/archive/refs/heads/master.zip"
@@ -15,3 +15,6 @@ stripComponents = 1
 refreshPeriod = "168h"
 include = ["*/files/**", "*/fonts/**"]
 
+{{- end }}
+
+# vim: filetype=toml

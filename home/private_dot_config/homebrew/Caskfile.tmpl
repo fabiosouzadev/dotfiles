@@ -1,0 +1,6 @@
+{{- range .packages.homebrew.cask | uniq }}
+cask {{ . | quote }}
+{{- end }}
+
+# -*-mode:ruby-*- vim:ft=ruby.gotexttmpl
+# vim: filetype=ruby

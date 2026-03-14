@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 
-{{ if eq .chezmoi.os "linux" -}}
-
 set -euo pipefail
 
-# Pretty print functions
-info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
-warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
-error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
-success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
+{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . }}
 
 info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)"
 
@@ -18,16 +13,16 @@ sudo swapoff -a || true
 
 # --- 1. Instalar dependências ---
 
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
 info ">>> Instalando zram-generator (Arch)..."
 sudo pacman -Syyu --noconfirm --needed zram-generator
-{{ end }}
+{{- end }}
 
-{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+{{- if .osid | lower | contains "ubuntu" }}
 info ">>> Instalando zram-tools (Ubuntu)..."
 sudo apt update -y
 sudo apt install -y zram-tools util-linux
-{{ end }}
+{{- end }}
 
 # --- 2. Limpar ZRAM antigo ---
 info ">>> Removendo dispositivos ZRAM antigos..."
@@ -37,7 +32,7 @@ done
 
 # --- 3. Configurar ZRAM ---
 
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
 info ">>> Gerando /etc/systemd/zram-generator.conf (Arch)..."
 sudo tee /etc/systemd/zram-generator.conf > /dev/null <<EOF
 [zram0]
@@ -46,16 +41,16 @@ compression-algorithm = zstd
 swap-priority = 200
 fs-type = swap
 EOF
-{{ end }}
+{{- end }}
 
-{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+{{- if .osid | lower | contains "ubuntu" }}
 info ">>> Configurando /etc/default/zramswap (Ubuntu)..."
 sudo tee /etc/default/zramswap > /dev/null <<EOF
 PERCENT=100
 PRIORITY=200
 COMPRESSOR=zstd
 EOF
-{{ end }}
+{{- end }}
 
 # --- 4. Criar SWAP físico de fallback ---
 SWAP_FILE="/swapfile"
@@ -110,16 +105,16 @@ sudo sysctl --system >/dev/null
 
 # --- 6. Ativar serviços ---
 
-{{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
 info ">>> Reiniciando systemd-zram-setup..."
 sudo systemctl daemon-reexec
 sudo systemctl restart systemd-zram-setup@zram0.service || true
-{{ end }}
+{{- end }}
 
-{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+{{- if .osid | lower | contains "ubuntu" }}
 info ">>> Reiniciando zramswap..."
 sudo systemctl restart zramswap.service || true
-{{ end }}
+{{- end }}
 
 sudo swapon --show || sudo swapon "$SWAP_FILE"
 
@@ -141,13 +136,13 @@ if [ -f "$GRUB_FILE" ];then
     # Remover possíveis conflitos
     sudo sed -i -E 's/(^| )zswap\.enabled=0( |$)//g' "$GRUB_FILE"
 
-    {{ if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+    {{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
     sudo grub-mkconfig -o /boot/grub/grub.cfg
-    {{ end }}
+    {{- end }}
 
-    {{ if eq .chezmoi.osRelease.id "ubuntu" }}
+    {{- if .osid | lower | contains "ubuntu" }}
     sudo update-grub
-    {{ end }}
+    {{- end }}
 
   else
     info ">>> Parâmetros ZSWAP já presentes no GRUB."
@@ -169,7 +164,4 @@ info ">>> ZRAM:"
 zramctl || true
 
 success ">>> ZRAM + ZSWAP configurados com sucesso. Reinicie o sistema para efeito completo."
-
-{{ end -}}
-
 # vim: filetype=bash

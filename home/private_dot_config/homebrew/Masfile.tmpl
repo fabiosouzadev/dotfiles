@@ -1,0 +1,9 @@
+# Mac App Store
+brew "mas"
+
+{{- range .packages.homebrew.mas | uniq }}
+mas {{ .name | quote }}, id: {{ .id }}
+{{- end }}
+
+# -*-mode:ruby-*- vim:ft=ruby.gotexttmpl
+# vim: filetype=ruby
