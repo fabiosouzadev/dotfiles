@@ -15,7 +15,7 @@ tap = [
 
 brew = [
     # Cli
-    #'gnupg',
+    #'gnupg', sudo port install gnupg2
     'lazygit',
     'neofetch',
     'direnv',
@@ -23,7 +23,7 @@ brew = [
     'duf',
     'bat',
     'git-delta',
-    #'eza',
+    #'eza', cargo install eza, sudo port install eza (macport)
     'hey', # Like a ab (ApacheBench)
     'yazi',
     'fd',
