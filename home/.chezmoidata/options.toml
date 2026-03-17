@@ -1,8 +1,8 @@
 [dell3520]
-enabled = true
+enabled = false
 
 [rtl8821ce]
-enabled = true
+enabled = false
 
 [dell3530]
 enabled = false
@@ -15,10 +15,10 @@ compiled = true
 localmodels = false
 
 [openclaw]
-install = true
+install = false
 
 [i3]
-install = true
+install = false
 
 [niri]
 install = true
