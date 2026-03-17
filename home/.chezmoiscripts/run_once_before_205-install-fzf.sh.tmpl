@@ -2,10 +2,9 @@
 
 set -euo pipefail
 
-{{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
-info "Installing fzf"
+info ">>>Installing fzf"
 
 FZF_DIR="$HOME/.fzf"
 

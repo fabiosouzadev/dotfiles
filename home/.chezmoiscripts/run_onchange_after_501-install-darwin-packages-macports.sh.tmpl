@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "darwin/script_darwin_only" . }}
+{{ template "common/script_helper" . }}
+
+# Install Macports
+info "Install Macports"
+
+if ! command -v port >/dev/null 2>&1; then
+  VERSION=2.9.3
+  curl -LO https://distfiles.macports.org/MacPorts/MacPorts-${VERSION}.tar.bz2
+  tar xf MacPorts-${VERSION}.tar.bz2
+  cd MacPorts-${VERSION}
+
+  ./configure
+  make
+  sudo make install
+
+  success "Installed Macports"
+
+  sudo port selfupdate
+fi
+
+
+{{- range .packages.macports | uniq }}
+sudo port install {{ . | quote }}
+{{- end }}
+
+
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
+# vim: filetype=bash

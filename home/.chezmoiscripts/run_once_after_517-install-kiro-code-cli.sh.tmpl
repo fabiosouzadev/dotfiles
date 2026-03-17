@@ -2,20 +2,14 @@
 
 set -euo pipefail
 
-# Pretty print functions
-info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
-warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
-error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
-success() { echo -e "\033[1;32m✅ $*\033[0m"; }
+{{ template "common/script_eval_mise" . }}
+{{ template "common/script_helper" . }}
 
 #Install Kiro Code Cli
 info "Installing Kiro Code Cli"
 
-# PATH correto para ambiente não-interativo
-export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
-
 curl -fsSL https://cli.kiro.dev/install | bash
 
-success ">>> Kiro Code Cli Installed Version: $(kiro -v)"
+success ">>> Kiro Code Cli Installed Version: $(kiro-vli --version)"
 
 # vim: filetype=bash

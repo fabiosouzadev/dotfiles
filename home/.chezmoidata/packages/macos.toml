@@ -9,39 +9,11 @@ tap = [
     'homebrew/cask-fonts',
     'homebrew/cask-versions',
     'nicoverbruggen/homebrew-cask',
-    'jesseduffield/lazygit',
     'ferdium/ferdium'
 ]
 
 brew = [
-    # Cli
-    #'gnupg', sudo port install gnupg2
-    'lazygit',
-    'neofetch',
-    'direnv',
-    'ranger',
-    'duf',
-    'bat',
-    'git-delta',
-    #'eza', cargo install eza, sudo port install eza (macport)
-    'hey', # Like a ab (ApacheBench)
-    'yazi',
-    'fd',
-    #'mpv',
-    'zoxide',
-    'age',
-
-    # DEVOPS
-    #'docker',
-    #'lazydocker',
-    #'ducker',
-    'podman',   
-    'podman-compose',
-    'podman-tui',
-    'podlet',
     'lazyjournal',
-    'k9s',
-    #'distrobox'
 ]
 
 cask = [
@@ -67,6 +39,7 @@ cask = [
     'obsidian',
     'localsend',
     'streamlink-twitch-gui',
+    'raycast',
 
     # terminal
     'kitty',
@@ -118,3 +91,35 @@ id   = 1153157709
 [[packages.homebrew.mas]]
 name = "Xcode"
 id   = 497799835
+
+
+[packages]
+macports = [
+    'eza',
+    'gnupg2',
+    'lazygit',
+    'neofetch',
+    'direnv',
+    'ranger',
+    'duf',
+    'bat',
+    'git-delta',
+    'hey', # Like a ab (ApacheBench)
+    'yazi',
+    'fd',
+    'zoxide',
+    'age',
+    'starship',
+    # 'fzf',
+    'jq',
+    'tree',
+    'wget',
+    'htop',
+    'btop',
+    'podman',   
+    'podman-compose',
+    'lima',
+    'colima',
+    'k9s',
+    'grep'
+]

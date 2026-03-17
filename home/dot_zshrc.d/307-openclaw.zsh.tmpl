@@ -1,9 +1,15 @@
-OPENCLAW_COMPLETION="$HOME/.local/share/zsh/site-functions/_openclaw"
+{{- if .openclaw.install }}
+{{ template "common/script_eval_mise" . }}
+
+fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
+
+OPENCLAW_COMPLETION="$HOME/.local/share/zsh/site-functions/openclaw.zsh"
 
 if [ -f $OPENCLAW_COMPLETION ]; then
 	zinit ice as"completion"
 	zinit snippet $OPENCLAW_COMPLETION
 fi
 
+{{- end }}
 # vim: noet ci pi sts=0 sw=4 ts=4
 # vim: filetype=bash
