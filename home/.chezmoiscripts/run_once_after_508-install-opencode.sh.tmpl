@@ -9,6 +9,12 @@ set -euo pipefail
 info ">>> Installing opencode using curl"
 
 npm install -g opencode-ai
+
+{{ template "common/script_validate_completions_path" . }}
+
+opencode completion \
+    > ~/.local/share/zsh/site-functions/_opencode
+
 success ">>> Installed Opencode: $(opencode --version) version"
 # -*-mode:sh-*- vim:ft=sh.gotexttmpl
 # vim: filetype=sh
