@@ -3,15 +3,5 @@ if [ -f ~/.local/bin/mise ]; then
  eval "$(~/.local/bin/mise activate zsh)"
 fi
 
-MISE_COMPLETION="$HOME/.local/share/zsh/site-functions/_mise"
-
-if [ -f $MISE_COMPLETION ]; then
-	zinit ice as"completion"
-	zinit snippet $MISE_COMPLETION
-fi
-
-#autoload -Uz compinit
-#compinit
-
 # vim: noet ci pi sts=0 sw=4 ts=4
 # vim: filetype=bash

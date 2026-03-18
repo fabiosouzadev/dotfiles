@@ -9,7 +9,7 @@ set -euo pipefail
 
 # Remove old OpenClaw installation if it exists
 if command -v openclaw &> /dev/null; then
-    warn ">>> OpenClaw is already installed. Removing old version..."
+    warn ">>> 🧹 OpenClaw is already installed. Removing old version..."
     openclaw uninstall --all --yes --non-interactive
     rm -rfv "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
 
@@ -41,7 +41,7 @@ if command -v openclaw &> /dev/null; then
         rm -f "$HOME/.npm-global/bin/openclaw"
     fi
 
-    success "OpenClaw was uninstalled"
+    success " 🧹🦞 OpenClaw was uninstalled 🧹"
 fi
 
 if [ -d "$HOME/openclaw" ]; then
@@ -49,21 +49,20 @@ if [ -d "$HOME/openclaw" ]; then
 fi
 
 #Install OpenClaw
-info ">>>>> Installing OpenClaw <<<<<<"
+info ">>>>> 🦞 Installing OpenClaw <<<<<<"
 
 npm install -g openclaw@beta
 
-if [ ! -d "$HOME/.local/share/zsh/site-functions" ]; then
-    mkdir -p "$HOME/.local/share/zsh/site-functions"
-fi
+{{ template "common/script_validate_completions_path" . }}
 
-openclaw completion --shell zsh > "$HOME/.local/share/zsh/site-functions/openclaw.zsh"
+openclaw completion --shell zsh \
+    > "$HOME/.local/share/zsh/site-functions/openclaw.zsh"
 
 #openclaw gateway install
 #openclaw gateway
 #systemctl --user start openclaw-gateway.service
 
-success ">>>>>> OpenClaw Installed Version: $(openclaw --version) <<<<<<"
+success ">>>>>> 🦞 OpenClaw Installed Version: $(openclaw --version) <<<<<<"
 
 {{-  end }}
 

@@ -15,7 +15,7 @@ compiled = false
 localmodels = false
 
 [openclaw]
-install = false
+install = true
 
 [i3]
 install = false

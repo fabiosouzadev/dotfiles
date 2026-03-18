@@ -1,0 +1,5 @@
+# Zsh completions
+[ ! -d "$HOME/.local/share/zsh/site-functions" ] && mkdir -p "$HOME/.local/share/zsh/site-functions"
+
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
+# vim: filetype=bash

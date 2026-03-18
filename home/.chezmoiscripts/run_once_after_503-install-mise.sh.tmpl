@@ -11,10 +11,7 @@ if [ ! -x "$HOME/.local/bin/mise" ]; then
   # PATH correto para ambiente não-interativo
   export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
-  # Zsh completions
-  if [ ! -d "$HOME/.local/share/zsh/site-functions" ]; then
-      mkdir -p "$HOME/.local/share/zsh/site-functions"
-  fi
+  {{ template "common/script_validate_completions_path" . }}
 
   "$HOME/.local/bin/mise" completion zsh \
     > "$HOME/.local/share/zsh/site-functions/_mise"
