@@ -43,7 +43,6 @@ cask = [
 
     # terminal
     'kitty',
-    'ghostty',
     'wezterm',
     
     # Ide

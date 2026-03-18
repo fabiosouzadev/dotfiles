@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "common/script_helper" . }}
+
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+
+info ">>> 👻 Installing Ghostty (Arch)..."
+sudo pacman -Syyu --noconfirm --needed ghostty
+
+{{- else if .osid | lower | contains "ubuntu" }}
+
+info ">>> 👻 Installing Ghostty (Ubuntu)..."
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
+
+{{- else if (eq .osid "darwin") }}
+
+brew install --cask ghostty
+
+{{- end }}
+
+success " 👻 Installed Ghostty "
+
+# vim: filetype=bash
+

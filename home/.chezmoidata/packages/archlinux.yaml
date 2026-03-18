@@ -39,7 +39,6 @@ packages:
         - flameshot
         - firefox-developer-edition-i18n-pt-br
         - fd
-        - ghostty
         - git
         - git-delta
         - github-cli
