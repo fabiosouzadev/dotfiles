@@ -13,8 +13,7 @@
                 "picom",
                 "polybar",
                 "rofi",
-                "xorg-xhost",
-                "xrandr"
+                "arandr"
               ]
             },
             "arch": {

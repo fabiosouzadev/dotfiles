@@ -102,17 +102,6 @@
             "packages": ["signal-desktop"]
           },
           {
-            "name": "spotify",
-            "keyring_path": "/etc/apt/keyrings/spotify.gpg",
-            "key_url": "https://download.spotify.com/debian/pubkey_5384ce82ba52c83a.asc",
-            "uri": "https://repository.spotify.com/",
-            "suites": "stable",
-            "components": "non-free",
-            "architectures":[], 
-            "types": "deb",
-            "packages": ["spotify-client"]
-          },
-          {
             "name": "vscode",
             "keyring_path": "/etc/apt/keyrings/microsoft.gpg",
             "key_url": "https://packages.microsoft.com/keys/microsoft.asc",
