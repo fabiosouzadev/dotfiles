@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . }}
+
+{{- if .linuxonmac }}
+
+# ----------------------------
+# Ubuntu
+# ----------------------------
+{{- if .osid | lower | contains "ubuntu" }}
+
+info ">>> Install dependencies to build Cirrus Driver (Ubuntu)"
+
+sudo apt install -y wget make gcc linux-headers-generic
+
+{{- end }}
+
+# ----------------------------
+# Arch / EndeavourOS / CachyOS
+# ----------------------------
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+
+info ">>> Install dependencies to build Cirrus Driver (Arch)"
+
+sudo pacman -Syyu --noconfirm --needed wget make gcc linux-headers
+
+{{- end }}
+
+
+CIRRUS_DRIVER_SRC="$HOME/.local/src/snd_hda_macbookpro"
+
+# ----------------------------
+# Remove previous installations
+# ----------------------------
+if [ -d $CIRRUS_DRIVER_SRC ]; then
+  info ">>> 🧹 Remove previous installations" 
+  sudo rm -rf $CIRRUS_DRIVER_SRC
+fi
+
+if [ ! -d $HOME/.local/src/ ]; then
+  mkdir -p $HOME/.local/src/
+fi
+
+# ----------------------------
+# Build Cirrus Driver
+# ----------------------------
+info ">>> 📦 Build Cirrus Driver from source"
+
+git clone https://github.com/davidjo/snd_hda_macbookpro.git $CIRRUS_DRIVER_SRC
+cd $CIRRUS_DRIVER_SRC
+
+sudo ./install.cirrus.driver.sh
+#reboot
+
+sudo rm -rf $CIRRUS_DRIVER_SRC
+success ">>> 📦 Cirrus Driver build process finished successfully <<<<"
+
+{{- end }}
+# vim: filetype=bash

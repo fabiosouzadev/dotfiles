@@ -6,11 +6,12 @@ recipient = "age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy"
 
 
 {{/* boolean feature tags */}}
-{{- $docker     := false -}}{{/* true if this machine should have Docker installed */}}
-{{- $ephemeral  := false -}}{{/* true if this machine is ephemeral, e.g. a cloud or VM instance */}}
-{{- $headless   := false -}}{{/* true if this machine does not have a screen and keyboard */}}
-{{- $cloud      := false -}}{{/* true if this machine is going to use cloud */}}
-{{- $wsl        := false -}}{{/* true if this machine is a wsl instance */}}
+{{- $docker       := false -}}{{/* true if this machine should have Docker installed */}}
+{{- $ephemeral    := false -}}{{/* true if this machine is ephemeral, e.g. a cloud or VM instance */}}
+{{- $headless     := false -}}{{/* true if this machine does not have a screen and keyboard */}}
+{{- $cloud        := false -}}{{/* true if this machine is going to use cloud */}}
+{{- $wsl          := false -}}{{/* true if this machine is a wsl instance */}}
+{{- $linuxonmac   := false -}}{{/* true if this is a ubuntu install on macbook */}}
 {{- "" -}}
 
 
@@ -31,17 +32,32 @@ recipient = "age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy"
 {{-   $headless = true -}}
 {{- end -}}
 
+{{/* detect if is a WSL instance */}}
+{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{-   $wsl      = true -}}
+{{-   $headless = true -}}
+{{- end -}}
+
 {{- $hostname := .chezmoi.hostname -}}
+
+{{/* detect if this is a ubuntu install on macbook */}}
+{{- if and (eq .chezmoi.os "linux") ($hostname | lower | contains "macbook") -}}
+{{-   $linuxonmac = true -}}
+{{- end -}}
+
+
 
 
 [data]
-docker    = {{ $docker }}
-ephemeral = {{ $ephemeral }}
-headless  = {{ $headless }}
-hostname  = {{ $hostname | quote }}
-cloud     = {{ $cloud }}
-wsl       = {{ $wsl }}
-osid      = {{ $osID | quote }}
+docker      = {{ $docker }}
+ephemeral   = {{ $ephemeral }}
+headless    = {{ $headless }}
+cloud       = {{ $cloud }}
+wsl         = {{ $wsl }}
+linuxonmac  = {{ $linuxonmac }}
+
+osid        = {{ $osID | quote }}
+hostname    = {{ $hostname | quote }}
 
 [edit]
 command = "nvim"
