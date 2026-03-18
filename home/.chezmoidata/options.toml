@@ -8,10 +8,10 @@ enabled = false
 enabled = false
 
 [kernels]
-install = true
+install = false
 
 [ollama]
-compiled = true
+compiled = false
 localmodels = false
 
 [openclaw]
@@ -21,4 +21,4 @@ install = false
 install = false
 
 [niri]
-install = true
+install = false
