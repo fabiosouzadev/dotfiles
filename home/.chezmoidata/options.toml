@@ -18,7 +18,7 @@ localmodels = false
 install = true
 
 [i3]
-install = false
+install = true
 
 [niri]
-install = false
+install = true

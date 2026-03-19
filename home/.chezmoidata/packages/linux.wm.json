@@ -4,8 +4,9 @@
       "wm": [
         {
           "name": "i3",
-          "flavors": {
-            "ubuntu": {
+          "flavors": [
+            {
+              "name": "ubuntu",
               "packages": [
                 "i3",
                 "dunst",
@@ -16,7 +17,8 @@
                 "arandr"
               ]
             },
-            "arch": {
+            {
+              "name": "arch",
               "packages": [
                 "i3-wm",
                 "dunst",
@@ -32,15 +34,31 @@
                 "xob"
               ]
             }
-          }
+          ]
         },
         {
           "name": "niri",
-          "flavors": {
-            "ubuntu": {
-              "packages": []
+          "flavors": [
+            {
+             "name": "ubuntu",
+              "packages": [
+                "cava",
+                "cliphist",
+                "ddcutil",
+                "fuzzel",
+                "mako",
+                "swaybg",
+                "swayidle",
+                "swaylock",
+                "waybar",
+                "wlsunset",
+                "xdg-desktop-portal-gtk",
+                "xdg-desktop-portal-gnome",
+                "xwayland-satellite"
+              ]
             },
-            "arch": {
+            {
+              "name": "arch",
               "packages": [
                 "cava",
                 "cliphist",
@@ -62,7 +80,7 @@
                 "sddm"
               ]
             }
-          }
+          ]
         }
       ]
     }

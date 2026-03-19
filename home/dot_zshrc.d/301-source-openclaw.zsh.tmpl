@@ -1,6 +1,9 @@
-OPENCLAW_COMPLETION="$HOME/.openclaw/completions/openclaw.zsh"
-
-[[ -f $OPENCLAW_COMPLETION ]] && source $OPENCLAW_COMPLETION
+{{-  if .openclaw.install }}
+if command -v openclaw &> /dev/null; then
+    OPENCLAW_COMPLETION="$HOME/.openclaw/completions/openclaw.zsh"
+    [[ -f $OPENCLAW_COMPLETION ]] && source $OPENCLAW_COMPLETION
+fi
+{{- end }}
 
 # vim: noet ci pi sts=0 sw=4 ts=4
 # vim: filetype=bash
