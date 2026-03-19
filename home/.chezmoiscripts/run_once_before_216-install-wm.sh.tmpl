@@ -5,7 +5,7 @@ set -euo pipefail
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
-info ">>>>>>> Installing WM packages <<<"
+info ">>>>>>> Installing WM packages <<<<<<<"
 {{- $root := . }}
 {{- range .packages.linux.wm }}
 {{-     $wmName     := .name }}
@@ -18,7 +18,6 @@ info ">>>>>>> Installing WM packages <<<"
 {{-         $enabled = true }}
 {{-     end }}
 {{-     if $enabled }}
-            info "Processing WM: {{ $wmName }} on {{$root.osid}}"
 {{-         range $wmFlavors}}
 {{-             if or ($root.osid | lower | contains "endeavouros") ($root.osid | lower | contains "cachyos") }}
 {{-                 if eq .name "arch" }}

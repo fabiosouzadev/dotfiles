@@ -41,21 +41,7 @@
           "flavors": [
             {
              "name": "ubuntu",
-              "packages": [
-                "cava",
-                "cliphist",
-                "ddcutil",
-                "fuzzel",
-                "mako",
-                "swaybg",
-                "swayidle",
-                "swaylock",
-                "waybar",
-                "wlsunset",
-                "xdg-desktop-portal-gtk",
-                "xdg-desktop-portal-gnome",
-                "xwayland-satellite"
-              ]
+              "packages": []
             },
             {
               "name": "arch",
