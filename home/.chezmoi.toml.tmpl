@@ -6,14 +6,28 @@ recipient = "age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy"
 
 
 {{/* boolean feature tags */}}
+{{- $ismanaged    := false -}}{{/* true if this machine is managed for others */}}
 {{- $docker       := false -}}{{/* true if this machine should have Docker installed */}}
 {{- $ephemeral    := false -}}{{/* true if this machine is ephemeral, e.g. a cloud or VM instance */}}
 {{- $headless     := false -}}{{/* true if this machine does not have a screen and keyboard */}}
 {{- $cloud        := false -}}{{/* true if this machine is going to use cloud */}}
 {{- $wsl          := false -}}{{/* true if this machine is a wsl instance */}}
 {{- $linuxonmac   := false -}}{{/* true if this is a ubuntu install on macbook */}}
+{{- $dell3530   := false -}}{{/* true if this is a ubuntu install on macbook */}}
+{{- $dell3520   := false -}}{{/* true if this is a ubuntu install on macbook */}}
+{{- $rtl8821ce   := false -}}{{/* true if this is a ubuntu install on macbook */}}
+{{- $latestkernel   := false -}}{{/* true if this is a ubuntu install on macbook */}}
+{{- $openclaw   := false -}}{{/* true if this is a ubuntu install on macbook */}}
+{{- $i3   := false -}}{{/* true if this is a ubuntu install on macbook */}}
+{{- $niri   := false -}}{{/* true if this is a ubuntu install on macbook */}}
 {{- "" -}}
 
+
+{{- $hostname := .chezmoi.hostname -}}
+
+{{- if ($hostname | contains "ZWPE0F96CN")  -}}
+{{-   $ismanaged = true -}}
+{{- end -}}
 
 {{- $osID := .chezmoi.os -}}
 {{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
@@ -32,13 +46,6 @@ recipient = "age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy"
 {{-   $headless = true -}}
 {{- end -}}
 
-{{/* detect if is a WSL instance */}}
-{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
-{{-   $wsl      = true -}}
-{{-   $headless = true -}}
-{{- end -}}
-
-{{- $hostname := .chezmoi.hostname -}}
 
 {{/* detect if this is a ubuntu install on macbook */}}
 {{- if and (eq .chezmoi.os "linux") ($hostname | lower | contains "macbook") -}}
@@ -49,6 +56,7 @@ recipient = "age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy"
 
 
 [data]
+ismanaged   = {{ $ismanaged }}
 docker      = {{ $docker }}
 ephemeral   = {{ $ephemeral }}
 headless    = {{ $headless }}
@@ -59,9 +67,36 @@ linuxonmac  = {{ $linuxonmac }}
 osid        = {{ $osID | quote }}
 hostname    = {{ $hostname | quote }}
 
+[dell3520]
+enabled = false
+
+[rtl8821ce]
+enabled = false
+
+[dell3530]
+enabled = false
+
+[kernels]
+install = false
+
+[ollama]
+compiled = false
+localmodels = false
+
+[openclaw]
+install = true
+
+[i3]
+enabled = true
+
+[niri]
+enabled = true
+
 [edit]
 command = "nvim"
 
 [diff]
 format = "git"
 pager = "delta"
+
+
