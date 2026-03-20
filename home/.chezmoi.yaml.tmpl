@@ -1,0 +1,90 @@
+{{- $ephemeral := env "CHEZMOI_EPHEMERAL" | not | not -}}
+{{- $headless := env "CHEZMOI_HEADLESS" | not | not -}}
+{{- $interactive := stdinIsATTY -}}
+{{- $profile := env "CHEZMOI_PROFILE" -}}
+
+
+{{- $ci := eq (env "CI") "true" -}}
+{{- $gethubAction := env "REMOTE_CONTAINERS" | not | not -}}
+{{- $codespaces := env "CODESPACES" | not | not -}}
+{{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
+{{- $othersContainers := (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") -}}
+
+{{- if or $ci $gethubAction $codespaces $wsl $devContainer $othersContainers -}}
+{{-   $ephemeral = true -}}
+{{-   $headless  = true -}}
+{{- end -}}
+
+{{- $hostname := .chezmoi.hostname -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
+{{- else if eq $hostname "docker" "podman" -}}
+{{-   $hostname = output "sh" "-c" "hostname 2>/dev/null || echo" | trim | default $hostname -}}
+{{- end -}}
+
+{{- $osID := .chezmoi.os -}}
+{{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
+{{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+{{- $linuxonmac := and (eq .chezmoi.os "linux") ($hostname | lower | contains "macbook") -}}
+{{- $ismanaged := ($hostname | contains "ZWPE0F96CN") -}}
+
+{{- if not $profile -}}
+{{-   $profile = ($ismanaged | ternary "work" "personal") -}}
+{{- end -}}
+
+{{-   $dell3530 := ($hostname | contains "dell3530") -}}
+{{-   $dell3520 := ($hostname | contains "dell3520") -}}
+
+{{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v,managed: %v)\n" $profile $ephemeral $headless $ismanaged) }}
+
+
+{{- $data := dict
+  "ephemeral"        $ephemeral
+  "headless"         $headless
+  "ci"               $ci
+  "codespaces"       $codespaces
+  "devContainer"     $devContainer
+  "othersContainers" $othersContainers
+  "hostname"         $hostname
+  "osid"             $osID
+  "linuxonmac"       $linuxonmac
+  "ismanaged"        $ismanaged
+  "profile"          $profile
+  "dell3530"         $dell3530
+  "dell3520"         $dell3520
+}}
+data:
+  rtl8821ce: false
+  kernels:  
+    install: false
+  ollama: 
+    compiled: false
+    localmodels: false
+  openclaw:
+    enabled: false
+  i3:
+    enabled: true
+  niri:
+    enabled: true
+
+{{ $data | toYaml | indent 2 }}
+
+edit:
+  command: nvim
+
+encryption: age
+
+age:
+  identity: $HOME/.config/chezmoi/key.txt
+  recipient: age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy
+
+diff:
+  format: git
+  pager:  delta
+
+
+# -*-mode:sh-*- vim:ft=yaml.gotexttmpl
+# vim: filetype=yaml
