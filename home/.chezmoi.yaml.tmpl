@@ -38,7 +38,7 @@
 {{-   $dell3530 := ($hostname | contains "dell3530") -}}
 {{-   $dell3520 := ($hostname | contains "dell3520") -}}
 
-{{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v,managed: %v)\n" $profile $ephemeral $headless $ismanaged) }}
+{{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v, managed: %v)\n" $profile $ephemeral $headless $ismanaged) }}
 
 
 {{- $data := dict
@@ -57,7 +57,8 @@
   "dell3520"         $dell3520
 }}
 data:
-  rtl8821ce: false
+  rtl8821ce:
+    install: {{ $dell3520 }}
   kernels:  
     install: false
   ollama: 
@@ -69,6 +70,8 @@ data:
     enabled: true
   niri:
     enabled: true
+  work:
+    on: "nothing"
 
 {{ $data | toYaml | indent 2 }}
 
@@ -78,7 +81,7 @@ edit:
 encryption: age
 
 age:
-  identity: $HOME/.config/chezmoi/key.txt
+  identity: {{ env "HOME" }}/.config/chezmoi/key.txt
   recipient: age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy
 
 diff:

@@ -1,4 +1,4 @@
-{{-  if .openclaw.install }}
+{{-  if .openclaw.enabled }}
 if command -v openclaw &> /dev/null; then
     OPENCLAW_COMPLETION="$HOME/.openclaw/completions/openclaw.zsh"
     [[ -f $OPENCLAW_COMPLETION ]] && source $OPENCLAW_COMPLETION

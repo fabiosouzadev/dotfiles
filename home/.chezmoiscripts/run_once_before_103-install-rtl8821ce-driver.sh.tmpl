@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-{{- if .rtl8821ce.enabled }}
+{{- if .rtl8821ce.install }}
 
 {{- template "linux/script_linux_only" . }}
 {{- template "common/script_helper" . }}
