@@ -11,10 +11,10 @@ info ">>>>>>> Installing WM packages <<<<<<<"
 {{-     $wmName     := .name }}
 {{-     $wmFlavors  := .flavors }}
 {{-     $enabled  := false }}
-{{-     if and (eq $wmName "i3") ( $root.i3.install ) }}
+{{-     if and (eq $wmName "i3") ( $root.i3.enabled ) }}
 {{-         $enabled  = true }}
 {{-     end }}
-{{-     if and (eq $wmName "niri") ( $root.niri.install ) }}
+{{-     if and (eq $wmName "niri") ( $root.niri.enabled ) }}
 {{-         $enabled = true }}
 {{-     end }}
 {{-     if $enabled }}
@@ -48,5 +48,25 @@ info ">>>>>>> Installing WM packages <<<<<<<"
 {{-         end }}
 {{-         end }}
 {{-     end }}
+{{- end }}
+
+{{- if .niri.enabled }}
+
+{{-     if .osid | lower | contains "ubuntu" }}
+
+info ">>> 🦉 Installing Niri and noctalia-shell (Ubuntu)..."
+
+sudo add-apt-repository -y ppa:avengemedia/danklinux
+sudo add-apt-repository -y ppa:avengemedia/dms
+
+[ ! -f "/etc/apt/keyrings/noctalia.gpg" ] && curl -fsSL https://pkg.noctalia.dev/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/noctalia.gpg
+[ ! -f "/etc/apt/sources.list.d/noctalia.list" ] && echo "deb [signed-by=/etc/apt/keyrings/noctalia.gpg] https://pkg.noctalia.dev/apt {{ .chezmoi.osRelease.ubuntuCodename }} main" | sudo tee /etc/apt/sources.list.d/noctalia.list
+sudo apt update -y 
+sudo apt install -y niri noctalia-shell
+
+{{-     end }}
+
+success " 🦉 Installed Niri and noctalia-shell"
+
 {{- end }}
 # vim: filetype=bash
