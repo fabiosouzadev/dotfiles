@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-{{ template "linux/script_is_not_ephemeral" . }}
-{{ template "linux/script_linux_only" . }}
+{{ template "common/script_is_not_ephemeral" . }}
 {{ template "common/script_helper" . }}
+{{ template "linux/script_linux_only" . }}
 
 info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)"
 
