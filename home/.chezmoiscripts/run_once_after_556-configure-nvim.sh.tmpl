@@ -5,7 +5,7 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 
 if [ -d $HOME/.config/nvim ]; then 
-  sudo rm -r $HOME/.config/nvim 
+  rm -rf $HOME/.config/nvim 
 fi
 
 

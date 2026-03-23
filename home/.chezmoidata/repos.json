@@ -1,16 +1,21 @@
 {
   "repos": {
     "personal": [
-      { "repo": "fabiosouzadev/personal",
+      { "repo": "git@github.com:fabiosouzadev/personal.git",
          "path": "personal"
       },
-      { "repo": "fabiosouzadev/polybar-themes",
+      { "repo": "git@github.com:fabiosouzadev/polybar-themes",
          "path": "polybar-themes"
       },
-      { "repo": "fabiosouzadev/wallpapers",
+      { "repo": "git@github.com:fabiosouzadev/wallpapers",
          "path": "wallpapers"
       }
     ],
-    "work": []
+    "work": [],
+    "other": [
+      { "repo": "https://github.com/LazyVim/LazyVim.git",
+         "path": "lazyvim"
+      }
+    ]
   }
 }

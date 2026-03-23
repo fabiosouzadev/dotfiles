@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+{{ template "common/script_is_not_ephemeral" . }}
 {{ if .ollama.localmodels -}}
   set -euo pipefail
 

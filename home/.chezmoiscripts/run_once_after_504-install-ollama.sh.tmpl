@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # vim: filetype=bash
+
+{{ template "common/script_is_not_ephemeral" . }}
 {{ if eq .chezmoi.os "linux" -}}
 set -euo pipefail
 

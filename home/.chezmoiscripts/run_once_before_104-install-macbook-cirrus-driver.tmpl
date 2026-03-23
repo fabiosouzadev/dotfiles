@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+{{ template "common/script_is_not_ephemeral" . }}
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
