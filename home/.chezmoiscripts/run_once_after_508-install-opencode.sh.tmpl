@@ -15,6 +15,10 @@ npm install -g opencode-ai
 opencode completion \
     > ~/.local/share/zsh/site-functions/_opencode
 
+# This requires bash-completion to be installed
+opencode completion bash \
+--include-bash-completion-lib > ~/.local/share/bash-completion/completions/opencode
+
 success ">>> Installed Opencode: $(opencode --version) version"
 # -*-mode:sh-*- vim:ft=sh.gotexttmpl
 # vim: filetype=sh
