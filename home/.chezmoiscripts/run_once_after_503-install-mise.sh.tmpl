@@ -15,6 +15,10 @@ if [ ! -x "$HOME/.local/bin/mise" ]; then
 
   "$HOME/.local/bin/mise" completion zsh \
     > "$HOME/.local/share/zsh/site-functions/_mise"
+  
+  # This requires bash-completion to be installed
+  "$HOME/.local/bin/mise" completion bash \
+    --include-bash-completion-lib > ~/.local/share/bash-completion/completions/mise
 
   info "Installing tool versions via mise"
   mise install -y

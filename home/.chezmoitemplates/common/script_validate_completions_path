@@ -1,5 +1,6 @@
 # Zsh completions
-[ ! -d "$HOME/.local/share/zsh/site-functions" ] && mkdir -p "$HOME/.local/share/zsh/site-functions"
+[ -d "$HOME/.local/share/zsh/site-functions" ] || mkdir -p "$HOME/.local/share/zsh/site-functions"
+[ -d "$HOME/.local/share/bash-completion/completions" ] || mkdir -p "$HOME/.local/share/bash-completion/completions"
 
 # -*-mode:sh-*- vim:ft=sh.gotexttmpl
 # vim: filetype=bash
