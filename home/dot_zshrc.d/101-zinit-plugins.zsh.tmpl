@@ -10,6 +10,12 @@ zinit wait lucid light-mode for \
       zsh-users/zsh-completions \
   zdharma-continuum/history-search-multi-word
 
+
+zinit ice as"command" from"gh-r" \
+  atclone"./starship init zsh > init.zsh; ./starship completions zsh > _starship" \
+  atpull"%atclone" src"init.zsh"
+zinit light starship/starship
+
 fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
  
 # vim: filetype=bash

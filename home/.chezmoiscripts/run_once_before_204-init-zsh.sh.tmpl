@@ -1,23 +1,19 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-{{- template "common/script_is_not_ephemeral" . }}
+
 {{- template "linux/script_linux_only" . }}
 {{- template "common/script_helper" . }}
 
-ZSH_BIN="$(command -v zsh || true)"
-
-# ----------------------------
-# Ubuntu
-# ----------------------------
-{{- if .osid | lower | contains "ubuntu" }}
-
-info ">>> Atualizando pacotes (apt)"
-sudo apt update -y
 
 if ! command -v zsh >/dev/null 2>&1; then
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+  info ">>> Instalando Zsh (Arch)"
+  sudo pacman -Syyu --noconfirm --needed zsh
+{{- else if .osid | lower | contains "ubuntu" }}
   info ">>> Instalando Zsh (Ubuntu)"
   sudo apt install -y zsh
+{{- end }}
 else
   info ">>> Zsh já instalado"
 fi
@@ -34,34 +30,7 @@ else
   info ">>> Zsh já é o shell padrão"
 fi
 
-success ">>> Zsh pronto no Ubuntu"
-
-{{- end }}
-
-# ----------------------------
-# Arch / EndeavourOS / CachyOS
-# ----------------------------
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
-
-if ! command -v zsh >/dev/null 2>&1; then
-  info ">>> Instalando Zsh (Arch)"
-  sudo pacman -Syyu --noconfirm --needed zsh
-else
-  info ">>> Zsh já instalado"
-fi
-
-ZSH_BIN="$(command -v zsh)"
-
-info ">>> Definindo Zsh como shell padrão"
-if [ "$SHELL" != "$ZSH_BIN" ]; then
-  chsh -s "$ZSH_BIN"
-else
-  info ">>> Zsh já é o shell padrão"
-fi
-
-success ">>> Zsh pronto no Arch"
-
-{{- end }}
+success ">>> Zsh pronto"
 
 # ----------------------------
 # $HOME/.profile config
@@ -84,28 +53,5 @@ else
   info ">>> Hook de Zsh já presente em ~/.profile"
 fi
 
-# ----------------------------
-# Xorg keyboard config
-# ----------------------------
-KEYBOARD_SRC="{{ .chezmoi.sourceDir }}/private_dot_config/xorg.conf.d/20-keyboard.conf"
-KEYBOARD_DST="/etc/X11/xorg.conf.d/20-keyboard.conf"
-
-if [ -f "$KEYBOARD_SRC" ]; then
-  info ">>> Configurando layout de teclado"
-  sudo mkdir -p /etc/X11/xorg.conf.d
-  sudo cp -f "$KEYBOARD_SRC" "$KEYBOARD_DST"
-else
-  warn "Arquivo de teclado não encontrado: $KEYBOARD_SRC"
-fi
-
-# ----------------------------
-# Starship prompt
-# ----------------------------
-if ! command -v starship >/dev/null 2>&1; then
-  info ">>> Instalando Starship"
-  curl -fsSL https://starship.rs/install.sh | sh -s -- -y
-else
-  info ">>> Starship já instalado"
-fi
-
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
 # vim: filetype=bash
