@@ -2,14 +2,24 @@
 
 set -euo pipefail
 
-{{- template "common/script_is_not_ephemeral" . }}
-{{ template "linux/script_linux_only" . }}
-{{ template "common/script_helper" . }}
+{{- template "linux/script_linux_only" . }}
+{{- template "common/script_helper" . }}
+
+{{- if .ismanaged }}
+
+info ">>> Install Nvim from release"
+
+cd /tmp
+curl -fLO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
+tar xzf nvim-linux-x86_64.tar.gz
+cp -r nvim-linux-x86_64/* ~/.local
+
+{{- else if not .ismanaged }}
 
 # ----------------------------
 # Ubuntu
 # ----------------------------
-{{- if .osid | lower | contains "ubuntu" }}
+{{-   if .osid | lower | contains "ubuntu" }}
 
 info ">>> Install dependencies Nvim (Ubuntu)"
 
@@ -27,14 +37,14 @@ sudo apt-get install -y ninja-build \
   doxygen
 
 
-{{- end }}
+{{-   end }}
 
 # ----------------------------
 # Arch / EndeavourOS / CachyOS
 # ----------------------------
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{-   if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
 info ">>> Install dependencies Nvim (Arch)"
-{{- end }}
+{{-   end }}
 
 # ----------------------------
 # Remove previous Neovim installations
@@ -73,4 +83,8 @@ make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$HOME/.local
 make install
 
 success ">>> Neovim build process finished successfully"
+
+{{- end }}
+
+success ">>> Neovim configured successfully"
 # vim: filetype=bash

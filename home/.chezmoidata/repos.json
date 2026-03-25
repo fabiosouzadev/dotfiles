@@ -9,6 +9,9 @@
       },
       { "repo": "git@github.com:fabiosouzadev/wallpapers",
          "path": "wallpapers"
+      },
+      { "repo": "git@github.com:fabiosouzadev/kickstart.nvim.git",
+         "path": "$HOME/.config/nvim"
       }
     ],
     "work": [],

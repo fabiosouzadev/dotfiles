@@ -70,25 +70,33 @@ BASE_OTHER="$HOME/Workspaces/Others"
 
 
 #Personal repos
-{{ if .repos.personal  }}
-{{ range .repos.personal }}
-repo="{{ .repo }}"
-path="{{ .path }}"
-target="$BASE_PERSONAL/$path"
-clone_or_update "$repo" "$target"
-{{ end }}
-{{ else }}
+{{- if .repos.personal  }}
+{{- 	range .repos.personal }}
+	repo="{{ .repo }}"
+	path="{{ .path }}"
+{{- 		if or (.path | hasPrefix "/") (.path | contains "HOME") }}
+	target="$path"
+{{- 		else }}
+	target="$BASE_PERSONAL/$path"
+{{- 		end }}
+	clone_or_update "$repo" "$target"
+{{- 	end }}
+{{- else }}
 warn "No personal repository defined"
-{{ end }}
+{{- end }}
 
 #Other repos
 {{ if .repos.other  }}
-{{ range .repos.other }}
+{{-		range .repos.other }}
 repo="{{ .repo }}"
 path="{{ .path }}"
-target="$BASE_OTHER/$path"
-clone_or_update "$repo" "$target"
-{{ end }}
+{{- 		if or (.path | hasPrefix "/") (.path | contains "HOME") }}
+	target="$path"
+{{- 		else }}
+	target="$BASE_OTHER/$path"
+{{- 		end }}
+	clone_or_update "$repo" "$target"
+{{- 	end }}
 {{ else }}
 warn "No others repository defined"
 {{ end }}
