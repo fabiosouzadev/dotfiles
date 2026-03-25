@@ -12,12 +12,15 @@
       },
       { "repo": "git@github.com:fabiosouzadev/kickstart.nvim.git",
          "path": "$HOME/.config/nvim"
+      },
+      { "repo": "git@github.com:fabiosouzadev/neovim.git",
+         "path": "$HOME/.config/novo"
       }
     ],
     "work": [],
     "other": [
-      { "repo": "https://github.com/LazyVim/LazyVim.git",
-         "path": "lazyvim"
+      { "repo": "https://github.com/LazyVim/starter",
+         "path": "$HOME/.config/lazyvim"
       }
     ]
   }

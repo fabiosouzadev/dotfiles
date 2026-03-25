@@ -1,29 +1,39 @@
-alias -- v=nvim
-alias -- n=nvim
-alias -- vi=nvim
-alias -- vim=nvim
+if command -v nvim >/dev/null 2>&1; then
+    alias -- v=nvim
+    alias -- n=nvim
+    alias -- vi=nvim
+    alias -- vim=nvim
+    alias nvim-lazyvim='NVIM_APPNAME="lazyvim" nvim'
+    alias nvim-novo='NVIM_APPNAME="novo" nvim'
+fi
 
 #bat
 {{- if .osid | lower | contains "ubuntu" }}
-
-alias -- bat=batcat
-alias -- cat=batcat
+if command -v batcat >/dev/null 2>&1; then
+    alias -- bat=batcat
+    alias -- cat=batcat
+fi
 {{- else }}
 alias -- cat=bat
 {{- end }}
 
 #eza
-alias -- eza='eza --icons auto --git'
-alias -- l='eza -lF --time-style=long-iso --icons'
-alias -- la='eza -lah --tree'
-alias -- ll='eza -l'
-alias -- lla='eza -la'
-alias -- ls='eza -h --git --icons --color=auto --group-directories-first -s extension'
-alias -- lt='eza --tree'
-alias -- tree='eza --tree --icons --tree'
+if command -v eza >/dev/null 2>&1; then
+    alias -- eza='eza --icons auto --git'
+    alias -- l='eza -lF --time-style=long-iso --icons'
+    alias -- la='eza -lah --tree'
+    alias -- ll='eza -l'
+    alias -- lla='eza -la'
+    alias -- ls='eza -h --git --icons --color=auto --group-directories-first -s extension'
+    alias -- lt='eza --tree'
+    alias -- tree='eza --tree --icons --tree'
+fi
 
 #grep
-#alias -- grep='rg'
+if command -v rg >/dev/null 2>&1; then
+    alias -- grep='rg'
+fi
+
 alias -- df='df -h'
 alias -- du='du -h'
 
@@ -36,4 +46,3 @@ alias -- work='cd ~/Projects/Work/Instivo'
 alias -- personal='cd ~/Projects/Personal'
 
 alias -- turn_off_edp1="xrandr --output eDP-1 --off && pkill polybar && MONITOR=HDMI-1 polybar -r -c \"$HOME/.config/polybar/simple/my-colorblocks/config.ini\" -q main 2>&1 | tee -a /tmp/polybar-monitor-HDMI-1.log &"
-
