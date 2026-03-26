@@ -24,6 +24,9 @@
       },
       { "repo": "https://github.com/nvim-lua/kickstart.nvim",
          "path": "$HOME/.config/kickstart"
+      },
+      { "repo": "https://github.com/LazyVim/LazyVim",
+         "path": "Lazyvim"
       }
     ]
   }

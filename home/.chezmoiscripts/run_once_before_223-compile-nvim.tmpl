@@ -10,11 +10,6 @@ set -euo pipefail
 info ">>>>> Install Nvim from release <<<<<<"
 
 cd /tmp
-curl -fLO https://luarocks.github.io/luarocks/releases/luarocks-3.13.0-linux-x86_64.zip
-unzip luarocks-3.13.0-linux-x86_64.zip
-cp -r luarocks-3.13.0-linux-x86_64/* ~/.local/bin
-
-cd /tmp
 curl -fLO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
 tar xzf nvim-linux-x86_64.tar.gz
 cp -r nvim-linux-x86_64/* ~/.local
