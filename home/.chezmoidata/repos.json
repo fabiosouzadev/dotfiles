@@ -21,6 +21,9 @@
     "other": [
       { "repo": "https://github.com/LazyVim/starter",
          "path": "$HOME/.config/lazyvim"
+      },
+      { "repo": "https://github.com/nvim-lua/kickstart.nvim",
+         "path": "$HOME/.config/kickstart"
       }
     ]
   }
