@@ -17,7 +17,19 @@
          "path": "$HOME/.config/novo"
       }
     ],
-    "work": [],
+    "work": {
+      "workplaces": [
+         {
+            "name": "Zup",
+             "repos": [
+              {
+                "repo": "git@gitdev.clarobrasil.mobi:devops/core-flex/ms-interactions.git",
+                "path": "ms-interactions"
+              }
+            ]
+         }
+      ]
+    },
     "other": [
       { "repo": "https://github.com/LazyVim/starter",
          "path": "$HOME/.config/lazyvim"

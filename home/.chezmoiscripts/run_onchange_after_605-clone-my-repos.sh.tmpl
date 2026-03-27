@@ -90,7 +90,7 @@ warn "No personal repository defined"
 {{-		range .repos.other }}
 repo="{{ .repo }}"
 path="{{ .path }}"
-{{- 		if or (.path | hasPrefix "/") (.path | contains "HOME") }}
+{{-         if or (.path | hasPrefix "/") (.path | contains "HOME") }}
 	target="$path"
 {{- 		else }}
 	target="$BASE_OTHER/$path"
@@ -102,24 +102,28 @@ warn "No others repository defined"
 {{ end }}
 
 # Work repos
-{{ if .repos.work -}}
-{{ range .repos.work }}
-workplace="{{ .workplace }}"
-{{ if .repos  }}
-{{ range .repos }}
-repo="{{ .repo }}"
-path="{{ .path }}"
-target="$BASE_WORK/$workplace/$path"
-clone_or_update "$repo" "$target"
-{{ end }}
-{{ end }}
-{{ end -}}
+{{- $workplace := .workplace }}
+{{ if and (.repos.work) (eq .profile "work") -}}
+{{-         range .repos.work.workplaces }}
+{{-             $workplaceName := .name }}
+{{-             $repos         := .repos }}
+{{-             if (eq $workplaceName $workplace) }}
+                    newBaseWork="$BASE_WORK/{{ $workplace }}"
+                    [ -d $newBaseWork ] || mkdir -p $newBaseWork
+{{-                 range $repos }}
+                        echo " >>>>> Workplace:{{ $workplaceName }} <<<<"
+                        repo="{{ .repo }}"
+                        path="{{ .path }}"
+                        target="$newBaseWork/$path"
+                        clone_or_update "$repo" "$target"
+{{-                 end }}
+{{-             end }}
+{{-         end }}
 {{ else }}
-warn "No working repository defined"
+warn "No working repository defined OR not a work profile"
 {{ end }}
 
 
 success ">>>> All repositories processed successfully. <<<<<"
-
 # -*-mode:sh-*- vim:ft=sh.gotexttmpl
 # vim: filetype=bash
