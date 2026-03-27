@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{- template "common/script_is_zup" . }}
+{{- template "common/script_helper" . }}
+
+info "Installing Sdkman"
+
+if [ ! -x "$HOME/.sdkman" ]; then
+
+  #  * Install without modifying shell config
+  #  * Answers all prompts (sets sdkman_auto_answer=true)
+  #  * Disables colored output for cleaner logs (sets sdkman_colour_enable=false)
+  #  * Turns off the self-update feature to prevent unexpected updates (sets sdkman_selfupdate_feature=false)
+
+  curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash 
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+  success "Sdkman installation completed"
+else
+  warn "Sdkman already installed"
+fi
+
+# -*-mode:sh-*- vim:ft=sh.gotexttmpl
+# vim: filetype=bash
+
+
