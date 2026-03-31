@@ -12,7 +12,13 @@ info ">>>>> Install Nvim from release <<<<<<"
 cd /tmp
 curl -fLO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
 tar xzf nvim-linux-x86_64.tar.gz
-cp -r nvim-linux-x86_64/* ~/.local
+cp -fr nvim-linux-x86_64/* ~/.local
+
+cd /tmp
+curl -fLO https://github.com/tree-sitter/tree-sitter/releases/download/v0.25.8/tree-sitter-linux-x64.gz
+gunzip -f tree-sitter-linux-x64.gz
+cp -f tree-sitter-linux-x64 ~/.local/bin/tree-sitter
+chmod +x ~/.local/bin/tree-sitter
 
 {{- else if not .ismanaged }}
 
