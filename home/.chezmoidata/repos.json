@@ -11,10 +11,10 @@
          "path": "wallpapers"
       },
       { "repo": "git@github.com:fabiosouzadev/kickstart.nvim.git",
-         "path": "$HOME/.config/nvim"
+         "path": "$HOME/.config/old"
       },
       { "repo": "git@github.com:fabiosouzadev/neovim.git",
-         "path": "$HOME/.config/novo"
+         "path": "$HOME/.config/nvim"
       }
     ],
     "work": {
