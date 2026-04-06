@@ -5,40 +5,42 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 
 if ! command -v "git" > /dev/null; then
+    echo "Git not found. Installing..."
 {{- if eq .chezmoi.os "linux" -}}
-{{-      if eq .chezmoi.osRelease.id "ubuntu" }}
-                sudo apt update
-                sudo apt install -y git
-{{-     else if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-                sudo pacman -Syyu --noconfirm --needed git
+  {{- if eq .chezmoi.osRelease.id "ubuntu" }}
+      sudo apt update
+      sudo apt install -y git
+  {{- else if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+      sudo pacman -Syyu --noconfirm --needed git
+  {{- end }}
 {{- else if eq .chezmoi.os "windows" }}
-        winget install --id Git.Git -e --source winget
+    winget install --id Git.Git -e --source winget
 {{- else if eq .chezmoi.os "darwin" }}
-        if command -v "brew" && [ -f "$BREW_DIR/Brewfile" ]; then
-                brew install git
-        else if command -v port >/dev/null 2>&1; then
-                sudo port install git
-        fi
-{{-     end }}
+    if command -v "brew" && [ -f "$BREW_DIR/Brewfile" ]; then
+            brew install git
+    elif command -v port >/dev/null 2>&1; then
+            sudo port install git
+    fi
 {{- end }}
 fi
 
 if ! command -v "jq" > /dev/null; then
+    echo "Jq not found. Installing..."
 {{- if eq .chezmoi.os "linux" }}
-{{-     if eq .chezmoi.osRelease.id "ubuntu" }}
-                sudo apt update
-                sudo apt install -y jq
-{{-      else if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-                sudo pacman -Syyu --noconfirm --needed jq
+  {{- if eq .chezmoi.osRelease.id "ubuntu" }}
+      sudo apt update
+      sudo apt install -y jq
+  {{- else if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+      sudo pacman -Syyu --noconfirm --needed jq
+  {{- end}}
 {{- else if eq .chezmoi.os "windows" }}
-        winget install jqlang.jq
+  winget install jqlang.jq
 {{- else if eq .chezmoi.os "darwin" }}
-        if command -v "brew" && [ -f "$BREW_DIR/Brewfile" ]; then
-                brew install jq
-        else if command -v port >/dev/null 2>&1; then
-                sudo port install jq
-        fi
-{{-     end}}
+  if command -v "brew" && [ -f "$BREW_DIR/Brewfile" ]; then
+          brew install jq
+  elif command -v port >/dev/null 2>&1; then
+          sudo port install jq
+  fi
 {{- end }}
 fi
 
