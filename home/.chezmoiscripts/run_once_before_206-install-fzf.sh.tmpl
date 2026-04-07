@@ -10,7 +10,7 @@ FZF_DIR="$HOME/.fzf"
 
 
 if [ -d "$FZF_DIR" ]; then
-    sudo rm -r $FZF_DIR
+    rm -rf $FZF_DIR
 fi
 
 git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_DIR"

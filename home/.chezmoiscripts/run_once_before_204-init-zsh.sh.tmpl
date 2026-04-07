@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-{{- template "linux/script_linux_only" . }}
-{{- template "common/script_helper" . }}
+{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . }}
 
 
 if ! command -v zsh >/dev/null 2>&1; then

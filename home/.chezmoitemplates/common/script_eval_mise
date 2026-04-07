@@ -1,4 +1,1 @@
 [ -f ~/.local/bin/mise ] && eval "$(~/.local/bin/mise activate zsh --shims)"
-
-# -*-mode:sh-*- vim:ft=sh.gotexttmpl
-# vim: filetype=bash

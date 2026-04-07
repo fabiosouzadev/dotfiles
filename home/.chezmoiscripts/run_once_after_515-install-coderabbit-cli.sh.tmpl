@@ -6,17 +6,16 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 
 
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") -}}
+{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
 
 sudo pacman -Syyu --noconfirm --needed gnome-keyring libsecret
 
-{{- end -}}
 
-{{- if .osid | lower | contains "ubuntu" -}}
+{{- else if .osid | lower | contains "ubuntu" }}
 
 sudo apt update && sudo apt install gnome-keyring libsecret-1-0 libsecret-tools
 
-{{- end -}}
+{{- end }}
 
 #Install CodeRabbit CLI
 info ">>>>> Installing CodeRabbit CLI"

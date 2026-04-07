@@ -2,10 +2,10 @@
 
 set -euo pipefail
 
-{{- template "common/script_is_zup" . }}
-{{- template "common/script_helper" . }}
+{{ template "common/script_is_zup" . }}
+{{ template "common/script_helper" . }}
 
-info "Installing Sdkman"
+info ">>>>>>>>>>> Installing Sdkman <<<<<<<<<<<<"
 
 if [ ! -x "$HOME/.sdkman" ]; then
 
@@ -14,12 +14,15 @@ if [ ! -x "$HOME/.sdkman" ]; then
   #  * Disables colored output for cleaner logs (sets sdkman_colour_enable=false)
   #  * Turns off the self-update feature to prevent unexpected updates (sets sdkman_selfupdate_feature=false)
 
-  curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash 
-  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
 
-  success "Sdkman installation completed"
+  set +u
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  set -u
+
+  success ">>>>> Sdkman installation completed <<<<<<<"
 else
-  warn "Sdkman already installed"
+  warn ">>>> Sdkman already installed <<<<<"
 fi
 
 # -*-mode:sh-*- vim:ft=sh.gotexttmpl
