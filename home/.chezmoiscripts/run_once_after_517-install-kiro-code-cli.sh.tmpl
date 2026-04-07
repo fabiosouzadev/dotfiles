@@ -6,10 +6,10 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 
 #Install Kiro Code Cli
-info "Installing Kiro Code Cli"
+info ">>>>>>>>>>>>>>>>>>>>>>>>>> Installing Kiro Code Cli"
 
 curl -fsSL https://cli.kiro.dev/install | bash
 
-success ">>> Kiro Code Cli Installed Version: $(kiro-vli --version)"
+success ">>> Kiro Code Cli Installed Version: $(kiro-cli --version)"
 
 # vim: filetype=bash
