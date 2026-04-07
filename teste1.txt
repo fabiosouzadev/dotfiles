@@ -1,1 +1,0 @@
-home/.chezmoiscripts/run_onchange_before_201-install-arch-packages.sh.tmpl
