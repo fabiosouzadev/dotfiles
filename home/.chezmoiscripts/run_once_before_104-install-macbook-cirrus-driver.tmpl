@@ -6,12 +6,12 @@ set -euo pipefail
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
-{{- if .linuxonmac }}
+{{- if .settings.linuxonmac }}
 
 # ----------------------------
 # Ubuntu
 # ----------------------------
-{{- if .osid | lower | contains "ubuntu" }}
+{{- if .settings.osid | lower | contains "ubuntu" }}
 
 info ">>> Install dependencies to build Cirrus Driver (Ubuntu)"
 

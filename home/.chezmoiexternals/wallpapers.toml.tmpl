@@ -1,4 +1,4 @@
-{{ if not .ephemeral }}
+{{ if not (or .settings.ephemeral .settings.headless) }}
 [".config/wallpapers"]
   type = "git-repo"
   url = "https://github.com/fabiosouzadev/wallpapers.git"

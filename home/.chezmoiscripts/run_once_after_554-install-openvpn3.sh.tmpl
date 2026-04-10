@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-{{ template "common/script_is_not_ephemeral" . }}
-{{- if and (.workplace ) (eq .workplace "instivo") }}
 
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "workplace/script_is_instivo" . }}
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
-{{-		if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{-	if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
 # ============================================
 # 1. Installing openvpn3
@@ -39,7 +39,6 @@ if ! command -v "openvpn3" > /dev/null; then
 	success "openvpn3-git installed"
 fi
 
-{{-		end }}
-{{- end }}
+{{-	end }}
 # -*-mode:sh-*- vim:ft=sh.gotexttmpl
 # vim: filetype=bash

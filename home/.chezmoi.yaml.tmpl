@@ -1,53 +1,150 @@
-{{- $ephemeral := env "CHEZMOI_EPHEMERAL" | not | not -}}
-{{- $headless := env "CHEZMOI_HEADLESS" | not | not -}}
-{{- $interactive := stdinIsATTY -}}
-{{- $profile := env "CHEZMOI_PROFILE" -}}
+{{- /*
+No contexto de ambientes de desenvolvimento, os termos "ephemeral" (efêmero) e "headless" (sem cabeça) têm significados específicos:
 
+Ephemeral (Efêmero):
+  Um ambiente efêmero é um ambiente que existe apenas por um curto período de tempo e é destruído após o uso. Esses ambientes são frequentemente usados em testes automatizados, integração contínua (CI) e entrega contínua (CD). Eles garantem que cada teste ou build seja executado em um ambiente limpo e isolado, o que ajuda a evitar problemas de dependência e inconsistências.
+  Exemplos de ambientes efêmeros incluem contêineres Docker que são criados e destruídos rapidamente, ou instâncias de máquinas virtuais que são provisionadas temporariamente para execução de testes.
+  Exemplos de Uso: (Docker, remote containers, codespaces etc)
 
-{{- $ci := eq (env "CI") "true" -}}
-{{- $gethubAction := env "REMOTE_CONTAINERS" | not | not -}}
-{{- $codespaces := env "CODESPACES" | not | not -}}
-{{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
-{{- $devContainer := env "REMOTE_CONTAINERS" | not | not -}}
-{{- $othersContainers := (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") -}}
+Headless:
+  Um ambiente headless refere-se a um sistema que opera sem uma interface gráfica de usuário (GUI). Em vez disso, ele é controlado e interagido através de comandos de linha de comando, APIs ou outras interfaces programáticas.
+  Ambientes headless são comuns em servidores, onde a interface gráfica não é necessária e pode consumir recursos desnecessariamente. Eles são frequentemente usados em automação de testes, deployments automatizados e em ambientes de desenvolvimento onde a interação via linha de comando é suficiente.
+  Exemplos de Uso: (WSL, teminais no vscode) */ -}}
 
-{{- if or $ci $gethubAction $codespaces $wsl $devContainer $othersContainers -}}
-{{-   $ephemeral = true -}}
-{{-   $headless  = true -}}
-{{- end -}}
+{{- /* Detecção robusta de ambientes: CI, containers, headless/interactive, remote, WSL GUI probe */ -}}
 
+{{- /* CI indicatores comuns */ -}}
+{{- $ci := or
+  (eq (env "CI") "true")
+  (env "GITHUB_ACTIONS" | not | not)
+  (env "GITLAB_CI" | not | not)
+  (env "TRAVIS" | not | not)
+  (env "CIRCLECI" | not | not)
+  (env "JENKINS_URL" | not | not)
+  (env "BUILDKITE" | not | not)
+  (env "DRONE" | not | not)
+  (env "TF_BUILD" | not | not)
+  (env "CI_SERVER" | not | not)
+-}}
+
+{{- /* Cloud IDEs / ephemeral environments */ -}}
+{{- $codespaces := (env "CODESPACES" | not | not) -}}
+{{- $gitpod := (env "GITPOD_WORKSPACE_ID" | not | not) -}}
+{{- $replit := (env "REPL_ID" | not | not) -}}
+
+{{- /* Devcontainer / Remote-Containers */ -}}
+{{- $devContainer := or (env "REMOTE_CONTAINERS" | not | not) (env "DEVCONTAINER" | not | not) (env "DEVCONTAINERS" | not | not) -}}
+
+{{- /* Username and hostname */ -}}
+{{- $username := .chezmoi.username -}}
+{{- $usernameLower := $username | lower -}}
 {{- $hostname := .chezmoi.hostname -}}
 {{- if eq .chezmoi.os "darwin" -}}
 {{-   $hostname = output "scutil" "--get" "LocalHostName" | trim -}}
 {{- else if eq $hostname "docker" "podman" -}}
 {{-   $hostname = output "sh" "-c" "hostname 2>/dev/null || echo" | trim | default $hostname -}}
 {{- end -}}
+{{- $hostLower := $hostname | lower -}}
 
+{{- /* WSL detection */ -}}
+{{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+
+{{- /* Container heuristics: cgroup, /.dockerenv, username, envs */ -}}
+{{- $distrobox := (env "DISTROBOX" | not | not) -}}
+{{- $limavm := (env "LIMA_INSTANCE" | not | not) -}}
+{{- $cgroupContains := output "sh" "-c" "grep -E -i 'docker|podman|lxc|containerd|kubepods' /proc/1/cgroup 2>/dev/null || true" | trim -}}
+{{- $hasDockerenv := output "sh" "-c" "test -f /.dockerenv && echo yes || true" | trim -}}
+{{- $likelyContainerUser := or (env "DOCKER_HOST" | not | not) (eq $usernameLower "root") (eq $usernameLower "vscode") (eq $usernameLower "vagrant") (eq $usernameLower "ubuntu") $distrobox $limavm -}}
+{{- $inContainer := or $devContainer $codespaces $gitpod $replit $distrobox $limavm ($hasDockerenv | not | not) ($cgroupContains | not | not) $likelyContainerUser (env "KUBERNETES_SERVICE_HOST" | not | not) -}}
+
+{{- /* Remote / SSH session detection */ -}}
+{{- $sshSession := or (env "SSH_CONNECTION" | not | not) (env "SSH_CLIENT" | not | not) (env "SSH_TTY" | not | not) -}}
+
+{{- /* TTY / interactive detection */ -}}
+{{- $interactiveTTY := stdinIsATTY -}}
+
+{{- /* DISPLAY / WAYLAND env presence */ -}}
+{{- $displaySet := or (env "DISPLAY" | not | not) (env "WAYLAND_DISPLAY" | not | not) -}}
+
+{{- /* Probe adicional em WSL: unix socket X11 ou xdpyinfo funcionando (best-effort) */ -}}
+{{- $wslGuiProbe := output "sh" "-c" "([ -S /tmp/.X11-unix/X0 ] && echo yes) || (command -v xdpyinfo >/dev/null 2>&1 && xdpyinfo >/dev/null 2>&1 && echo yes) || true" | trim -}}
+
+{{- /* Forças manuais */ -}}
+{{- $forceGUI := env "CHEZMOI_FORCE_GUI" | not | not -}}
+{{- $forceHeadless := env "CHEZMOI_FORCE_HEADLESS" | not | not -}}
+
+{{- /* GUI available rules (avaliadas com ternary para evitar reassign):
+      - se CHEZMOI_FORCE_GUI -> true
+      - else se CHEZMOI_FORCE_HEADLESS -> false
+      - else se macOS -> true
+      - else se WSL -> DISPLAY e probe bem-sucedido
+      - else -> DISPLAY/WAYLAND presence
+*/ -}}
+{{- $guiAvailable := ternary true (ternary false (ternary true (ternary (and $displaySet ($wslGuiProbe | not | not)) $displaySet $wsl) (eq .chezmoi.os "darwin")) $forceHeadless) $forceGUI -}}
+
+{{- /* Mobile Termux */ -}}
+{{- $termux := (env "TERMUX_VERSION" | not | not) -}}
+
+{{- /* Ephemeral: transitório (CI, cloud IDEs, devcontainers) */ -}}
+{{- $ephemeral := or $ci $codespaces $devContainer $gitpod $replit -}}
+
+{{- /* Headless: sem GUI ou sem TTY, ou ambientes server/container/ssh/termux */ -}}
+{{- $headless := or (not $interactiveTTY) (not $guiAvailable) $wsl $inContainer $sshSession $termux -}}
+
+{{- /* Interativo: tem TTY e não é considerado headless */ -}}
+{{- $interactive := and $interactiveTTY (not $headless) -}}
+
+{{- /* Managed vs personal (sua heurística) */ -}}
+{{- $ismanaged := ($hostLower | contains "zwpe0f96cn") -}}
+{{- $profile := env "CHEZMOI_PROFILE" -}}
+{{- if not $profile -}}
+{{-   $profile = ($ismanaged | ternary "work" "personal") -}}
+{{- end -}}
+
+{{- /* OS id (distro) */ -}}
 {{- $osID := .chezmoi.os -}}
 {{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
 {{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
 {{- end -}}
 
-{{- $linuxonmac := and (eq .chezmoi.os "linux") ($hostname | lower | contains "macbook") -}}
-{{- $ismanaged := ($hostname | contains "ZWPE0F96CN") -}}
+{{- /* Hardware hints */ -}}
+{{- $linuxonmac := and (eq .chezmoi.os "linux") ($hostLower | contains "macbook") -}}
+{{- $dell3530 := ($hostLower | contains "dell3530") -}}
+{{- $dell3520 := ($hostLower | contains "dell3520") -}}
 
-{{- if not $profile -}}
-{{-   $profile = ($ismanaged | ternary "work" "personal") -}}
+{{- /* Debug output: só em TTY interativo para não poluir logs de CI */ -}}
+{{- if $interactiveTTY -}}
+{{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v, interactive: %v, managed: %v)\n" $profile $ephemeral $headless $interactive $ismanaged) -}}
+{{- writeToStdout (printf "Ephemeral: %v\n" $ephemeral) -}}
+{{- writeToStdout (printf "Headless: %v\n" $headless) -}}
+{{- writeToStdout (printf "Interactive (TTY): %v\n" $interactiveTTY) -}}
+{{- writeToStdout (printf "GUI available: %v\n" $guiAvailable) -}}
+{{- writeToStdout (printf "CI: %v\n" $ci) -}}
+{{- writeToStdout (printf "Codespaces: %v\n" $codespaces) -}}
+{{- writeToStdout (printf "Dev Container: %v\n" $devContainer) -}}
+{{- writeToStdout (printf "In container heuristics: %v (cgroup: %s, /.dockerenv: %s)\n" $inContainer $cgroupContains $hasDockerenv) -}}
+{{- writeToStdout (printf "SSH session: %v\n" $sshSession) -}}
+{{- writeToStdout (printf "WSL: %v\n" $wsl) -}}
+{{- writeToStdout (printf "Termux: %v\n" $termux) -}}
 {{- end -}}
 
-{{-   $dell3530 := ($hostname | contains "dell3530") -}}
-{{-   $dell3520 := ($hostname | contains "dell3520") -}}
-
-{{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v, managed: %v)\n" $profile $ephemeral $headless $ismanaged) }}
-
-
+{{- /* Consolidate dados */ -}}
 {{- $data := dict
+  "settings" (dict
   "ephemeral"        $ephemeral
   "headless"         $headless
+  "interactive"      $interactive
   "ci"               $ci
   "codespaces"       $codespaces
   "devContainer"     $devContainer
-  "othersContainers" $othersContainers
+  "gitpod"           $gitpod
+  "replit"           $replit
+  "inContainer"      $inContainer
+  "ssh"              $sshSession
+  "tty"              $interactiveTTY
+  "guiAvailable"     $guiAvailable
+  "wsl"              $wsl
+  "termux"           $termux
   "hostname"         $hostname
   "osid"             $osID
   "linuxonmac"       $linuxonmac
@@ -55,24 +152,18 @@
   "profile"          $profile
   "dell3530"         $dell3530
   "dell3520"         $dell3520
-}}
+  "username"         $username
+  "rtl8821ce"        (dict "install" $dell3520)
+  "kernels"          (dict "install" false)
+  "ollama"           (dict "compiled" false "localmodels" false)
+  "openclaw"         (dict "enabled" false)
+  "i3"               (dict "enabled" true)
+  "niri"             (dict "enabled" true)
+  "workplace"        "Zup"
+)
+-}}
 
 data:
-  rtl8821ce:
-    install: {{ $dell3520 }}
-  kernels:  
-    install: false
-  ollama: 
-    compiled: false
-    localmodels: false
-  openclaw:
-    enabled: false
-  i3:
-    enabled: true
-  niri:
-    enabled: true
-  workplace: Zup
-
 {{ $data | toYaml | indent 2 }}
 
 edit:
@@ -86,8 +177,7 @@ age:
 
 diff:
   format: git
-  pager:  delta
-
+  pager: delta
 
 # -*-mode:sh-*- vim:ft=yaml.gotexttmpl
 # vim: filetype=yaml

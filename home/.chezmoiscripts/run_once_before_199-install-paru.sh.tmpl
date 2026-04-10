@@ -4,7 +4,7 @@ set -euo pipefail
 
 {{- template "common/script_is_not_ephemeral" . }}
 {{- template "linux/script_linux_only" . }}
-{{-	if .osid | lower | contains "endeavouros" }}
+{{-	if.settings.osid | lower | contains "endeavouros" }}
 {{ template "common/script_helper" . }}
 
 

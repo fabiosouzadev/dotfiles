@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-{{- if .rtl8821ce.install }}
+{{- if .settings.rtl8821ce.install }}
 {{- template "common/script_is_not_ephemeral" . }}
 {{- template "linux/script_linux_only" . }}
 {{- template "common/script_helper" . }}
@@ -17,7 +17,7 @@ elif type -P yay >/dev/null 2>&1; then
   yay -Syyu --noconfirm --needed rtl8821ce-dkms-git
 fi
 
-{{-   else if .osid | lower | contains "ubuntu" }}
+{{-   else if.settings.osid | lower | contains "ubuntu" }}
 sudo apt install -y bc module-assistant build-essential dkms
 sudo m-a prepare
 git clone https://github.com/tomaspinho/rtl8821ce.git /tmp/rtl8821ce

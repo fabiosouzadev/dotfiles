@@ -2,9 +2,11 @@
 
 set -euo pipefail
 
+{{ template "workplace/script_is_not_zup" . }}
 {{ template "common/script_is_not_ephemeral" . }}
 {{ template "linux/script_ubuntu_only" . }}
 {{ template "common/script_helper" . }}
+
 export PATH="$HOME/.local/bin/:$PATH"
 
 info ">>> Updating Ubuntu packages"

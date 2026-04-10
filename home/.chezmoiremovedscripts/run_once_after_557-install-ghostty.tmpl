@@ -9,12 +9,12 @@ set -euo pipefail
 info ">>> 👻 Installing Ghostty (Arch)..."
 sudo pacman -Syyu --noconfirm --needed ghostty
 
-{{- else if .osid | lower | contains "ubuntu" }}
+{{- else if.settings.osid | lower | contains "ubuntu" }}
 
 info ">>> 👻 Installing Ghostty (Ubuntu)..."
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
 
-{{- else if (eq .osid "darwin") }}
+{{- else if (eq.settings.osid "darwin") }}
 
 brew install --cask ghostty
 

@@ -67,7 +67,7 @@ set -euo pipefail
 # ----------------------------
 # Ubuntu
 # ----------------------------
-{{- if .osid | lower | contains "ubuntu" }}
+{{- if.settings.osid | lower | contains "ubuntu" }}
 
 info ">>> Install dependencies to build Cirrus Driver (Ubuntu)"
 

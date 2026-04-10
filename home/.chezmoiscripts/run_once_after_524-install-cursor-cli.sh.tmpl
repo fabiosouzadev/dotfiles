@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "common/script_helper" . }}
+
+#Install Cursor CLI
+info ">>> Installing Cursor CLI"
+{{- if eq .chezmoi.os "linux" }}
+curl https://cursor.com/install -fsS | bash
+{{- else if eq .chezmoi.os "windows"  }}
+irm 'https://cursor.com/install?win32=true' | iex
+{{- end}}
+
+success ">>> Cursor Cli Installed Version: $(agent --version)"
+
+# vim: filetype=bash

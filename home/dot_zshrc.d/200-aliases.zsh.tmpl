@@ -10,7 +10,7 @@ if command -v nvim >/dev/null 2>&1; then
 fi
 
 #bat
-{{- if .osid | lower | contains "ubuntu" }}
+{{- if.settings.osid | lower | contains "ubuntu" }}
 if command -v batcat >/dev/null 2>&1; then
     alias -- bat=batcat
     alias -- cat=batcat

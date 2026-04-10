@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+{{ template "workplace/script_is_not_zup" . }}
 {{ template "common/script_is_not_ephemeral" . }}
 {{ template "common/script_helper" . }}
 {{ template "linux/script_linux_only" . }}
@@ -14,12 +15,12 @@ sudo swapoff -a || true
 
 # --- 1. Instalar dependências ---
 
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{- if or (.settings.osid | lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos") }}
 info ">>> Instalando zram-generator (Arch)..."
 sudo pacman -Syyu --noconfirm --needed zram-generator
 {{- end }}
 
-{{- if .osid | lower | contains "ubuntu" }}
+{{- if .settings.osid | lower | contains "ubuntu" }}
 info ">>> Instalando zram-tools (Ubuntu)..."
 sudo apt update -y
 sudo apt install -y zram-tools util-linux
@@ -33,7 +34,7 @@ done
 
 # --- 3. Configurar ZRAM ---
 
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{- if or (.settings.osid | lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos") }}
 info ">>> Gerando /etc/systemd/zram-generator.conf (Arch)..."
 sudo tee /etc/systemd/zram-generator.conf > /dev/null <<EOF
 [zram0]
@@ -44,7 +45,7 @@ fs-type = swap
 EOF
 {{- end }}
 
-{{- if .osid | lower | contains "ubuntu" }}
+{{- if .settings.osid | lower | contains "ubuntu" }}
 info ">>> Configurando /etc/default/zramswap (Ubuntu)..."
 sudo tee /etc/default/zramswap > /dev/null <<EOF
 PERCENT=100
@@ -106,13 +107,13 @@ sudo sysctl --system >/dev/null
 
 # --- 6. Ativar serviços ---
 
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{- if or (.settings.osid| lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos") }}
 info ">>> Reiniciando systemd-zram-setup..."
 sudo systemctl daemon-reexec
 sudo systemctl restart systemd-zram-setup@zram0.service || true
 {{- end }}
 
-{{- if .osid | lower | contains "ubuntu" }}
+{{- if .settings.osid | lower | contains "ubuntu" }}
 info ">>> Reiniciando zramswap..."
 sudo systemctl restart zramswap.service || true
 {{- end }}
@@ -137,11 +138,11 @@ if [ -f "$GRUB_FILE" ];then
     # Remover possíveis conflitos
     sudo sed -i -E 's/(^| )zswap\.enabled=0( |$)//g' "$GRUB_FILE"
 
-    {{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+    {{- if or (.settings.osid | lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos") }}
     sudo grub-mkconfig -o /boot/grub/grub.cfg
     {{- end }}
 
-    {{- if .osid | lower | contains "ubuntu" }}
+    {{- if .settings.osid | lower | contains "ubuntu" }}
     sudo update-grub
     {{- end }}
 

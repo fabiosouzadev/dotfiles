@@ -2,13 +2,13 @@
 
 set -euo pipefail
 
-{{ if .kernels.install }}
+{{ if .settings.kernels.install }}
 {{ template "common/script_is_not_ephemeral" . }}
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
 
-{{ if .osid | lower | contains "endeavouros" }}
+{{ if.settings.osid | lower | contains "endeavouros" }}
 
 info "Installing Arch Kernels"
 
@@ -20,7 +20,7 @@ success "Installed Arch Kernels"
 {{ else }}
 
 #CachyOS	
-{{ if .osid | lower | contains "cachyos" }}
+{{ if.settings.osid | lower | contains "cachyos" }}
 info "Installing CachyOs Kernels"
 
 sudo pacman -Syyu --noconfirm --needed {{ range .linux.cachyos.kernels }} {{.}}{{end}}
@@ -28,7 +28,7 @@ sudo pacman -Syyu --noconfirm --needed {{ range .linux.cachyos.kernels }} {{.}}{
 
 success "Installed CachyOs Kernels"
 {{ else }}
-{{ if .osid | lower | contains "ubuntu" }}
+{{ if.settings.osid | lower | contains "ubuntu" }}
 sudo add-apt-repository -y ppa:damentz/liquorix
 sudo apt update -y
 sudo apt install -y \

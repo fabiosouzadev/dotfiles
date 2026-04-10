@@ -2,12 +2,13 @@
 
 set -euo pipefail
 
+{{ template "workplace/script_is_not_zup" . }}
 {{ template "common/script_is_not_ephemeral" . }}
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
 info ">>>>>>> Installing WM packages <<<<<<<"
-{{- $root := . }}
+{{- $root := .settings }}
 {{- range .packages.linux.wm }}
 {{-     $wmName     := .name }}
 {{-     $wmFlavors  := .flavors }}
@@ -51,9 +52,9 @@ info ">>>>>>> Installing WM packages <<<<<<<"
 {{-     end }}
 {{- end }}
 
-{{- if .niri.enabled }}
+{{- if $root.niri.enabled }}
 
-{{-     if .osid | lower | contains "ubuntu" }}
+{{-     if $root.osid | lower | contains "ubuntu" }}
 
 info ">>> 🦉 Installing Niri and noctalia-shell (Ubuntu)..."
 

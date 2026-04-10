@@ -7,10 +7,10 @@ set -euo pipefail
 
 
 if ! command -v zsh >/dev/null 2>&1; then
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{- if or ( .settings.osid | lower | contains "endeavouros" ) ( .settings.osid | lower | contains "cachyos" ) }}
   info ">>> Instalando Zsh (Arch)"
   sudo pacman -Syyu --noconfirm --needed zsh
-{{- else if .osid | lower | contains "ubuntu" }}
+{{- else if .settings.osid | lower | contains "ubuntu" }}
   info ">>> Instalando Zsh (Ubuntu)"
   sudo apt install -y zsh
 {{- end }}

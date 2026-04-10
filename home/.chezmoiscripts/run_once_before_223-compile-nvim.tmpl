@@ -5,7 +5,7 @@ set -euo pipefail
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
-{{- if .ismanaged }}
+{{- if .settings.ismanaged }}
 
 info ">>>>>>>> Install Nvim from release <<<<<<<<"
 
@@ -20,12 +20,12 @@ gunzip -f tree-sitter-linux-x64.gz
 cp -f tree-sitter-linux-x64 ~/.local/bin/tree-sitter
 chmod +x ~/.local/bin/tree-sitter
 
-{{- else if not .ismanaged }}
+{{- else if not .settings.ismanaged }}
 
 # ----------------------------
 # Ubuntu
 # ----------------------------
-{{-   if .osid | lower | contains "ubuntu" }}
+{{-   if .settings.osid | lower | contains "ubuntu" }}
 
 info ">>> Install dependencies Nvim (Ubuntu)"
 
@@ -48,7 +48,7 @@ sudo apt-get install -y ninja-build \
 # ----------------------------
 # Arch / EndeavourOS / CachyOS
 # ----------------------------
-{{-   if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{-   if or ( .settings.osid | lower | contains "endeavouros" ) ( .settings.osid | lower | contains "cachyos" ) }}
 info ">>> Install dependencies Nvim (Arch)"
 {{-   end }}
 

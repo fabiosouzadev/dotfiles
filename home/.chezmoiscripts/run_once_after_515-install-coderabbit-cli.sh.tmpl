@@ -6,12 +6,12 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 
 
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{- if or ( .settings.osid | lower | contains "endeavouros" ) ( .settings.osid | lower | contains "cachyos" ) }}
 
 sudo pacman -Syyu --noconfirm --needed gnome-keyring libsecret
 
 
-{{- else if .osid | lower | contains "ubuntu" }}
+{{- else if.settings.osid | lower | contains "ubuntu" }}
 
 sudo apt update && sudo apt install gnome-keyring libsecret-1-0 libsecret-tools
 

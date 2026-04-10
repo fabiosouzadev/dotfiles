@@ -104,8 +104,8 @@ warn "No others repository defined"
 {{ end }}
 
 # Work repos
-{{- $workplace := .workplace }}
-{{ if and (.repos.work) (eq .profile "work") -}}
+{{- $workplace := .settings.workplace }}
+{{ if and (.repos.work) (eq .settings.profile "work") -}}
 {{-         range .repos.work.workplaces }}
 {{-             $workplaceName := .name }}
 {{-             $repos         := .repos }}
