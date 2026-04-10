@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "common/script_helper" . }}
+
+#Install Devin CLI
+info ">>> Installing Devin CLI"
+
+curl -fsSL https://cli.devin.ai/install.sh | bash
+
+success ">>> Devin CLI Installed Version: $(devin --version)"
+
+# vim: filetype=bash
