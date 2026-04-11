@@ -1,3 +1,3 @@
-{{ if not (or (.settings.osid | lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos")) }}
+{{- if not (or (.settings.osid | lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos")) }}
 exit 0
-{{ end }}
+{{- end }}
