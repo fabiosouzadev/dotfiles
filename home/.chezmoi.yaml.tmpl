@@ -49,11 +49,20 @@ Headless:
 {{- /* WSL detection */ -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
-{{- /* Container heuristics: cgroup, /.dockerenv, username, envs */ -}}
+{{- /* Container heuristics: cgroup, /.dockerenv, username, envs - safer probes only on Linux to avoid calling 'sh' on Windows */ -}}
 {{- $distrobox := (env "DISTROBOX" | not | not) -}}
 {{- $limavm := (env "LIMA_INSTANCE" | not | not) -}}
-{{- $cgroupContains := output "sh" "-c" "grep -E -i 'docker|podman|lxc|containerd|kubepods' /proc/1/cgroup 2>/dev/null || true" | trim -}}
-{{- $hasDockerenv := output "sh" "-c" "test -f /.dockerenv && echo yes || true" | trim -}}
+
+{{- /* defaults to empty (no probe) */ -}}
+{{- $cgroupContains := "" -}}
+{{- $hasDockerenv := "" -}}
+
+{{- /* Run expensive/OS-specific shell probes only on Linux */ -}}
+{{- if eq .chezmoi.os "linux" -}}
+  {{- $cgroupContains = (output "sh" "-c" "grep -E -i 'docker|podman|lxc|containerd|kubepods' /proc/1/cgroup 2>/dev/null || true" | trim) -}}
+  {{- $hasDockerenv = (output "sh" "-c" "test -f /.dockerenv && echo yes || true" | trim) -}}
+{{- end -}}
+
 {{- $likelyContainerUser := or (env "DOCKER_HOST" | not | not) (eq $usernameLower "root") (eq $usernameLower "vscode") (eq $usernameLower "vagrant") (eq $usernameLower "ubuntu") $distrobox $limavm -}}
 {{- $inContainer := or $devContainer $codespaces $gitpod $replit $distrobox $limavm ($hasDockerenv | not | not) ($cgroupContains | not | not) $likelyContainerUser (env "KUBERNETES_SERVICE_HOST" | not | not) -}}
 
@@ -66,8 +75,13 @@ Headless:
 {{- /* DISPLAY / WAYLAND env presence */ -}}
 {{- $displaySet := or (env "DISPLAY" | not | not) (env "WAYLAND_DISPLAY" | not | not) -}}
 
-{{- /* Probe adicional em WSL: unix socket X11 ou xdpyinfo funcionando (best-effort) */ -}}
-{{- $wslGuiProbe := output "sh" "-c" "([ -S /tmp/.X11-unix/X0 ] && echo yes) || (command -v xdpyinfo >/dev/null 2>&1 && xdpyinfo >/dev/null 2>&1 && echo yes) || true" | trim -}}
+{{- /* Evita executar 'sh' fora de Linux e permite pular probes via CHEZMOI_SKIP_SHELL_PROBES */ -}}
+{{- $skipShellProbes := env "CHEZMOI_SKIP_SHELL_PROBES" | not | not -}}
+{{- $wslGuiProbe := "" -}}
+{{- if and (not $skipShellProbes) (eq .chezmoi.os "linux") $wsl -}}
+  {{- /* Best-effort: verifica socket X11 ou xdpyinfo; sempre cai para ''/true para não falhar o template */ -}}
+  {{- $wslGuiProbe = (output "sh" "-c" "([ -S /tmp/.X11-unix/X0 ] && echo yes) || (command -v xdpyinfo >/dev/null 2>&1 && xdpyinfo >/dev/null 2>&1 && echo yes) || true" | trim) -}}
+{{- end -}}
 
 {{- /* Forças manuais */ -}}
 {{- $forceGUI := env "CHEZMOI_FORCE_GUI" | not | not -}}
