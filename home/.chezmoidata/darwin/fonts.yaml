@@ -1,0 +1,24 @@
+fonts:
+  darwin:
+    nerdfonts:
+      - CascadiaCode
+      - FiraCode
+      - FiraMono
+      - Hack
+      - JetBrainsMono
+      - VictorMono
+      - IBMPlexMono
+      - SourceCodePro
+      - SpaceMono
+      - NerdFontsSymbolsOnly
+      - Ubuntu
+      - UbuntuMono
+      - Inconsolata
+      - Iosevka
+      - IosevkaTerm
+      - FantasqueSansMono
+      - DroidSansMono
+      - Noto
+      - RobotoMono
+      - Terminus
+      - DejaVuSansMono

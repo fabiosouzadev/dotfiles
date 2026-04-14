@@ -3,14 +3,17 @@ README.md
 # Distro-specific scripts
 {{- if not (.settings.osid | lower | contains "linux" ) }}
 .chezmoiscripts/linux/**
+.chezmoidata/linux/**
 {{- end }}
 
 {{- if not (.settings.osid | lower | contains "windows") }}
 .chezmoiscripts/windows/**
+.chezmoidata/windows/**
 AppData/**
 scoop/**
 {{- end }}
 
 {{- if not (.settings.osid | lower | contains "darwin") }}
 .chezmoiscripts/darwin/**
+.chezmoidata/darwin/**
 {{- end }}

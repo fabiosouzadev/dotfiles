@@ -11,6 +11,9 @@ info "Installing fonts"
 TEMP_DIR_FONTS="$HOME/.temp-fonts"
 LOCAL_SHARE_FONTS="$HOME/.local/share/fonts"
 
+#Idepotency
+[[ -d $TEMP_DIR_FONTS ]] && rm -rfv "$TEMP_DIR_FONTS"
+
 mkdir -p "$TEMP_DIR_FONTS"
 mkdir -p "$LOCAL_SHARE_FONTS"
 
