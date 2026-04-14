@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "common/script_eval_mise" . }}
+{{ template "common/script_helper" . }}
+
+#Install Get Shit Done CLI -> Spec Framework
+info ">>> Installing GSD CLI"
+
+{{ template "common/script_validate_completions_path" . }}
+
+ # Claude Code
+# npx get-shit-done-cc --claude --global
+# npx get-shit-done-cc --claude --local
+
+# OpenCode
+# npx get-shit-done-cc --opencode --global
+
+# Gemini CLI
+# npx get-shit-done-cc --gemini --global
+
+# Kilo
+# npx get-shit-done-cc --kilo --global
+# npx get-shit-done-cc --kilo --local
+
+# Codex
+# npx get-shit-done-cc --codex --global
+# npx get-shit-done-cc --codex --local
+
+# Copilot
+# npx get-shit-done-cc --copilot --global
+# npx get-shit-done-cc --copilot --local
+
+# Cursor
+# npx get-shit-done-cc --cursor --global
+# npx get-shit-done-cc --cursor --local
+
+# Antigravity
+# npx get-shit-done-cc --antigravity --global
+# npx get-shit-done-cc --antigravity --local
+
+# Augment
+# npx get-shit-done-cc --augment --global     # Install to ~/.augment/
+# npx get-shit-done-cc --augment --local      # Install to ./.augment/
+
+# Trae
+# npx get-shit-done-cc --trae --global        # Install to ~/.trae/
+# npx get-shit-done-cc --trae --local         # Install to ./.trae/
+
+# Cline
+# npx get-shit-done-cc --cline --global       # Install to ~/.cline/
+# npx get-shit-done-cc --cline --local        # Install to ./.clinerules
+
+# Todos
+npx get-shit-done-cc --all --global
+
+success ">>> GSD Framework Cli Installed"
+
+# vim: filetype=bash

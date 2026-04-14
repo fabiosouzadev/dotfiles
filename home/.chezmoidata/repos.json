@@ -25,6 +25,10 @@
               {
                 "repo": "git@gitdev.clarobrasil.mobi:devops/core-flex/ms-interactions.git",
                 "path": "ms-interactions"
+              },
+              {
+                "repo": "git@gitdev.clarobrasil.mobi:devops/core-flex/flex-suspension-ms.git",
+                "path": "flex-suspension-ms"
               }
             ]
          }
