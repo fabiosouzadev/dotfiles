@@ -7,7 +7,7 @@ set -euo pipefail
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
-{{-	if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{-	if or (.settings.osid | lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos") }}
 
 # ============================================
 # 1. Installing openvpn3
