@@ -5,12 +5,12 @@ README.md
 .chezmoiscripts/linux/**
 {{- end }}
 
-{{- if ne (.settings.osid | lower | contains "windows" }}
+{{- if not (.settings.osid | lower | contains "windows") }}
 .chezmoiscripts/windows/**
 AppData/**
 scoop/**
 {{- end }}
 
-{{- if ne (.settings.osid | lower | contains "darwin" }}
+{{- if not (.settings.osid | lower | contains "darwin") }}
 .chezmoiscripts/darwin/**
 {{- end }}
