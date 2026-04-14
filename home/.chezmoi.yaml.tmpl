@@ -186,7 +186,7 @@ edit:
 encryption: age
 
 age:
-  identity: {{ env "HOME" }}/.config/chezmoi/key.txt
+  identity: {{ .chezmoi.homeDir }}/.config/chezmoi/key.txt
   recipient: age1dv82ds88umzeuuwlayrpwdceflj96femz6ryuqhh8jgxtrl6vvgs0k4mmy
 
 diff:
