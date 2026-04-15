@@ -1,14 +1,31 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "theme": "catppuccin",
   "autoupdate": true,
-  "model": "google/gemini-3-pro-preview",
+  "model": "ollama/minimax-m2.7:cloud",
   "provider": {
-    "google": {
-      "models": {},
+    "ollama": {
+      "models": {
+        "minimax-m2.7:cloud": {
+          "_launch": true,
+          "limit": {
+            "context": 204800,
+            "output": 128000
+          },
+          "name": "minimax-m2.7:cloud"
+        }
+      },
+      "name": "Ollama",
+      "npm": "@ai-sdk/openai-compatible",
       "options": {
-        "apiKey": "{env:INSTIVO_GEMINI_API_KEY_2}"
+        "baseURL": "http://127.0.0.1:11434/v1"
+      }
+    },
+    "openrouter": {
+      "models": {
+        "minimax/minimax-m2.5:free": {},
+        "openrouter/free": {}
       }
     }
-  }
+  },
+  "theme": "catppuccin"
 }
