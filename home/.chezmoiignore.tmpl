@@ -5,9 +5,7 @@ README.md
 .chezmoiscripts/linux/**
 .chezmoidata/linux/**
 .chezmoiexternals/linux/**
-.bashrc
-.zshrc
-.zshrc.d/**
+
 .mozilla/**
 {{- end }}
 
@@ -21,4 +19,10 @@ scoop/**
 {{- if not (.settings.osid | lower | contains "darwin") }}
 .chezmoiscripts/darwin/**
 .chezmoidata/darwin/**
+{{- end }}
+
+{{- if (.settings.osid | lower | contains "windows") }}
+.bashrc
+.zshrc
+.zshrc.d/**
 {{- end }}
