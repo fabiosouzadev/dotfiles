@@ -40,6 +40,7 @@ cask = [
     'localsend',
     'streamlink-twitch-gui',
     'raycast',
+    'rambox',
 
     # terminal
     'kitty',
