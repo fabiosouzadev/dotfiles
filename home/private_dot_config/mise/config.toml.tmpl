@@ -1,5 +1,5 @@
 [tools]
-java = "temurin-21"
+java = [ "latest", "21" ]
 node = "24"
 go = "1.25.1"
 "npm:npx" = "latest"
@@ -8,3 +8,7 @@ usage = "latest"
 
 [settings]
 experimental = true
+
+# tools can read the versions files used by other version managers
+# for example, .nvmrc in the case of node's nvm
+idiomatic_version_file_enable_tools = ['java']
