@@ -6,12 +6,13 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 
 #Install opencode
-info ">>>>>> Installing opencode using curl <<<<<<<"
+info ">>>>>> 🧑‍💻 Installing opencode using curl 🧑‍💻 <<<<<<<"
 
 npm install -g opencode-ai
 
 {{ template "common/script_validate_completions_path" . }}
 
+{{ if not (.settings.osid | lower | contains "windows") }}
 opencode completion \
     > ~/.local/share/zsh/site-functions/_opencode
 
@@ -19,6 +20,8 @@ opencode completion \
 opencode completion bash \
 --include-bash-completion-lib > ~/.local/share/bash-completion/completions/opencode
 
-success ">>> Installed Opencode: $(opencode --version) version"
+{{ end }}
+
+success ">>> 🧑‍💻 Installed Opencode: $(opencode --version) version 🧑‍💻"
 # -*-mode:sh-*- vim:ft=sh.gotexttmpl
 # vim: filetype=sh

@@ -2,13 +2,12 @@
 
 set -euo pipefail
 
-{{ template "common/script_eval_mise" . }}
 {{ template "common/script_helper" . }}
 
 #Install Claude Code
 info ">>> Installing Claude Code <<<"
 
-npm install -g @anthropic-ai/claude-code
+curl -fsSL https://claude.ai/install.sh | bash
 success ">>> Claude Code Installed Version: $(claude --version)"
 
 npm install -g @musistudio/claude-code-router # ccr code, ccr ui, ccr start , ccr model
