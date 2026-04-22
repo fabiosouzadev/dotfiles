@@ -6,7 +6,10 @@ set -euo pipefail
 
 #Install Codex CLI
 info ">>> Installing Codex CLI"
-npm i -g @openai/codex
+npm i -g @openai/codex@latest
+
+codex completion zsh \
+  > "$HOME/.local/share/zsh/site-functions/_codex"
 
 success ">>> Codex Cli Installed Version: $(codex --version)"
 
