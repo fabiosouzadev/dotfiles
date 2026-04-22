@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "common/script_helper" . }}
+
+#Install Codex CLI
+info ">>> Installing Codex CLI"
+npm i -g @openai/codex
+
+success ">>> Codex Cli Installed Version: $(codex --version)"
+
+# vim: filetype=bash
