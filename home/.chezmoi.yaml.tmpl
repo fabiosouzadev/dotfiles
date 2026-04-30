@@ -126,6 +126,21 @@ Headless:
 {{- $dell3530 := ($hostLower | contains "dell3530") -}}
 {{- $dell3520 := ($hostLower | contains "dell3520") -}}
 
+
+{{- /* Config Dirs */ -}}
+{{- $dirs := dict
+  "local"  (joinPath .chezmoi.homeDir ".local")
+  "src"    (joinPath .chezmoi.homeDir ".local" "src")
+  "bin"    (joinPath .chezmoi.homeDir ".local" "bin")
+  "workspaces" (dict
+    "prefix"   (joinPath .chezmoi.homeDir "Workspaces")
+    "personal" (joinPath .chezmoi.homeDir "Workspaces" "Personal")
+    "others"   (joinPath .chezmoi.homeDir "Workspaces" "Others")
+    "work"     (joinPath .chezmoi.homeDir "Workspaces" "Work")
+    "zup"      (joinPath .chezmoi.homeDir "Workspaces" "Work" "Zup")
+  )
+-}}
+
 {{- /* Debug output: só em TTY interativo para não poluir logs de CI */ -}}
 {{- if $interactiveTTY -}}
 {{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v, interactive: %v, managed: %v)\n" $profile $ephemeral $headless $interactive $ismanaged) -}}
@@ -140,6 +155,9 @@ Headless:
 {{- writeToStdout (printf "SSH session: %v\n" $sshSession) -}}
 {{- writeToStdout (printf "WSL: %v\n" $wsl) -}}
 {{- writeToStdout (printf "Termux: %v\n" $termux) -}}
+{{- writeToStdout (printf "Dirs: \n\tlocal: %v,\n\tbin: %v,\n\tsrc: %v\n" $dirs.local $dirs.bin $dirs.src) -}}
+{{- writeToStdout (printf "Workspaces: \n\tpersonal: %v,\n\tothers: %v,\n\tzup: %v\n" $dirs.workspaces.personal $dirs.workspaces.others $dirs.workspaces.zup) -}}
+
 {{- end -}}
 
 {{- /* Consolidate dados */ -}}
@@ -175,6 +193,7 @@ Headless:
   "niri"             (dict "enabled" true)
   "workplace"        "Zup"
 )
+  "dirs"             $dirs
 -}}
 
 data:

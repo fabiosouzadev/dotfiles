@@ -3,6 +3,12 @@
 	email      = fabiovanderlei.developer@gmail.com
 	signingkey = 9D79F9FD64781516
 
+[commit]
+    gpgsign = true
+
+[tag]
+    gpgSign = true
+
 [color]
 	ui = true
 
@@ -29,11 +35,11 @@
 [fetch]
 	prune = true
 
-{{/*}
+{{- /*
 [merge]
 	tool = "nvimdiff"
 	conflictStyle = zdiff3
-*/}}
+*/ -}}
 
 [pull]
 	rebase = true
@@ -44,22 +50,21 @@
 [rebase]
 	autoStash = true
 
-[tag]
-	gpgSign = true
-
-[commit]
-	gpgsign = true
-
 [credential]
 	helper = "gh auth git-credential"
 
 [diff]
 	colorMoved = "zebra"
 
-{{- if .settings.osid | lower | contains "windows"}}
+{{ if .settings.osid | lower | contains "windows" -}}
 [gpg]
 	program = C:\\Users\\fabio.souza\\scoop\\apps\\gnupg\\current\\bin\\gpg.exe
-{{- end }}
+{{ end -}}
 
-[includeIf "hasconfig:remote.*.url:git@gitdev.clarobrasil.mobi:**/**/**"]
-	path = ~/.config/git/config.zup.inc
+{{- /* Git > 2.36 hasconfig not working 
+[includeIf "hasconfig:remote.*.url:ssh://git@gitdev.clarobrasil.mobi/*"]
+    path = ~/.config/git/config.zup.inc
+*/ -}}
+
+[includeIf "gitdir:{{.dirs.workspaces.zup}}/"]
+    path = ~/.config/git/config.zup.inc
