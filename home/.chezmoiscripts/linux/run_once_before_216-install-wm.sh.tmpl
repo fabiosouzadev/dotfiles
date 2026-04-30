@@ -8,15 +8,16 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 
 info ">>>>>>> Installing WM packages <<<<<<<"
-{{- $root := .settings }}
+{{- $root     := .settings }}
+{{- $features := .features }}
 {{- range .packages.linux.wm }}
 {{-     $wmName     := .name }}
 {{-     $wmFlavors  := .flavors }}
 {{-     $enabled  := false }}
-{{-     if and (eq $wmName "i3") ( $root.i3.enabled ) }}
+{{-     if and (eq $wmName "i3") ( $features.i3.enabled ) }}
 {{-         $enabled  = true }}
 {{-     end }}
-{{-     if and (eq $wmName "niri") ( $root.niri.enabled ) }}
+{{-     if and (eq $wmName "niri") ( $features.niri.enabled ) }}
 {{-         $enabled = true }}
 {{-     end }}
 {{-     if $enabled }}
@@ -52,7 +53,7 @@ info ">>>>>>> Installing WM packages <<<<<<<"
 {{-     end }}
 {{- end }}
 
-{{- if $root.niri.enabled }}
+{{- if $features.niri.enabled }}
 
 {{-     if $root.osid | lower | contains "ubuntu" }}
 

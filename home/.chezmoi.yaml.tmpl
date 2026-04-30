@@ -141,6 +141,38 @@ Headless:
   )
 -}}
 
+{{- /* Config Features */ -}}
+
+{{- $hasSudo := not $ismanaged -}}
+{{- $hasSystemd := not $ismanaged -}}
+{{- $wantsCompile := or $dell3530 $dell3520 -}}
+
+{{- /* Ollama Mode */ -}}
+{{- $ollamaMode := "user" -}}
+{{- if and $hasSudo $hasSystemd -}}
+  {{- $ollamaMode = "root" -}}
+{{- end -}}
+{{- if and $wantsCompile $hasSudo -}}
+  {{- $ollamaMode = "compile" -}}
+{{- end -}}
+
+{{- $features := dict
+  "sudo"        (dict "enabled" $hasSudo)
+  "systemd"     (dict "enabled" $hasSystemd)
+  "runtime"     (dict "background_services" (not $ismanaged))
+  "kernels"     (dict "install" false)
+  "rtl8821ce"   (dict "install" $dell3530)
+
+  "ollama" (dict
+    "install"      true
+    "mode"         $ollamaMode
+    "localmodels"  false
+  )
+  "openclaw" (dict "install" false)
+  "i3"       (dict "enabled" true)
+  "niri"     (dict "enabled" true)
+-}}
+
 {{- /* Debug output: só em TTY interativo para não poluir logs de CI */ -}}
 {{- if $interactiveTTY -}}
 {{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v, interactive: %v, managed: %v)\n" $profile $ephemeral $headless $interactive $ismanaged) -}}
@@ -185,19 +217,15 @@ Headless:
   "dell3530"         $dell3530
   "dell3520"         $dell3520
   "username"         $username
-  "rtl8821ce"        (dict "install" $dell3520)
-  "kernels"          (dict "install" false)
-  "ollama"           (dict "compiled" false "localmodels" false)
-  "openclaw"         (dict "enabled" false)
-  "i3"               (dict "enabled" true)
-  "niri"             (dict "enabled" true)
   "workplace"        "Zup"
 )
   "dirs"             $dirs
+  "features"         $features
 -}}
 
 data:
 {{ $data | toYaml | indent 2 }}
+
 
 edit:
   command: nvim

@@ -1,125 +1,102 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
-{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . -}}
+{{- template "linux/script_linux_only" . -}}
 {{ template "common/script_is_not_ephemeral" . }}
-{{ template "common/script_helper" . }}
 
-# ====================================================================
-# 1. REMOVER VERSÃO ATUAL DO OLLAMA
-# ====================================================================
-if command -v ollama &>/dev/null; then
-  info ">>> 🗑️  Removendo versão atual do Ollama...."
-  if [ -f /etc/systemd/system/ollama.service ]; then
-    sudo systemctl stop ollama
-    sudo systemctl disable ollama
-    sudo rm /etc/systemd/system/ollama.service
-  fi 
+INSTALL_DIR= {{- .dirs.local }}
+LOG_DIR={{ .features.ollama.path.logs }}
+SRC_DIR={{ .dirs.src }}
+BIN_DIR={{ .dirs.bin }}
 
-  if [ -d /usr/share/ollama ]; then
-    sudo userdel ollama
-    sudo groupdel ollama
-    sudo rm -r /usr/share/ollama
-  fi
+{{- if .features.ollama.install }}
 
-  OLLAMA_BIN=$(which ollama)
+info ">>> 🐑 Installing Ollama in mode {{ .features.ollama.mode }}  🐑"
 
-  if [[ "$OLLAMA_BIN" == */bin/* ]]; then
-    OLLAMA_LIB="${OLLAMA_BIN//\/bin\//\/lib\/}"
-    echo ">>>> 📚 Caminho da biblioteca calculado: $OLLAMA_LIB"
+# --------------------------------------------------------------------
+# USER MODE (WSL / ambiente gerenciado)
+# --------------------------------------------------------------------
+{{-  if eq .features.ollama.mode "user" }}
 
-          if [ -d "$OLLAMA_LIB" ]; then
-            echo ">>> 🧹 Removendo diretório de bibliotecas: $OLLAMA_LIB"
-            rm -rf "$OLLAMA_LIB"
-          else
-            echo ">>> ℹ️ Diretório de bibliotecas não encontrado: $OLLAMA_LIB"
-          fi
-  fi
+OLLAMA_VERSION="v0.22.0"
 
-  if [ -f $OLLAMA_BIN ]; then
-    if [ -d "$HOME/.ollama" ]; then
-      rm -rf ~/.ollama
-    fi
-    info ">>> 🗑️  Removendo versão atual do Ollama.... em $OLLAMA_BIN"
-    rm -f $OLLAMA_BIN
-  fi
+rm -rf "$HOME/.ollama"
+rm -f "$INSTALL_DIR/bin/ollama"
+rm -rf "$INSTALL_DIR/lib/ollama"
 
+# garante zstd local
+if ! command -v zstd >/dev/null 2>&1; then
+  echo ">>> Installing zstd local"
+  curl -L https://github.com/facebook/zstd/releases/latest/download/zstd-linux-amd64 -o "$BIN_DIR/zstd"
+  chmod +x "$BIN_DIR/zstd"
+  export PATH="$BIN_DIR:$PATH"
 fi
 
-# ====================================================================
-# 2. INSTALAR DE UM RELEASE,COMPILAÇÃO OU SCRIPT
-# ====================================================================
-{{- if .settings.ismanaged }} ELSE IS ZUP
-
-# ====================================================================
-# 2. INSTALAR DE UM RELEASE
-# ====================================================================
-
-VERSION="v0.20.5"
-INSTALL_DIR="${HOME}/.local"
-
-info ">>> 🐑 Instalando Ollama de uma release in $INSTALL_DIR 🐑 <<<"
-
-mkdir -p "${INSTALL_DIR}"
-
-[[ -d "${INSTALL_DIR}/src/zstd" ]] && rm -rf ${INSTALL_DIR}/src/zstd
-
-cd $HOME/.local/src
-
-git clone https://github.com/facebook/zstd.git
-cd zstd
-make -j$(nproc) 
-make prefix="${INSTALL_DIR}" install
-chmod +x "${INSTALL_DIR}/bin/zstd"
-
-
-cd $HOME/.local/src
+mkdir -p "$INSTALL_DIR"
+cd "$SRC_DIR"
 
 export PATH="${INSTALL_DIR}/bin:${PATH}"
 
-curl -fsSL https://ollama.com/download/ollama-linux-amd64.tar.zst -o ollama-linux-amd64.tar.zst
+curl -fL https://github.com/ollama/ollama/releases/download/$OLLAMA_VERSION/ollama-linux-amd64.tar.zst -o ollama-linux-amd64.tar.zst
 tar --zstd -xvf ollama-linux-amd64.tar.zst -C "${INSTALL_DIR}"
 
 export PATH="${INSTALL_DIR}/bin:${PATH}"
 export LD_LIBRARY_PATH="${INSTALL_DIR}/lib/ollama:${LD_LIBRARY_PATH:-}"
 
+mkdir -p "$LOG_DIR"
+
+if {{ .features.runtime.background_services }}; then
+  nohup ollama serve > "$LOG_DIR/server.log" 2>&1 &
+  success "Ollama rodando em background"
+else
+  warn "Background desabilitado — execute manualmente: ollama serve"
+fi
+
 success "🐑 Ollama Installed in $INSTALL_DIR version: $(ollama -v) 🐑 "
 
-{{- else }} # ELSE IS ZUP
+{{-  else if eq .features.ollama.mode "root" }}
 
-{{-   if .settings.ollama.compiled }}
+# --------------------------------------------------------------------
+# ROOT MODE
+# --------------------------------------------------------------------
 
-# ====================================================================
-# 2. INSTALAR DEPENDÊNCIAS PARA COMPILAÇÃO
-# ====================================================================
+info " 🐑 Instalando Ollama 🐑 "
+curl -fsSL https://ollama.com/install.sh | sh
+
+{{ if .features.systemd.enabled }}
+sudo systemctl daemon-reload
+sudo systemctl enable --now ollama
+{{ end }}
+
+success "Ollama Installed version: $(ollama -v) 🐑"
+
+{{-  else if eq .features.ollama.mode "compile" }}
+# --------------------------------------------------------------------
+# COMPILE MODE (opcional avançado)
+# --------------------------------------------------------------------
 
 # PATH correto para ambiente não-interativo
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
 info ">>> 🐑🔨 Instalando dependências de compilação... 🐑"
 
-{{-     if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
+{{- if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
 
 sudo pacman -Syyu --noconfirm --needed base-devel git cmake make gcc clang
 
-{{-     end }}
-
+{{- end }}
 
 info ">>> 🔨 Compilando Ollama ..."
-[ ! -d "$HOME/ollama-source" ] || rm -rf $HOME/ollama-source/
-git clone https://github.com/ollama/ollama.git ~/ollama-source
+[ ! -d "$SRC_DIR/ollama-source" ] || rm -rf $SRC_DIR/ollama-source/
+git clone https://github.com/ollama/ollama.git $SRC_DIR/ollama-source
 cd ~/ollama-source
 
-
-{{-     if .settings.dell3530.enabled }}
-# ====================================================================
-# 3. COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA ALDER LAKE-U
-# ====================================================================
-info ">>> 🔨 Compilando Ollama com otimizações para Alder Lake-U (i7-1355U)"
+# COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA ALDER LAKE-U
+{{- if .settings.dell3530 }}
+info ">>> 🐑🔨 Compilando Ollama com otimizações para Alder Lake-U (i7-1355U)"
 
 # Compila com flags específicas para Tiger Lake
-info ">>> 🔨 ⚡ Compilando com flags Alder Lake-U (i7-1355U)"
+info ">>> 🐑🔨 ⚡ Compilando com flags Alder Lake-U (i7-1355U)"
 export CGO_CFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -flto -fno-plt -fassociative-math -freciprocal-math -fno-signed-zeros -fno-trapping-math"
 export CGO_LDFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -flto -fno-plt"
 # export CGO_CFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -fno-plt"
@@ -133,13 +110,11 @@ export LDFLAGS="-Wl,-O1 -Wl,--as-needed -Wl,-z,now -Wl,-z,relro"
 export CGO_ENABLED=1
 export OLLAMA_THREADS=10
 export OLLAMA_PARALLEL=8
-{{-     end }} # dell3530
+{{- end }} # dell3530
 
-{{-     if .settings.dell3520.enabled }}
-# ====================================================================
-# 3. COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA TIGER LAKE
-# ====================================================================
-info ">>> 🔨 Compilando Ollama com otimizações para i5-1135G7..."
+#COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA TIGER LAKE
+{{- if .settings.dell3520 }}
+info ">>> 🐑🔨 Compilando Ollama com otimizações para i5-1135G7..."
 
 # Compila com flags específicas para Tiger Lake
 info ">>> ⚡ Compilando com flags AVX2 otimizadas..."
@@ -152,7 +127,7 @@ export CFLAGS="$CPU_FLAGS"
 export CXXFLAGS="$CPU_FLAGS"
 export LDFLAGS="-Wl,-O1 -Wl,--as-needed -Wl,-z,now -Wl,-z,relro"
 export CGO_ENABLED=1
-{{-     end }} # dell3520
+{{- end }} # dell3520
 
 export GOFLAGS="-buildmode=pie -trimpath -ldflags=-s -ldflags=-w"
 
@@ -171,13 +146,11 @@ sudo install -Dm755 ollama "$INSTALL_DIR/ollama"
 # sudo cp ./bin/ollama /usr/local/bin/
 sudo chmod +x /usr/local/bin/ollama
 
-echo "✅ Ollama compilado com sucesso!"
+success "🐑🔨Ollama compilado com sucesso! 🐑🔨"
 
-
-# ====================================================================
-# 4. CONFIGURAR SERVIÇO SYSTEMD OTIMIZADO
-# ====================================================================
-echo "⚙️  Configurando serviço systemd ..."
+#CONFIGURAR SERVIÇO SYSTEMD OTIMIZADO
+{{- if .features.systemd.enabled }}
+info "⚙️ Configurando serviço systemd ..."
 
 sudo tee /etc/systemd/system/ollama.service > /dev/null <<'EOF'
 [Unit]
@@ -198,16 +171,11 @@ EOF
 
 sudo useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
 sudo usermod -a -G ollama $(whoami)
+{{- end }}
+{{- end }}
 
-{{-   else }} // # ELSE IS NOT ollama.compiled
-
-info " 🐑 Instalando Ollama 🐑 "
-curl -fsSL https://ollama.com/install.sh | sh
-sudo systemctl daemon-reload
-sudo systemctl enable --now ollama
-success "Ollama Installed version: $(ollama -v) 🐑"
-
-{{-   end }} # END IS ollama.compiled
+### Override Service
+{{- if not (eq .features.ollama.mode "user")}}
 
 [ -d /etc/systemd/system/ollama.service.d ] || sudo mkdir /etc/systemd/system/ollama.service.d/
 
@@ -235,4 +203,6 @@ success "✨ Seu setup de IA local está 100% otimizado para alto desempenho!"
 
 sleep 3
 
-{{- end }} ## END IF IS ZUP
+{{- end }}
+
+{{- end }}
