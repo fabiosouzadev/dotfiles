@@ -54,11 +54,20 @@ fi
 
 success "🐑 Ollama Installed in $INSTALL_DIR version: $(ollama -v) 🐑 "
 
-{{-  else if eq .features.ollama.mode "root" }}
-
 # --------------------------------------------------------------------
 # ROOT MODE
 # --------------------------------------------------------------------
+
+{{-  else if eq .features.ollama.mode "root" }}
+
+{{ if .features.systemd.enabled }}
+sudo systemctl stop ollama
+sudo systemctl disable ollama
+
+if [ -f /etc/systemd/system/ollama.service ]; then
+  sudo rm /etc/systemd/system/ollama.service
+fi
+{{ end }}
 
 info " 🐑 Instalando Ollama 🐑 "
 curl -fsSL https://ollama.com/install.sh | sh
