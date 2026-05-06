@@ -4,13 +4,6 @@ local act = wezterm.action
 
 {{- if .settings.osid | lower | contains "windows"}}
 config.default_prog = { 'wsl.exe' }
-config.wsl_domains = {
-    {
-        name = 'WSL:Zupwsl.tar',
-        distribution = 'Ubuntu',
-        default_cwd = '~',
-    },
-}
 config.default_domain = 'WSL:Zupwsl.tar'
 {{- end }}
 
