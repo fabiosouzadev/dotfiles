@@ -132,9 +132,9 @@ Providers: Ollama (local), Gemini API, OpenRouter
 
 ## Browser
 
-| Browser | Platform |
-|---------|----------|
-| Firefox Developer Edition | Linux (with managed profiles via externals) |
-| Brave Nightly | Both |
-| Chromium | macOS |
-| Google Chrome Beta | macOS |
+| Browser | Platform | Details |
+|---------|----------|---------|
+| Firefox Developer Edition | Linux | Templated profiles (`private_dot_mozilla/private_firefox/profiles.ini.tmpl`), custom `user.js.tmpl` |
+| Brave Nightly | Both | |
+| Chromium | macOS | |
+| Google Chrome Beta | macOS | |

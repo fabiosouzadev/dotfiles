@@ -35,6 +35,11 @@
 - **Go**: 1.25.1
 - **npm packages**: npx, prettier
 
+### Isolated Development Environments (via Nix/Devenv)
+Located in `private_dot_local/private_share/environments/`. Provides reproducible, project-specific development stacks using [Nix Flakes](https://nixos.wiki/wiki/Flakes) and [Devenv](https://devenv.sh/).
+- **Languages**: Java (`java.nix`), Node.js (`node.nix`), PHP (`php.nix`), Python (`flake-python-versions.nix`)
+- **Projects**: `instivo-ms-auth`, `instivo-ms-fornecedor`, `instivo-receiving-conference-ms`, `novo-site-puroar`
+
 ## Package Managers
 
 | OS | Package Manager | Data Source |

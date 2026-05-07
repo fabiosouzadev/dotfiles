@@ -124,6 +124,15 @@ Scripts use a numeric ordering scheme:
 | 500-599 | Tool installation (ollama, mise, AI CLIs, VPN) | `run_once_after_` / `run_onchange_after_` |
 | 600-699 | Configuration & repo cloning | `run_onchange_after_` / `run_once_after_` |
 
+### Modular Application Configurations
+For complex applications, configurations are split into modular components rather than monolithic files:
+- **Niri WM**: `private_dot_config/niri/config.kdl` includes modular files from `cfg/` (e.g., `autostart.kdl`, `keybinds.kdl`, `rules.kdl`).
+- **Zsh**: The `dot_zshrc.d/` directory pattern breaks the monolithic shell config into 20+ purpose-specific files.
+- **Firefox Profiles**: Templated `profiles.ini.tmpl` and `user.js.tmpl` to manage browser environments cleanly.
+
+### Reproducible Dev Environments
+Instead of relying on global package installations for project dependencies, the dotfiles leverage **Nix Flakes** and **Devenv** (`private_dot_local/private_share/environments/`). This provides isolated, declarative development environments for specific microservices and languages (Java, PHP, Node, Python).
+
 ### chezmoi File Naming
 Uses chezmoi's naming conventions for file attributes:
 - `dot_` → `.` (hidden files)

@@ -178,7 +178,9 @@ private_dot_config/
 ├── kitty/kitty.conf              # Kitty terminal
 ├── mise/config.toml.tmpl         # Runtime version manager
 ├── networkmanager_dmenu/          # Network manager menu
-├── niri/config.kdl               # Niri WM config
+├── niri/                         # Niri WM config
+│   ├── config.kdl                # Main entrypoint
+│   └── cfg/                      # Modular config parts (keybinds, rules, etc.)
 ├── opencode/opencode.json        # OpenCode AI tool config
 ├── picom/                        # Compositor (Linux X11)
 ├── private_Antigravity/          # Antigravity IDE config
@@ -187,6 +189,27 @@ private_dot_config/
 ├── tmux/tmux.conf.tmpl           # Tmux config (270 lines)
 ├── wezterm/wezterm.lua.tmpl      # WezTerm terminal config
 └── xorg.conf.d/                  # X.org display config
+```
+
+### Reproducible Environments (`private_dot_local/private_share/environments/`)
+```
+environments/
+├── java.nix, node.nix, php.nix            # Language base configurations
+├── flake-python-versions.nix              # Python flake base
+├── instivo-ms-auth/                       # Project-specific dev environment
+│   ├── devenv.nix, devenv.lock, dot_envrc
+├── instivo-ms-fornecedor/                 # Nix flake environment
+│   └── flake.nix, flake.lock
+└── instivo-receiving-conference-ms/       # Project-specific dev environment
+```
+
+### Web Browser Profiles (`private_dot_mozilla/`)
+```
+private_dot_mozilla/
+└── private_firefox/
+    ├── installs.ini.tmpl, profiles.ini.tmpl     # Firefox profile routing
+    ├── private_fabiosouzadev.default/user.js.tmpl
+    └── private_fabiosouzadev.dev-edition-default/user.js.tmpl
 ```
 
 ### Secrets & Encrypted Files
