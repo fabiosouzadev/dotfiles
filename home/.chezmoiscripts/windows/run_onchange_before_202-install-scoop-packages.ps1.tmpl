@@ -20,7 +20,7 @@ if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
 
 # ── Add buckets ────────────────────────────────────────────────────────────────
 Write-Info "Configuring Scoop buckets..."
-$knownBuckets = scoop bucket list | ForEach-Object { $_.Trim() }
+$knownBuckets = scoop bucket list | ForEach-Object { if ($_ -is [string]) { $_.Trim() } else { $_.Name } }
 
 {{ range .packages.windows.scoop.buckets -}}
 $bucket = "{{ . }}"
@@ -35,7 +35,7 @@ if ($knownBuckets -contains $bucket) {
 
 # ── Install packages ───────────────────────────────────────────────────────────
 Write-Info "Installing Scoop packages..."
-$installed = scoop list 6>$null | Select-Object -ExpandProperty Name
+$installed = scoop list 6>$null | ForEach-Object { if ($_ -is [string]) { $_.Trim() } else { $_.Name } }
 
 {{ range .packages.windows.scoop.packages -}}
 # Strip bucket prefix (e.g. "extras/lazygit" → "lazygit")
