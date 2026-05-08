@@ -1,3 +1,4 @@
+{{ if .features.ai.spec_tools -}}
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -13,3 +14,4 @@ npm install -g @gitlawb/openclaude@latest
 success ">>> Openclaude Cli Installed Version: $(openclaude --version)"
 
 # vim: filetype=bash
+{{- end }}

@@ -1,3 +1,4 @@
+{{ if .features.ai.coding_assistants -}}
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -15,3 +16,4 @@ irm 'https://cursor.com/install?win32=true' | iex
 success ">>> Cursor Cli Installed Version: $(agent --version)"
 
 # vim: filetype=bash
+{{- end }}

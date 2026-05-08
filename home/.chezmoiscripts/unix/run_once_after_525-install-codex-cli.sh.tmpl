@@ -1,3 +1,4 @@
+{{ if .features.ai.coding_assistants -}}
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -14,3 +15,4 @@ codex completion zsh \
 success ">>> Codex Cli Installed Version: $(codex --version)"
 
 # vim: filetype=bash
+{{- end }}

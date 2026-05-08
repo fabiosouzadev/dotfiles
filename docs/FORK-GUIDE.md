@@ -1,4 +1,4 @@
-# 🍴 Fork & Customize Guide
+int# 🍴 Fork & Customize Guide
 
 > How to adapt these dotfiles for your own setup.
 > 

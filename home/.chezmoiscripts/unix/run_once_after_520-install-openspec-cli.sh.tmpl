@@ -1,3 +1,4 @@
+{{ if .features.ai.spec_tools -}}
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -18,3 +19,4 @@ openspec completion generate zsh \
 success ">>> OpenSpec Cli Installed Version: $(openspec --version)"
 
 # vim: filetype=bash
+{{- end }}

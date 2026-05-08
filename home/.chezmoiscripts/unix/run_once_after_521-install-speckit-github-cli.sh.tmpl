@@ -1,3 +1,4 @@
+{{ if .features.ai.spec_tools -}}
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -14,3 +15,4 @@ success ">>> SpecKit Github Cli Installed"
 specify version
 
 # vim: filetype=bash
+{{- end }}

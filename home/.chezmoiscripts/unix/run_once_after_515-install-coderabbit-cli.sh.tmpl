@@ -1,3 +1,4 @@
+{{ if .features.ai.coding_assistants -}}
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -25,3 +26,4 @@ curl -fsSL https://cli.coderabbit.ai/install.sh | sh
 success ">>> CodeRabbit Cli Installed Version: $(coderabbit -V)"
 
 # vim: filetype=bash
+{{- end }}

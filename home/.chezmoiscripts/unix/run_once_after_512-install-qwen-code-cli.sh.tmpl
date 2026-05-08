@@ -1,3 +1,4 @@
+{{ if .features.ai.coding_assistants -}}
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -12,3 +13,4 @@ npm install -g @qwen-code/qwen-code
 
 success ">>> Qwen Code Installed Version: $(qwen -v)"
 # vim: filetype=bash
+{{- end }}

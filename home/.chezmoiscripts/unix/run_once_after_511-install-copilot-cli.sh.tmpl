@@ -1,3 +1,4 @@
+{{ if .features.ai.coding_assistants -}}
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -13,3 +14,4 @@ npm install -g @github/copilot@prerelease
 success ">>> Copilot Cli Installed Version: $(copilot -v)"
 
 # vim: filetype=bash
+{{- end }}
