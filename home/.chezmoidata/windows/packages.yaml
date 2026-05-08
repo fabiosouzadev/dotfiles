@@ -4,12 +4,6 @@ packages:
       - Microsoft.WindowsTerminal
       - Microsoft.PowerShell
       - Git.Git
-      - Starship.Starship
-      - ajeetdsouza.zoxide
-      - sharkdp.fd
-      - BurntSushi.ripgrep.MSVC
-      - eza-community.eza
-      - junegunn.fzf
       - Bitwarden.Bitwarden
       - Brave.Brave
       - Bruno.Bruno
@@ -35,12 +29,17 @@ packages:
         - nerd-fonts
       packages:
         - main/age
+        # - main/codex
         - main/gnupg
         - main/delta
         - main/direnv
         - main/jq
+        # - main/opencode
         - main/yazi
         - main/wget
         - main/curl
+        - extras/antigravity
+        # - extras/opencode-desktop
         - extras/lazygit
-        - nerd-fonts/JetBrainsMono-NF
+        - extras/warp-terminal
+        - extras/models
