@@ -1,6 +1,56 @@
 packages:
   windows:
     winget:
-    scoop:
-      - gnupg
+      - Microsoft.WindowsTerminal
+      - Microsoft.PowerShell
+      - Git.Git
+      - GitHub.cli
+      - JanDeDobbeleer.OhMyPosh
+      - Starship.Starship
+      - ajeetdsouza.zoxide
+      - sharkdp.bat
+      - sharkdp.fd
+      - BurntSushi.ripgrep.MSVC
+      - eza-community.eza
+      - junegunn.fzf
+      - jesseduffield.lazygit
+      - JesseDuffield.lazyDocker
+      - Neovim.Neovim
+      - WezFurlong.WezTerm
+      - Ghostty.Ghostty
+      - Bitwarden.Bitwarden
+      - Obsidian.Obsidian
+      - Figma.Figma
+      - Spotify.Spotify
+      - Mozilla.Firefox
+      - Google.Chrome
+      - Brave.Brave
+      - Docker.DockerDesktop
+      - Microsoft.VisualStudioCode
+      - Cursor.Cursor
+      - JetBrains.IntelliJIDEA.Community
+      - DBngin.DBngin
+      - dbeaver.dbeaver
+      - Postman.Postman
+      - localsend.localsend
+      - 9NKSQGP7F2NH           # WhatsApp (Microsoft Store)
 
+    scoop:
+      buckets:
+        - main
+        - extras
+        - versions
+        - nerd-fonts
+      packages:
+        - main/age
+        - main/gnupg
+        - main/delta
+        - main/direnv
+        - main/jq
+        - main/yazi
+        - main/btop
+        - main/htop
+        - main/wget
+        - main/curl
+        - extras/lazygit
+        - nerd-fonts/JetBrainsMono-NF

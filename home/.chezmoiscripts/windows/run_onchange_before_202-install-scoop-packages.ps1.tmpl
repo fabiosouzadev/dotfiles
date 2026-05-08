@@ -1,0 +1,60 @@
+# chezmoi:template:left-delimiter="{{ " right-delimiter="}}"
+# run_onchange_before_202-install-scoop-packages.ps1.tmpl
+# Installs Windows packages via Scoop reading from .chezmoidata/windows/packages.yaml
+#
+# Hash: {{ .packages.windows.scoop | toJson | sha256sum }}
+
+{{ if .packages.windows.scoop -}}
+$ErrorActionPreference = 'Stop'
+
+function Write-Info  { param($msg) Write-Host "[INFO]    $msg" -ForegroundColor Cyan }
+function Write-Ok    { param($msg) Write-Host "[OK]      $msg" -ForegroundColor Green }
+function Write-Warn  { param($msg) Write-Host "[WARN]    $msg" -ForegroundColor Yellow }
+
+# ── Install Scoop if missing ───────────────────────────────────────────────────
+if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+    Write-Info "Installing Scoop..."
+    Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+    Write-Ok "Scoop installed."
+}
+
+# ── Add buckets ────────────────────────────────────────────────────────────────
+Write-Info "Configuring Scoop buckets..."
+$knownBuckets = scoop bucket list | ForEach-Object { $_.Trim() }
+
+{{ range .packages.windows.scoop.buckets -}}
+$bucket = "{{ . }}"
+if ($knownBuckets -contains $bucket) {
+    Write-Warn "Bucket already added: $bucket"
+} else {
+    Write-Info "Adding bucket: $bucket"
+    scoop bucket add $bucket
+    Write-Ok "Bucket added: $bucket"
+}
+{{ end }}
+
+# ── Install packages ───────────────────────────────────────────────────────────
+Write-Info "Installing Scoop packages..."
+$installed = scoop list 6>$null | Select-Object -ExpandProperty Name
+
+{{ range .packages.windows.scoop.packages -}}
+# Strip bucket prefix (e.g. "extras/lazygit" → "lazygit")
+$fullName = "{{ . }}"
+$pkgName  = ($fullName -split "/")[-1]
+
+if ($installed -contains $pkgName) {
+    Write-Warn "Already installed: $pkgName"
+} else {
+    Write-Info "Installing: $fullName"
+    scoop install $fullName
+    if ($LASTEXITCODE -eq 0) {
+        Write-Ok "Installed: $pkgName"
+    } else {
+        Write-Warn "Failed to install: $fullName (exit code $LASTEXITCODE)"
+    }
+}
+{{ end }}
+
+Write-Ok "Scoop packages done."
+{{- end }}
