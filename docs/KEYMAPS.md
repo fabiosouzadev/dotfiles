@@ -92,15 +92,38 @@
 >
 > Aliases: [`200-aliases.zsh.tmpl`](../home/dot_zshrc.d/200-aliases.zsh.tmpl) and [`201-git-aliases.zsh.tmpl`](../home/dot_zshrc.d/201-git-aliases.zsh.tmpl)
 
-> 🚧 Coming soon — full alias and keybinding list will be documented in Phase 5.
+### General & Navigation Aliases
 
-### Quick Reference
-
-| Alias/Key | Action |
+| Alias / Key | Action |
 | :--- | :--- |
-| `ll` | `eza -la` (detailed file listing) |
-| `cat` | `bat` (syntax highlighting) |
-| `cd` | `zoxide` (smart jump) |
+| `v`, `n`, `vi`, `vim` | Open `nvim` |
+| `cat` | Run `bat` (with syntax highlighting) |
+| `ls`, `ll`, `la`, `l`, `tree` | Smart directory listing using `eza` |
+| `df`, `du` | Disk usage human-readable (`-h`) |
+| `reload` | Source `~/.zshrc` |
+| `work`, `personal` | Jump to workspace directories |
+
+### Git Aliases (Essentials)
+
+| Alias | Action |
+| :--- | :--- |
+| `g`, `gs` | `git`, `git status` |
+| `ga`, `gaa` | `git add`, `git add --all` |
+| `gc`, `gcm` | `git commit -v`, `git commit -m` |
+| `gac` | `git add -A && git commit -v` |
+| `gco`, `gcb`, `gbr` | `git checkout`, `git checkout -b`, `git branch` |
+| `gcop` | `git branch \| fzf \| xargs git checkout` |
+| `gpl`, `gps` | `git pull`, `git push` |
+| `gl`, `glo` | `git log` (oneline, graph, decorated) |
+| `gd` | `git diff` |
+
+### Zsh Keybindings & Tools
+
+| Key | Action |
+| :--- | :--- |
+| `Ctrl` + `p` | History search backward |
+| `Ctrl` + `n` | History search forward |
+| `cd` | Powered by `zoxide` (smart jump) |
 
 ---
 
