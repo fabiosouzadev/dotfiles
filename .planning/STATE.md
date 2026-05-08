@@ -5,14 +5,14 @@
 Ver: .planning/PROJECT.md (atualizado 2026-05-07)
 
 **Valor principal:** Reprodutibilidade confiável — formatar qualquer máquina e ter o ambiente completo em minutos.
-**Foco atual:** Fase 3 — README — Cheatsheet tmux
+**Foco atual:** Fase 4 — README — Cheatsheet Neovim
 
 ## Fase Atual
 
-**Fase:** 3 de 8
-**Nome:** README — Cheatsheet tmux
+**Fase:** 4 de 8
+**Nome:** README — Cheatsheet Neovim
 **Status:** Pendente
-**Requisitos:** KEY-01
+**Requisitos:** KEY-02
 
 ## Progresso do Milestone
 
@@ -20,14 +20,14 @@ Ver: .planning/PROJECT.md (atualizado 2026-05-07)
 |------|------|--------|------------|
 | 1 | README — Estrutura Base e Quick Start | ✅ Concluída | DOC-01..07 |
 | 2 | README — Guia de Fork e Personalização | ✅ Concluída | DOC-08 |
-| 3 | README — Cheatsheet tmux | 🔄 Em Progresso | KEY-01 |
-| 4 | README — Cheatsheet Neovim | ○ Pendente | KEY-02 |
+| 3 | README — Cheatsheet tmux | ✅ Concluída | KEY-01 |
+| 4 | README — Cheatsheet Neovim | 🔄 Em Progresso | KEY-02 |
 | 5 | README — Cheatsheet Zsh | ○ Pendente | KEY-03 |
 | 6 | Tech Debt — Correções Rápidas | ○ Pendente | DEBT-01..04 |
 | 7 | Tech Debt — Feature Flags AI Tools | ○ Pendente | DEBT-05..06 |
 | 8 | Performance — Shell Startup | ○ Pendente | PERF-01 |
 
-Progresso: ██░░░░░░░░ 25%
+Progresso: ███░░░░░░░ 37.5%
 
 ---
-*Última atualização: 2026-05-08 após finalização da fase 2*
+*Última atualização: 2026-05-08 após finalização da fase 3*

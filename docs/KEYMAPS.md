@@ -14,20 +14,59 @@
 
 ## 🖥️ tmux
 
-> **Prefix:** `Ctrl + a` (default remapped from `Ctrl + b`)
+> **Prefix:** `Ctrl + b` (Default)
 >
 > Full config: [`home/private_dot_config/tmux/tmux.conf.tmpl`](../home/private_dot_config/tmux/tmux.conf.tmpl)
 
-> 🚧 Coming soon — detailed keybindings will be extracted from tmux config in Phase 3.
-
-### Quick Reference
+### Sessions & Windows
 
 | Key | Action |
 | :--- | :--- |
+| `Prefix` + `Ctrl-c` | New session |
+| `Prefix` + `Ctrl-r` | Rename session |
 | `Prefix` + `c` | New window |
-| `Prefix` + `\|` | Vertical split |
-| `Prefix` + `-` | Horizontal split |
-| `Ctrl` + `h/j/k/l` | Navigate panes (Navigator.nvim) |
+| `Prefix` + `r` | Rename window |
+| `Prefix` + `Ctrl-n` / `Ctrl-p` | Next / Previous window |
+| `Prefix` + `l` / `Tab` | Last active window |
+| `Prefix` + `Ctrl-h` / `Ctrl-l` | Jump to window on left / right |
+
+### Panes
+
+| Key | Action |
+| :--- | :--- |
+| `Prefix` + `%` | Vertical split |
+| `Prefix` + `"` | Horizontal split |
+| `Prefix` + `>` / `<` | Swap current pane with next / previous |
+| `Prefix` + `+` | Zoom / Unzoom pane |
+| `Prefix` + `H/J/K/L` | Resize pane (by 5 cells) |
+
+### Copy Mode & Clipboard
+
+| Key | Action |
+| :--- | :--- |
+| `Prefix` + `Enter` | Enter copy mode |
+| `v` | Begin selection (vi-style) |
+| `y` | Copy selection & cancel |
+| `Prefix` + `P` | Paste buffer |
+| `H` / `L` | Start of line / End of line (in copy mode) |
+
+*System clipboard integration is configured for X11, Wayland, and macOS automatically.*
+
+### Popups & Tools
+
+| Key | Action |
+| :--- | :--- |
+| `Prefix` + `g` | Open **lazygit** |
+| `Prefix` + `k` | Open **k9s** |
+| `Prefix` + `z` | Open **yazi** |
+| `Prefix` + `Ctrl-a`| Open **aichat** |
+
+### Plugins & Integrations
+
+- **Navigator.nvim**: Use `Ctrl` + `h/j/k/l` to transparently navigate between Neovim splits and tmux panes.
+- **tmux-resurrect**: Save session with `Prefix` + `S`. Restore with `Prefix` + `R`.
+- **tmux-continuum**: Automatically saves sessions every 10 minutes.
+- **tmux-yank**: Integrated for cross-platform clipboard support.
 
 ---
 
