@@ -4,36 +4,28 @@ packages:
       - Microsoft.WindowsTerminal
       - Microsoft.PowerShell
       - Git.Git
-      - GitHub.cli
-      - JanDeDobbeleer.OhMyPosh
       - Starship.Starship
       - ajeetdsouza.zoxide
-      - sharkdp.bat
       - sharkdp.fd
       - BurntSushi.ripgrep.MSVC
       - eza-community.eza
       - junegunn.fzf
-      - jesseduffield.lazygit
-      - JesseDuffield.lazyDocker
-      - Neovim.Neovim
-      - WezFurlong.WezTerm
-      - Ghostty.Ghostty
       - Bitwarden.Bitwarden
-      - Obsidian.Obsidian
-      - Figma.Figma
-      - Spotify.Spotify
-      - Mozilla.Firefox
-      - Google.Chrome
       - Brave.Brave
-      - Docker.DockerDesktop
+      - Bruno.Bruno
       - Microsoft.VisualStudioCode
-      - Cursor.Cursor
       - JetBrains.IntelliJIDEA.Community
-      - DBngin.DBngin
-      - dbeaver.dbeaver
+      - DBeaver.DBeaver.Community
       - Postman.Postman
-      - localsend.localsend
+      - GnuPG.GnuPG
+      - GnuPG.Gpg4win.Beta
+      - RedHat.Podman-Desktop
+      - VSCodium.VSCodium.Insiders
+      - VSCodium.VSCodium
+      - ente-io.auth-desktop
+      - Microsoft.Teams
       - 9NKSQGP7F2NH           # WhatsApp (Microsoft Store)
+      - XPDBVSS44R0L9H         # Notion
 
     scoop:
       buckets:
@@ -48,8 +40,6 @@ packages:
         - main/direnv
         - main/jq
         - main/yazi
-        - main/btop
-        - main/htop
         - main/wget
         - main/curl
         - extras/lazygit
