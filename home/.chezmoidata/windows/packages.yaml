@@ -28,18 +28,13 @@ packages:
         - versions
         - nerd-fonts
       packages:
-        - main/age
-        # - main/codex
         - main/gnupg
         - main/delta
         - main/direnv
         - main/jq
-        # - main/opencode
-        - main/yazi
         - main/wget
         - main/curl
         - extras/antigravity
-        # - extras/opencode-desktop
         - extras/lazygit
         - extras/warp-terminal
         - extras/models
