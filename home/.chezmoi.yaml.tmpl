@@ -179,6 +179,19 @@ Headless:
   )
 -}}
 
+{{- /* GPG Program */ -}}
+{{- $gpgProgram := "" -}}
+{{- if (eq .chezmoi.os "windows") -}}
+  {{- $gpgProgram = (joinPath .chezmoi.homeDir ".scoop" "scoop" "gnupg" "bin" "gpg.exe") -}}
+{{- else -}}
+  {{- $gpgProgram = or (lookPath "gpg") (lookPath "gpg2") -}}
+{{- end -}}
+
+{{- $gpg := dict
+  "program"     $gpgProgram
+-}}
+
+
 {{- /* Debug output: só em TTY interativo para não poluir logs de CI */ -}}
 {{- if $interactiveTTY -}}
 {{- writeToStdout (printf "Profile: %s (ephemeral: %v, headless: %v, interactive: %v, managed: %v)\n" $profile $ephemeral $headless $interactive $ismanaged) -}}
@@ -227,6 +240,7 @@ Headless:
 )
   "dirs"             $dirs
   "features"         $features
+  "gpg"              $gpg
 -}}
 
 data:

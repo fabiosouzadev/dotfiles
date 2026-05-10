@@ -57,15 +57,13 @@
 [diff]
 	colorMoved = "zebra"
 
-{{ if .settings.osid | lower | contains "windows" -}}
 [gpg]
-	program = C:\\Users\\fabio.souza\\scoop\\apps\\gnupg\\current\\bin\\gpg.exe
-{{ end -}}
+	program = {{- .gpg.program -}}
 
-{{- /* Git > 2.36 hasconfig not working 
+{{/* Git > 2.36 hasconfig not working 
 [includeIf "hasconfig:remote.*.url:ssh://git@gitdev.clarobrasil.mobi/*"]
     path = ~/.config/git/config.zup.inc
-*/ -}}
+*/}}
 
 [includeIf "gitdir:{{.dirs.workspaces.zup}}/"]
     path = ~/.config/git/config.zup.inc
