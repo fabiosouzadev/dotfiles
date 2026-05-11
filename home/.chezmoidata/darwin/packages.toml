@@ -122,5 +122,6 @@ macports = [
     'lima',
     'colima',
     'k9s',
-    'grep'
+    'grep',
+    'ollama'
 ]
