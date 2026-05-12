@@ -34,7 +34,6 @@ packages:
         - main/jq
         - main/wget
         - main/curl
-        - extras/antigravity
         - extras/lazygit
         - extras/warp-terminal
         - extras/models
