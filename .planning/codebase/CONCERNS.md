@@ -32,12 +32,8 @@ This creates significant install time and potential PATH/env conflicts. Consider
 
 The 483-line aider config file is almost entirely commented-out template documentation. Only the `editor: nvim` line (line 441) is actually active. The file could be dramatically simplified.
 
-### 5. Missing `.chezmoiremovedscripts/` Cleanup
-**Severity: Low** | **Directory**: `home/.chezmoiremovedscripts/`
-
-Directory exists but was not inspected — likely contains deprecated scripts that should be periodically audited.
-
 ## Security Considerations
+
 
 ### 1. Age Encryption Key Management
 **Severity: Medium**
