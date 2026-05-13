@@ -1,0 +1,50 @@
+ai_tools:
+  npm:
+    - name: opencode
+      package: "opencode-ai"
+      feature_flag: coding_assistants
+      completions_cmd: "opencode completion"
+    - name: copilot
+      package: "@github/copilot@prerelease"
+      feature_flag: coding_assistants
+    - name: qwen-code
+      package: "@qwen-code/qwen-code"
+      feature_flag: coding_assistants
+    - name: kilocode
+      package: "@kilocode/cli"
+      feature_flag: coding_assistants
+    - name: amp
+      package: "@sourcegraph/amp@latest"
+      feature_flag: coding_assistants
+    - name: codex
+      package: "@openai/codex@latest"
+      feature_flag: coding_assistants
+      completions_cmd: "codex completion zsh"
+    - name: claude-code-router
+      package: "@musistudio/claude-code-router"
+      feature_flag: coding_assistants
+    - name: gemini
+      package: "@google/gemini-cli@preview"
+      feature_flag: coding_assistants
+    - name: openspec
+      package: "@fission-ai/openspec@latest"
+      feature_flag: spec_tools
+      env: "OPENSPEC_NO_COMPLETIONS=1"
+      completions_cmd: "openspec completion generate zsh"
+    - name: openclaude
+      package: "@gitlawb/openclaude@latest"
+      feature_flag: spec_tools
+  curl:
+    - name: aider
+      url: "https://aider.chat/install.sh"
+      shell: sh
+      env: "NO_MODIFY_PATH=1"
+      feature_flag: coding_assistants
+    - name: claude
+      url: "https://claude.ai/install.sh"
+      shell: bash
+      feature_flag: coding_assistants
+    - name: kiro
+      url: "https://cli.kiro.dev/install"
+      shell: bash
+      feature_flag: coding_assistants
