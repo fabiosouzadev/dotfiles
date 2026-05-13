@@ -74,15 +74,13 @@
 
 > **Leader:** `Space`
 >
-> Config: External Neovim repository (not managed in this dotfiles repo)
-
-> 🚧 Coming soon — detailed keybindings will be documented in Phase 4.
-
-### Quick Reference
-
-| Key | Action |
-| :--- | :--- |
-| `Ctrl` + `h/j/k/l` | Navigate splits (integrated with tmux) |
+> **Config:** Gerenciada em repositório externo dedicado.
+>
+> Este setup de dotfiles foca na integração entre o terminal e o editor. O principal atalho configurado aqui é a navegação transparente via [Navigator.nvim](https://github.com/numToStr/Navigator.nvim):
+>
+> | Key | Action |
+> | :--- | :--- |
+> | `Ctrl` + `h/j/k/l` | Navegação entre splits do Neovim e panes do tmux |
 
 ---
 
