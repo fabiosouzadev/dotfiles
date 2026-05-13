@@ -1,6 +1,6 @@
 # Testing
 
-> Last mapped: 2026-05-07
+> Last mapped: 2026-05-13
 
 ## Overview
 
@@ -34,7 +34,7 @@ chezmoi provides built-in validation tools:
 | macOS (Darwin) | ✅ Active | Primary development machine |
 | Arch Linux | ✅ Active | Desktop with Dell 3530/3520 |
 | Ubuntu Linux | ✅ Historical | Package lists maintained |
-| Windows | ⚠️ Partial | winget/scoop scripts present but less maintained |
+| Windows | ✅ Active | winget/scoop scripts functional, cross-platform bash |
 | WSL | ⚠️ Indirect | Detection logic in `.chezmoi.yaml.tmpl` |
 
 ### Environment Types
@@ -42,8 +42,9 @@ chezmoi provides built-in validation tools:
 |-------------|---------|-------|
 | Interactive desktop | ✅ | Full GUI with window managers |
 | Headless server | ⚠️ | Guards exist but less frequently tested |
-| CI/Codespaces | ⚠️ | Detection logic present, ephemeral guards active |
+| CI/Codespaces | ✅ Active | Detection logic present, ephemeral guards active across all scripts |
 | Container/Docker | ⚠️ | Container detection present |
+
 
 ## Smoke Tests (Manual)
 

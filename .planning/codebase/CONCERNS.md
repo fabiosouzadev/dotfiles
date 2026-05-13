@@ -1,31 +1,8 @@
 # Concerns
 
-> Last mapped: 2026-05-07
+> Last mapped: 2026-05-13
 
 ## Technical Debt
-
-### 1. Duplicated Code in `dot_bashrc.tmpl`
-**Severity: Medium** | **File**: `home/dot_bashrc.tmpl`
-
-The bashrc file contains duplicated blocks:
-- `cd ~` appears 4 times (lines 118-131)
-- `dbus-launch` evaluation block is duplicated 4 times (lines 121-140)
-- This appears to be accidental copy-paste rather than intentional
-
-### 2. Duplicated Repo Clone Script
-**Severity: Low** | **Files**: Both `darwin/` and `linux/` contain identical `run_onchange_after_605-clone-my-repos.sh.tmpl` (3678 bytes each)
-
-The clone script exists in both OS-specific directories with the same content. This should likely be moved to `unix/` or made into a shared template.
-
-### 3. AI Tool Proliferation
-**Severity: Low** | **Directory**: `home/.chezmoiscripts/unix/`
-
-17 separate AI CLI tool install scripts in `unix/`. Many of these tools serve overlapping purposes:
-- Claude Code, OpenClaude, Claude Code Router (3 Claude-related tools)
-- Aider, OpenCode, Copilot CLI, Cursor CLI, Codex CLI (5 coding assistants)
-- Gemini CLI, Qwen Code CLI, Kilo Code CLI, Amp CLI, Kiro Code CLI (5 more CLIs)
-
-This creates significant install time and potential PATH/env conflicts. Consider making AI tools opt-in via feature flags.
 
 ### 4. Aider Config is Mostly Comments
 **Severity: Low** | **File**: `home/dot_aider.conf.yaml.tmpl`
@@ -111,14 +88,14 @@ Scripts prefixed with `run_onchange_` re-execute whenever their rendered content
 ### 3. Large Number of AI Tool Install Scripts
 **Severity: Low**
 
-17 AI tool install scripts in `unix/` all run on first apply. Each requires network access (npm install, pip install, etc.). First-time setup on a new machine could take significant time.
+*Resolved in M2: AI tools are now data-driven via ai_tools.yaml and installed through a single loop script.*
 
 ## Improvement Opportunities
 
 1. **Add CI pipeline**: Validate templates render correctly on multiple OS containers
-2. **Deduplicate bashrc**: Clean up the repeated `cd ~` and `dbus-launch` blocks
-3. **Consolidate repo clone scripts**: Move from `darwin/` + `linux/` to `unix/`
-4. **Make AI tools opt-in**: Add feature flags for AI tool categories
+2. ~~**Deduplicate bashrc**: Clean up the repeated cd ~ and dbus-launch blocks~~ (Done in M2)
+3. ~~**Consolidate repo clone scripts**: Move from darwin/ + linux/ to unix/~~ (Done in M2)
+4. ~~**Make AI tools opt-in**: Add feature flags for AI tool categories~~ (Done in M2)
 5. **Simplify aider config**: Remove 480 lines of comments, keep only active config
 6. **Document key backup**: Add recovery instructions for age encryption key
 7. **Lazy-load shell tools**: Use zinit's `wait` or `atinit` for deferred loading

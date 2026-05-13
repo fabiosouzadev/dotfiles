@@ -38,17 +38,22 @@ Repositório de dotfiles cross-platform gerenciado por chezmoi, suportando macOS
 
 <!-- Escopo atual — construindo em direção a estes -->
 
-- [ ] README completo com quick-start de instalação por OS
-- [ ] README com cheatsheets de keymaps (tmux, Neovim, zsh)
-- [ ] README com guia de fork e personalização para contribuidores
-- [ ] README com visão geral da arquitetura e estrutura do repo
-- [ ] Eliminar duplicações no `dot_bashrc.tmpl` (blocos repetidos)
-- [ ] Consolidar script `clone-my-repos` duplicado entre `darwin/` e `linux/` para `unix/`
-- [ ] Simplificar complexidade do `.chezmoi.yaml.tmpl` (244 linhas de detecção)
-- [ ] Tornar AI tools opt-in via feature flags (reduzir 17 instalações obrigatórias)
+- ✓ README completo com quick-start de instalação por OS (Milestone 1)
+- ✓ README com cheatsheets de keymaps (tmux, Neovim, zsh) (Milestone 1)
+- ✓ README com guia de fork e personalização para contribuidores (Milestone 1)
+- ✓ Eliminar duplicações no `dot_bashrc.tmpl` (Milestone 2)
+- ✓ Consolidar script `clone-my-repos` em `crossplatform/` com execução no Windows (Milestone 2)
+- ✓ Tornar AI tools data-driven via `ai_tools.yaml` (Milestone 2)
+- ✓ Simplificar configurações redundantes e remover completions estáticos de shell (Milestone 2)
+
+### Ativos
+
+<!-- Escopo atual — construindo em direção a estes -->
+
 - [ ] Otimizar startup time do zsh (lazy-load evals pesados)
-- [ ] Corrigir typo em `310-eval-starshipt.zsh.tmpl`
 - [ ] Simplificar `dot_aider.conf.yaml.tmpl` (480 linhas de comentários, 1 linha ativa)
+- [ ] Corrigir typo em `310-eval-starshipt.zsh.tmpl`
+- [ ] Documentar procedimento de backup da chave `age`
 
 ### Fora de Escopo
 
@@ -102,4 +107,4 @@ Este documento evolui nas transições de fase e nos limites de milestone.
 4. Atualizar Contexto com estado atual
 
 ---
-*Última atualização: 2026-05-07 após inicialização*
+*Última atualização: 2026-05-13 após conclusão do Milestone 2 (Manutenibilidade)*
