@@ -98,6 +98,10 @@ The Windows implementation follows the exact same pattern as the other platforms
 3. Installs each package listed under `packages.windows.scoop.packages`.
 4. Supports bucket-prefixed format: `"extras/lazygit"` → scoop bucket `extras`, package `lazygit`.
 
+### Repository Cloning
+1. The `crossplatform/run_onchange_after_605-clone-my-repos.sh.tmpl` script automatically clones all repositories defined in `.chezmoidata/repos.json`.
+2. This bash script runs natively in Windows via Git Bash (which is installed automatically by the winget script).
+
 ---
 
 ## 🚀 Quick Start (Windows)
