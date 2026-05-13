@@ -61,4 +61,28 @@ If you want to add or remove default software from your fork, simply edit these 
 
 ---
 
+## 4. AI Features (`features.ai`)
+
+This repository includes a robust AI development environment. You can enable or disable specific AI tools in `.chezmoi.yaml.tmpl`:
+
+```yaml
+features:
+  ai:
+    coding_assistants: true  # Aider, Claude Code, Copilot, etc.
+    spec_tools: true         # OpenSpec, SpecKit, etc.
+    gsd: true                # Get Shit Done (GSD) workflow tools
+    ollama:
+      install: true          # Local AI inference
+      mode: "user"           # user, root, or compile
+      localmodels: false     # Auto-pull models defined in ollama.yaml
+    openclaw:
+      install: false         # OpenClaw assistant
+```
+
+- **Coding Assistants**: Installs CLI tools like `aider`, `claude-code`, and `copilot`.
+- **Ollama**: If `install` is true, it sets up Ollama. The `mode` determines if it's installed via script (`user`), system-wide (`root`), or compiled from source.
+- **Local Models**: If `localmodels` is true, it will automatically pull the models listed in `home/.chezmoidata/ollama.yaml`.
+
+---
+
 *[← Back to Fork Guide](../FORK-GUIDE.md)*

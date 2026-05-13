@@ -162,13 +162,7 @@ Headless:
   "runtime"     (dict "background_services" (not $ismanaged))
   "kernels"     (dict "install" false)
   "rtl8821ce"   (dict "install" $dell3530)
-
-  "ollama" (dict
-    "install"      true
-    "mode"         $ollamaMode
-    "localmodels"  false
-  )
-  "openclaw" (dict "install" false)
+  
   "i3"       (dict "enabled" true)
   "niri"     (dict "enabled" true)
 
@@ -176,6 +170,14 @@ Headless:
     "coding_assistants" true
     "spec_tools"        true
     "gsd"               true
+
+    "ollama" (dict
+    "install"      true
+    "mode"         $ollamaMode
+    "localmodels"  false
+    )
+
+    "openclaw" (dict "install" false)
   )
 -}}
 

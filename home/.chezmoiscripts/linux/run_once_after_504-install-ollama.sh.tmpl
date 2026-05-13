@@ -5,18 +5,18 @@
 {{ template "common/script_is_not_ephemeral" . }}
 
 INSTALL_DIR= {{- .dirs.local }}
-LOG_DIR={{ .features.ollama.path.logs }}
+LOG_DIR={{ .features.ai.ollama.path.logs }}
 SRC_DIR={{ .dirs.src }}
 BIN_DIR={{ .dirs.bin }}
 
-{{- if .features.ollama.install }}
+{{- if .features.ai.ollama.install }}
 
-info ">>> 🐑 Installing Ollama in mode {{ .features.ollama.mode }}  🐑"
+info ">>> 🐑 Installing Ollama in mode {{ .features.ai.ollama.mode }}  🐑"
 
 # --------------------------------------------------------------------
 # USER MODE (WSL / ambiente gerenciado)
 # --------------------------------------------------------------------
-{{-  if eq .features.ollama.mode "user" }}
+{{-  if eq .features.ai.ollama.mode "user" }}
 
 OLLAMA_VERSION="v0.23.0"
 
@@ -58,7 +58,7 @@ success "🐑 Ollama Installed in $INSTALL_DIR version: $(ollama -v) 🐑 "
 # ROOT MODE
 # --------------------------------------------------------------------
 
-{{-  else if eq .features.ollama.mode "root" }}
+{{-  else if eq .features.ai.ollama.mode "root" }}
 
 {{ if .features.systemd.enabled }}
 sudo systemctl stop ollama
@@ -79,7 +79,7 @@ sudo systemctl enable --now ollama
 
 success "Ollama Installed version: $(ollama -v) 🐑"
 
-{{-  else if eq .features.ollama.mode "compile" }}
+{{-  else if eq .features.ai.ollama.mode "compile" }}
 # --------------------------------------------------------------------
 # COMPILE MODE (opcional avançado)
 # --------------------------------------------------------------------
@@ -184,13 +184,13 @@ sudo usermod -a -G ollama $(whoami)
 {{- end }}
 
 ### Override Service
-{{- if not (eq .features.ollama.mode "user")}}
+{{- if not (eq .features.ai.ollama.mode "user")}}
 
 [ -d /etc/systemd/system/ollama.service.d ] || sudo mkdir /etc/systemd/system/ollama.service.d/
 
 sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null <<'EOF'
 [Service]
-{{ range .ollama.environments -}}
+{{ range .features.ai.ollama.environments -}}
 Environment={{.}}
 {{ end -}}
 
