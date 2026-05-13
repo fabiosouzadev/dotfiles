@@ -1,6 +1,13 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": true,
-  "model": "ollama/kimi-k2.6:cloud",
-  "theme": "catppuccin"
+  "theme": "catppuccin",
+  "model": "fireworks/kimi-k2p5-turbo",
+  "provider": {
+    "fireworks": {
+      "models": {
+        "accounts/fireworks/routers/kimi-k2p5-turbo": {},
+      }
+    }
+  }
 }

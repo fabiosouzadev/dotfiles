@@ -41,6 +41,16 @@
 
 - [x] **PERF-01**: Evals pesados no zsh startup lazy-loaded (mise, direnv, zoxide, starship)
 
+## AI Tools Integration
+
+### Hermes Agent
+
+- [ ] **HERME-01**: Feature flag `ai.coding_assistants.hermes.enabled` adicionada ao `.chezmoi.yaml.tmpl`
+- [ ] **HERME-02**: Script de instalação do Hermes via chezmoi (run_once) funciona em macOS
+- [ ] **HERME-03**: Hermes coexiste sem conflitos com Claude Code, Aider, OpenCode
+- [ ] **HERME-04**: Instalação é idempotente (rodar novamente não quebra)
+- [ ] **HERME-05**: Documentação no README sobre Hermes (como usar, provider config)
+
 ## v2 Requirements
 
 ### CI/CD
@@ -80,10 +90,16 @@
 | DEBT-05 | Fase 7 | Done |
 | DEBT-06 | Fase 7 | Done |
 | PERF-01 | Fase 8 | Done |
+| HERME-01 | Fase 9 | Pending |
+| HERME-02 | Fase 9 | Pending |
+| HERME-03 | Fase 9 | Pending |
+| HERME-04 | Fase 9 | Pending |
+| HERME-05 | Fase 9 | Pending |
 
 **Coverage:**
-- v1 requirements: 18 total
-- Mapped to phases: 18
+- v1 requirements: 18 total (all mapped)
+- v2 + Hermes requirements: 8 total
+- Mapped to phases: 23
 - Unmapped: 0 ✓
 
 ---

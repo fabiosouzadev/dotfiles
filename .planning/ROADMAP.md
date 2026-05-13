@@ -89,6 +89,17 @@
 3. Todas as ferramentas continuam funcionando normalmente após lazy-load
 4. Nenhuma regressão em funcionalidade do shell
 
+### Fase 9: Hermes Agent — Integração
+**Objetivo:** Adicionar suporte ao Hermes Agent como ferramenta de IA opcional, integrada via feature flags.
+**Modo:** mvp
+**Requisitos:** HERME-01, HERME-02, HERME-03, HERME-04, HERME-05
+**Critérios de Sucesso:**
+1. Feature flag `ai.coding_assistants.hermes.enabled` funciona no `.chezmoi.yaml.tmpl`
+2. Script de instalação via chezmoi funciona em macOS
+3. Hermes coexiste sem conflitos com outras AI tools
+4. Instalação é idempotente
+5. Documentação básica no README
+
 ---
 
 ## Dependências entre Fases

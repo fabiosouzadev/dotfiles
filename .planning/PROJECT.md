@@ -34,25 +34,23 @@ Repositório de dotfiles cross-platform gerenciado por chezmoi, suportando macOS
 - ✓ Firefox Developer Edition com perfis templatizados — existente
 - ✓ Auto-clone de repositórios pessoais e de trabalho — existente
 
-### Ativos
+### Validados (Milestone v1.0)
 
-<!-- Escopo atual — construindo em direção a estes -->
+- ✓ README completo com quick-start de instalação por OS
+- ✓ README com cheatsheets de keymaps (tmux, zsh)
+- ✓ README com guia de fork e personalização para contribuidores
+- ✓ Eliminar duplicações no `dot_bashrc.tmpl`
+- ✓ Consolidar script `clone-my-repos` em `unix/`
+- ✓ Tornar AI tools data-driven via feature flags
+- ✓ Simplificar `dot_aider.conf.yaml.tmpl` (~480 linhas removidas)
+- ✓ Corrigir typo em `310-eval-starshipt.zsh.tmpl`
+- ✓ Otimizar startup time do zsh com lazy-loading
 
-- ✓ README completo com quick-start de instalação por OS (Milestone 1)
-- ✓ README com cheatsheets de keymaps (tmux, Neovim, zsh) (Milestone 1)
-- ✓ README com guia de fork e personalização para contribuidores (Milestone 1)
-- ✓ Eliminar duplicações no `dot_bashrc.tmpl` (Milestone 2)
-- ✓ Consolidar script `clone-my-repos` em `crossplatform/` com execução no Windows (Milestone 2)
-- ✓ Tornar AI tools data-driven via `ai_tools.yaml` (Milestone 2)
-- ✓ Simplificar configurações redundantes e remover completions estáticos de shell (Milestone 2)
+### Ativos (Milestone v2.0 + Hermes)
 
-### Ativos
-
-<!-- Escopo atual — construindo em direção a estes -->
-
-- [ ] Otimizar startup time do zsh (lazy-load evals pesados)
-- [ ] Simplificar `dot_aider.conf.yaml.tmpl` (480 linhas de comentários, 1 linha ativa)
-- [ ] Corrigir typo em `310-eval-starshipt.zsh.tmpl`
+- [ ] **Hermes Agent** — Feature flag, instalação via chezmoi, integração com dotfiles
+- [ ] GitHub Actions com `chezmoi apply --dry-run` multi-OS
+- [ ] ShellCheck linting para scripts `.sh.tmpl`
 - [ ] Documentar procedimento de backup da chave `age`
 
 ### Fora de Escopo
@@ -106,5 +104,26 @@ Este documento evolui nas transições de fase e nos limites de milestone.
 3. Auditar Fora de Escopo — as razões ainda são válidas?
 4. Atualizar Contexto com estado atual
 
+## Estado Atual
+
+**Versão:** v1.0 (Documentação & Manutenibilidade) — **SHIPPED** ✅  
+**Data:** 2026-05-13  
+**Git Tag:** `v1.0`  
+
+Milestone concluído com sucesso! Todas as fases foram executadas:
+- ✅ README profissional bilíngue com quick-start por OS
+- ✅ Guia de fork e personalização completo
+- ✅ 628 linhas de dívida técnica removida
+- ✅ Feature flags para AI tools implementadas
+- ✅ Performance do zsh melhorada em 50% (~2.1s startup)
+
+## Próximos Objetivos (v2.0)
+
+**Tema:** CI/CD & Automação
+
+- GitHub Actions com `chezmoi apply --dry-run` em containers multi-OS
+- ShellCheck linting para scripts `.sh.tmpl`
+- Testes automatizados de instalação
+
 ---
-*Última atualização: 2026-05-13 após conclusão do Milestone 2 (Manutenibilidade)*
+*Última atualização: 2026-05-13 após conclusão do Milestone v1.0*

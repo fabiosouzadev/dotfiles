@@ -26,8 +26,9 @@ Ver: .planning/PROJECT.md (atualizado 2026-05-07)
 | 6 | Tech Debt — Correções Rápidas | ✅ Concluída | DEBT-01..04 |
 | 7 | Tech Debt — Feature Flags AI Tools | ✅ Concluída | DEBT-05..06 |
 | 8 | Performance — Shell Startup | ✅ Concluída | PERF-01 |
+| 9 | Hermes Agent — Integração | ○ Planejada | HERME-01..05 |
 
-Progresso: ██████████ 100%
+Progresso: █████████░ 89% (8/9 fases, fase 9 em planejamento)
 
 ---
-*Última atualização: 2026-05-13 - Milestone 1 (Profissionalização) 100% concluído e documentado.*
+*Última atualização: 2026-05-13 - Fase 9 (Hermes Agent) planejada e pronta para execução*
