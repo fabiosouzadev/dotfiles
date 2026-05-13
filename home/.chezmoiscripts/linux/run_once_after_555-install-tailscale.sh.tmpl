@@ -16,4 +16,6 @@ curl -fsSL https://tailscale.com/install.sh | sh
 
 success "Tailscale Installed"
 
+{{ template "common/script_validate_completions_path" . }}
 
+tailscale completion zsh > "$HOME/.local/share/zsh/site-functions/_tailscale"
