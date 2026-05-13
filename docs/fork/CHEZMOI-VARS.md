@@ -85,4 +85,24 @@ features:
 
 ---
 
+## 5. Hardcoded Hostnames & Hardware Detection
+
+The `.chezmoi.yaml.tmpl` uses hostname matching to detect specific machines. **If you fork this repo, you must update these values:**
+
+```yaml
+# Work machine detection (managed profile)
+$ismanaged := ($hostLower | contains "zwpe0f96cn")
+
+# Hardware-specific optimizations
+$dell3530 := ($hostLower | contains "dell3530")
+$dell3520 := ($hostLower | contains "dell3520")
+```
+
+- **`zwpe0f96cn`**: Hostname pattern for the author's corporate laptop. When matched, enables the `work` profile and disables `sudo`/`systemd` features.
+- **`dell3530` / `dell3520`**: Hostname patterns for specific Dell laptops. When matched, enables hardware-specific features like Ollama compile mode and the RTL8821CE Wi-Fi driver.
+
+Replace these with your own hostname patterns, or remove the hardware-specific blocks if not needed.
+
+---
+
 *[← Back to Fork Guide](../FORK-GUIDE.md)*
