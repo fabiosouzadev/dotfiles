@@ -16,14 +16,24 @@ zinit ice wait"0" lucid as"command" from"gh-r" \
   atpull"%atclone" src"init.zsh"
 zinit light starship/starship
 
-zinit ice wait"0" lucid from"gh-r" as"program" pick"eza"
+zinit ice wait"0" lucid from"gh-r" as"program" \
+  pick"eza"
 zinit light eza-community/eza
 
-zinit ice wait"0" lucid from"gh-r" as"program" mv"ripgrep* -> rg" pick"rg/rg"
+zinit ice wait"0" lucid from"gh-r" as"program" \
+    mv"ripgrep* -> rg" \
+    pick"rg/rg"
 zinit light BurntSushi/ripgrep
 
-zinit ice wait"0" lucid from"gh-r" as"program" mv"fd* -> fd" pick"fd/fd"
+zinit ice wait"0" lucid from"gh-r" as"program" \
+  mv"fd* -> fd" \
+  pick"fd/fd"
 zinit light @sharkdp/fd
+
+zinit ice wait"0" lucid from"gh-r" as"program" \
+  pick"bat"
+
+zinit light sharkdp/bat
 
 
 
@@ -31,10 +41,10 @@ fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
 
 # Turbo mode for heavy evals
 zinit ice wait"0" lucid atload'
-    command -v zoxide >/dev/null && eval "$(zoxide init --cmd cd zsh)"
-    command -v direnv >/dev/null && eval "$(direnv hook zsh)"
-    command -v mise >/dev/null && eval "$(mise activate zsh)"
-    command -v ccr >/dev/null && eval "$(ccr activate)"
+  command -v zoxide >/dev/null && eval "$(zoxide init --cmd cd zsh)"
+  command -v direnv >/dev/null && eval "$(direnv hook zsh)"
+  command -v mise >/dev/null && eval "$(mise activate zsh)"
+  command -v ccr >/dev/null && eval "$(ccr activate)"
 '
 zinit snippet /dev/null
  
