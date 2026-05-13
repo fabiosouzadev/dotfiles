@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "common/script_helper" . }}
+
+# Install delta (git pager with syntax highlighting)
+info ">>>>>> 📝 Installing delta (git pager) 📝 <<<<<<"
+
+# Check if delta is already installed
+if command -v delta &> /dev/null; then
+    info "Delta is already installed: $(delta --version)"
+    success ">>> 📝 Delta already installed 📝"
+    exit 0
+fi
+
+# Detect package manager and install
+{{ if (.settings.osid | lower | contains "arch") }}
+    # Arch Linux
+    if command -v pacman &> /dev/null; then
+        info "Installing delta via pacman..."
+        sudo pacman -S --noconfirm delta
+    fi
+{{ else if or (.settings.osid | lower | contains "fedora") (.settings.osid | lower | contains "rhel") (.settings.osid | lower | contains "centos") }}
+    # Fedora/RHEL/CentOS
+    if command -v dnf &> /dev/null; then
+        info "Installing delta via dnf..."
+        sudo dnf install -y delta
+    fi
+{{ else }}
+    # Generic Linux - install from GitHub releases
+    info "Installing delta from GitHub releases..."
+    DELTA_VERSION="0.19.2"
+    DELTA_ARCH="x86_64-unknown-linux-gnu"
+    DELTA_FILE="delta-${DELTA_VERSION}-${DELTA_ARCH}.tar.gz"
+    DELTA_URL="https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/${DELTA_FILE}"
+    
+    cd /tmp
+    curl -LO "$DELTA_URL"
+    tar -xzf "$DELTA_FILE"
+    mv delta-"${DELTA_VERSION}"-*/delta $HOME/.local/bin/
+    rm -rf delta-"${DELTA_VERSION}"-*
+{{ end }}
+
+# Verify installation
+if command -v delta &> /dev/null; then
+    success ">>> 📝 Installed delta: $(delta --version) 📝"
+else
+    error "Failed to install delta"
+    exit 1
+fi
+
+success ">>> 📝 Delta installation and configuration complete 📝"
+
+# vim: filetype=sh
