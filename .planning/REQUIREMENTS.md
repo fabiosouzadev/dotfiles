@@ -45,11 +45,11 @@
 
 ### Hermes Agent
 
-- [ ] **HERME-01**: Feature flag `ai.coding_assistants.hermes.enabled` adicionada ao `.chezmoi.yaml.tmpl`
-- [ ] **HERME-02**: Script de instalação do Hermes via chezmoi (run_once) funciona em macOS
-- [ ] **HERME-03**: Hermes coexiste sem conflitos com Claude Code, Aider, OpenCode
-- [ ] **HERME-04**: Instalação é idempotente (rodar novamente não quebra)
-- [ ] **HERME-05**: Documentação no README sobre Hermes (como usar, provider config)
+- [x] **HERME-01**: Feature flag `ai.coding_assistants.hermes.enabled` adicionada ao `.chezmoi.yaml.tmpl`
+- [x] **HERME-02**: Script de instalação do Hermes via chezmoi (run_once) funciona em macOS
+- [x] **HERME-03**: Hermes coexiste sem conflitos com Claude Code, Aider, OpenCode
+- [x] **HERME-04**: Instalação é idempotente (rodar novamente não quebra)
+- [x] **HERME-05**: Documentação no README sobre Hermes (como usar, provider config)
 
 ## v2 Requirements
 
@@ -90,11 +90,11 @@
 | DEBT-05 | Fase 7 | Done |
 | DEBT-06 | Fase 7 | Done |
 | PERF-01 | Fase 8 | Done |
-| HERME-01 | Fase 9 | Pending |
-| HERME-02 | Fase 9 | Pending |
-| HERME-03 | Fase 9 | Pending |
-| HERME-04 | Fase 9 | Pending |
-| HERME-05 | Fase 9 | Pending |
+| HERME-01 | Fase 9 | Done |
+| HERME-02 | Fase 9 | Done |
+| HERME-03 | Fase 9 | Done |
+| HERME-04 | Fase 9 | Done |
+| HERME-05 | Fase 9 | Done |
 
 **Coverage:**
 - v1 requirements: 18 total (all mapped)

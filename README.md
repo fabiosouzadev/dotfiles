@@ -94,7 +94,7 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 
 | Category | Tools |
 |----------|-------|
-| **Coding Assistants** | Claude Code, Aider, Gemini CLI, OpenCode, Copilot CLI, Cursor CLI, Codex CLI, Amp, Kilo Code, Qwen Code, Kiro |
+| **Coding Assistants** | Claude Code, Aider, Gemini CLI, OpenCode, Copilot CLI, Cursor CLI, Codex CLI, Amp, Kilo Code, Qwen Code, Kiro, Hermes Agent |
 | **Spec & Review** | OpenSpec, SpecKit, CodeRabbit |
 | **Orchestration** | claude-code-router, GSD, OpenClaude |
 | **Local Inference** | Ollama (pre-configured models) |
