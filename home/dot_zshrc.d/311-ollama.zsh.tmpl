@@ -1,16 +1,8 @@
 # LLM Local (Ollama)
 
-export OLLAMA_HOST=127.0.0.1:11434
-export OLLAMA_CONTEXT_LENGTH=64000
-export OLLAMA_MAX_LOADED_MODELS=2
-export OLLAMA_KEEP_ALIVE=30m
-export OLLAMA_NUM_PARALLEL=4
-export OLLAMA_NUM_THREADS=8
-export OLLAMA_KV_CACHE_TYPE=q5_0
-export OLLAMA_NEW_ENGINE=1
-export OLLAMA_FLASH_ATTENTION=1
-export OLLAMA_LLM_LIBRARY="cpu"
-export OLLAMA_GPU_OVERHEAD=0
+{{ range .features.ai.ollama.environments -}}
+export {{ . }}
+{{ end -}}
 
 unset OLLAMA_MLOCK
 
@@ -21,16 +13,11 @@ alias -- ollama-stop="sudo systemctl stop ollama.service"
 alias -- ollama-restart="sudo systemctl restart ollama.service"
 alias -- ollama-status="sudo systemctl status ollama.service"
 {{ else }}
-
-{{/* TODO: nohup ollama serve > "$LOG_DIR/server.log" 2>&1 &  */}}
-
-alias -- ollama-start="sudo systemctl start ollama.service"
-alias -- ollama-stop="sudo systemctl stop ollama.service"
-alias -- ollama-restart="sudo systemctl restart ollama.service"
-alias -- ollama-status="sudo systemctl status ollama.service"
+alias -- ollama-start="nohup ollama serve > /dev/null 2>&1 &"
+alias -- ollama-stop="pkill ollama"
+alias -- ollama-restart="pkill ollama && nohup ollama serve > /dev/null 2>&1 &"
+alias -- ollama-status="pgrep -a ollama"
 {{ end }}
-
-
 
 alias -- ollama-ui="docker run -d --network=host -v open-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name open-webui --restart always ghcr.io/open-webui/open-webui:main"
 
