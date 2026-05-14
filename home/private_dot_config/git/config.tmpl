@@ -58,7 +58,7 @@
 	colorMoved = "zebra"
 
 [gpg]
-	program = {{ .gpg.program -}}
+	program = "{{ .gpg.program -}}"
 
 {{/* Git > 2.36 hasconfig not working 
 [includeIf "hasconfig:remote.*.url:ssh://git@gitdev.clarobrasil.mobi/*"]
