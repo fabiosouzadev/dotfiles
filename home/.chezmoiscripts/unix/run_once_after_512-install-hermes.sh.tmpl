@@ -12,11 +12,11 @@
 {{- end -}}
 
 {{ if not $hermesEnabled }}
-info ">>> Hermes Agent: feature flag disabled, skipping <<<"
+info ">> Hermes Agent: feature flag disabled, skipping <"
 exit 0
 {{ end }}
 
-info ">>> 🏛️ Installing Hermes Agent 🏛️ <<<"
+info ">>>>>>> 🏛️ Installing Hermes Agent 🏛️ <<<<<<<"
 
 # Check if Hermes is already installed (idempotency)
 if command -v hermes &> /dev/null; then

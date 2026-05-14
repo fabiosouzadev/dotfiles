@@ -41,6 +41,8 @@ cask = [
     'streamlink-twitch-gui',
     'raycast',
     'rambox',
+    'telegram-desktop@beta',
+    'ayugram',
 
     # terminal
     'kitty',

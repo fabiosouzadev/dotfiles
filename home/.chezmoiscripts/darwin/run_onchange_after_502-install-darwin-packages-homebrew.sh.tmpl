@@ -6,7 +6,7 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 
 # Install Homebrew
-info "Install Homebrew"
+info ">>> Install Homebrew <<<"
 BREW_DIR="$HOME/.config/homebrew"
 if ! command -v "brew" && [ -f "$BREW_DIR/Brewfile" ]; then
  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
