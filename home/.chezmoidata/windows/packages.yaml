@@ -29,11 +29,8 @@ packages:
         - nerd-fonts
       packages:
         - main/gnupg
-        - main/delta
-        - main/direnv
-        - main/jq
-        - main/wget
-        - main/curl
         - extras/lazygit
         - extras/warp-terminal
         - extras/models
+        - extras/models
+        - extras/64gram
