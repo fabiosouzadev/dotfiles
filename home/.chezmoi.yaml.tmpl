@@ -128,16 +128,18 @@ Headless:
 
 
 {{- /* Config Dirs */ -}}
+
 {{- $dirs := dict
-  "local"  (joinPath .chezmoi.homeDir ".local")
-  "src"    (joinPath .chezmoi.homeDir ".local" "src")
-  "bin"    (joinPath .chezmoi.homeDir ".local" "bin")
+  "local"  ((joinPath .chezmoi.homeDir ".local") | replaceAll "\\" "/")
+  "src"    ((joinPath .chezmoi.homeDir ".local" "src") | replaceAll "\\" "/")
+  "bin"    ((joinPath .chezmoi.homeDir ".local" "bin") | replaceAll "\\" "/")
+
   "workspaces" (dict
-    "prefix"   (joinPath .chezmoi.homeDir "Workspaces")
-    "personal" (joinPath .chezmoi.homeDir "Workspaces" "Personal")
-    "others"   (joinPath .chezmoi.homeDir "Workspaces" "Others")
-    "work"     (joinPath .chezmoi.homeDir "Workspaces" "Work")
-    "zup"      (joinPath .chezmoi.homeDir "Workspaces" "Work" "Zup")
+    "prefix"   ((joinPath .chezmoi.homeDir "Workspaces") | replaceAll "\\" "/")
+    "personal" ((joinPath .chezmoi.homeDir "Workspaces" "Personal") | replaceAll "\\" "/")
+    "others"   ((joinPath .chezmoi.homeDir "Workspaces" "Others") | replaceAll "\\" "/")
+    "work"     ((joinPath .chezmoi.homeDir "Workspaces" "Work") | replaceAll "\\" "/")
+    "zup"      ((joinPath .chezmoi.homeDir "Workspaces" "Work" "Zup") | replaceAll "\\" "/")
   )
 -}}
 
@@ -185,7 +187,7 @@ Headless:
 {{- /* GPG Program */ -}}
 {{- $gpgProgram := "" -}}
 {{- if (eq .chezmoi.os "windows") -}}
-  {{- $gpgProgram = (joinPath .chezmoi.homeDir "scoop" "apps" "gnupg" "current" "bin" "gpg.exe") -}}
+  {{- $gpgProgram = (joinPath .chezmoi.homeDir "scoop" "apps" "gnupg" "current" "bin" "gpg.exe" | replaceAll "\\" "/") -}}
 {{- else -}}
   {{- $gpgProgram = or (lookPath "gpg") (lookPath "gpg2") -}}
 {{- end -}}
