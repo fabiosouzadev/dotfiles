@@ -1,3 +1,4 @@
+<!-- generated-by: gsd-doc-writer -->
 # 🏠 fabiosouzadev/dotfiles
 
 ![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)
@@ -94,7 +95,7 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 
 | Category | Tools |
 |----------|-------|
-| **Coding Assistants** | Claude Code, Aider, Gemini CLI, OpenCode, Copilot CLI, Cursor CLI, Codex CLI, Amp, Kilo Code, Qwen Code, Kiro, Hermes Agent |
+| **Coding Assistants** | Claude Code, Aider, Gemini CLI, OpenCode, Copilot CLI, Cursor CLI, Codex CLI, Amp, Kilo Code, Qwen Code, Kiro, **Hermes Agent** |
 | **Spec & Review** | OpenSpec, SpecKit, CodeRabbit |
 | **Orchestration** | claude-code-router, GSD, OpenClaude |
 | **Local Inference** | Ollama (pre-configured models) |
@@ -145,10 +146,26 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 │   └── private_dot_local/         # 📁 Local data
 │       └── environments/          #    Nix/Devenv project environments
 ├── docs/                          # 📖 Detailed documentation
+│   ├── ARCHITECTURE.md            #    System design & data flow
+│   ├── CONFIGURATION.md           #    Environment variables & settings
+│   ├── GETTING-STARTED.md         #    Detailed installation guide
+│   ├── DEVELOPMENT.md             #    Contribution & dev workflow
+│   ├── TESTING.md                 #    Testing procedures
 │   ├── KEYMAPS.md                 #    Keybinding cheatsheets
 │   └── FORK-GUIDE.md              #    How to fork & customize
 └── README.md                      # 👈 You are here
 ```
+
+---
+
+## 📖 Documentation
+
+For detailed information, see:
+- [Architecture](docs/ARCHITECTURE.md) — How the system is designed.
+- [Configuration](docs/CONFIGURATION.md) — Available variables and settings.
+- [Getting Started](docs/GETTING-STARTED.md) — Detailed setup instructions.
+- [Development](docs/DEVELOPMENT.md) — How to contribute.
+- [Testing](docs/TESTING.md) — How tests are structured.
 
 ---
 
