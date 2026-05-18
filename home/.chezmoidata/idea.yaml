@@ -7,7 +7,7 @@ features:
       windows: false
     # Versao fixa (vazio = mais recente do GitHub)
     # Exemplo: "2026.1.2"
-    version: ""
+    version: "2025.3.1.1"
     # Filtro adicional por workplace (vazio = todos)
     # workplaces:
     #   - Zup
