@@ -1,0 +1,15 @@
+features:
+  idea:
+    # Controle por OS — cada script checa a propria chave
+    install:
+      linux: true
+      darwin: true
+      windows: false
+    # Versao fixa (vazio = mais recente do GitHub)
+    # Exemplo: "2026.1.2"
+    version: ""
+    # Filtro adicional por workplace (vazio = todos)
+    # workplaces:
+    #   - Zup
+    #   - Instivo
+    workplaces: []

@@ -1,0 +1,162 @@
+# run_once_after_530-install-idea-community.ps1.tmpl
+# Instala IntelliJ IDEA Community Edition no Windows (sem admin)
+
+{{- if index .features.idea.install "windows" }}
+
+$ErrorActionPreference = 'Stop'
+
+function Write-Info  { param($msg) Write-Host "[INFO]    $msg" -ForegroundColor Cyan }
+function Write-Ok    { param($msg) Write-Host "[OK]      $msg" -ForegroundColor Green }
+function Write-Warn  { param($msg) Write-Host "[WARN]    $msg" -ForegroundColor Yellow }
+function Write-Err   { param($msg) Write-Host "[ERROR]   $msg" -ForegroundColor Red }
+
+$Repo        = "JetBrains/intellij-community"
+$InstallBase = "$env:LOCALAPPDATA\idea-ic"
+$BinDir      = "$env:LOCALAPPDATA\bin"
+
+# ── Filtro por workplace ─────────────────────────────────────────
+{{- if .features.idea.workplaces }}
+{{- $wpPsList := "" }}
+{{- range $i, $wp := .features.idea.workplaces }}{{ if $i }}{{ $wpPsList = printf "%s, " $wpPsList }}{{ end }}{{ $wpPsList = printf "%s\"%s\"" $wpPsList $wp }}{{ end }}
+$AllowedWorkplaces = @({{ $wpPsList }})
+$CurrentWorkplace  = "{{ .settings.workplace }}"
+if ($AllowedWorkplaces.Count -gt 0 -and $CurrentWorkplace -notin $AllowedWorkplaces) {
+    Write-Info ">>> IntelliJ IDEA: workplace '$CurrentWorkplace' nao esta na lista permitida. Skipping. <<<"
+    exit 0
+}
+{{- end }}
+
+# ── Detectar arquitetura ─────────────────────────────────────────
+$ArchSuffix = if ([System.Environment]::Is64BitOperatingSystem) {
+    if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "-aarch64" } else { "" }
+} else {
+    Write-Err "Sistemas 32-bit nao sao suportados."
+    exit 1
+}
+
+# ── Resolver versao ──────────────────────────────────────────────
+{{- if .features.idea.version }}
+$Version = "{{ .features.idea.version }}"
+Write-Info ">>> IntelliJ IDEA Community Edition — Windows (versao fixa: $Version) <<<"
+{{- else }}
+$Version = ""
+Write-Info ">>> IntelliJ IDEA Community Edition — Windows (versao mais recente) <<<"
+{{- end }}
+
+if (-not $Version) {
+    Write-Info "Buscando versao mais recente no GitHub..."
+    try {
+        if (Get-Command gh -ErrorAction SilentlyContinue) {
+            $tag = gh api "repos/$Repo/releases" --jq '[.[] | select(.tag_name | startswith("idea/"))] | first | .tag_name'
+            $Version = $tag -replace "^idea/", ""
+        } else {
+            $headers = @{}
+            if ($env:GITHUB_TOKEN) { $headers["Authorization"] = "Bearer $env:GITHUB_TOKEN" }
+            $releases = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases" -Headers $headers
+            $ideaRelease = $releases | Where-Object { $_.tag_name -like "idea/*" } | Select-Object -First 1
+            $Version = $ideaRelease.tag_name -replace "^idea/", ""
+        }
+    } catch {
+        Write-Err "Nao foi possivel determinar a versao mais recente."
+        Write-Err "Fixe manualmente em .chezmoidata/idea.yaml: version: `"2026.1.2`""
+        exit 1
+    }
+
+    if (-not $Version) {
+        Write-Err "Nao foi possivel determinar a versao mais recente."
+        exit 1
+    }
+}
+
+Write-Info "Versao: $Version | Arquitetura: $($ArchSuffix -replace '-', 'aarch64' | ForEach-Object { if ($ArchSuffix) { 'aarch64' } else { 'x86_64' } })"
+
+# ── Verificar se ja esta instalado ───────────────────────────────
+$InstallDir = "$InstallBase-$Version"
+
+if (Test-Path $InstallDir) {
+    Write-Ok ">>> IntelliJ IDEA CE $Version ja instalado em $InstallDir <<<"
+    exit 0
+}
+
+# ── Download ─────────────────────────────────────────────────────
+$AssetName   = "idea-$Version$ArchSuffix.win.zip"
+$DownloadUrl = "https://github.com/$Repo/releases/download/idea%2F$Version/$AssetName"
+
+$TmpDir = Join-Path $env:TEMP "idea-ic-install-$(Get-Random)"
+New-Item -ItemType Directory -Path $TmpDir -Force | Out-Null
+
+try {
+    Write-Info "Baixando $AssetName..."
+    $zipPath = Join-Path $TmpDir $AssetName
+    try {
+        Invoke-WebRequest -Uri $DownloadUrl -OutFile $zipPath -UseBasicParsing
+    } catch {
+        Write-Err "Falha no download. Verifique se a versao '$Version' existe."
+        Write-Err "URL: $DownloadUrl"
+        Write-Err ""
+        Write-Err "Versoes disponiveis:"
+        Write-Err "  gh api repos/$Repo/releases --jq '.[].tag_name' | grep '^idea/'"
+        exit 1
+    }
+
+    # ── Extrair ──────────────────────────────────────────────────
+    Write-Info "Extraindo para $InstallDir..."
+    New-Item -ItemType Directory -Path (Split-Path $InstallDir) -Force | Out-Null
+    Expand-Archive -Path $zipPath -DestinationPath (Split-Path $InstallDir) -Force
+
+    # Normalizar nome do diretorio extraido
+    $extractedDir = Get-ChildItem -Directory (Split-Path $InstallDir) | Where-Object { $_.Name -like "idea-ic-*" -or $_.Name -like "idea-*" } | Select-Object -First 1
+    if ($extractedDir -and $extractedDir.FullName -ne $InstallDir) {
+        if (Test-Path $InstallDir) { Remove-Item $InstallDir -Recurse -Force }
+        Rename-Item $extractedDir.FullName (Split-Path $InstallDir -Leaf)
+    }
+
+    Write-Ok "Extraido em $InstallDir"
+} finally {
+    Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# ── Adicionar ao PATH (user) ────────────────────────────────────
+$IdeaBin = "$InstallDir\bin\idea64.exe"
+if (-not (Test-Path $IdeaBin)) {
+    $IdeaBin = "$InstallDir\bin\idea.exe"
+}
+
+New-Item -ItemType Directory -Path $BinDir -Force | Out-Null
+
+# Criar wrapper script
+$wrapperPath = Join-Path $BinDir "idea.cmd"
+$wrapperContent = "@echo off`r`n`"$IdeaBin`" %*"
+Set-Content -Path $wrapperPath -Value $wrapperContent -Encoding ASCII
+
+# Adicionar BinDir ao PATH do usuario se nao estiver
+$userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+if ($userPath -notlike "*$BinDir*") {
+    Write-Info "Adicionando $BinDir ao PATH do usuario..."
+    [System.Environment]::SetEnvironmentVariable("Path", "$userPath;$BinDir", "User")
+    $env:Path = "$env:Path;$BinDir"
+    Write-Ok "PATH atualizado."
+}
+
+# ── Atalho na area de trabalho ───────────────────────────────────
+$DesktopPath = [System.Environment]::GetFolderPath("Desktop")
+$ShortcutPath = Join-Path $DesktopPath "IntelliJ IDEA CE.lnk"
+
+if (-not (Test-Path $ShortcutPath)) {
+    $shell = New-Object -ComObject WScript.Shell
+    $shortcut = $shell.CreateShortcut($ShortcutPath)
+    $shortcut.TargetPath = $IdeaBin
+    $shortcut.WorkingDirectory = $InstallDir
+    $shortcut.Description = "IntelliJ IDEA Community Edition $Version"
+    $shortcut.Save()
+    Write-Ok "Atalho criado na area de trabalho."
+}
+
+Write-Ok ">>> IntelliJ IDEA CE $Version instalado no Windows! <<<"
+Write-Info "Execute:  idea"
+Write-Info "Ou:  $IdeaBin"
+Write-Info "Desinstalar:  Remove-Item -Recurse '$InstallDir'; Remove-Item '$wrapperPath'; Remove-Item '$ShortcutPath'"
+
+{{- else }}
+Write-Info ">>> IntelliJ IDEA Community Edition desabilitado para Windows (features.idea.install.windows = false) <<<"
+{{- end }}

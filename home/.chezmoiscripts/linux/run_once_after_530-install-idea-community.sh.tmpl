@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . }}
+
+{{- if index .features.idea.install "linux" }}
+
+REPO="JetBrains/intellij-community"
+INSTALL_BASE="$HOME/.local/share"
+BIN_DIR="$HOME/.local/bin"
+DESKTOP_DIR="$HOME/.local/share/applications"
+
+# ── Filtro por workplace ─────────────────────────────────────────
+{{- if .features.idea.workplaces }}
+{{- $wpList := "" }}
+{{- range .features.idea.workplaces }}{{ $wpList = printf "%s\"%s\" " $wpList . }}{{ end }}
+WORKPLACES=({{ $wpList }})
+CURRENT_WORKPLACE="{{ .settings.workplace }}"
+if [[ ${#WORKPLACES[@]} -gt 0 ]]; then
+    MATCH=false
+    for wp in "${WORKPLACES[@]}"; do
+        [[ "$wp" == "$CURRENT_WORKPLACE" ]] && MATCH=true
+    done
+    if ! $MATCH; then
+        info ">>> 🧠 IntelliJ IDEA: workplace '${CURRENT_WORKPLACE}' nao esta na lista permitida. Skipping. <<<"
+        exit 0
+    fi
+fi
+{{- end }}
+
+# ── Detectar arquitetura ─────────────────────────────────────────
+detect_arch() {
+    local arch
+    arch="$(uname -m)"
+    case "$arch" in
+        x86_64|amd64)  echo "" ;;
+        aarch64|arm64)  echo "-aarch64" ;;
+        *)
+            error "Arquitetura nao suportada: $arch"
+            exit 1
+            ;;
+    esac
+}
+
+ARCH_SUFFIX="$(detect_arch)"
+
+# ── Resolver versao ──────────────────────────────────────────────
+{{- if .features.idea.version }}
+VERSION="{{ .features.idea.version }}"
+info ">>> 🧠 IntelliJ IDEA Community Edition (versao fixa: ${VERSION}) <<<"
+{{- else }}
+VERSION=""
+info ">>> 🧠 IntelliJ IDEA Community Edition (versao mais recente) <<<"
+{{- end }}
+
+if [[ -z "$VERSION" ]]; then
+    info "Buscando versao mais recente no GitHub..."
+    if command -v gh &>/dev/null; then
+        VERSION=$(gh api "repos/${REPO}/releases" --jq '[.[] | select(.tag_name | startswith("idea/")) | .tag_name | sub("idea/";"")] | first')
+    elif command -v jq &>/dev/null; then
+        VERSION=$(curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN:-}" "https://api.github.com/repos/${REPO}/releases" | \
+            jq -r '[.[] | select(.tag_name | startswith("idea/")) | .tag_name | sub("idea/";"")] | first')
+    else
+        VERSION=$(curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN:-}" "https://api.github.com/repos/${REPO}/releases" | \
+            grep -oP '"tag_name"\s*:\s*"idea/\K[^"]+' | head -1 || true)
+    fi
+
+    if [[ -z "$VERSION" ]]; then
+        error "Nao foi possivel determinar a versao mais recente."
+        error "Fixe manualmente em .chezmoidata/idea.yaml: version: \"2026.1.2\""
+        exit 1
+    fi
+fi
+
+info "Versao: ${VERSION} | Arquitetura: ${ARCH_SUFFIX:-x86_64}"
+
+# ── Verificar se ja esta instalado ───────────────────────────────
+INSTALL_DIR="${INSTALL_BASE}/idea-ic-${VERSION}"
+
+if [[ -d "$INSTALL_DIR" ]]; then
+    success ">>> 🧠 IntelliJ IDEA ${VERSION} ja instalado em ${INSTALL_DIR} <<<"
+    exit 0
+fi
+
+# ── Download ─────────────────────────────────────────────────────
+ASSET_NAME="idea-${VERSION}${ARCH_SUFFIX}.tar.gz"
+DOWNLOAD_URL="https://github.com/${REPO}/releases/download/idea%2F${VERSION}/${ASSET_NAME}"
+
+TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+info "Baixando ${ASSET_NAME}..."
+if ! curl -fSL --progress-bar "$DOWNLOAD_URL" -o "$TMP_DIR/$ASSET_NAME"; then
+    error "Falha no download. Verifique se a versao '${VERSION}' existe."
+    error "URL: $DOWNLOAD_URL"
+    error ""
+    error "Versoes disponiveis:"
+    error "  gh api repos/${REPO}/releases --jq '.[].tag_name' | grep '^idea/'"
+    exit 1
+fi
+
+# ── Extrair ──────────────────────────────────────────────────────
+info "Extraindo para ${INSTALL_DIR}..."
+mkdir -p "$INSTALL_BASE"
+tar -xzf "$TMP_DIR/$ASSET_NAME" -C "$INSTALL_BASE"
+
+# Normalizar nome do diretorio extraido
+# O tar cria algo como idea-IC-243.23654 ou idea-ic-2026.1.2
+EXTRACTED_DIR=""
+for d in "${INSTALL_BASE}"/idea-*; do
+    [[ -d "$d" ]] && EXTRACTED_DIR="$d" && break
+done
+if [[ -n "$EXTRACTED_DIR" && "$(basename "$EXTRACTED_DIR")" != "idea-ic-${VERSION}" ]]; then
+    mv "$EXTRACTED_DIR" "$INSTALL_DIR"
+fi
+
+success "Extraido em ${INSTALL_DIR}"
+
+# ── Symlink binario ──────────────────────────────────────────────
+mkdir -p "$BIN_DIR"
+
+IDEA_BIN="${INSTALL_DIR}/bin/idea"
+SYMLINK="${BIN_DIR}/idea"
+
+if [[ -L "$SYMLINK" ]]; then
+    rm "$SYMLINK"
+elif [[ -f "$SYMLINK" ]]; then
+    warn "Arquivo existente em ${SYMLINK} — renomeando para .bak"
+    mv "$SYMLINK" "${SYMLINK}.bak"
+fi
+
+ln -s "$IDEA_BIN" "$SYMLINK"
+success "Symlink: ${SYMLINK} -> ${IDEA_BIN}"
+
+# ── Desktop entry ────────────────────────────────────────────────
+mkdir -p "$DESKTOP_DIR"
+
+ICON_PATH="${INSTALL_DIR}/bin/idea.svg"
+[[ ! -f "$ICON_PATH" ]] && ICON_PATH="${INSTALL_DIR}/bin/idea.png"
+
+cat > "${DESKTOP_DIR}/idea-ic.desktop" <<DESKTOP
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=IntelliJ IDEA Community Edition
+Icon=${ICON_PATH}
+Exec="${IDEA_BIN}" %f
+Comment=IntelliJ IDEA Community Edition ${VERSION}
+Categories=Development;IDE;
+Terminal=false
+StartupWMClass=jetbrains-idea-ce
+StartupNotify=true
+DESKTOP
+
+if command -v update-desktop-database &>/dev/null; then
+    update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
+fi
+
+success "Desktop entry: ${DESKTOP_DIR}/idea-ic.desktop"
+
+# ── Verificar PATH ───────────────────────────────────────────────
+if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+    warn "'${BIN_DIR}' nao esta no PATH. Adicione ao shell rc:"
+    warn "  export PATH=\"${BIN_DIR}:\$PATH\""
+fi
+
+success ">>> 🧠 IntelliJ IDEA Community Edition ${VERSION} instalado! <<<"
+info "Execute:  idea"
+info "Desinstalar:  rm -rf ${INSTALL_DIR} ${SYMLINK} ${DESKTOP_DIR}/idea-ic.desktop"
+
+{{- else }}
+info ">>> 🧠 IntelliJ IDEA Community Edition desabilitado para Linux (features.idea.install.linux = false) <<<"
+{{- end }}
+
+# vim: filetype=bash

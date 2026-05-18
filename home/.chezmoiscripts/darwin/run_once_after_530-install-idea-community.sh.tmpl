@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "darwin/script_darwin_only" . }}
+{{ template "common/script_helper" . }}
+
+{{- if index .features.idea.install "darwin" }}
+
+REPO="JetBrains/intellij-community"
+APPS_DIR="$HOME/Applications"
+BIN_DIR="$HOME/.local/bin"
+
+# ── Filtro por workplace ─────────────────────────────────────────
+{{- if .features.idea.workplaces }}
+{{- $wpList := "" }}
+{{- range .features.idea.workplaces }}{{ $wpList = printf "%s\"%s\" " $wpList . }}{{ end }}
+WORKPLACES=({{ $wpList }})
+CURRENT_WORKPLACE="{{ .settings.workplace }}"
+if [[ ${#WORKPLACES[@]} -gt 0 ]]; then
+    MATCH=false
+    for wp in "${WORKPLACES[@]}"; do
+        [[ "$wp" == "$CURRENT_WORKPLACE" ]] && MATCH=true
+    done
+    if ! $MATCH; then
+        info ">>> 🧠 IntelliJ IDEA: workplace '${CURRENT_WORKPLACE}' nao esta na lista permitida. Skipping. <<<"
+        exit 0
+    fi
+fi
+{{- end }}
+
+# ── Detectar arquitetura ─────────────────────────────────────────
+detect_arch() {
+    local arch
+    arch="$(uname -m)"
+    case "$arch" in
+        x86_64)   echo "" ;;
+        arm64)    echo "-aarch64" ;;
+        *)
+            error "Arquitetura nao suportada: $arch"
+            exit 1
+            ;;
+    esac
+}
+
+ARCH_SUFFIX="$(detect_arch)"
+
+# ── Resolver versao ──────────────────────────────────────────────
+{{- if .features.idea.version }}
+VERSION="{{ .features.idea.version }}"
+info ">>> 🧠 IntelliJ IDEA Community Edition — macOS (versao fixa: ${VERSION}) <<<"
+{{- else }}
+VERSION=""
+info ">>> 🧠 IntelliJ IDEA Community Edition — macOS (versao mais recente) <<<"
+{{- end }}
+
+if [[ -z "$VERSION" ]]; then
+    info "Buscando versao mais recente no GitHub..."
+    if command -v gh &>/dev/null; then
+        VERSION=$(gh api "repos/${REPO}/releases" --jq '[.[] | select(.tag_name | startswith("idea/")) | .tag_name | sub("idea/";"")] | first')
+    elif command -v jq &>/dev/null; then
+        VERSION=$(curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN:-}" "https://api.github.com/repos/${REPO}/releases" | \
+            jq -r '[.[] | select(.tag_name | startswith("idea/")) | .tag_name | sub("idea/";"")] | first')
+    else
+        VERSION=$(curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN:-}" "https://api.github.com/repos/${REPO}/releases" | \
+            grep -oP '"tag_name"\s*:\s*"idea/\K[^"]+' | head -1)
+    fi
+
+    if [[ -z "$VERSION" ]]; then
+        error "Nao foi possivel determinar a versao mais recente."
+        error "Fixe manualmente em .chezmoidata/idea.yaml: version: \"2026.1.2\""
+        exit 1
+    fi
+fi
+
+info "Versao: ${VERSION} | Arquitetura: ${ARCH_SUFFIX:-x86_64}"
+
+# ── Verificar se ja esta instalado ───────────────────────────────
+APP_PATH="${APPS_DIR}/IntelliJ IDEA CE.app"
+
+if [[ -d "$APP_PATH" ]]; then
+    # Verificar se a versao instalada corresponde
+    INSTALLED_VER=$(defaults read "$APP_PATH/Contents/Info" CFBundleShortVersionString 2>/dev/null || echo "unknown")
+    if [[ "$INSTALLED_VER" == "$VERSION" ]]; then
+        success ">>> 🧠 IntelliJ IDEA CE ${VERSION} ja instalado <<<"
+        exit 0
+    fi
+    info "Versao instalada: ${INSTALLED_VER} — atualizando para ${VERSION}"
+    rm -rf "$APP_PATH"
+fi
+
+# ── Download ─────────────────────────────────────────────────────
+ASSET_NAME="idea-${VERSION}${ARCH_SUFFIX}.dmg"
+DOWNLOAD_URL="https://github.com/${REPO}/releases/download/idea%2F${VERSION}/${ASSET_NAME}"
+
+TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+info "Baixando ${ASSET_NAME}..."
+if ! curl -fSL --progress-bar "$DOWNLOAD_URL" -o "$TMP_DIR/$ASSET_NAME"; then
+    error "Falha no download. Verifique se a versao '${VERSION}' existe."
+    error "URL: $DOWNLOAD_URL"
+    exit 1
+fi
+
+# ── Montar DMG e copiar app ──────────────────────────────────────
+info "Montando DMG..."
+MOUNT_POINT=$(hdiutil attach "$TMP_DIR/$ASSET_NAME" -nobrowse -readonly 2>/dev/null | grep "/Volumes/" | awk '{print $NF}')
+
+if [[ -z "$MOUNT_POINT" ]]; then
+    error "Falha ao montar o DMG."
+    exit 1
+fi
+
+trap 'hdiutil detach "$MOUNT_POINT" 2>/dev/null; rm -rf "$TMP_DIR"' EXIT
+
+info "Copiando para ${APPS_DIR}..."
+mkdir -p "$APPS_DIR"
+cp -R "${MOUNT_POINT}/IntelliJ IDEA CE.app" "$APPS_DIR/"
+
+hdiutil detach "$MOUNT_POINT" 2>/dev/null || true
+
+success "Copiado para ${APP_PATH}"
+
+# ── Symlink binario ──────────────────────────────────────────────
+mkdir -p "$BIN_DIR"
+
+IDEA_BIN="${APP_PATH}/Contents/MacOS/idea"
+SYMLINK="${BIN_DIR}/idea"
+
+if [[ -L "$SYMLINK" ]]; then
+    rm "$SYMLINK"
+elif [[ -f "$SYMLINK" ]]; then
+    warn "Arquivo existente em ${SYMLINK} — renomeando para .bak"
+    mv "$SYMLINK" "${SYMLINK}.bak"
+fi
+
+ln -s "$IDEA_BIN" "$SYMLINK"
+success "Symlink: ${SYMLINK} -> ${IDEA_BIN}"
+
+# ── Verificar PATH ───────────────────────────────────────────────
+if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+    warn "'${BIN_DIR}' nao esta no PATH. Adicione ao shell rc:"
+    warn "  export PATH=\"${BIN_DIR}:\$PATH\""
+fi
+
+success ">>> 🧠 IntelliJ IDEA CE ${VERSION} instalado no macOS! <<<"
+info "Execute:  idea"
+info "Desinstalar:  rm -rf \"${APP_PATH}\" ${SYMLINK}"
+
+{{- else }}
+info ">>> 🧠 IntelliJ IDEA Community Edition desabilitado para macOS (features.idea.install.darwin = false) <<<"
+{{- end }}
+
+# vim: filetype=bash

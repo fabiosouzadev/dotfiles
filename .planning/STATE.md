@@ -32,3 +32,9 @@ Progresso: ██████████ 100% (9/9 fases)
 
 ---
 *Última atualização: 2026-05-13 - Fase 9 (Hermes Agent) concluída e integrada*
+
+## Quick Tasks Completed
+
+| Data | Slug | Descricao |
+|------|------|-----------|
+| 2026-05-18 | install-idea-community | Script para instalar IntelliJ IDEA Community Edition sem sudo |
