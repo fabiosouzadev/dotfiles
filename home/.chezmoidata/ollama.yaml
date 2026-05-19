@@ -18,7 +18,4 @@ features:
       models:
         - qwen2.5-coder:0.5b #Completion entende bem ts, Nestjs, prisma
         - qwen2.5-coder:1.5b #Completion entende bem ts, Nestjs, prisma
-        - qwen2.5-coder:3b #Completion entende bem ts, Nestjs, prisma #Openclaw Coding
-        - qwen3:4b #4b Openclaw Fast answers
-        - llama3.2:3b #Openclaw General
-        - gemma3n:e2b #Openclaw General
+        - gemma4 #Openclaw General
