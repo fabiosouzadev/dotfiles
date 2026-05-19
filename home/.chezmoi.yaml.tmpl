@@ -59,8 +59,8 @@ Headless:
 
 {{- /* Run expensive/OS-specific shell probes only on Linux */ -}}
 {{- if eq .chezmoi.os "linux" -}}
-  {{- $cgroupContains = (output "sh" "-c" "grep -E -i 'docker|podman|lxc|containerd|kubepods' /proc/1/cgroup 2>/dev/null || true" | trim) -}}
-  {{- $hasDockerenv = (output "sh" "-c" "test -f /.dockerenv && echo yes || true" | trim) -}}
+{{-   $cgroupContains = (output "sh" "-c" "grep -E -i 'docker|podman|lxc|containerd|kubepods' /proc/1/cgroup 2>/dev/null || true" | trim)   -}}
+{{-   $hasDockerenv = (output "sh" "-c" "test -f /.dockerenv && echo yes || true" | trim)   -}}
 {{- end -}}
 
 {{- $likelyContainerUser := or (env "DOCKER_HOST" | not | not) (eq $usernameLower "root") (eq $usernameLower "vscode") (eq $usernameLower "vagrant") (eq $usernameLower "ubuntu") $distrobox $limavm -}}
@@ -79,8 +79,8 @@ Headless:
 {{- $skipShellProbes := env "CHEZMOI_SKIP_SHELL_PROBES" | not | not -}}
 {{- $wslGuiProbe := "" -}}
 {{- if and (not $skipShellProbes) (eq .chezmoi.os "linux") $wsl -}}
-  {{- /* Best-effort: verifica socket X11 ou xdpyinfo; sempre cai para ''/true para não falhar o template */ -}}
-  {{- $wslGuiProbe = (output "sh" "-c" "([ -S /tmp/.X11-unix/X0 ] && echo yes) || (command -v xdpyinfo >/dev/null 2>&1 && xdpyinfo >/dev/null 2>&1 && echo yes) || true" | trim) -}}
+{{- /* Best-effort: verifica socket X11 ou xdpyinfo; sempre cai para ''/true para não falhar o template */ -}}
+{{-   $wslGuiProbe = (output "sh" "-c" "([ -S /tmp/.X11-unix/X0 ] && echo yes) || (command -v xdpyinfo >/dev/null 2>&1 && xdpyinfo >/dev/null 2>&1 && echo yes) || true" | trim)  -}}
 {{- end -}}
 
 {{- /* Forças manuais */ -}}
@@ -152,10 +152,10 @@ Headless:
 {{- /* Ollama Mode */ -}}
 {{- $ollamaMode := "user" -}}
 {{- if and $hasSudo $hasSystemd -}}
-  {{- $ollamaMode = "root" -}}
+{{-   $ollamaMode = "root"  -}}
 {{- end -}}
 {{- if and $wantsCompile $hasSudo -}}
-  {{- $ollamaMode = "compile" -}}
+{{-   $ollamaMode = "compile"   -}}
 {{- end -}}
 
 {{- $features := dict
@@ -187,9 +187,9 @@ Headless:
 {{- /* GPG Program */ -}}
 {{- $gpgProgram := "" -}}
 {{- if (eq .chezmoi.os "windows") -}}
-  {{- $gpgProgram = ((joinPath .chezmoi.homeDir "scoop" "apps" "gnupg" "current" "bin" "gpg.exe") | replace "\\" "/") -}}
+{{-   $gpgProgram = ((joinPath .chezmoi.homeDir "scoop" "apps" "gnupg" "current" "bin" "gpg.exe") | replace "\\" "/")   -}}
 {{- else -}}
-  {{- $gpgProgram = or (lookPath "gpg") (lookPath "gpg2") -}}
+{{-   $gpgProgram = or (lookPath "gpg") (lookPath "gpg2")   -}}
 {{- end -}}
 
 {{- $gpg := dict
