@@ -26,6 +26,9 @@ ai_tools:
     - name: gemini
       package: "@google/gemini-cli@preview"
       feature_flag: coding_assistants
+    - name: omniroute
+      package: "omniroute"
+      feature_flag: coding_assistants
     - name: openspec
       package: "@fission-ai/openspec@latest"
       feature_flag: spec_tools
