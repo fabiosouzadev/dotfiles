@@ -38,3 +38,4 @@ Progresso: ██████████ 100% (9/9 fases)
 | Data | Slug | Descricao |
 |------|------|-----------|
 | 2026-05-18 | install-idea-community | Script para instalar IntelliJ IDEA Community Edition sem sudo |
+| 2026-05-22 | vamos-implementar-o-cli-do-gitlab-https- | Implementar o CLI do Gitlab |
