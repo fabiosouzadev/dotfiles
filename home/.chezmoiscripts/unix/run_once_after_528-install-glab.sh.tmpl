@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "workplace/script_is_zup" . }}
+
+{{ template "common/script_helper" . }}
+
+# Install glab (GitLab CLI)
+info ">>>>>> 🦊 Installing glab (GitLab CLI) 🦊 <<<<<<"
+
+# Check if glab is already installed
+if command -v glab &> /dev/null; then
+    info "glab is already installed: $(glab --version 2>&1 | head -1)"
+    success ">>> 🦊 glab already installed 🦊"
+    exit 0
+fi
+
+# Detect architecture
+ARCH="$(uname -m)"
+case "$ARCH" in
+    x86_64)  GLAB_ARCH="amd64" ;;
+    aarch64) GLAB_ARCH="arm64" ;;
+    armv7l)  GLAB_ARCH="armv6" ;;
+    *)
+        error "Unsupported architecture: $ARCH"
+        exit 1
+        ;;
+esac
+
+# Detect OS
+GLAB_OS="linux"
+case "$(uname -s)" in
+    Darwin) GLAB_OS="macOS" ;;
+esac
+
+# Get latest release version from GitLab API
+info "Fetching latest glab release..."
+GLAB_VERSION=$(curl -fsSL "https://gitlab.com/api/v4/projects/34675721/releases" \
+    | grep -oP '"tag_name":"\K[^"]+' | head -1)
+
+if [ -z "$GLAB_VERSION" ]; then
+    error "Could not determine latest glab version"
+    exit 1
+fi
+
+info "Installing glab ${GLAB_VERSION} for ${GLAB_OS}/${GLAB_ARCH}..."
+
+GLAB_FILE="glab_${GLAB_VERSION#v}_${GLAB_OS}_${GLAB_ARCH}.tar.gz"
+GLAB_URL="https://gitlab.com/gitlab-org/cli/-/releases/${GLAB_VERSION}/downloads/${GLAB_FILE}"
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+info "Downloading: ${GLAB_URL}"
+curl -fsSL "$GLAB_URL" -o "$TMPDIR/$GLAB_FILE"
+
+info "Extracting..."
+tar -xzf "$TMPDIR/$GLAB_FILE" -C "$TMPDIR"
+
+# The archive contains bin/glab
+mkdir -p "$HOME/.local/bin"
+cp "$TMPDIR/bin/glab" "$HOME/.local/bin/glab"
+chmod +x "$HOME/.local/bin/glab"
+
+{{ template "common/script_validate_completions_path" . }}
+"$HOME/.local/bin/glab" completion -s zsh > "$HOME/.local/share/zsh/site-functions/_glab" 2>/dev/null || true
+
+success ">>> 🦊 Installed glab: $("$HOME/.local/bin/glab" --version 2>&1 | head -1) 🦊"
+
+# vim: filetype=bash

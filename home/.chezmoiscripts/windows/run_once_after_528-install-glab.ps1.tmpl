@@ -1,0 +1,107 @@
+# run_once_after_528-install-glab.ps1.tmpl
+# Instala glab (GitLab CLI) no Windows (sem admin)
+
+{{ template "workplace/script_is_zup" . }}
+
+$ErrorActionPreference = 'Stop'
+
+function Write-Info  { param($msg) Write-Host "[INFO]    $msg" -ForegroundColor Cyan }
+function Write-Ok    { param($msg) Write-Host "[OK]      $msg" -ForegroundColor Green }
+function Write-Warn  { param($msg) Write-Host "[WARN]    $msg" -ForegroundColor Yellow }
+function Write-Err   { param($msg) Write-Host "[ERROR]   $msg" -ForegroundColor Red }
+
+# ── Verificar se ja esta instalado ───────────────────────────────
+if (Get-Command glab -ErrorAction SilentlyContinue) {
+    $installedVersion = glab --version 2>&1 | Select-Object -First 1
+    Write-Ok ">>> glab ja instalado: $installedVersion <<<"
+    exit 0
+}
+
+# ── Detectar arquitetura ─────────────────────────────────────────
+$Arch = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "amd64" }
+$OS = "windows"
+
+Write-Info ">>> Instalando glab (GitLab CLI) para $OS/$Arch <<<"
+
+# ── Buscar versao mais recente ──────────────────────────────────
+Write-Info "Buscando versao mais recente..."
+try {
+    $releases = Invoke-RestMethod -Uri "https://gitlab.com/api/v4/projects/34675721/releases"
+    $latestVersion = $releases[0].tag_name
+} catch {
+    Write-Err "Nao foi possivel buscar a versao mais recente."
+    Write-Err $_.Exception.Message
+    exit 1
+}
+
+if (-not $latestVersion) {
+    Write-Err "Nao foi possivel determinar a versao mais recente."
+    exit 1
+}
+
+$versionNum = $latestVersion -replace '^v', ''
+Write-Info "Versao: $latestVersion"
+
+# ── Download ─────────────────────────────────────────────────────
+$assetName = "glab_${versionNum}_${OS}_${Arch}.zip"
+$downloadUrl = "https://gitlab.com/gitlab-org/cli/-/releases/$latestVersion/downloads/$assetName"
+
+$TmpDir = Join-Path $env:TEMP "glab-install-$(Get-Random)"
+New-Item -ItemType Directory -Path $TmpDir -Force | Out-Null
+
+try {
+    Write-Info "Baixando $assetName..."
+    $zipPath = Join-Path $TmpDir $assetName
+    Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath -UseBasicParsing
+
+    # ── Extrair ──────────────────────────────────────────────────
+    Write-Info "Extraindo..."
+    Expand-Archive -Path $zipPath -DestinationPath $TmpDir -Force
+
+    # ── Instalar para %LOCALAPPDATA%\bin ─────────────────────────
+    $BinDir = "$env:LOCALAPPDATA\bin"
+    New-Item -ItemType Directory -Path $BinDir -Force | Out-Null
+
+    $glabExe = Join-Path $TmpDir "bin\glab.exe"
+    if (-not (Test-Path $glabExe)) {
+        # Alguns releases colocam o binário direto na raiz
+        $glabExe = Join-Path $TmpDir "glab.exe"
+    }
+
+    if (-not (Test-Path $glabExe)) {
+        Write-Err "glab.exe nao encontrado apos extracao."
+        exit 1
+    }
+
+    Copy-Item $glabExe -Destination $BinDir -Force
+    Write-Ok "glab.exe instalado em $BinDir"
+
+    # ── Adicionar ao PATH do usuario ─────────────────────────────
+    $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+    if ($userPath -notlike "*$BinDir*") {
+        Write-Info "Adicionando $BinDir ao PATH do usuario..."
+        [System.Environment]::SetEnvironmentVariable("Path", "$userPath;$BinDir", "User")
+        $env:Path = "$env:Path;$BinDir"
+        Write-Ok "PATH atualizado."
+    }
+
+    # ── Configurar GITLAB_HOST ───────────────────────────────────
+    [System.Environment]::SetEnvironmentVariable("GITLAB_HOST", "https://gitdev.clarobrasil.mobi", "User")
+    $env:GITLAB_HOST = "https://gitdev.clarobrasil.mobi"
+    Write-Ok "GITLAB_HOST configurado para https://gitdev.clarobrasil.mobi"
+
+} finally {
+    Remove-Item $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# ── Verificar instalacao ────────────────────────────────────────
+$glabPath = Join-Path $BinDir "glab.exe"
+if (Test-Path $glabPath) {
+    $version = & $glabPath --version 2>&1 | Select-Object -First 1
+    Write-Ok ">>> glab instalado: $version <<<"
+} else {
+    Write-Err "Falha na instalacao do glab."
+    exit 1
+}
+
+# vim: filetype=ps1
