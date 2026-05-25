@@ -26,6 +26,9 @@ ai_tools:
     - name: gemini
       package: "@google/gemini-cli@preview"
       feature_flag: coding_assistants
+    - name: openclaude
+      package: "@gitlawb/openclaude@latest"
+      feature_flag: coding_assistants
     - name: omniroute
       package: "omniroute"
       feature_flag: coding_assistants
@@ -34,8 +37,8 @@ ai_tools:
       feature_flag: spec_tools
       env: "OPENSPEC_NO_COMPLETIONS=1"
       completions_cmd: "openspec completion generate zsh"
-    - name: openclaude
-      package: "@gitlawb/openclaude@latest"
+    - name: get-shit-done-redux
+      package: "@opengsd/get-shit-done-redux@latest"
       feature_flag: spec_tools
   curl:
     - name: aider
