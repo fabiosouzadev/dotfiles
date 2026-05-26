@@ -26,7 +26,7 @@ case "$ARCH" in
 esac
 
 # Detect OS
-ATUIN_OS="unknown-linux-gnu"
+ATUIN_OS="unknown-linux-musl"
 case "$(uname -s)" in
     Darwin) ATUIN_OS="apple-darwin" ;;
 esac
