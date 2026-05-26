@@ -15,6 +15,7 @@ tap = [
 brew = [
     'lazygit',
     'lazyjournal',
+    'atuin'
 ]
 
 cask = [
@@ -126,5 +127,6 @@ macports = [
     'colima',
     'k9s',
     'grep',
-    'ollama'
+    'ollama',
+    'atuin'
 ]

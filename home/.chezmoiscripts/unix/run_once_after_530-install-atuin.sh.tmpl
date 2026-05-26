@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "common/script_helper" . }}
+
+# Install Atuin (Magical shell history)
+info ">>>>>> 🐢 Installing Atuin 🐢 <<<<<<"
+
+# Check if atuin is already installed
+if command -v atuin &> /dev/null; then
+    info "atuin is already installed: $(atuin --version 2>&1 | head -1)"
+    success ">>> 🐢 atuin already installed 🐢"
+    exit 0
+fi
+
+# Detect architecture
+ARCH="$(uname -m)"
+case "$ARCH" in
+    x86_64)  ATUIN_ARCH="x86_64" ;;
+    aarch64) ATUIN_ARCH="aarch64" ;;
+    arm64)   ATUIN_ARCH="aarch64" ;; # Atuin uses aarch64 for Linux, and aarch64 for Mac
+    *)
+        error "Unsupported architecture: $ARCH"
+        exit 1
+        ;;
+esac
+
+# Detect OS
+ATUIN_OS="unknown-linux-gnu"
+case "$(uname -s)" in
+    Darwin) ATUIN_OS="apple-darwin" ;;
+esac
+
+# Get latest release version from GitHub API
+info "Fetching latest atuin release..."
+ATUIN_VERSION=$(curl -fsSL "https://api.github.com/repos/atuinsh/atuin/releases/latest" \
+    | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+
+if [ -z "$ATUIN_VERSION" ]; then
+    error "Could not determine latest atuin version"
+    exit 1
+fi
+
+info "Installing atuin ${ATUIN_VERSION} for ${ATUIN_ARCH}-${ATUIN_OS}..."
+
+ATUIN_FILE="atuin-${ATUIN_ARCH}-${ATUIN_OS}.tar.gz"
+ATUIN_URL="https://github.com/atuinsh/atuin/releases/download/v${ATUIN_VERSION}/${ATUIN_FILE}"
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+info "Downloading: ${ATUIN_URL}"
+if ! curl -fsSL "$ATUIN_URL" -o "$TMPDIR/$ATUIN_FILE"; then
+    error "Failed to download $ATUIN_URL"
+    exit 1
+fi
+
+info "Extracting..."
+tar -xzf "$TMPDIR/$ATUIN_FILE" -C "$TMPDIR"
+
+# Install binary to ~/.local/bin (no sudo required)
+mkdir -p "$HOME/.local/bin"
+# The extracted directory name is usually atuin-ARCH-OS
+CP_DIR="$TMPDIR/atuin-${ATUIN_ARCH}-${ATUIN_OS}"
+if [ ! -d "$CP_DIR" ]; then
+    # Sometimes just extracted directly or inside another folder
+    if [ -f "$TMPDIR/atuin" ]; then
+        cp "$TMPDIR/atuin" "$HOME/.local/bin/atuin"
+    else
+        error "Could not find atuin binary in extracted files."
+        exit 1
+    fi
+else
+    cp "$CP_DIR/atuin" "$HOME/.local/bin/atuin"
+fi
+
+chmod +x "$HOME/.local/bin/atuin"
+
+# Verify installation
+if command -v atuin &> /dev/null || [ -x "$HOME/.local/bin/atuin" ]; then
+    success ">>> 🐢 Installed atuin: $("$HOME/.local/bin/atuin" --version 2>&1 | head -1) 🐢"
+else
+    error "Failed to install atuin"
+    exit 1
+fi
+
+# vim: filetype=bash

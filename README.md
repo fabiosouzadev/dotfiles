@@ -84,6 +84,8 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 | [fd](https://github.com/sharkdp/fd) | `find` | Fast, user-friendly file search |
 | [fzf](https://github.com/junegunn/fzf) | — | Fuzzy finder for everything |
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | `cd` | Smart directory jumping |
+| [Atuin](https://atuin.sh/) | — | Magical shell history synced across devices (auto-installed via binary) |
+| [zsh-vi-mode](https://github.com/jeffreytse/zsh-vi-mode) | — | Vi mode for ZSH |
 | [lazygit](https://github.com/jesseduffield/lazygit) | — | Terminal UI for git (auto-installed via binary) |
 | [yazi](https://yazi-rs.github.io) | — | Terminal file manager |
 | [delta](https://github.com/dandavison/delta) | `diff` | Beautiful git diffs (Catppuccin) |
@@ -133,7 +135,7 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 │   ├── .chezmoiscripts/           # 🔄 Lifecycle hooks
 │   │   ├── darwin/                #    macOS-only (packages, fonts, repos)
 │   │   ├── linux/                 #    Linux-only (25 scripts: packages, WM, VPN)
-│   │   ├── unix/                  #    Shared (18 scripts: AI tools, mise, lazygit)
+│   │   ├── unix/                  #    Shared (19 scripts: AI tools, mise, lazygit, atuin)
 │   │   └── windows/               #    Windows-only (winget, scoop)
 │   ├── .chezmoitemplates/         # 🧩 Reusable template guards
 │   ├── dot_zshrc.d/               # 🐚 Modular zsh config (numbered 099-999)

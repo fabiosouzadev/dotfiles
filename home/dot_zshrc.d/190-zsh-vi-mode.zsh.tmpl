@@ -1,0 +1,11 @@
+# zsh-vi-mode
+# https://github.com/jeffreytse/zsh-vi-mode
+
+ZVM_DIR="$HOME/.local/share/zsh-vi-mode"
+
+if [ ! -d "$ZVM_DIR" ]; then
+  echo "Installing zsh-vi-mode..."
+  git clone --depth 1 https://github.com/jeffreytse/zsh-vi-mode.git "$ZVM_DIR" &> /dev/null
+fi
+
+source "$ZVM_DIR/zsh-vi-mode.plugin.zsh"

@@ -1,0 +1,12 @@
+# Atuin - Magical shell history
+# Ensures compatibility with zsh-vi-mode by initializing after it
+
+if command -v atuin &> /dev/null; then
+  # If zsh-vi-mode is installed and exposes its after_init hook
+  if declare -f zvm_after_init_commands >/dev/null; then
+    zvm_after_init_commands+=( 'eval "$(atuin init zsh)"' )
+  else
+    # Fallback if zsh-vi-mode is not present
+    eval "$(atuin init zsh)"
+  fi
+fi
