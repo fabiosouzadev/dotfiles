@@ -1,5 +1,4 @@
-{{ template "workplace/script_is_zup" . }}
-
+{{- if eq .settings.workplace "Zup" -}}
 #OLLAMA
 export OLLAMA_API_KEY=$ZUP_OLLAMA_API_KEY
 
@@ -54,6 +53,7 @@ export MISTRAL_API_KEY=$ZUP_MISTRAL_API_KEY
 
 #Fireworks
 export FIREWORKS_API_KEY=$ZUP_FIREWORKS_API_KEY
+<<<<<<< Updated upstream
 
 #KILOCODE
 export KILOCODE_API_KEY=$ZUP_KILOCODE_API_KEY
@@ -63,3 +63,6 @@ export GITLAB_TOKEN=$ZUP_GITLAB_TOKEN
 export GITLAB_HOST=$ZUP_GITLAB_HOST
 
 # vim: filetype=bash
+=======
+{{- end -}}
+>>>>>>> Stashed changes

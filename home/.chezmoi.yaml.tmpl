@@ -163,7 +163,8 @@ Headless:
   "systemd"     (dict "enabled" $hasSystemd)
   "runtime"     (dict "background_services" (not $ismanaged))
   "kernels"     (dict "install" false)
-  "rtl8821ce"   (dict "install" $dell3530)
+  "rtl8821ce"      (dict "install" $dell3530)
+  "personal_repos" (not $ephemeral)
   
   "i3"       (dict "enabled" true)
   "niri"     (dict "enabled" true)
@@ -241,7 +242,7 @@ Headless:
   "dell3530"         $dell3530
   "dell3520"         $dell3520
   "username"         $username
-  "workplace"        "Zup"
+  "workplace"        (ternary "Zup" "none" (eq $profile "work"))
 )
   "dirs"             $dirs
   "features"         $features

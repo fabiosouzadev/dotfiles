@@ -72,7 +72,7 @@ BASE_OTHER="$HOME/Workspaces/Others"
 
 
 #Personal repos
-{{- if .repos.personal  }}
+{{- if and .repos.personal .features.personal_repos }}
 {{- 	range .repos.personal }}
 	repo="{{ .repo }}"
 	path="{{ .path }}"
@@ -88,7 +88,7 @@ warn ">>>> No personal repository defined <<<<"
 {{- end }}
 
 #Other repos
-{{ if .repos.other  }}
+{{ if and .repos.other .features.personal_repos }}
 {{-		range .repos.other }}
 repo="{{ .repo }}"
 path="{{ .path }}"
@@ -105,7 +105,7 @@ warn "No others repository defined"
 
 # Work repos
 {{- $workplace := .settings.workplace }}
-{{ if and (.repos.work) (eq .settings.profile "work") -}}
+{{ if and (.repos.work) (eq .settings.profile "work") (eq $workplace "Zup") -}}
 {{-         range .repos.work.workplaces }}
 {{-             $workplaceName := .name }}
 {{-             $repos         := .repos }}
