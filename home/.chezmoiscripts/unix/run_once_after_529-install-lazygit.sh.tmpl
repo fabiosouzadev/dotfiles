@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "common/script_helper" . }}
+
+# Install lazygit (Terminal UI for git)
+info ">>>>>> 🦥 Installing lazygit 🦥 <<<<<<"
+
+# Check if lazygit is already installed
+if command -v lazygit &> /dev/null; then
+    info "lazygit is already installed: $(lazygit --version 2>&1 | head -1)"
+    success ">>> 🦥 lazygit already installed 🦥"
+    exit 0
+fi
+
+# Detect architecture
+ARCH="$(uname -m)"
+case "$ARCH" in
+    x86_64)  LG_ARCH="x86_64" ;;
+    aarch64) LG_ARCH="arm64" ;;
+    arm64)   LG_ARCH="arm64" ;;
+    armv7l)  LG_ARCH="armv6" ;;
+    *)
+        error "Unsupported architecture: $ARCH"
+        exit 1
+        ;;
+esac
+
+# Detect OS
+LG_OS="Linux"
+case "$(uname -s)" in
+    Darwin) LG_OS="Darwin" ;;
+esac
+
+# Get latest release version from GitHub API
+info "Fetching latest lazygit release..."
+LG_VERSION=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
+    | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+
+if [ -z "$LG_VERSION" ]; then
+    error "Could not determine latest lazygit version"
+    exit 1
+fi
+
+info "Installing lazygit ${LG_VERSION} for ${LG_OS}/${LG_ARCH}..."
+
+LG_FILE="lazygit_${LG_VERSION}_${LG_OS}_${LG_ARCH}.tar.gz"
+LG_URL="https://github.com/jesseduffield/lazygit/releases/download/v${LG_VERSION}/${LG_FILE}"
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+info "Downloading: ${LG_URL}"
+curl -fsSL "$LG_URL" -o "$TMPDIR/$LG_FILE"
+
+info "Extracting..."
+tar -xzf "$TMPDIR/$LG_FILE" -C "$TMPDIR"
+
+# Install binary to ~/.local/bin (no sudo required)
+mkdir -p "$HOME/.local/bin"
+cp "$TMPDIR/lazygit" "$HOME/.local/bin/lazygit"
+chmod +x "$HOME/.local/bin/lazygit"
+
+# Verify installation
+if command -v lazygit &> /dev/null || [ -x "$HOME/.local/bin/lazygit" ]; then
+    success ">>> 🦥 Installed lazygit: $("$HOME/.local/bin/lazygit" --version 2>&1 | head -1) 🦥"
+else
+    error "Failed to install lazygit"
+    exit 1
+fi
+
+# vim: filetype=bash

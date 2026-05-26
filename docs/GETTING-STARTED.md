@@ -51,6 +51,7 @@ To verify the installation of modern CLI tools:
 eza --version
 bat --version
 fzf --version
+lazygit --version
 ```
 
 To check if AI tools are available:

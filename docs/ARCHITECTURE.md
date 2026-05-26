@@ -59,3 +59,20 @@ graph TD
     -   `private_dot_config/`: Application-specific configurations (Neovim, tmux, etc.).
 -   `docs/`: Detailed guides and architectural documentation.
 -   `.planning/`: Project management and GSD methodology artifacts.
+
+## Universal Binary Install Pattern
+
+Some CLI tools (lazygit, delta, glab) need to work across all environments, including **restricted ones without `sudo`** (e.g., Zup WSL). These tools use a shared installation pattern:
+
+-   **Location**: Scripts in `home/.chezmoiscripts/unix/` (shared between macOS and Linux).
+-   **Strategy**: Download pre-compiled binaries from GitHub Releases and install them to `~/.local/bin/`.
+-   **No sudo required**: Everything is installed in user-space.
+-   **Cross-platform**: Detects OS (`uname -s`) and architecture (`uname -m`) automatically.
+-   **Idempotent**: Skips installation if the tool is already available in `$PATH`.
+-   **Guard**: Uses `script_is_not_ephemeral` only (no `script_is_not_zup`), so it runs on managed/work machines.
+
+This pattern is preferred over platform-specific package managers when:
+1. The tool is not available in apt/official repos (e.g., lazygit on Ubuntu).
+2. The environment has no `sudo` access.
+3. A single script should cover all Unix environments.
+
