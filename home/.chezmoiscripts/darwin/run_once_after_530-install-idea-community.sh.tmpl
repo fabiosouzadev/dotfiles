@@ -106,7 +106,7 @@ fi
 
 # ── Montar DMG e copiar app ──────────────────────────────────────
 info "Montando DMG..."
-MOUNT_POINT=$(hdiutil attach "$TMP_DIR/$ASSET_NAME" -nobrowse -readonly 2>/dev/null | grep "/Volumes/" | awk '{print $NF}')
+MOUNT_POINT=$(hdiutil attach "$TMP_DIR/$ASSET_NAME" -nobrowse -readonly 2>/dev/null | grep -o "/Volumes/.*")
 
 if [[ -z "$MOUNT_POINT" ]]; then
     error "Falha ao montar o DMG."

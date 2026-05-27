@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "common/script_helper" . }}
+
+info ">>>>>>> ⏱️ Installing WakaTime CLI ⏱️ <<<<<<<"
+
+if test -f "$HOME/.wakatime/wakatime-cli" || command -v wakatime-cli &> /dev/null; then
+  info "WakaTime CLI is already installed, checking for updates..."
+  "$HOME/.wakatime/wakatime-cli" --version || true
+  exit 0
+fi
+
+info "Downloading wakatime-cli from GitHub releases..."
+mkdir -p "$HOME/.wakatime"
+
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+
+case "$ARCH" in
+  x86_64|amd64) ARCH="amd64" ;;
+  aarch64|arm64) ARCH="arm64" ;;
+  *) error "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
+
+URL="https://github.com/wakatime/wakatime-cli/releases/latest/download/wakatime-cli-${OS}-${ARCH}.zip"
+ZIP_PATH="$HOME/.wakatime/wakatime-cli.zip"
+
+curl -fsSL -o "$ZIP_PATH" "$URL"
+unzip -q -o "$ZIP_PATH" -d "$HOME/.wakatime/"
+
+mv "$HOME/.wakatime/wakatime-cli-${OS}-${ARCH}" "$HOME/.wakatime/wakatime-cli-bin"
+chmod +x "$HOME/.wakatime/wakatime-cli-bin"
+ln -sf "$HOME/.wakatime/wakatime-cli-bin" "$HOME/.wakatime/wakatime-cli"
+rm "$ZIP_PATH"
+
+if [ -f "$HOME/.wakatime/wakatime-cli" ]; then
+    success ">>> ✅ WakaTime CLI installed successfully <<<"
+    "$HOME/.wakatime/wakatime-cli" --version
+else
+    error ">>> ❌ WakaTime CLI installation failed <<<"
+    exit 1
+fi
+
+# vim: filetype=bash
