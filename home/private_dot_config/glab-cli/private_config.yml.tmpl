@@ -75,7 +75,7 @@ hosts:
         #   valueFromEnv: MY_SECRET_VALUE
         custom_headers: []
     gitdev.clarobrasil.mobi:
-        token: {{ include (joinPath .chezmoi.homeDir ".config" "glab-cli" "zup_token.txt") }}
+        token:
         container_registry_domains: gitdev.clarobrasil.mobi,gitdev.clarobrasil.mobi:443,registry.gitdev.clarobrasil.mobi
         api_host: gitdev.clarobrasil.mobi
         git_protocol: ssh
