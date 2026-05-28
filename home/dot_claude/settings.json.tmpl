@@ -1,0 +1,139 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "MIMO_ANTROPIC_BASE_URL_SGP",
+    "ANTHROPIC_AUTH_TOKEN": "MIMO_API_KEY_SGP_3",
+    "ANTHROPIC_MODEL": "mimo-v2.5-pro",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "mimo-v2.5-pro",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "mimo-v2.5-pro",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "mimo-v2.5-pro"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "\"/home/fabio.souza/.local/share/mise/installs/node/24.15.0/bin/node\" \"/home/fabio.souza/.claude/hooks/gsd-context-monitor.js\"",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task"
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash /home/fabio.souza/.claude/hooks/gsd-phase-boundary.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Write|Edit"
+      },
+      {
+        "hooks": [
+          {
+            "command": "\"/home/fabio.souza/.local/share/mise/installs/node/24.15.0/bin/node\" \"/home/fabio.souza/.claude/hooks/gsd-read-injection-scanner.js\"",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Read"
+      },
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "\"/home/fabio.souza/.local/share/mise/installs/node/24.15.0/bin/node\" \"/home/fabio.souza/.claude/hooks/gsd-prompt-guard.js\"",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Write|Edit"
+      },
+      {
+        "hooks": [
+          {
+            "command": "\"/home/fabio.souza/.local/share/mise/installs/node/24.15.0/bin/node\" \"/home/fabio.souza/.claude/hooks/gsd-read-guard.js\"",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Write|Edit"
+      },
+      {
+        "hooks": [
+          {
+            "command": "\"/home/fabio.souza/.local/share/mise/installs/node/24.15.0/bin/node\" \"/home/fabio.souza/.claude/hooks/gsd-workflow-guard.js\"",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Write|Edit"
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash /home/fabio.souza/.claude/hooks/gsd-validate-commit.sh",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "command": "atuin hook claude-code",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "\"/home/fabio.souza/.local/share/mise/installs/node/24.15.0/bin/node\" \"/home/fabio.souza/.claude/hooks/gsd-check-update.js\"",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash /home/fabio.souza/.claude/hooks/gsd-session-state.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  },
+  "model": "gemma4:31b-cloud",
+  "statusLine": {
+    "command": "node \"/home/fabio.souza/.claude/hooks/gsd-statusline.js\"",
+    "type": "command"
+  },
+  "theme": "light-ansi"
+}

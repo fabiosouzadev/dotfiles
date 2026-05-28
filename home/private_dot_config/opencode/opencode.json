@@ -5,11 +5,91 @@
     "opencode-wakatime"
   ],
   "theme": "catppuccin",
-  "model": "fireworks/kimi-k2p5-turbo",
+  "model": "xiaomi-token-plan-sgp/mimo-v2.5-pro",
   "provider": {
     "fireworks": {
       "models": {
         "accounts/fireworks/routers/kimi-k2p5-turbo": {},
+      }
+    },
+    "xiaomi-token-plan-cn": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Xiaomi Mimo Token Plan (China)",
+      "options": {
+        "baseURL": "{env:MIMO_OPENAI_BASE_URL_CN}",
+        "apiKey": "{env:MIMO_API_KEY_CN_2}",
+      },
+      "models": {
+        "mimo-v2.5-pro": {
+          "name": "mimo-v2.5-pro",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "mimo-v2.5": {
+          "name": "mimo-v2.5",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text", "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      }
+    },
+    "xiaomi-token-plan-sgp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Xiaomi Mimo Token Plan (Singapure)",
+      "options": {
+        "baseURL": "{env:MIMO_OPENAI_BASE_URL_SGP}",
+        "apiKey": "{env:MIMO_API_KEY_SGP_3}",
+      },
+      "models": {
+        "mimo-v2.5-pro": {
+          "name": "mimo-v2.5-pro",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "mimo-v2.5": {
+          "name": "mimo-v2.5",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text", "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
       }
     }
   }

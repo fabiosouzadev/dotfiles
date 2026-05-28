@@ -130,8 +130,6 @@ export OPENAI_MODEL=mimo-v2.5-pro
 # The `/provider` Xiaomi MiMo preset uses the same endpoint and stores the key as `MIMO_API_KEY`. `OPENAI_API_KEY` also works as a compatibility fallback, but `MIMO_API_KEY` keeps the profile tied to the MiMo route.
 
 
-
-
 ### Mistral
 # export CLAUDE_CODE_USE_MISTRAL=1
 # export MISTRAL_API_KEY=...
@@ -143,4 +141,9 @@ export OPENAI_MODEL=mimo-v2.5-pro
 # export OPENAI_BASE_URL=https://your-resource.openai.azure.com/openai/deployments/your-deployment/v1
 # export OPENAI_MODEL=gpt-4o
 
+
+#Free Xiaomi
+export ANTHROPIC_BASE_URL=$MIMO_ANTROPIC_BASE_URL_SGP
+export ANTHROPIC_AUTH_TOKEN=$MIMO_API_KEY_SGP_3
+unset ANTHROPIC_API_TOKEN
 # vim: filetype=bash
