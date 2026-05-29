@@ -53,6 +53,13 @@ brew install \
 
 info ">>> Build Tmux from source (macOS)"
 
+# Set PKG_CONFIG_PATH for Homebrew libraries (Apple Silicon and Intel)
+if [ -d "/opt/homebrew/lib/pkgconfig" ]; then
+  export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+elif [ -d "/usr/local/lib/pkgconfig" ]; then
+  export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+fi
+
 git clone https://github.com/tmux/tmux.git $HOME/.local/src/tmux
 cd $HOME/.local/src/tmux
 git pull
