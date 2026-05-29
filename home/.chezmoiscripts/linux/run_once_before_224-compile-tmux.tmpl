@@ -7,6 +7,48 @@ set -euo pipefail
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
+{{- if .settings.ismanaged }}
+
+info ">>> Install Tmux from release <<<<"
+
+cd /tmp
+
+# Detect architecture
+ARCH="$(uname -m)"
+case "$ARCH" in
+    x86_64)  TMUX_ARCH="x86_64" ;;
+    aarch64) TMUX_ARCH="aarch64" ;;
+    arm64)   TMUX_ARCH="aarch64" ;;
+    *)
+        error "Unsupported architecture: $ARCH"
+        exit 1
+        ;;
+esac
+
+# Get latest release version from GitHub API
+info "Fetching latest tmux release..."
+TMUX_VERSION=$(curl -fsSL "https://api.github.com/repos/tmux/tmux/releases/latest" \
+    | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+
+if [ -z "$TMUX_VERSION" ]; then
+    error "Could not determine latest tmux version"
+    exit 1
+fi
+
+info "Installing tmux ${TMUX_VERSION} for linux-${TMUX_ARCH}..."
+
+TMUX_FILE="tmux-${TMUX_VERSION}-linux-${TMUX_ARCH}.tar.gz"
+TMUX_URL="https://github.com/tmux/tmux/releases/download/${TMUX_VERSION}/${TMUX_FILE}"
+
+if ! curl -fsSL "$TMUX_URL" -o "$TMUX_FILE"; then
+    error "Failed to download $TMUX_URL"
+    exit 1
+fi
+
+tar xzf "$TMUX_FILE"
+cp -fr "tmux-${TMUX_VERSION}-linux-${TMUX_ARCH}"/* ~/.local
+
+{{- else if not .settings.ismanaged }}
 
 # ----------------------------
 # Ubuntu
@@ -21,7 +63,6 @@ sudo apt install -y \
   build-essential \
   bison \
   pkg-config
-
 
 {{- end }}
 
@@ -68,7 +109,7 @@ if [ -d $HOME/.tmux ]; then
 fi
 
 # ----------------------------
-# Build neovim
+# Build Tmux from source
 # ----------------------------
 info ">>> Build Tmux from source"
 
@@ -77,15 +118,12 @@ cd $HOME/.local/src/tmux
 git pull
 #git checkout 3.3a
 sh autogen.sh
-if [ `uname` = 'Darwin' ]; then
-  ./configure --enable-utf8proc --prefix=$HOME/.local
-elif [ `uname` = 'Linux' ]; then 
-  #./configure
-  # Test config (https://github.com/tmux/tmux/issues/3218)
-  sudo ./configure --enable-debug
-fi
+# Test config (https://github.com/tmux/tmux/issues/3218)
+sudo ./configure --enable-debug
 sudo make 
 sudo make install
 
-success ">>> Tmux build process finished successfully"
+{{- end }}
+
+success ">>> Tmux configured successfully"
 # vim: filetype=bash

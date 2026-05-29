@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+{{ template "darwin/script_darwin_only" . }}
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "common/script_helper" . }}
+
+# ----------------------------
+# Remove previous Tmux installations
+# ----------------------------
+
+info ">>> Remove previous Tmux installations"
+
+if [ -d $HOME/.local/share/tmux/ ]; then 
+  rm -rf $HOME/.local/share/tmux
+fi
+if [ -f /usr/local/bin/tmux ]; then
+  rm -f /usr/local/bin/tmux 
+fi
+if [ -f $HOME/.local/bin/tmux ]; then
+  rm -f $HOME/.local/bin/tmux 
+fi
+if [ -d $HOME/.local/src/tmux ]; then 
+  rm -rf $HOME/.local/src/tmux 
+fi
+if [ -d $HOME/.local/state/nvim ]; then 
+  rm -rf $HOME/.local/state/nvim 
+fi
+if [ -d $HOME/.tmux ]; then
+  rm -rf $HOME/.tmux
+fi
+
+# ----------------------------
+# Install dependencies
+# ----------------------------
+
+info ">>> Install dependencies Tmux (macOS)"
+
+if ! command -v brew &> /dev/null; then
+  error "Homebrew is required to install tmux dependencies"
+  exit 1
+fi
+
+brew install \
+  automake \
+  pkg-config \
+  libevent \
+  ncurses \
+  utf8proc
+
+# ----------------------------
+# Build Tmux from source
+# ----------------------------
+
+info ">>> Build Tmux from source (macOS)"
+
+git clone https://github.com/tmux/tmux.git $HOME/.local/src/tmux
+cd $HOME/.local/src/tmux
+git pull
+#git checkout 3.3a
+sh autogen.sh
+./configure --enable-utf8proc --prefix=$HOME/.local
+make
+make install
+
+success ">>> Tmux build process finished successfully (macOS)"
+# vim: filetype=bash
