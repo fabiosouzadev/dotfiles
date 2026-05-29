@@ -59,6 +59,7 @@ cask = [
     'vscodium',
     'vscodium@insiders',
     'cursor',
+    'postman',
 
     # BROWSERS    
     'chromium',
