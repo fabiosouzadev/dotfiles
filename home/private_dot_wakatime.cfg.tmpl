@@ -1,10 +1,6 @@
 [settings]
-{{- $wakatimeKeyFile := joinPath .chezmoi.sourceDir "encrypted_dot_wakatime-key.txt.age" -}}
-{{- if stat $wakatimeKeyFile }}
+{{- $wakatimeKeyFile := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_wakatime-key.txt.age" -}}
 api_key = {{ include $wakatimeKeyFile | decrypt | trim }}
-{{- else }}
-api_key = SUA_API_KEY_AQUI_OU_CRIE_O_ARQUIVO_ENCRYPTED_500
-{{- end }}
 
 [internal]
 cli_version = v2.14.8
