@@ -1,2 +1,21 @@
+model_provider = "freemodel"
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+disable_response_storage = true
+preferred_auth_method = "apikey"
+
+[model_providers.freemodel]
+name = "freemodel"
+base_url = "https://api.freemodel.dev"
+wire_api = "responses"
+
+[hooks.state]
+
+[hooks.state."/home/fabio.souza/.codex/hooks.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:fc87dbee1cb8a9be4f78ba094c4fa8d5e2fd38cb800854e3717f9b6a52fe2a47"
+
+[hooks.state."/home/fabio.souza/.codex/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:ac371f260e4b23ba1d1b7a4ad68a44a323a8470b61f38471a47aceac1b7a5a7c"
+
 [tui.model_availability_nux]
-"gpt-5.5" = 3
+"gpt-5.5" = 4

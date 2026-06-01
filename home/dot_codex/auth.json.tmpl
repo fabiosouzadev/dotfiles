@@ -1,0 +1,4 @@
+{
+  {{ $api_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_freemodels-key.txt.age" -}}
+  "OPENAI_API_KEY": "{{ include $api_key| decrypt | trim }}"
+}

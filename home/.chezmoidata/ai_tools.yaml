@@ -20,9 +20,6 @@ ai_tools:
       package: "@openai/codex@latest"
       feature_flag: coding_assistants
       completions_cmd: "codex completion zsh"
-    - name: claude-code-router
-      package: "@musistudio/claude-code-router"
-      feature_flag: coding_assistants
     - name: gemini
       package: "@google/gemini-cli@preview"
       feature_flag: coding_assistants
