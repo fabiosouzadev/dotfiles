@@ -51,3 +51,9 @@ ai_tools:
       url: "https://cli.kiro.dev/install"
       shell: bash
       feature_flag: coding_assistants
+    - name: bobibm
+      url: "https://bob.ibm.com/download/bobshell.sh"
+      shell: bash
+      feature_flag: coding_assistants
+    
+    
