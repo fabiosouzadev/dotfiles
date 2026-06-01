@@ -146,16 +146,12 @@ Headless:
 {{- /* Config Features */ -}}
 
 {{- $hasSudo := not $ismanaged -}}
-{{- $hasSystemd := not $ismanaged -}}
-{{- $wantsCompile := or $dell3530 $dell3520 -}}
+{{- $hasSystemd := and (not $ismanaged) (eq .chezmoi.os "linux") -}}
 
 {{- /* Ollama Mode */ -}}
 {{- $ollamaMode := "user" -}}
 {{- if and $hasSudo $hasSystemd -}}
 {{-   $ollamaMode = "root"  -}}
-{{- end -}}
-{{- if and $wantsCompile $hasSudo -}}
-{{-   $ollamaMode = "compile"   -}}
 {{- end -}}
 
 {{- $features := dict

@@ -1,6 +1,7 @@
 features:
   ai:
     ollama:
+      version: "latest"
       path:
         logs: $HOME/.ollama/logs
       environments:
@@ -9,15 +10,14 @@ features:
         - OLLAMA_MAX_LOADED_MODELS=1
         - OLLAMA_KEEP_ALIVE=20m
         - OLLAMA_NUM_PARALLEL=1
-        - OLLAMA_NUM_THREADS=4
+        - OLLAMA_NUM_THREADS=2
         # - OLLAMA_KV_CACHE_TYPE=q4_0
         - OLLAMA_NEW_ENGINE=1
         # - OLLAMA_FLASH_ATTENTION=1
-        - OLLAMA_LLM_LIBRARY="cpu"
+        - OLLAMA_LLM_LIBRARY=cpu
         # - OLLAMA_GPU_OVERHEAD=0
       models:
         - qwen2.5-coder:0.5b #Completion entende bem ts, Nestjs, prisma
         - qwen2.5-coder:1.5b #Completion entende bem ts, Nestjs, prisma
         - gemma4:e2b
         - gemma4:e4b
-        - qwen3.5:4b-bf16

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+{{ template "common/script_helper" . -}}
+{{- template "darwin/script_darwin_only" . -}}
+{{ template "common/script_is_not_ephemeral" . }}
+
+{{- if .features.ai.ollama.install }}
+
+info ">>> 🐑 Installing Ollama on macOS 🐑"
+
+{{- if eq .features.ai.ollama.version "latest" }}
+OLLAMA_VERSION=$(curl -s https://api.github.com/repos/ollama/ollama/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+{{- else }}
+OLLAMA_VERSION="{{ .features.ai.ollama.version }}"
+{{- end }}
+
+info ">>> Downloading Ollama version ${OLLAMA_VERSION}..."
+
+curl -fL "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/Ollama-darwin.zip" -o /tmp/Ollama-darwin.zip
+
+info ">>> Extracting to /Applications..."
+unzip -q -o /tmp/Ollama-darwin.zip -d /Applications
+rm /tmp/Ollama-darwin.zip
+
+# Create symlink for CLI if it doesn't exist
+if [ ! -L /usr/local/bin/ollama ]; then
+  info ">>> Setting up CLI symlink..."
+  sudo mkdir -p /usr/local/bin
+  sudo ln -sf /Applications/Ollama.app/Contents/Resources/ollama /usr/local/bin/ollama
+fi
+
+success "🐑 Ollama Installed version: $(/Applications/Ollama.app/Contents/Resources/ollama -v) 🐑"
+
+{{- end }}

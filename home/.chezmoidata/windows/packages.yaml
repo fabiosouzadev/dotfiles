@@ -29,8 +29,8 @@ packages:
         - nerd-fonts
       packages:
         - main/gnupg
+        - main/ollama
         - extras/lazygit
         - extras/warp-terminal
-        - extras/models
         - extras/models
         - extras/64gram

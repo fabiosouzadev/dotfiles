@@ -7,7 +7,7 @@ export {{ . }}
 unset OLLAMA_MLOCK
 
 #Alias
-{{ if and (.features.runtime.background_services) (.features.sudo.enabled) }}
+{{ if and (.features.runtime.background_services) (.features.sudo.enabled) (eq .chezmoi.os "linux") }}
 alias -- ollama-start="sudo systemctl start ollama.service"
 alias -- ollama-stop="sudo systemctl stop ollama.service"
 alias -- ollama-restart="sudo systemctl restart ollama.service"

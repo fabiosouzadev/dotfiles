@@ -18,7 +18,11 @@ info ">>> 🐑 Installing Ollama in mode {{ .features.ai.ollama.mode }}  🐑"
 # --------------------------------------------------------------------
 {{-  if eq .features.ai.ollama.mode "user" }}
 
-OLLAMA_VERSION="v0.24.0"
+{{- if eq .features.ai.ollama.version "latest" }}
+OLLAMA_VERSION=$(curl -s https://api.github.com/repos/ollama/ollama/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+{{- else }}
+OLLAMA_VERSION="{{ .features.ai.ollama.version }}"
+{{- end }}
 
 rm -rf "$HOME/.ollama"
 rm -f "$INSTALL_DIR/bin/ollama"
@@ -79,108 +83,6 @@ sudo systemctl enable --now ollama
 
 success "Ollama Installed version: $(ollama -v) 🐑"
 
-{{-  else if eq .features.ai.ollama.mode "compile" }}
-# --------------------------------------------------------------------
-# COMPILE MODE (opcional avançado)
-# --------------------------------------------------------------------
-
-# PATH correto para ambiente não-interativo
-export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
-
-info ">>> 🐑🔨 Instalando dependências de compilação... 🐑"
-
-{{- if (or (eq .chezmoi.osRelease.id "endeavouros") (eq .chezmoi.osRelease.id "cachyos")) }}
-
-sudo pacman -Syyu --noconfirm --needed base-devel git cmake make gcc clang
-
-{{- end }}
-
-info ">>> 🔨 Compilando Ollama ..."
-[ ! -d "$SRC_DIR/ollama-source" ] || rm -rf $SRC_DIR/ollama-source/
-git clone https://github.com/ollama/ollama.git $SRC_DIR/ollama-source
-cd ~/ollama-source
-
-# COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA ALDER LAKE-U
-{{- if .settings.dell3530 }}
-info ">>> 🐑🔨 Compilando Ollama com otimizações para Alder Lake-U (i7-1355U)"
-
-# Compila com flags específicas para Tiger Lake
-info ">>> 🐑🔨 ⚡ Compilando com flags Alder Lake-U (i7-1355U)"
-export CGO_CFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -flto -fno-plt -fassociative-math -freciprocal-math -fno-signed-zeros -fno-trapping-math"
-export CGO_LDFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -flto -fno-plt"
-# export CGO_CFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma -fno-plt"
-# export CGO_LDFLAGS="-O3 -march=alderlake -mtune=alderlake -mavx2 -mfma"
-export CPU_FLAGS="-O3 -march=alderlake -mtune=alderlake -pipe -flto -ffast-math -fomit-frame-pointer"
-export CC=clang
-export CXX=clang++
-export CFLAGS="$CPU_FLAGS"
-export CXXFLAGS="$CPU_FLAGS"
-export LDFLAGS="-Wl,-O1 -Wl,--as-needed -Wl,-z,now -Wl,-z,relro"
-export CGO_ENABLED=1
-export OLLAMA_THREADS=10
-export OLLAMA_PARALLEL=8
-{{- end }} # dell3530
-
-#COMPILAR OLLAMA COM PATCHES ESPECÍFICOS PARA TIGER LAKE
-{{- if .settings.dell3520 }}
-info ">>> 🐑🔨 Compilando Ollama com otimizações para i5-1135G7..."
-
-# Compila com flags específicas para Tiger Lake
-info ">>> ⚡ Compilando com flags AVX2 otimizadas..."
-export CGO_CFLAGS="-O3 -march=native -mtune=native -mavx2 -mfma -fno-plt"
-export CGO_LDFLAGS="-O3 -march=native -mtune=native -mavx2 -mfma"
-export CPU_FLAGS="-O3 -march=tigerlake -mtune=tigerlake -pipe -flto -ffast-math -fomit-frame-pointer"
-export CC=clang
-export CXX=clang++
-export CFLAGS="$CPU_FLAGS"
-export CXXFLAGS="$CPU_FLAGS"
-export LDFLAGS="-Wl,-O1 -Wl,--as-needed -Wl,-z,now -Wl,-z,relro"
-export CGO_ENABLED=1
-{{- end }} # dell3520
-
-export GOFLAGS="-buildmode=pie -trimpath -ldflags=-s -ldflags=-w"
-
-#Compilação
-INSTALL_DIR="/usr/local/bin"
-go clean
-go mod tidy
-go build \
-  -tags "avx avx2" \
-  -ldflags="-s -w -extldflags '-static' -X main.version=custom-cachyos" \
-  -o ollama .
-
-sudo install -Dm755 ollama "$INSTALL_DIR/ollama"
-
-# Instala a versão compilada
-# sudo cp ./bin/ollama /usr/local/bin/
-sudo chmod +x /usr/local/bin/ollama
-
-success "🐑🔨Ollama compilado com sucesso! 🐑🔨"
-
-#CONFIGURAR SERVIÇO SYSTEMD OTIMIZADO
-{{- if .features.systemd.enabled }}
-info "⚙️ Configurando serviço systemd ..."
-
-sudo tee /etc/systemd/system/ollama.service > /dev/null <<'EOF'
-[Unit]
-Description=Ollama Service
-After=network-online.target
-
-[Service]
-ExecStart=/usr/local/bin/ollama serve
-User=ollama
-Group=ollama
-Restart=always
-RestartSec=3
-Environment="PATH=$PATH"
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
-sudo usermod -a -G ollama $(whoami)
-{{- end }}
 {{- end }}
 
 ### Override Service
