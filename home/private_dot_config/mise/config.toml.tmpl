@@ -1,14 +1,15 @@
 [tools]
-java = [ "latest", "21" ]
-node = ["lts","latest"]
-go = "1.25.1"
-"npm:npx" = "latest"
-"npm:prettier" = "latest"
-{{/* usage = "latest" */}}
+node           = [ "lts", "latest" ]
+"npm:npx"      = 'latest'
+"npm:prettier" = 'latest'
+java           = [ "latest", "21" ]
+go             = "1.25.1"
+python         = 'latest'
+uv             = 'latest'
+
 
 [settings]
 experimental = true
 
-# tools can read the versions files used by other version managers
-# for example, .nvmrc in the case of node's nvm
-idiomatic_version_file_enable_tools = ['java']
+# read version files used by other version managers, such as .nvmrc
+idiomatic_version_file_enable_tools = ['java', 'node', 'python']
