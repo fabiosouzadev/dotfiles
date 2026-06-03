@@ -11,8 +11,10 @@ info ">>>>>> 🤖 Installing AI Tools 🤖 <<<<<<<"
 {{- $featureEnabled := false -}}
 {{- if eq .feature_flag "coding_assistants" }}{{ $featureEnabled = $.features.ai.coding_assistants }}{{- end -}}
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
+{{- $blocked := false -}}
+{{- if and (hasKey . "block_on_workplace") (eq .block_on_workplace $.settings.workplace) }}{{ $blocked = true }}{{- end -}}
 
-{{ if $featureEnabled }}
+{{ if and $featureEnabled (not $blocked) }}
 info "Installing {{ .name }} (NPM)"
 {{ if hasKey . "env" }}{{ .env }} {{ end }}npm install -g {{ .package }}
 
@@ -28,8 +30,10 @@ info "Installing {{ .name }} (NPM)"
 {{- $featureEnabled := false -}}
 {{- if eq .feature_flag "coding_assistants" }}{{ $featureEnabled = $.features.ai.coding_assistants }}{{- end -}}
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
+{{- $blocked := false -}}
+{{- if and (hasKey . "block_on_workplace") (eq .block_on_workplace $.settings.workplace) }}{{ $blocked = true }}{{- end -}}
 
-{{ if $featureEnabled }}
+{{ if and $featureEnabled (not $blocked) }}
 info "Installing {{ .name }} (Curl)"
 {{ if hasKey . "env" }}{{ .env }} {{ end }}curl -fsSL {{ .url }} | {{ .shell }}
 {{- end }}
