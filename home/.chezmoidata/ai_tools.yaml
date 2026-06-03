@@ -55,5 +55,6 @@ ai_tools:
       url: "https://bob.ibm.com/download/bobshell.sh"
       shell: bash
       feature_flag: coding_assistants
-    
+      block_on_workplace: Zup
+
     
