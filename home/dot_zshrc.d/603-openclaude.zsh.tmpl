@@ -109,7 +109,14 @@ export GEMINI_MODEL=gemini-3-flash-preview
 
 ### Freemodel (Only Openai)
 {{ $api_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_freemodels-key.txt.age" -}}
+# export CLAUDE_CODE_USE_OPENAI=1
+# export OPENAI_BASE_URL=https://api.freemodel.dev/v1
+# export OPENAI_API_KEY={{ include $api_key| decrypt | trim }}
+# export OPENAI_MODEL=gpt-5.5
+
+### Freemodel (OMNIROUTE)
+{{ $api_key2 := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omnirouter-key.txt.age" -}}
 export CLAUDE_CODE_USE_OPENAI=1
-export OPENAI_BASE_URL=https://api.freemodel.dev/v1
-export OPENAI_API_KEY={{ include $api_key| decrypt | trim }}
-export OPENAI_MODEL=gpt-5.5
+export OPENAI_BASE_URL=http://localhost:20128/v1
+export OPENAI_API_KEY={{ include $api_key2| decrypt | trim }}
+export OPENAI_MODEL=fr-prod/gpt-5.5
