@@ -4,12 +4,12 @@
 ## Claude Code usa settings.json (ANTHROPIC_*) — NÃO depende destas variáveis.
 ## ═══════════════════════════════════════════════════════════════════════════════
 
-{{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omnirouter-key.txt.age" -}}
+{{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.age" -}}
 
 ## Base config para tools OpenAI-compatible (Codex, Aider, OpenCode, Copilot, etc.)
 export OPENAI_BASE_URL=http://localhost:20128/v1
 export OPENAI_API_KEY={{ include $omniroute_key | decrypt | trim }}
-export OPENAI_MODEL=auto/coding
+#export OPENAI_MODEL=auto/coding
 
 ## Sincronização entre máquinas: Esta chave criptografa o SQLite para que os bancos
 ## exportados pelo 'omniroute-sync' possam ser lidos em qualquer máquina.
