@@ -1,0 +1,67 @@
+## ═══════════════════════════════════════════════════════════════════════════════
+## OmniRoute — Gateway unificado para todas as AI coding tools
+## Todas as tools (Codex, Aider, OpenCode, etc.) usam o mesmo endpoint local.
+## Claude Code usa settings.json (ANTHROPIC_*) — NÃO depende destas variáveis.
+## ═══════════════════════════════════════════════════════════════════════════════
+
+{{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omnirouter-key.txt.age" -}}
+
+## Base config para tools OpenAI-compatible (Codex, Aider, OpenCode, Copilot, etc.)
+export OPENAI_BASE_URL=http://localhost:20128/v1
+export OPENAI_API_KEY={{ include $omniroute_key | decrypt | trim }}
+export OPENAI_MODEL=auto/coding
+
+## Sincronização entre máquinas: Esta chave criptografa o SQLite para que os bancos
+## exportados pelo 'omniroute-sync' possam ser lidos em qualquer máquina.
+export API_KEY_SECRET={{ include $omniroute_key | decrypt | trim }}
+
+## ═══════════════════════════════════════════════════════════════════════════════
+## OmniRoute — Aliases de gerenciamento
+## ═══════════════════════════════════════════════════════════════════════════════
+
+{{ if and (eq .chezmoi.os "linux") (not .settings.wsl) (.features.sudo.enabled) }}
+## Arch Linux / Ubuntu com systemd — usa o service do AUR ou custom unit
+alias -- omniroute-start="systemctl --user start omniroute.service"
+alias -- omniroute-stop="systemctl --user stop omniroute.service"
+alias -- omniroute-restart="systemctl --user restart omniroute.service"
+alias -- omniroute-status="systemctl --user status omniroute.service"
+alias -- omniroute-enable="systemctl --user enable omniroute.service"
+{{ else }}
+## macOS / WSL / ambientes sem systemd
+alias -- omniroute-start="nohup omniroute > /dev/null 2>&1 &"
+alias -- omniroute-stop="pkill -f 'node.*omniroute'"
+alias -- omniroute-restart="pkill -f 'node.*omniroute' 2>/dev/null; sleep 1; nohup omniroute > /dev/null 2>&1 &"
+{{ end }}
+
+## Aliases universais
+alias -- omniroute-health="curl -sf http://localhost:20128/health 2>/dev/null && echo ' ✓ OmniRoute healthy' || echo ' ✗ OmniRoute not running'"
+alias -- omniroute-dashboard="open http://localhost:20128 2>/dev/null || xdg-open http://localhost:20128 2>/dev/null || echo 'Dashboard: http://localhost:20128'"
+alias -- omniroute-models="curl -sf http://localhost:20128/v1/models -H 'Authorization: Bearer $(echo $OPENAI_API_KEY)' 2>/dev/null | jq '.data[].id' 2>/dev/null || echo 'OmniRoute not running or no models available'"
+
+## Alias de sincronização via Chezmoi
+alias -- omniroute-sync-push="omniroute-sync push"
+alias -- omniroute-sync-pull="omniroute-sync pull"
+
+{{ if eq .settings.workplace "Zup" }}
+## ═══════════════════════════════════════════════════════════════════════════════
+## Proxy corporativo da Zup para OmniRoute
+## ═══════════════════════════════════════════════════════════════════════════════
+## O proxy corporativo é configurado DENTRO do OmniRoute (via dashboard).
+## Passos:
+##   1. Abra o dashboard: http://localhost:20128
+##   2. Vá em Settings → Proxy
+##   3. Configure o proxy global:
+##      - Type: http (ou socks5)
+##      - Host: <proxy-host-da-zup>
+##      - Port: <porta-do-proxy>
+##      - Username/Password: (se necessário)
+##   4. O OmniRoute encripta as credenciais com AES-256-GCM no SQLite
+##
+## Alternativa via variáveis de ambiente (caso o dashboard não funcione):
+## Descomente e preencha as linhas abaixo:
+# export HTTP_PROXY=http://proxy.zup.com:8080
+# export HTTPS_PROXY=http://proxy.zup.com:8080
+# export NO_PROXY=localhost,127.0.0.1,::1
+{{ end }}
+
+# vim: filetype=bash

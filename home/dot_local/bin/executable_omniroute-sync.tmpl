@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# OmniRoute Configuration Sync Tool
+# Sincroniza configurações do OmniRoute (providers, combos, etc) via Chezmoi, ignorando métricas/logs.
+
+OMNIROUTE_DIR="${DATA_DIR:-${HOME}/.omniroute}"
+DB_FILE="${OMNIROUTE_DIR}/omniroute.db"
+SYNC_FILE="${OMNIROUTE_DIR}/config.sql"
+
+case "$1" in
+  push)
+    echo "📦 Exportando configurações do OmniRoute..."
+    if [ ! -f "$DB_FILE" ]; then
+      echo "❌ Banco de dados não encontrado em $DB_FILE"
+      exit 1
+    fi
+    
+    # Exporta apenas as tabelas estruturais de configuração (ignora métricas/logs)
+    sqlite3 "$DB_FILE" "
+      .mode insert
+      .output ${SYNC_FILE}.tmp
+      SELECT * FROM providers;
+      SELECT * FROM combos;
+      SELECT * FROM proxies;
+      SELECT * FROM cli_tools;
+      SELECT * FROM api_keys;
+    "
+    
+    # Transforma os INSERTs normais em INSERT OR REPLACE para não dar erro de UNIQUE constraint
+    sed 's/INSERT INTO/INSERT OR REPLACE INTO/g' "${SYNC_FILE}.tmp" > "$SYNC_FILE"
+    rm "${SYNC_FILE}.tmp"
+    
+    echo "✓ Configurações exportadas para $SYNC_FILE"
+    
+    echo "🔄 Adicionando ao Chezmoi com criptografia (age)..."
+    chezmoi add --encrypt "$SYNC_FILE"
+    echo "✓ Adicionado de forma segura ao Chezmoi! Agora você pode rodar 'chezmoi cd && git commit -m \"Update OmniRoute config\" && git push'"
+    ;;
+    
+  pull)
+    echo "📥 Importando configurações do OmniRoute..."
+    
+    # Verifica se o arquivo de sync existe (depois do chezmoi update)
+    RESTORE_FILE="${HOME}/.omniroute/config.sql"
+    if [ ! -f "$RESTORE_FILE" ]; then
+      echo "❌ Arquivo de configuração não encontrado em $RESTORE_FILE."
+      echo "Execute 'chezmoi apply' primeiro para garantir que o arquivo esteja presente na máquina."
+      exit 1
+    fi
+    
+    if [ ! -f "$DB_FILE" ]; then
+      echo "⚠️ Banco de dados não encontrado. Inicie o OmniRoute uma vez para criar a estrutura inicial antes de importar."
+      exit 1
+    fi
+    
+    # Restaura as configurações
+    sqlite3 "$DB_FILE" < "$RESTORE_FILE"
+    echo "✓ Configurações importadas com sucesso!"
+    echo "🔄 Lembre-se de reiniciar o OmniRoute (omniroute-restart) para carregar as novas configs."
+    ;;
+    
+  *)
+    echo "Uso: omniroute-sync {push|pull}"
+    echo "  push : Exporta a config atual e adiciona ao chezmoi"
+    echo "  pull : Importa a config do chezmoi para o banco local"
+    exit 1
+    ;;
+esac

@@ -1,23 +1,17 @@
 {
   "env": {
-    {{ $api_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_freemodels-key.txt.age" -}}
-    {{/* "ANTHROPIC_API_KEY": "{{ include $api_key| decrypt | trim }}",
-    "ANTHROPIC_BASE_URL": "https://cc.freemodel.dev",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1" */}}
-
-    {{ $api_key2 := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omnirouter-key.txt.age" -}}
+    {{ $api_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omnirouter-key.txt.age" -}}
 
     "ANTHROPIC_BASE_URL": "http://localhost:20128",
-    "ANTHROPIC_AUTH_TOKEN": "{{ include $api_key2| decrypt | trim }}",
-    "ANTHROPIC_MODEL": "fr-claude/claude-opus-4-8",
-    "ANTHROPIC_SMALL_FAST_MODEL": "fr-claude/claude-haiku-4-5-20251001",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "fr-claude/claude-opus-4-8",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "fr-claude/claude-sonnet-4-6",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "fr-claude/claude-haiku-4-5-20251001"
+    "ANTHROPIC_AUTH_TOKEN": "{{ include $api_key| decrypt | trim }}",
+    "ANTHROPIC_MODEL": "auto/coding",
+    "ANTHROPIC_SMALL_FAST_MODEL": "auto/fast",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "auto/smart",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "auto/coding",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "auto/fast"
   },
   "permissions": {
       "allow": [],
       "deny": []
   }
-  {{/* "apiKeyHelper": "sk-b5e1733f52240cdf-688140-15c3b4f8" */}}
 }
