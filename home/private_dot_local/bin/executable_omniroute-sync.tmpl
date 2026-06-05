@@ -3,7 +3,7 @@
 # Sincroniza configurações do OmniRoute (providers, combos, etc) via Chezmoi, ignorando métricas/logs.
 
 OMNIROUTE_DIR="${DATA_DIR:-${HOME}/.omniroute}"
-DB_FILE="${OMNIROUTE_DIR}/omniroute.db"
+DB_FILE="${OMNIROUTE_DIR}/storage.sqlite"
 SYNC_FILE="${OMNIROUTE_DIR}/config.sql"
 
 case "$1" in
