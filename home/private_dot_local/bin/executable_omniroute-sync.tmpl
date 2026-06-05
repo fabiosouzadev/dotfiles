@@ -14,16 +14,25 @@ case "$1" in
       exit 1
     fi
     
-    # Exporta apenas as tabelas estruturais de configuração (ignora métricas/logs)
-    sqlite3 "$DB_FILE" "
-      .mode insert
-      .output ${SYNC_FILE}.tmp
-      SELECT * FROM providers;
-      SELECT * FROM combos;
-      SELECT * FROM proxies;
-      SELECT * FROM cli_tools;
-      SELECT * FROM api_keys;
-    "
+    # Exporta tabelas estruturais de configuração (ignora métricas/logs/cache)
+    # Tabelas verificadas contra o schema real do OmniRoute
+    TABLES=(
+      provider_connections
+      provider_nodes
+      combos
+      model_combo_mappings
+      api_keys
+      upstream_proxy_config
+    )
+
+    > "${SYNC_FILE}.tmp"  # limpa arquivo temporário
+
+    for table in "${TABLES[@]}"; do
+      sqlite3 "$DB_FILE" <<EOF 2>/dev/null >> "${SYNC_FILE}.tmp"
+.mode insert $table
+SELECT * FROM $table;
+EOF
+    done
     
     # Transforma os INSERTs normais em INSERT OR REPLACE para não dar erro de UNIQUE constraint
     sed 's/INSERT INTO/INSERT OR REPLACE INTO/g' "${SYNC_FILE}.tmp" > "$SYNC_FILE"
