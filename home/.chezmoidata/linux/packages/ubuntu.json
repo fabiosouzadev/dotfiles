@@ -126,6 +126,17 @@
             "architectures": ["amd64", "arm64"],
             "types": "deb",
             "packages": ["codium"]
+          },
+          {
+            "name": "tailscale",
+            "keyring_path": "/etc/apt/keyrings/tailscale.gpg",
+            "key_url": "https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg",
+            "uri": "https://pkgs.tailscale.com/stable/ubuntu",
+            "suites": "jammy",
+            "components": "main",
+            "architectures": ["amd64", "arm64"],
+            "types": "deb",
+            "packages": ["tailscale"]
           }
         ],
         "debs": [

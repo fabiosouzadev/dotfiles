@@ -39,3 +39,4 @@ Progresso: ██████████ 100% (9/9 fases)
 |------|------|-----------|
 | 2026-05-18 | install-idea-community | Script para instalar IntelliJ IDEA Community Edition sem sudo |
 | 2026-05-23 | install-glab | Script para instalar glab (GitLab CLI) para ClaroBrasil self-hosted |
+| 2026-06-08 | install-tailscale-vps | Adicionar instalação do tailscale via apt para o VPS (ubuntu.json) |
