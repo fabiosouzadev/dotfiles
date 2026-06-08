@@ -128,5 +128,6 @@ macports = [
     'colima',
     'k9s',
     'grep',
-    'atuin'
+    'atuin',
+    'tailscale'
 ]
