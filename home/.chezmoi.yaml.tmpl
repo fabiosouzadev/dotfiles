@@ -115,11 +115,14 @@ Headless:
 {{-   $profile = ($ismanaged | ternary "work" "personal") -}}
 {{- end -}}
 
-{{- /* VPS Profile Detection */ -}}
+{{- /* VPS Profile Detection (Auto-detect Oracle VPS) */ -}}
 {{- $isVps := false -}}
 {{- if eq .chezmoi.os "linux" -}}
-{{-   $isVpsPrompt := promptStringOnce . "vps" "Is this a VPS environment? (yes/no)" "no" -}}
-{{-   $isVps = eq ($isVpsPrompt | lower) "yes" "y" -}}
+{{-   $isVps = or
+        (env "CHEZMOI_VPS" | not | not)
+        ($hostLower | contains "vps")
+        (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.username "ubuntu") $sshSession (not $guiAvailable))
+-}}
 {{- end -}}
 {{- if $isVps -}}
 {{-   $profile = "vps" -}}
@@ -198,10 +201,10 @@ Headless:
     )
 
     "openclaw" (dict
-      "install"  $isVps
+      "install"  false
       "mode"     (ternary "vps-daemon" "local" $isVps)
-      "gateway"  $isVps
-      "telegram" $isVps
+      "gateway"  false
+      "telegram" false
     )
   )
 
