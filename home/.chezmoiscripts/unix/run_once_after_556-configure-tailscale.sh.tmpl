@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+set -euo pipefail
+
+{{ template "workplace/script_is_not_zup" . }}
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "common/script_helper" . }}
+
+{{ if not .features.networking.tailscale.install }}
+info ">> Tailscale config: feature flag disabled, skipping <<"
+exit 0
+{{ end }}
+
+info ">>>>>>> 🛜 Configuring Tailscale 🛜 <<<<<<<"
+
+# Ensure tailscaled service is running on Linux
+{{ if eq .chezmoi.os "linux" }}
+if command -v systemctl &> /dev/null; then
+    sudo systemctl enable --now tailscaled || true
+fi
+{{ end }}
+
+if ! command -v tailscale &> /dev/null; then
+    error "Tailscale not found in PATH."
+    exit 0
+fi
+
+# Check status
+if tailscale status &> /dev/null; then
+    success "Tailscale is authenticated and running."
+else
+    warn "Tailscale is NOT authenticated or running."
+    info "Please run 'sudo tailscale up' or open the Tailscale app to authenticate."
+fi

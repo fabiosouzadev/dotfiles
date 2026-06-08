@@ -7,7 +7,13 @@
 {{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.age" -}}
 
 ## Base config para tools OpenAI-compatible (Codex, Aider, OpenCode, Copilot, etc.)
+{{- if eq .features.ai.omniroute.mode "vps-client" }}
+## Como este é um client (VPS-client mode), apontamos para o servidor via Tailscale.
+## Você pode definir a variável OMNIROUTE_HOST no seu .zshrc local ou usar o hostname padrão.
+export OPENAI_BASE_URL=http://${OMNIROUTE_HOST:-vps-omniroute}:20128/v1
+{{- else }}
 export OPENAI_BASE_URL=http://localhost:20128/v1
+{{- end }}
 export OPENAI_API_KEY={{ include $omniroute_key | decrypt | trim }}
 #export OPENAI_MODEL=auto/coding
 

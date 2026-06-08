@@ -23,7 +23,7 @@
       "ollama": {
         "api": "openai-completions",
         "apiKey": "ollama-local",
-        "baseUrl": "http://127.0.0.1:11434/v1",
+        "baseUrl": "http://127.0.0.1:20128/v1",
         "models": [
           {
             "id": "minimax-m2.5:cloud",
@@ -163,7 +163,7 @@
   "gateway": {
     "port": 9091,
     "mode": "local",
-    "bind": "loopback",
+    "bind": "{{ if .settings.vps }}0.0.0.0{{ else }}loopback{{ end }}",
     "auth": {
       "token": "${OPENCLAW_GATEWAY_TOKEN}",
       "allowTailscale": true
@@ -176,7 +176,7 @@
   "plugins": {
     "entries": {
       "telegram": {
-        "enabled": true
+        "enabled": {{ .features.ai.openclaw.telegram }}
       }
     }
   }

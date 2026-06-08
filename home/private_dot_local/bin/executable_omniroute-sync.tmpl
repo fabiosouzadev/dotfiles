@@ -25,7 +25,9 @@ case "$1" in
       upstream_proxy_config
     )
 
-    > "${SYNC_FILE}.tmp"  # limpa arquivo temporário
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "-- Exported at: $TIMESTAMP" > "${SYNC_FILE}.tmp"
+
 
     for table in "${TABLES[@]}"; do
       sqlite3 "$DB_FILE" <<EOF 2>/dev/null >> "${SYNC_FILE}.tmp"
@@ -68,10 +70,31 @@ EOF
     echo "🔄 Lembre-se de reiniciar o OmniRoute (omniroute-restart) para carregar as novas configs."
     ;;
     
+  status)
+    echo "🔍 OmniRoute Sync Status"
+    echo "--------------------------"
+    if [ -f "$DB_FILE" ]; then
+      echo "✅ Database: Present ($DB_FILE)"
+      ls -lh "$DB_FILE" | awk '{print "   Size: " $5 ", Last Modified: " $6 " " $7 " " $8}'
+    else
+      echo "❌ Database: Missing"
+    fi
+    
+    if [ -f "$SYNC_FILE" ]; then
+      echo "✅ Sync File: Present ($SYNC_FILE)"
+      ls -lh "$SYNC_FILE" | awk '{print "   Size: " $5 ", Last Modified: " $6 " " $7 " " $8}'
+      echo "   Version:"
+      head -n 1 "$SYNC_FILE" | grep "^--" || echo "   (No timestamp found)"
+    else
+      echo "❌ Sync File: Missing"
+    fi
+    ;;
+    
   *)
-    echo "Uso: omniroute-sync {push|pull}"
-    echo "  push : Exporta a config atual e adiciona ao chezmoi"
-    echo "  pull : Importa a config do chezmoi para o banco local"
+    echo "Uso: omniroute-sync {push|pull|status}"
+    echo "  push   : Exporta a config atual e adiciona ao chezmoi"
+    echo "  pull   : Importa a config do chezmoi para o banco local"
+    echo "  status : Verifica a saúde dos arquivos de configuração e banco"
     exit 1
     ;;
 esac

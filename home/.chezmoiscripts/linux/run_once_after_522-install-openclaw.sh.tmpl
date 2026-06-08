@@ -59,9 +59,12 @@ npm install -g openclaw@beta
 openclaw completion --shell zsh \
     > "$HOME/.local/share/zsh/site-functions/openclaw.zsh"
 
-#openclaw gateway install
-#openclaw gateway
-#systemctl --user start openclaw-gateway.service
+{{ if .features.ai.openclaw.gateway }}
+info ">>>>> 🦞 Installing OpenClaw Gateway <<<<<<"
+openclaw gateway install || true
+systemctl --user daemon-reload || true
+# Service is enabled/started in 560-setup-vps-services.sh.tmpl
+{{ end }}
 
 success ">>>>>> 🦞 OpenClaw Installed Version: $(openclaw --version) <<<<<<"
 

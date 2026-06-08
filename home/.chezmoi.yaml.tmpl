@@ -115,6 +115,16 @@ Headless:
 {{-   $profile = ($ismanaged | ternary "work" "personal") -}}
 {{- end -}}
 
+{{- /* VPS Profile Detection */ -}}
+{{- $isVps := false -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{-   $isVpsPrompt := promptStringOnce . "vps" "Is this a VPS environment? (yes/no)" "no" -}}
+{{-   $isVps = eq ($isVpsPrompt | lower) "yes" "y" -}}
+{{- end -}}
+{{- if $isVps -}}
+{{-   $profile = "vps" -}}
+{{- end -}}
+
 {{- /* OS id (distro) */ -}}
 {{- $osID := .chezmoi.os -}}
 {{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
@@ -171,13 +181,34 @@ Headless:
     "gsd"               true
 
     "ollama" (dict
-    "install"      true
-    "mode"         $ollamaMode
-    "localmodels"  false
+      "install"      true
+      "mode"         $ollamaMode
+      "localmodels"  false
     )
 
-    "openclaw" (dict "install" false)
-    "hermes"   (dict "install" true)
+    "omniroute" (dict
+      "install" true
+      "mode"    (ternary "vps-server" "local" $isVps)
+      "bind"    (ternary "0.0.0.0" "localhost" $isVps)
+    )
+
+    "hermes" (dict
+      "install" true
+      "mode"    (ternary "vps-daemon" "local" $isVps)
+    )
+
+    "openclaw" (dict
+      "install"  $isVps
+      "mode"     (ternary "vps-daemon" "local" $isVps)
+      "gateway"  $isVps
+      "telegram" $isVps
+    )
+  )
+
+  "networking" (dict
+    "tailscale" (dict
+      "install" true
+    )
   )
 -}}
 
@@ -216,6 +247,7 @@ Headless:
 {{- /* Consolidate dados */ -}}
 {{- $data := dict
   "settings" (dict
+  "vps"              $isVps
   "ephemeral"        $ephemeral
   "headless"         $headless
   "interactive"      $interactive

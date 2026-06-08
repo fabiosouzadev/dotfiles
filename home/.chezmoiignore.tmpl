@@ -6,6 +6,7 @@ README.md
 .chezmoidata/linux/**
 .chezmoiexternals/linux/**
 .mozilla/**
+.config/systemd/**
 {{- end }}
 
 {{- if not (.settings.osid | lower | contains "windows") }}
@@ -18,6 +19,7 @@ scoop/**
 {{- if not (.settings.osid | lower | contains "darwin") }}
 .chezmoiscripts/darwin/**
 .chezmoidata/darwin/**
+Library/LaunchAgents/**
 {{- end }}
 
 {{- if (.settings.osid | lower | contains "windows") }}

@@ -1,0 +1,18 @@
+[Unit]
+Description=OmniRoute AI Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+{{- if eq .features.ai.omniroute.mode "vps-server" }}
+Environment=HOST=0.0.0.0
+{{- end }}
+Environment=NODE_ENV=production
+ExecStart=%h/.local/share/mise/shims/omniroute
+Restart=on-failure
+RestartSec=5
+WorkingDirectory=%h/.omniroute
+
+[Install]
+WantedBy=default.target
