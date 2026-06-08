@@ -191,7 +191,8 @@ Headless:
 
     "omniroute" (dict
       "install" true
-      "mode"    (ternary "vps-server" "local" $isVps)
+      "mode"    (ternary "vps-server" "client" $isVps)
+      "domain"  (env "CHEZMOI_OMNIROUTE_DOMAIN" | default "")
       "bind"    (ternary "0.0.0.0" "localhost" $isVps)
     )
 

@@ -32,4 +32,13 @@ info "Starting OpenClaw Gateway Service"
 systemctl --user enable --now openclaw-gateway.service || true
 {{ end }}
 
+{{ if ne .features.ai.omniroute.domain "" }}
+info "Applying Caddy Configuration"
+if command -v caddy &> /dev/null; then
+    sudo cp "$HOME/.config/caddy/Caddyfile" /etc/caddy/Caddyfile
+    sudo systemctl reload caddy || sudo systemctl restart caddy || true
+    success "Caddyfile applied."
+fi
+{{ end }}
+
 success "VPS Services setup completed"

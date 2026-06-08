@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+
+set -euo pipefail
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . }}
+
+{{ if or (eq .features.ai.omniroute.domain "") (not .settings.vps) }}
+info ">> Caddy: not a VPS or domain is empty, skipping <<"
+exit 0
+{{ end }}
+
+info ">>>>>>> 🌐 Installing Caddy Web Server 🌐 <<<<<<<"
+
+if ! command -v caddy &> /dev/null; then
+    info "Adding Caddy repository..."
+    sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+    sudo apt update
+    sudo apt install -y caddy
+    success "Caddy installed."
+else
+    info "Caddy is already installed."
+fi
+
+info "Configuring Firewall (UFW) to allow HTTP/HTTPS"
+if command -v ufw &> /dev/null; then
+    sudo ufw allow 80/tcp || true
+    sudo ufw allow 443/tcp || true
+    success "UFW configured."
+else
+    warn "ufw not found. Skipping internal firewall configuration."
+fi
+
+# Note about Oracle Cloud
+warn "⚠️ ORACLE CLOUD USERS: Remember to add Ingress Rules for ports 80 and 443 in the Oracle Web Console (VCN -> Security Lists)! ⚠️"
