@@ -118,13 +118,12 @@ Headless:
 {{- /* VPS Profile Detection (Auto-detect Oracle VPS) */ -}}
 {{- $isVps := false -}}
 {{- if eq .chezmoi.os "linux" -}}
-{{-   /* Oracle Cloud: kernel contains "-oracle" or hostname starts with "instance-" */ -}}
-{{-   $kernelRelease := output "uname" "-r" | trim -}}
-{{-   $isOracle := or (contains "-oracle" $kernelRelease) (hasPrefix "instance-" $hostLower) -}}
+{{-   /* Oracle Cloud: hostname starts with "instance-" */ -}}
+{{-   $hostnameInstance := hasPrefix "instance-" $hostLower -}}
 {{-   $isVps = or
         (env "CHEZMOI_VPS" | not | not)
         ($hostLower | contains "vps")
-        $isOracle
+        $hostnameInstance
         (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.username "ubuntu") $sshSession (not $guiAvailable))
 -}}
 {{- end -}}
