@@ -5,6 +5,10 @@ set -euo pipefail
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
+{{ if .settings.vps }}
+info ">> VPS detected: skipping font installation"
+exit 0
+{{ end }}
 
 info "Installing fonts"
 
