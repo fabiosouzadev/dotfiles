@@ -18,7 +18,10 @@ info "Installing Ubuntu APT packages"
 
 {{ if .packages.linux.ubuntu.apt -}} # if apt packages
 
-sudo apt install -y {{ range .packages.linux.ubuntu.apt }} {{.}}{{end}}
+{{- $vps := .settings.vps -}}
+{{- $gui_packages := list "dex" "feh" "flameshot" "kitty" "mpv" "pavucontrol" "transmission-qt" "vlc" "xclip" "xsel" "wine" "gnome-keyring" -}}
+
+sudo apt install -y {{ range .packages.linux.ubuntu.apt }}{{ if or (not $vps) (not (has . $gui_packages)) }} {{.}}{{ end }}{{end}}
 
 success "Installed Ubuntu APT packages"
 

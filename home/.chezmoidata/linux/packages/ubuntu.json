@@ -6,6 +6,7 @@
           "bat",
           "clang",
           "dex",
+          "delta",
           "direnv",
           "eza",
           "feh",
@@ -31,11 +32,15 @@
         "ppas": [
           {
             "name": "xtradeb/apps",
-            "packages": ["chromium"]
+            "packages": [
+              "chromium"
+            ]
           },
           {
             "name": "mkasberg/ghostty-ubuntu",
-            "packages": ["ghostty"]
+            "packages": [
+              "ghostty"
+            ]
           }
         ],
         "sources": [
@@ -45,10 +50,12 @@
             "key_url": "https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg",
             "uri": "https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/",
             "suites": "antigravity-debian",
-            "components":"main",
-            "architectures":[], 
+            "components": "main",
+            "architectures": [],
             "types": "deb",
-            "packages": ["antigravity"]
+            "packages": [
+              "antigravity"
+            ]
           },
           {
             "name": "brave-browser-beta",
@@ -56,10 +63,16 @@
             "key_url": "https://brave-browser-apt-beta.s3.brave.com/brave-browser-beta-archive-keyring.gpg",
             "uri": "https://brave-browser-apt-beta.s3.brave.com",
             "suites": "stable",
-            "components":"main",
-            "architectures":["amd64","arm64"], 
+            "components": "main",
+            "architectures": [
+              "amd64",
+              "arm64"
+            ],
             "types": "deb",
-            "packages": ["brave-browser-beta","brave-keyring"]
+            "packages": [
+              "brave-browser-beta",
+              "brave-keyring"
+            ]
           },
           {
             "name": "brave-browser-nightly",
@@ -67,10 +80,16 @@
             "key_url": "https://brave-browser-apt-nightly.s3.brave.com/brave-browser-nightly-archive-keyring.gpg",
             "uri": "https://brave-browser-apt-nightly.s3.brave.com",
             "suites": "stable",
-            "components":"main",
-            "architectures":["amd64","arm64"], 
+            "components": "main",
+            "architectures": [
+              "amd64",
+              "arm64"
+            ],
             "types": "deb",
-            "packages": ["brave-browser-nightly","brave-keyring"]
+            "packages": [
+              "brave-browser-nightly",
+              "brave-keyring"
+            ]
           },
           {
             "name": "firefox",
@@ -80,8 +99,13 @@
             "suites": "mozilla",
             "components": "main",
             "types": "deb",
-            "architectures":[], 
-            "packages": ["firefox-beta", "firefox-beta-l10n-pt-br", "firefox-nightly", "firefox-nightly-l10n-pt-br"]
+            "architectures": [],
+            "packages": [
+              "firefox-beta",
+              "firefox-beta-l10n-pt-br",
+              "firefox-nightly",
+              "firefox-nightly-l10n-pt-br"
+            ]
           },
           {
             "name": "google-chrome",
@@ -90,9 +114,16 @@
             "uri": "https://dl.google.com/linux/chrome/deb/",
             "suites": "stable",
             "components": "main",
-            "architectures":["amd64"], 
+            "architectures": [
+              "amd64"
+            ],
             "types": "deb",
-            "packages": ["google-chrome-stable", "google-chrome-beta", "google-chrome-unstable", "google-chrome-canary"]
+            "packages": [
+              "google-chrome-stable",
+              "google-chrome-beta",
+              "google-chrome-unstable",
+              "google-chrome-canary"
+            ]
           },
           {
             "name": "signal-desktop",
@@ -101,9 +132,13 @@
             "uri": "https://updates.signal.org/desktop/apt",
             "suites": "xenial",
             "components": "main",
-            "architectures":["amd64"], 
+            "architectures": [
+              "amd64"
+            ],
             "types": "deb",
-            "packages": ["signal-desktop"]
+            "packages": [
+              "signal-desktop"
+            ]
           },
           {
             "name": "vscode",
@@ -112,9 +147,15 @@
             "uri": "https://packages.microsoft.com/repos/code",
             "suites": "stable",
             "components": "main",
-            "architectures": ["amd64", "arm64", "armhf"],
+            "architectures": [
+              "amd64",
+              "arm64",
+              "armhf"
+            ],
             "types": "deb",
-            "packages": ["code-insiders"]
+            "packages": [
+              "code-insiders"
+            ]
           },
           {
             "name": "vscodium",
@@ -123,9 +164,14 @@
             "uri": "https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs",
             "suites": "vscodium",
             "components": "main",
-            "architectures": ["amd64", "arm64"],
+            "architectures": [
+              "amd64",
+              "arm64"
+            ],
             "types": "deb",
-            "packages": ["codium"]
+            "packages": [
+              "codium"
+            ]
           },
           {
             "name": "tailscale",
@@ -134,9 +180,14 @@
             "uri": "https://pkgs.tailscale.com/stable/ubuntu",
             "suites": "jammy",
             "components": "main",
-            "architectures": ["amd64", "arm64"],
+            "architectures": [
+              "amd64",
+              "arm64"
+            ],
             "types": "deb",
-            "packages": ["tailscale"]
+            "packages": [
+              "tailscale"
+            ]
           }
         ],
         "debs": [
@@ -155,7 +206,6 @@
           {
             "name": "fd",
             "url": "https://github.com/sharkdp/fd/releases/download/v10.3.0/fd_10.3.0_amd64.deb"
-
           },
           {
             "name": "kiro-code",
@@ -164,7 +214,6 @@
           {
             "name": "obsidian",
             "url": "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.11.7/obsidian_1.11.7_amd64.deb"
-
           },
           {
             "name": "vesktop",
