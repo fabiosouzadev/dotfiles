@@ -5,6 +5,11 @@ set -euo pipefail
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
+{{ if .settings.vps }}
+info ">> Neovim: VPS detected, skipping Neovim build <<"
+exit 0
+{{ end }}
+
 {{- if .settings.ismanaged }}
 
 info ">>> Install Nvim from release <<<<"

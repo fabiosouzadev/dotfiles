@@ -7,6 +7,11 @@ set -euo pipefail
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
 
+{{ if .settings.vps }}
+info ">> Tmux: VPS detected, skipping Tmux build <<"
+exit 0
+{{ end }}
+
 {{- if .settings.ismanaged }}
 
 info ">>> Install Tmux from release <<<<"
