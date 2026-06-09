@@ -34,6 +34,13 @@ success "Installed Ubuntu APT packages"
 
 {{ if .packages.linux.ubuntu.ppas -}} # if ppas
 
+# Ensure add-apt-repository is available
+if ! command -v add-apt-repository &> /dev/null; then
+    info ">>> Installing software-properties-common (required for add-apt-repository)..."
+    sudo apt update -y
+    sudo apt install -y software-properties-common
+fi
+
 {{ range .packages.linux.ubuntu.ppas -}} # range ppas
 
 info ">>> Processando PPA: ppa:{{.name}}"
