@@ -175,16 +175,16 @@ Headless:
   "rtl8821ce"      (dict "install" $dell3530)
   "personal_repos" (not $ephemeral)
   
-  "i3"       (dict "enabled" true)
-  "niri"     (dict "enabled" true)
+  "i3"       (dict "enabled" (not $isVps))
+  "niri"     (dict "enabled" (not $isVps))
 
   "ai" (dict
-    "coding_assistants" true
-    "spec_tools"        true
-    "gsd"               true
+    "coding_assistants" (not $isVps)
+    "spec_tools"        (not $isVps)
+    "gsd"               (not $isVps)
 
     "ollama" (dict
-      "install"      true
+      "install"      (not $isVps)
       "mode"         $ollamaMode
       "localmodels"  false
     )

@@ -28,3 +28,46 @@ Library/LaunchAgents/**
 .zshrc.d/**
 .chezmoiscripts/unix/**
 {{- end }}
+
+# === VPS-SPECIFIC FILTERS ===
+# Ignore desktop/GUI scripts when running on VPS
+{{- if .settings.vps }}
+
+# Window managers - not needed on VPS
+.chezmoiscripts/linux/run_once_before_216-install-wm.sh.tmpl
+.chezmoiscripts/linux/run_once_before_220-configure-bluetooth-arch.sh.tmpl
+.chezmoiscripts/linux/run_once_before_205-configure-keyboard-xorg.sh.tmpl
+
+# Fonts - not needed on VPS
+.chezmoiscripts/linux/run_onchange_after_506-install-fonts.sh.tmpl
+.chezmoidata/linux/fonts.yaml
+
+# Hardware drivers - not needed on VPS
+.chezmoiscripts/linux/run_once_before_103-install-rtl8821ce-driver.sh.tmpl
+.chezmoiscripts/linux/run_once_before_104-install-cirrus-driver-for-macbook.tmpl
+
+# Virtualization - not needed on VPS
+.chezmoiscripts/linux/run_once_before_215-install-virtualisation.sh.tmpl
+
+# Nix - not needed on VPS
+.chezmoiscripts/linux/run_once_before_207-install-nix.sh.tmpl
+
+# VPN Instivo - VPS uses Tailscale
+.chezmoiscripts/linux/run_once_after_655-configure-vpn-instivo.sh.tmpl
+.chezmoiscripts/linux/run_once_after_554-install-openvpn3.sh.tmpl
+
+# Paru - VPS uses Ubuntu, not Arch
+.chezmoiscripts/linux/run_once_before_199-install-paru.sh.tmpl
+
+# Compile neovim from source - not needed on VPS
+.chezmoiscripts/linux/run_once_before_223-compile-nvim.tmpl
+
+# Compile tmux from source - VPS can use package version
+.chezmoiscripts/linux/run_once_before_224-compile-tmux.tmpl
+
+# Desktop configs
+home/private_dot_config/i3/
+home/private_dot_config/niri/
+home/private_dot_config/greenclip.toml
+
+{{- end }}
