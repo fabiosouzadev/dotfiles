@@ -118,7 +118,7 @@ Headless:
 {{- /* VPS Profile Detection (Auto-detect Oracle VPS) */ -}}
 {{- $isVps := false -}}
 {{- if eq .chezmoi.os "linux" -}}
-{{-   /* Oracle Cloud: hostname starts with "instance-" */ -}}
+{{- /* Oracle Cloud: hostname starts with "instance-" */ -}}
 {{-   $hostnameInstance := hasPrefix "instance-" $hostLower -}}
 {{-   $isVps = or
         (env "CHEZMOI_VPS" | not | not)
