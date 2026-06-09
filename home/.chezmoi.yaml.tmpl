@@ -128,6 +128,9 @@ Headless:
 {{-   $profile = "vps" -}}
 {{- end -}}
 
+{{- /* Workplace detection */ -}}
+{{- $workplace := ternary "Zup" "none" (eq $profile "work") -}}
+
 {{- /* OS id (distro) */ -}}
 {{- $osID := .chezmoi.os -}}
 {{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
@@ -173,8 +176,14 @@ Headless:
   "runtime"     (dict "background_services" (not $ismanaged))
   "kernels"     (dict "install" false)
   "rtl8821ce"      (dict "install" $dell3530)
-  "personal_repos" (not $ephemeral)
+  "personal_repos" (ternary false (not $ephemeral) $isVps)
   
+  "repos" (dict
+    "personal" (not $isVps)
+    "other"    (not $isVps)
+    "work"     (eq $workplace "Zup")
+  )
+
   "i3"       (dict "enabled" (not $isVps))
   "niri"     (dict "enabled" (not $isVps))
 
@@ -274,7 +283,7 @@ Headless:
   "dell3530"         $dell3530
   "dell3520"         $dell3520
   "username"         $username
-  "workplace"        (ternary "Zup" "none" (eq $profile "work"))
+  "workplace"        $workplace
 )
   "dirs"             $dirs
   "features"         $features
