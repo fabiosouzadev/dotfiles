@@ -14,18 +14,6 @@ if command -v openclaw &> /dev/null; then
     openclaw uninstall --all --yes --non-interactive
     rm -rfv "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
 
-    if command -v npm &> /dev/null; then
-        npm uninstall -g openclaw || true
-    fi
-
-    if command -v pnpm &> /dev/null; then
-        pnpm remove -g openclaw || true
-    fi
-
-    if command -v bun &> /dev/null; then
-        bun remove -g openclaw || true
-    fi
-
     if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service" ]; then
         if command -v systemctl &> /dev/null; then
             systemctl --user disable --now openclaw-gateway.service || true
@@ -34,30 +22,8 @@ if command -v openclaw &> /dev/null; then
         rm -f "$HOME/.config/systemd/user/openclaw-gateway.service"
     fi
 
-    if [ -f "$HOME/.local/bin/openclaw" ]; then
-        rm -f "$HOME/.local/bin/openclaw"
-    fi
-
-    if [ -f "$HOME/.npm-global/bin/openclaw" ]; then
-        rm -f "$HOME/.npm-global/bin/openclaw"
-    fi
-
     success " 🧹🦞 OpenClaw was uninstalled 🧹"
 fi
-
-if [ -d "$HOME/openclaw" ]; then
-    rm -rf "$HOME/openclaw"
-fi
-
-#Install OpenClaw
-info ">>>>> 🦞 Installing OpenClaw <<<<<<"
-
-npm install -g openclaw@beta
-
-{{ template "common/script_validate_completions_path" . }}
-
-openclaw completion --shell zsh \
-    > "$HOME/.local/share/zsh/site-functions/openclaw.zsh"
 
 {{ if .features.ai.openclaw.gateway }}
 info ">>>>> 🦞 Installing OpenClaw Gateway <<<<<<"
@@ -66,7 +32,7 @@ systemctl --user daemon-reload || true
 # Service is enabled/started in 560-setup-vps-services.sh.tmpl
 {{ end }}
 
-success ">>>>>> 🦞 OpenClaw Installed Version: $(openclaw --version) <<<<<<"
+success ">>>>>> 🦞 OpenClaw configured <<<<<<"
 
 {{-  end }}
 

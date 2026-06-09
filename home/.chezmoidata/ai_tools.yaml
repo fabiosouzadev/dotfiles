@@ -28,7 +28,10 @@ ai_tools:
       feature_flag: coding_assistants
     - name: omniroute
       package: "omniroute"
-      feature_flag: coding_assistants
+      feature_flag: omniroute.install
+    - name: openclaw
+      package: "openclaw@beta"
+      feature_flag: openclaw.install
     - name: openspec
       package: "@fission-ai/openspec@latest"
       feature_flag: spec_tools
@@ -56,5 +59,9 @@ ai_tools:
       shell: bash
       feature_flag: coding_assistants
       block_on_workplace: Zup
+    - name: hermes
+      url: "https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh"
+      shell: bash
+      feature_flag: hermes.install
 
     

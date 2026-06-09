@@ -202,14 +202,14 @@ Headless:
     )
 
     "omniroute" (dict
-      "install" true
+      "install" $isVps
       "mode"    (ternary "vps-server" "client" $isVps)
       "domain"  (env "CHEZMOI_OMNIROUTE_DOMAIN" | default "fabiosouzadev.mytunnel.org")
       "bind"    (ternary "0.0.0.0" "localhost" $isVps)
     )
 
     "hermes" (dict
-      "install" true
+      "install" $isVps
       "mode"    (ternary "vps-daemon" "local" $isVps)
     )
 
