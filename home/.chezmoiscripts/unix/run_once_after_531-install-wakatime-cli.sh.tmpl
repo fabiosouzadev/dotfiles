@@ -3,6 +3,17 @@
 {{ template "common/script_is_not_ephemeral" . }}
 {{ template "common/script_helper" . }}
 
+# wakatime-cli installation depends on unzip
+if ! command -v unzip &> /dev/null; then
+    info ">>> Installing unzip (dependency for wakatime-cli)..."
+    {{ if (.settings.osid | lower | contains "linux" ) }}
+    sudo apt update -y
+    sudo apt install -y unzip
+    {{ else if (.settings.osid | lower | contains "darwin" ) }}
+    # unzip is usually available on macOS
+    {{ end }}
+fi
+
 info ">>>>>>> ⏱️ Installing WakaTime CLI ⏱️ <<<<<<<"
 
 if test -f "$HOME/.wakatime/wakatime-cli" || command -v wakatime-cli &> /dev/null; then
