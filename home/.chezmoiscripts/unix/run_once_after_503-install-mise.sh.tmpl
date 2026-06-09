@@ -36,6 +36,15 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
   --include-bash-completion-lib > ~/.local/share/bash-completion/completions/mise
 
 
+{{ if (.settings.osid | lower | contains "linux" ) }}
+# Node.js requires libatomic on Linux
+if ! dpkg -l | grep -q "^ii  libatomic1 "; then
+    info ">>> Installing libatomic1 (dependency for Node.js)..."
+    sudo apt update -y
+    sudo apt install -y libatomic1
+fi
+{{ end }}
+
 info "🧑‍🍳Installing tool versions via mise 🧑‍🍳"
 mise install -y
 

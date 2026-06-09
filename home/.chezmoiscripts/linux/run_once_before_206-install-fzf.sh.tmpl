@@ -4,6 +4,13 @@ set -euo pipefail
 
 {{ template "common/script_helper" . }}
 
+# fzf installation depends on git
+if ! command -v git &> /dev/null; then
+    info ">>> Installing git (dependency for fzf)..."
+    sudo apt update -y
+    sudo apt install -y git
+fi
+
 info ">>>Installing fzf"
 
 FZF_DIR="$HOME/.fzf"
