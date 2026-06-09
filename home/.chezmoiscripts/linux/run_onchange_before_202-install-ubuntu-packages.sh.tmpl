@@ -19,9 +19,11 @@ info "Installing Ubuntu APT packages"
 {{ if .packages.linux.ubuntu.apt -}} # if apt packages
 
 {{- $vps := .settings.vps -}}
-{{- $gui_packages := list "dex" "feh" "flameshot" "kitty" "mpv" "pavucontrol" "transmission-qt" "vlc" "xclip" "xsel" "wine" "gnome-keyring" -}}
+{{- $gui_packages := .packages.linux.ubuntu.gui | default list -}}
+{{- $not_in_repos := .packages.linux.ubuntu.not_in_repos | default list -}}
+{{- $skip_packages := concat $gui_packages $not_in_repos -}}
 
-sudo apt install -y {{ range .packages.linux.ubuntu.apt }}{{ if or (not $vps) (not (has . $gui_packages)) }} {{.}}{{ end }}{{end}}
+sudo apt install -y {{ range .packages.linux.ubuntu.apt }}{{ if or (not $vps) (not (has . $skip_packages)) }} {{.}}{{ end }}{{end}}
 
 success "Installed Ubuntu APT packages"
 

@@ -1,0 +1,51 @@
+{
+  "packages": {
+    "linux": {
+      "ubuntu": {
+        "gui": [
+          "dex",
+          "feh",
+          "flameshot",
+          "kitty",
+          "mpv",
+          "pavucontrol",
+          "transmission-qt",
+          "vlc",
+          "xclip",
+          "xsel",
+          "wine",
+          "gnome-keyring"
+        ],
+        "not_in_repos": [
+          "bat",
+          "delta",
+          "eza",
+          "zoxide"
+        ],
+        "ppas": [
+          "xtradeb/apps",
+          "mkasberg/ghostty-ubuntu"
+        ],
+        "sources": [
+          "antigravity",
+          "brave-browser-beta",
+          "brave-browser-nightly",
+          "firefox",
+          "google-chrome",
+          "signal-desktop",
+          "vscode",
+          "vscodium",
+          "tailscale"
+        ],
+        "debs": [
+          "dbeaver",
+          "draw.io",
+          "enth-auth",
+          "kiro-code",
+          "obsidian",
+          "vesktop"
+        ]
+      }
+    }
+  }
+}
