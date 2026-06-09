@@ -7,6 +7,11 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 {{ template "linux/script_linux_only" . }}
 
+{{ if .settings.vps }}
+info ">> Swap/ZRAM: VPS detected, skipping aggressive swap configuration <<"
+exit 0
+{{ end }}
+
 info ">>> 🧠 Configurando ZRAM + SWAP (modo EXTREMO)"
 
 # --- 0. Desativar swaps existentes ---

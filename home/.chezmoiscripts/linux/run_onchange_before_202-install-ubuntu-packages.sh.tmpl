@@ -25,6 +25,8 @@ success "Installed Ubuntu APT packages"
 {{ end -}} # if apt packages
 
 
+{{ if not .settings.vps }}
+
 {{ if .packages.linux.ubuntu.ppas -}} # if ppas
 
 {{ range .packages.linux.ubuntu.ppas -}} # range ppas
@@ -150,6 +152,7 @@ success "All .deb packages processed successfully"
 
 {{ end -}} # if debs
 
+{{ end -}} # if not vps
 
 success "Installed Ubuntu packages"
 # -*-mode:sh-*- vim:ft=sh.gotexttmpl
