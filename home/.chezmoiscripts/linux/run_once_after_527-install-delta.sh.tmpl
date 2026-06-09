@@ -31,16 +31,25 @@ fi
     # Generic Linux - install from GitHub releases
     info "Installing delta from GitHub releases..."
     DELTA_VERSION="0.19.2"
-    DELTA_ARCH="x86_64-unknown-linux-gnu"
+    
+    # Detect architecture
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64)  DELTA_ARCH="x86_64-unknown-linux-gnu" ;;
+        aarch64) DELTA_ARCH="aarch64-unknown-linux-gnu" ;;
+        *)       error "Unsupported architecture: $ARCH"; exit 1 ;;
+    esac
+    
     DELTA_FILE="delta-${DELTA_VERSION}-${DELTA_ARCH}.tar.gz"
     DELTA_URL="https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/${DELTA_FILE}"
     
-    cd /tmp
-    curl -LO "$DELTA_URL"
+    TMPDIR_DELTA=$(mktemp -d)
+    cd "$TMPDIR_DELTA"
+    curl -fLO "$DELTA_URL"
     tar -xzf "$DELTA_FILE"
     mkdir -p "$HOME/.local/bin"
-    mv delta-"${DELTA_VERSION}"-*/delta "$HOME/.local/bin/"
-    rm -rf delta-"${DELTA_VERSION}"-*
+    find . -name "delta" -type f -executable -exec cp {} "$HOME/.local/bin/" \;
+    rm -rf "$TMPDIR_DELTA"
 {{ end }}
 
 # Verify installation
