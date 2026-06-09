@@ -38,7 +38,8 @@ fi
     cd /tmp
     curl -LO "$DELTA_URL"
     tar -xzf "$DELTA_FILE"
-    mv delta-"${DELTA_VERSION}"-*/delta $HOME/.local/bin/
+    mkdir -p "$HOME/.local/bin"
+    mv delta-"${DELTA_VERSION}"-*/delta "$HOME/.local/bin/"
     rm -rf delta-"${DELTA_VERSION}"-*
 {{ end }}
 
