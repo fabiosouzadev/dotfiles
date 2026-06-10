@@ -204,7 +204,7 @@ Headless:
     "omniroute" (dict
       "install" $isVps
       "mode"    (ternary "vps-server" "client" $isVps)
-      "domain"  (env "CHEZMOI_OMNIROUTE_DOMAIN" | default "fabiosouzadev.mytunnel.org")
+      "domain"  (env "CHEZMOI_OMNIROUTE_DOMAIN" | default "fabiosouzadev.duckdns.org")
       "bind"    (ternary "0.0.0.0" "localhost" $isVps)
     )
 
