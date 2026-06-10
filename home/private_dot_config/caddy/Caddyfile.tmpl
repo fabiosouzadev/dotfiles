@@ -1,10 +1,17 @@
 {{- if and .settings.vps (ne .features.ai.omniroute.domain "") }}
 {{ .features.ai.omniroute.domain }} {
     reverse_proxy 127.0.0.1:20128
-    
+
     log {
         output file /var/log/caddy/omniroute-access.log
         format console
+    }
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
     }
 }
 {{- end }}
