@@ -1,5 +1,5 @@
 [settings]
-{{ $wakatimeKeyFile := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_wakatime-key.txt.age" -}}
+{{ $wakatimeKeyFile := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_wakatime-key.txt.asc" -}}
 api_key = {{ include $wakatimeKeyFile | decrypt | trim }}
 
 [internal]

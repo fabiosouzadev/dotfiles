@@ -1,6 +1,6 @@
 {
   "env": {
-    {{ $api_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.age" -}}
+    {{ $api_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
     "ANTHROPIC_BASE_URL": "http://localhost:20128",
     "ANTHROPIC_AUTH_TOKEN": "{{ include $api_key| decrypt | trim }}",
     "ANTHROPIC_MODEL": "fr-claude/claude-opus-4-8",
