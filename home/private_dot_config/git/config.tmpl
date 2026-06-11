@@ -63,6 +63,7 @@
 [gpg]
 	program = "{{ .gpg.program }}"
 
+{{ if eq .settings.workplace "Zup" -}}
 {{/* Git > 2.36 hasconfig not working 
 [includeIf "hasconfig:remote.*.url:ssh://git@gitdev.clarobrasil.mobi/*"]
     path = ~/.config/git/config.zup.inc
@@ -70,6 +71,10 @@
 
 [includeIf "gitdir:{{.dirs.workspaces.zup}}/"]
     path = ~/.config/git/config.zup.inc
+
+[include]
+	path = ~/.config/git/config.zup.inc
+{{ end -}}
 
 {{ if .settings.vps -}}
 [include]
