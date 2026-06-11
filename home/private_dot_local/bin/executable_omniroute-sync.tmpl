@@ -44,7 +44,7 @@ EOF
     
     echo "🔄 Adicionando ao Chezmoi com criptografia (age)..."
     chezmoi add --encrypt "$SYNC_FILE"
-    chezmoi add --encrypt "$DB_FILE"
+    # chezmoi add --encrypt "$DB_FILE"
     echo "✓ Adicionado de forma segura ao Chezmoi! Agora você pode rodar 'chezmoi cd && git commit -m \"Update OmniRoute config\" && git push'"
     ;;
     
