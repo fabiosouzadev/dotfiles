@@ -67,3 +67,8 @@
 
 [includeIf "gitdir:{{.dirs.workspaces.zup}}/"]
     path = ~/.config/git/config.zup.inc
+
+{{ if .settings.vps -}}
+[include]
+	path = "~/.config/git/themes/catppuccin.gitconfig"
+{{ end -}}
