@@ -26,6 +26,12 @@ info "Starting OmniRoute Service"
 systemctl --user enable --now omniroute.service || true
 {{ end }}
 
+{{ if eq .features.ai.hermes.mode "vps-daemon" }}
+info "Installing Hermes Gateway systemd service"
+# Hermes own installer creates system-level service; prefer user service via chezmoi
+systemctl --user enable --now hermes-gateway.service || true
+{{ end }}
+
 {{ if .features.ai.openclaw.gateway }}
 info "Starting OpenClaw Gateway Service"
 # Note: openclaw gateway creates 'openclaw-gateway.service'
