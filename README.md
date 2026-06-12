@@ -93,7 +93,7 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 | [direnv](https://direnv.net) | — | Per-directory environment variables |
 
 ### 🤖 AI Coding Tools
-17+ AI assistants and tools installed via automated scripts:
+17+ AI assistants and tools installed via automated scripts, with **OmniRoute** as the central AI API gateway for Claude Code, OpenCode, Aider, Codex, and others.
 
 | Category | Tools |
 |----------|-------|
@@ -101,15 +101,30 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 | **Spec & Review** | OpenSpec, SpecKit, CodeRabbit |
 | **Orchestration** | claude-code-router, GSD, OpenClaude |
 | **Local Inference** | Ollama (pre-configured models) |
+| **Gateway** | OmniRoute (`http://localhost:20128/v1`, VPS via Tailscale, Caddy on VPS) |
 
 ### 📦 Runtime Management
 - **[mise](https://mise.jdx.dev)** — Multi-language version manager (Java, Node.js, Go, Python)
 - **[Nix/Devenv](https://devenv.sh)** — Isolated, reproducible project environments
+- **[Nerd Font](https://www.nerdfonts.com)** — FiraCode Nerd Font (icons in starship, eza, yazi)
+
+### 🖥️ Terminals
+| Tool | Config | Notes |
+|------|--------|-------|
+| **Kitty** | `private_dot_config/kitty/kitty.conf` | Catppuccin Mocha, Fira Nerd Font |
+| **WezTerm** | `private_dot_config/wezterm/wezterm.lua.tmpl` | Lua config, WSL default domain |
+| **Ghostty** | Installed via packages | — |
+
+### 🌐 Networking & VPN
+- **[Tailscale](https://tailscale.com)** — Mesh VPN for VPS/client connectivity
+- **OpenVPN3** — Work VPN (Instivo)
+- **[Caddy](https://caddyserver.com)** — Reverse proxy on VPS (HTTPS, security headers)
 
 ### 🔑 Security & Secrets
 - **17 encrypted files** via [age](https://age-encryption.org) (SSH keys, GPG keys, API tokens, VPN certs)
 - Git commits signed with GPG
 - Conditional git includes for work profiles (Zup, Instivo)
+- **[rbw](https://github.com/rbw/rbw)** — Bitwarden CLI for password management
 
 ### 🪟 Window Managers (Linux)
 - **i3** — Tiling WM for X11
@@ -155,6 +170,9 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 │   ├── TESTING.md                 #    Testing procedures
 │   ├── KEYMAPS.md                 #    Keybinding cheatsheets
 │   └── FORK-GUIDE.md              #    How to fork & customize
+├── .planning/                     # 🗺 GSD workflow state
+│   ├── codebase/                  #    Generated codebase docs (STACK, ARCH, CONCERNS...)
+│   └── milestones/                #    Phase plans and progress
 └── README.md                      # 👈 You are here
 ```
 
@@ -168,6 +186,8 @@ For detailed information, see:
 - [Getting Started](docs/GETTING-STARTED.md) — Detailed setup instructions.
 - [Development](docs/DEVELOPMENT.md) — How to contribute.
 - [Testing](docs/TESTING.md) — How tests are structured.
+- [Fork Guide](docs/FORK-GUIDE.md) — How to fork and customize.
+- [Keymaps](docs/KEYMAPS.md) — Tmux, Neovim, and Zsh cheatsheets.
 
 ---
 
@@ -205,6 +225,8 @@ Want to use these dotfiles as a starting point for your own setup?
 - [Starship](https://starship.rs) — The minimal, blazing-fast prompt
 - [mise](https://mise.jdx.dev) — Dev tools, any language, any tool
 - [age](https://age-encryption.org) — Simple, modern encryption
+- [Tailscale](https://tailscale.com) — Zero-config VPN
+- OmniRoute — AI gateway
 
 ---
 
