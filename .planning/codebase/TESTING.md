@@ -1,74 +1,168 @@
-# Testing
+# Testing Patterns
 
-> Last mapped: 2026-05-13
+**Analysis Date:** Fri Jun 12 2026
 
-## Overview
+## Test Framework
 
-This is a **dotfiles repository**, not a traditional software project. There is no automated test suite, CI pipeline, or formal testing framework. Validation is performed through manual application and operational verification.
+**Runner:**
+- Not detected. Repository has no `package.json`, `jest.config.*`, `vitest.config.*`, `pytest` config, Bats config, or dedicated automated test directory.
+- Validation runner is chezmoi itself through manual commands documented in `docs/TESTING.md` and `docs/DEVELOPMENT.md`.
+- Config: `home/.chezmoi.yaml.tmpl` is primary render/apply config; `.chezmoiroot` points chezmoi at `home/` source root.
 
-## Validation Approach
+**Assertion Library:**
+- Not detected. No automated assertion library present.
+- Manual assertions check command success, rendered diff, shell startup, and tool availability.
 
-### Primary Validation: `chezmoi apply`
-The main validation mechanism is running `chezmoi apply` and verifying:
-- Template rendering succeeds without errors
-- Files are placed in the correct locations
-- Scripts execute without failures
-- Encrypted files are properly decrypted
+**Run Commands:**
+```bash
+chezmoi apply --dry-run --verbose     # Render templates and preview apply without modifying target files
+chezmoi diff                          # Preview target changes from source state
+chezmoi apply                         # Apply dotfiles after dry-run review
+chezmoi verify                        # Verify target state matches source where supported
+chezmoi doctor                        # Diagnose chezmoi/runtime environment issues
+```
 
-### Pre-apply Checks
-chezmoi provides built-in validation tools:
-- `chezmoi diff` — Preview changes before applying
-- `chezmoi verify` — Check target state matches source
-- `chezmoi doctor` — Diagnose chezmoi configuration issues
+## Test File Organization
 
-### Template Validation
-- Go templates are validated at render time by chezmoi
-- Template syntax errors cause the apply to fail immediately
-- The `.chezmoiignore.tmpl` file ensures OS-irrelevant files are excluded
+**Location:**
+- No test files detected by `**/*test*` or `**/*spec*` source patterns.
+- Testing guidance lives in `docs/TESTING.md`.
+- Development validation guidance lives in `docs/DEVELOPMENT.md`.
+- Runtime scripts requiring validation live under `home/.chezmoiscripts/` by platform and lifecycle.
+- Templates requiring render validation live across `home/**/*.tmpl`, especially `home/.chezmoi.yaml.tmpl`, `home/dot_zshrc.d/*.tmpl`, and `home/.chezmoiscripts/**/*.tmpl`.
 
-## Manual Testing Matrix
+**Naming:**
+- No automated test naming convention detected.
+- Manual validation should name evidence by feature/path in phase artifacts under `.planning/milestones/...` when using GSD workflow.
 
-### Operating Systems
-| OS | Tested? | Notes |
-|----|---------|-------|
-| macOS (Darwin) | ✅ Active | Primary development machine |
-| Arch Linux | ✅ Active | Desktop with Dell 3530/3520 |
-| Ubuntu Linux | ✅ Historical | Package lists maintained |
-| Windows | ✅ Active | winget/scoop scripts functional, cross-platform bash |
-| WSL | ⚠️ Indirect | Detection logic in `.chezmoi.yaml.tmpl` |
+**Structure:**
+```text
+home/
+├── .chezmoi.yaml.tmpl                 # Core template data and environment detection to render-test
+├── .chezmoiscripts/<platform>/        # Lifecycle scripts to dry-run/apply-test
+├── .chezmoitemplates/<group>/         # Shared guards/helpers to include-test through scripts
+├── dot_zshrc.d/*.tmpl                 # Shell fragments to render and source-test
+└── private_dot_config/**              # App configs to render and smoke-test
 
-### Environment Types
-| Environment | Tested? | Notes |
-|-------------|---------|-------|
-| Interactive desktop | ✅ | Full GUI with window managers |
-| Headless server | ⚠️ | Guards exist but less frequently tested |
-| CI/Codespaces | ✅ Active | Detection logic present, ephemeral guards active across all scripts |
-| Container/Docker | ⚠️ | Container detection present |
+docs/TESTING.md                        # Manual validation checklist
+```
 
+## Test Structure
 
-## Smoke Tests (Manual)
+**Suite Organization:**
+```bash
+# Current manual validation pattern from docs/DEVELOPMENT.md
+chezmoi apply --dry-run --verbose
+chezmoi apply
+```
 
-After `chezmoi apply`, the following can be verified:
+**Patterns:**
+- Setup pattern: work from chezmoi source directory `/home/fabio.souza/.local/share/chezmoi`, make changes under `home/`, then run chezmoi preview commands.
+- Render validation pattern: run `chezmoi apply --dry-run --verbose` after changing `.tmpl` files such as `home/.chezmoi.yaml.tmpl`, `home/dot_zshrc.d/200-aliases.zsh.tmpl`, or `home/.chezmoiscripts/linux/run_once_before_216-install-wm.sh.tmpl`.
+- Diff assertion pattern: inspect `chezmoi diff` before applying changes that modify target dotfiles.
+- Apply assertion pattern: run `chezmoi apply` only after dry-run output looks correct.
+- Smoke assertion pattern: verify shell starts, zinit plugins load, and expected tools respond after apply; checklist is documented in `docs/TESTING.md`.
+- Cross-platform pattern: manually reason against guard templates in `home/.chezmoitemplates/linux/`, `home/.chezmoitemplates/darwin/`, `home/.chezmoitemplates/windows/`, `home/.chezmoitemplates/common/`, and `home/.chezmoitemplates/workplace/`.
 
-1. **Shell starts correctly**: `zsh` launches without errors
-2. **Zinit plugins load**: `zinit list` shows plugins
-3. **Tools available**: `mise`, `starship`, `zoxide`, `eza` respond to `--version`
-4. **Git configured**: `git config user.name` returns correct value
-5. **tmux works**: `tmux` starts with Catppuccin theme
-6. **Neovim works**: `nvim` starts and Navigator.nvim integration functions
-7. **AI tools accessible**: `claude`, `aider`, `opencode` commands available
+## Mocking
 
-## Missing Testing
+**Framework:** Not detected.
 
-- **No CI/CD pipeline** for automated validation
-- **No template rendering tests** (no `chezmoi execute-template` checks)
-- **No cross-OS testing** (no matrix builds)
-- **No linting** for shell scripts (no shellcheck integration)
-- **No idempotency tests** (scripts should be re-runnable but this isn't verified)
+**Patterns:**
+```bash
+# No mocking framework exists. Use dry-run and environment override variables for safe validation.
+CHEZMOI_FORCE_HEADLESS=true chezmoi apply --dry-run --verbose
+CHEZMOI_FORCE_GUI=true chezmoi apply --dry-run --verbose
+CHEZMOI_SKIP_SHELL_PROBES=true chezmoi apply --dry-run --verbose
+```
 
-## Recommendations for Future Testing
+**What to Mock:**
+- Prefer chezmoi/environment overrides for detection behavior in `home/.chezmoi.yaml.tmpl`: `CHEZMOI_PROFILE`, `CHEZMOI_FORCE_GUI`, `CHEZMOI_FORCE_HEADLESS`, `CHEZMOI_SKIP_SHELL_PROBES`, and `CI`, documented in `docs/CONFIGURATION.md`.
+- For platform-gated scripts, validate rendered inclusion/exclusion via guard templates rather than running package managers on wrong host. Relevant guards live in `home/.chezmoitemplates/linux/`, `home/.chezmoitemplates/darwin/`, `home/.chezmoitemplates/windows/`, and `home/.chezmoitemplates/workplace/`.
 
-1. **GitHub Actions CI**: Run `chezmoi apply --dry-run` on multiple OS containers
-2. **ShellCheck**: Lint all `.sh.tmpl` files for shell script best practices
-3. **Template tests**: Use `chezmoi execute-template` to validate template rendering
-4. **Docker-based tests**: Test `chezmoi init --apply` in clean containers for each OS
+**What NOT to Mock:**
+- Do not mock encrypted files by reading or copying secret material. Encrypted secret placeholders such as `home/dot_aws/encrypted_private_credentials.asc`, `home/dot_zshrc.d/encrypted_300-ai-api-keys.zsh.asc`, and `home/dot_omniroute/encrypted_dot_env.asc` should be existence-checked only.
+- Do not run package-manager install scripts against production machines as a substitute for dry-run review. Scripts like `home/.chezmoiscripts/linux/run_onchange_before_202-install-ubuntu-packages.sh.tmpl` and `home/.chezmoiscripts/linux/run_onchange_before_201-install-arch-packages.sh.tmpl` include real `sudo apt`, `sudo pacman`, `paru`, and `yay` operations.
+
+## Fixtures and Factories
+
+**Test Data:**
+```bash
+# Chezmoi data files act as fixtures for rendering package/script templates.
+home/.chezmoidata/linux/linux.wm.json
+home/.chezmoiexternals/atuin.toml.tmpl
+home/.chezmoiexternals/tmux.toml.tmpl
+home/.chezmoiexternals/i3.toml.tmpl
+```
+
+**Location:**
+- Chezmoi data fixtures: `home/.chezmoidata/`.
+- External-source fixtures/config templates: `home/.chezmoiexternals/`.
+- Environment detection and global fixture composition: `home/.chezmoi.yaml.tmpl`.
+- Shared render snippets: `home/.chezmoitemplates/`.
+
+## Coverage
+
+**Requirements:** None enforced.
+
+**View Coverage:**
+```bash
+# Not applicable: no coverage tooling configured.
+```
+
+## Test Types
+
+**Unit Tests:**
+- Not used. No function-level shell, template, or config unit tests detected.
+- Closest equivalent is rendering a focused template path with chezmoi and inspecting output/diff for files such as `home/dot_zshrc.d/200-aliases.zsh.tmpl`.
+
+**Integration Tests:**
+- Manual chezmoi integration validation is primary. Use `chezmoi apply --dry-run --verbose`, `chezmoi diff`, and `chezmoi apply` to validate interaction between `home/.chezmoi.yaml.tmpl`, `home/.chezmoidata/`, `home/.chezmoitemplates/`, and `home/.chezmoiscripts/`.
+- Installer scripts require platform-aware integration checks because they perform package installs. Examples: `home/.chezmoiscripts/darwin/run_onchange_after_501-install-darwin-packages-macports.sh.tmpl`, `home/.chezmoiscripts/linux/run_onchange_before_202-install-ubuntu-packages.sh.tmpl`, and `home/.chezmoiscripts/windows/run_onchange_before_201-install-winget-packages.ps1.tmpl`.
+
+**E2E Tests:**
+- Not automated.
+- Manual E2E is fresh-machine or clean-environment `chezmoi init --apply` followed by smoke checks from `docs/TESTING.md`.
+- Expected smoke checks include shell startup (`zsh`), zinit plugin list (`zinit list`), tool availability (`mise`, `starship`, `zoxide`, `eza`), git identity, tmux startup, Neovim startup, and AI CLI availability.
+
+## Common Patterns
+
+**Async Testing:**
+```bash
+# Not applicable. No async test framework exists.
+# For long-running install scripts, prefer dry-run/template review first and run apply only on intended platform.
+chezmoi apply --dry-run --verbose
+```
+
+**Error Testing:**
+```bash
+# Current pattern: rely on fail-fast shell and chezmoi render/apply failures.
+chezmoi apply --dry-run --verbose
+chezmoi doctor
+```
+
+**Template Testing:**
+```bash
+# Validate Go template syntax and rendered target plan.
+chezmoi apply --dry-run --verbose
+chezmoi diff
+```
+
+**Shell Script Testing:**
+```bash
+# No ShellCheck or shfmt config detected. For new scripts, run external checks manually when available.
+shellcheck path/to/rendered-script.sh
+shfmt -w path/to/rendered-script.sh
+```
+
+**Idempotency Testing:**
+```bash
+# Manual idempotency pattern for scripts and configs.
+chezmoi apply --dry-run --verbose
+chezmoi apply
+chezmoi apply --dry-run --verbose    # Should show no unexpected changes
+```
+
+---
+
+*Testing analysis: Fri Jun 12 2026*

@@ -1,150 +1,219 @@
+<!-- refreshed: 2026-06-12 -->
 # Architecture
 
-> Last mapped: 2026-05-07
+**Analysis Date:** 2026-06-12
 
-## Overview
+## System Overview
 
-This is a **cross-platform dotfiles repository** managed by [chezmoi](https://chezmoi.io), supporting macOS (Darwin), Linux (Arch, Ubuntu), Windows, and WSL. The architecture uses chezmoi's template system to generate OS-specific configurations from a single source of truth.
-
-## Architectural Pattern
-
-**Template-driven declarative configuration** with:
-- **Go templates** for conditional OS/environment logic
-- **Data-driven package management** via `.chezmoidata/`
-- **Ordered script execution** via chezmoi's `run_once_`/`run_onchange_` lifecycle hooks
-- **Age encryption** for secrets management
-- **External resources** for third-party assets (themes, plugins)
-
-## Core Layers
-
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│                     `chezmoi apply` / `chezmoi init --apply`      │
+├───────────────────────────┬──────────────────┬────────────────────┤
+│ Environment detection     │ Data selection   │ Script execution    │
+│ `home/.chezmoi.yaml.tmpl` │ `home/.chezmoidata/` │ `home/.chezmoiscripts/` │
+├───────────────────────────┴──────────────────┴────────────────────┤
+│ Template rendering, file filtering, package/install orchestration │
+├────────────────────────────────────────────────────────────────────┤
+│ Generated configs and secrets land in `$HOME`                     │
+│ `home/dot_*`, `home/private_dot_*`, `home/.chezmoitemplates/`     │
+└────────────────────────────────────────────────────────────────────┘
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    chezmoi apply                             │
-├─────────────────────────────────────────────────────────────┤
-│  1. CONFIG LAYER     .chezmoi.yaml.tmpl                     │
-│     Environment detection, feature flags, data consolidation│
-├─────────────────────────────────────────────────────────────┤
-│  2. DATA LAYER       .chezmoidata/{os}/                     │
-│     Package lists, fonts, repos, ollama models              │
-├─────────────────────────────────────────────────────────────┤
-│  3. TEMPLATE LAYER   .chezmoitemplates/{os,common,workplace}│
-│     Reusable guard scripts, helper functions                │
-├─────────────────────────────────────────────────────────────┤
-│  4. SCRIPT LAYER     .chezmoiscripts/{os}/                  │
-│     Installation hooks (run_once_, run_onchange_)           │
-├─────────────────────────────────────────────────────────────┤
-│  5. CONFIG FILES     private_dot_config/, dot_zshrc.d/, ... │
-│     Application configuration files (some templated)        │
-├─────────────────────────────────────────────────────────────┤
-│  6. EXTERNAL LAYER   .chezmoiexternals/                     │
-│     Third-party git repos, theme files, font archives       │
-├─────────────────────────────────────────────────────────────┤
-│  7. SECRETS LAYER    encrypted_*.age files                  │
-│     API keys, SSH keys, VPN certs, GPG keys                 │
-└─────────────────────────────────────────────────────────────┘
-```
+
+## Component Responsibilities
+
+| Component | Responsibility | File |
+|-----------|----------------|------|
+| Environment bootstrap | Detect OS, profile, GUI/headless state, and feature flags | `home/.chezmoi.yaml.tmpl` |
+| File filtering | Exclude OS/VPS-specific paths before rendering | `home/.chezmoiignore.tmpl` |
+| Shell entrypoint | Load ordered zsh fragments into the user shell | `home/dot_zshrc.tmpl` |
+| Script helpers | Provide shared shell boilerplate and logging | `home/.chezmoitemplates/common/script_helper` |
+| Platform installers | Install packages, runtimes, tools, and services | `home/.chezmoiscripts/linux/*.tmpl`, `home/.chezmoiscripts/unix/*.tmpl`, `home/.chezmoiscripts/darwin/*.tmpl`, `home/.chezmoiscripts/windows/*.tmpl` |
+| App configuration | Render user-facing configs for shell, tmux, wm, terminals, and AI tools | `home/dot_zshrc.d/`, `home/private_dot_config/`, `home/private_dot_mozilla/` |
+| Data inputs | Hold package lists, model definitions, repo lists, and OS-specific parameters | `home/.chezmoidata/` |
+| External assets | Pin third-party repos, themes, and plugin sources | `home/.chezmoiexternals/` |
+| Secret material | Store encrypted secrets for SSH, GPG, VPN, and API access | `home/**/encrypted_*`, `home/dot_zshrc.d/encrypted_*.age` |
+
+## Pattern Overview
+
+**Overall:** Template-driven declarative provisioning with ordered lifecycle hooks.
+
+**Key Characteristics:**
+- Use `chezmoi` templates as the single orchestration layer for OS/profile-aware setup.
+- Keep installation inputs in data files under `home/.chezmoidata/` and keep imperative work in `home/.chezmoiscripts/`.
+- Split large application configs into modular files, especially `home/dot_zshrc.d/` and `home/private_dot_config/niri/cfg/`.
+- Treat secrets as encrypted assets only; no plaintext credentials are committed.
+
+## Layers
+
+**1. Detection and feature selection:**
+- Purpose: derive runtime context and feature flags.
+- Location: `home/.chezmoi.yaml.tmpl`
+- Contains: OS detection, host/profile classification, GUI/headless checks, VPS heuristics, feature dictionaries.
+- Depends on: `chezmoi` template functions, environment variables, shell probes.
+- Used by: `.chezmoiscripts/`, templates, ignore rules, data-driven package selection.
+
+**2. Data layer:**
+- Purpose: hold declarative inputs for package and model installation.
+- Location: `home/.chezmoidata/`
+- Contains: platform package manifests, fonts, kernel lists, repo lists, Ollama model definitions.
+- Depends on: template variables exposed by `.chezmoi.yaml.tmpl`.
+- Used by: installation scripts such as `home/.chezmoiscripts/linux/run_onchange_before_201-install-arch-packages.sh.tmpl`.
+
+**3. Guard/template layer:**
+- Purpose: reuse common shell and template guards across scripts.
+- Location: `home/.chezmoitemplates/`
+- Contains: shell helper snippets and platform/workplace predicates.
+- Depends on: chezmoi template evaluation and shell execution.
+- Used by: lifecycle scripts in `home/.chezmoiscripts/`.
+
+**4. Lifecycle script layer:**
+- Purpose: perform idempotent system setup and tool installation.
+- Location: `home/.chezmoiscripts/`
+- Contains: `run_once_before_`, `run_onchange_before_`, `run_once_after_`, and `run_onchange_after_` scripts.
+- Depends on: guards from `home/.chezmoitemplates/`, package data, platform-specific package managers.
+- Used by: `chezmoi apply` during bootstrap and refresh runs.
+
+**5. Config file layer:**
+- Purpose: render end-user configuration files for shells, editors, terminals, WMs, browsers, and AI tools.
+- Location: `home/dot_zshrc.d/`, `home/private_dot_config/`, `home/private_dot_mozilla/`.
+- Contains: templates and plain configs for zsh, tmux, git, niri, kitty, wezterm, starship, Firefox, and AI tooling.
+- Depends on: environment data and secrets.
+- Used by: the user session after deployment.
+
+**6. External layer:**
+- Purpose: vendor upstream assets that are not authored locally.
+- Location: `home/.chezmoiexternals/`
+- Contains: theme sources, plugins, wallpapers, browser extras.
+- Depends on: remote git repositories and archive sources.
+- Used by: application configs that reference those assets.
+
+**7. Secrets layer:**
+- Purpose: keep sensitive data encrypted at rest.
+- Location: `home/**/encrypted_*` and `home/dot_zshrc.d/encrypted_*.age`.
+- Contains: SSH keys, GPG keys, API tokens, VPN certificates, service auth blobs.
+- Depends on: `age` and user-specific key material.
+- Used by: shell startup, auth tooling, VPN and work-profile setup.
 
 ## Data Flow
 
-```mermaid
-graph TD
-    A[chezmoi apply] --> B[.chezmoi.yaml.tmpl]
-    B --> C{Environment Detection}
-    C --> D[OS: darwin/linux/windows]
-    C --> E[Context: ephemeral/headless/interactive]
-    C --> F[Profile: personal/work]
-    C --> G[Features: sudo/systemd/ollama/i3/niri]
-    
-    D --> H[.chezmoiignore.tmpl]
-    H --> I[Filter OS-specific files]
-    
-    B --> J[Data Variables]
-    J --> K[.chezmoidata/ files]
-    K --> L[Package lists per OS]
-    K --> M[Repos to clone]
-    K --> N[Ollama models]
-    
-    I --> O[Template Rendering]
-    J --> O
-    O --> P[Generated Config Files]
-    O --> Q[Script Execution]
-    
-    Q --> R[run_once_before_*: System setup]
-    Q --> S[run_onchange_before_*: Package installs]
-    Q --> T[run_once_after_*: Tool installs]
-    Q --> U[run_onchange_after_*: Fonts, repos, models]
-```
+### Primary Provisioning Flow
 
-## Entry Points
+1. `chezmoi apply` starts from the repo root defined by `.chezmoiroot` (`.chezmoiroot`).
+2. `.chezmoi.yaml.tmpl` computes the runtime context: OS, host, profile, headless/interactive state, and feature flags (`home/.chezmoi.yaml.tmpl:14-229`).
+3. `.chezmoiignore.tmpl` removes platform or VPS-inapplicable files before rendering (`home/.chezmoiignore.tmpl:1-73`).
+4. Templates render `home/dot_*` and `home/private_dot_*` files into the target home directory.
+5. Lifecycle scripts execute in numeric order, with guards controlling whether each script runs (`home/.chezmoiscripts/linux/run_onchange_before_201-install-arch-packages.sh.tmpl:1-28`, `home/.chezmoiscripts/unix/run_once_after_503-install-mise.sh.tmpl:1-58`).
+6. Generated configs, shell fragments, and installed tools are available to the session.
 
-### Primary: `chezmoi apply`
-The main entry point. Reads `.chezmoi.yaml.tmpl`, detects environment, renders templates, executes scripts.
+### Shell Initialization Flow
 
-### Configuration Entry: `.chezmoi.yaml.tmpl`
-The most critical file — performs extensive environment detection:
+1. `home/dot_zshrc.tmpl` sets `ZDOTDIR=$HOME` and sources `~/.zshrc.d/*.zsh` in lexical order (`home/dot_zshrc.tmpl:3-11`).
+2. Numbered fragments in `home/dot_zshrc.d/` layer environment variables, plugins, aliases, integrations, and secrets.
+3. Late fragments enable tool integrations such as `mise`, `zoxide`, `direnv`, `starship`, `ollama`, and `openclaude`.
 
-1. **CI detection** — GitHub Actions, GitLab CI, Travis, CircleCI, Jenkins, Buildkite, Drone
-2. **Cloud IDE detection** — Codespaces, Gitpod, Replit
-3. **Container detection** — Docker, Podman, LXC, Distrobox, Lima, Kubernetes
-4. **Display detection** — X11, Wayland, WSL GUI probe
-5. **Profile determination** — personal vs work (based on hostname)
-6. **Feature flags** — sudo, systemd, kernels, ollama mode, window managers
+### Linux Package Install Flow
 
-### Shell Entry: `dot_zshrc.tmpl`
-Sources all numbered files from `dot_zshrc.d/` directory in order.
+1. Linux-only scripts check platform and workplace guards before doing work (`home/.chezmoiscripts/linux/run_onchange_before_201-install-arch-packages.sh.tmpl:3-8`).
+2. Package lists are read from `.chezmoidata/linux/packages/archlinux.yaml` or the relevant OS file.
+3. Package managers install core, extra, multilib, and AUR packages through `pacman`, `paru`, or `yay` (`home/.chezmoiscripts/linux/run_onchange_before_201-install-arch-packages.sh.tmpl:13-24`).
+4. Follow-up scripts install runtime tools, fonts, and services after package provisioning.
+
+### Niri Configuration Flow
+
+1. `home/private_dot_config/niri/config.kdl` acts as the top-level entrypoint.
+2. It includes modular config slices from `home/private_dot_config/niri/cfg/` (`home/private_dot_config/niri/config.kdl:6-13`).
+3. The include-based design keeps keybinds, rules, layout, display, input, animations, and misc settings independently editable.
+
+**State Management:**
+- State is mostly declarative and idempotent.
+- Mutable state exists only where tools need caches, generated completions, or runtime stores under `$HOME`.
+- Feature flags in `.chezmoi.yaml.tmpl` drive whether scripts and configs appear at all.
 
 ## Key Abstractions
 
-### Template Guards (`.chezmoitemplates/`)
-Reusable template snippets used as guards in scripts:
+**Environment flags:**
+- Purpose: centralize machine classification and feature gating.
+- Examples: `home/.chezmoi.yaml.tmpl`.
+- Pattern: compute booleans and dictionaries once, then reuse in templates and scripts.
 
-| Guard | Purpose | Location |
-|-------|---------|----------|
-| `script_helper` | Common helper functions | `common/script_helper` |
-| `script_eval_mise` | Mise activation | `common/script_eval_mise` |
-| `script_is_not_ephemeral` | Skip in CI/containers | `common/script_is_not_ephemeral` |
-| `script_is_not_headless` | Skip without GUI | `common/script_is_not_headless` |
-| `script_validate_completions_path` | Ensure completions dir | `common/script_validate_completions_path` |
-| `script_linux_only` | Skip on non-Linux | `linux/script_linux_only` |
-| `script_arch_based_only` | Skip on non-Arch | `linux/script_arch_based_only` |
-| `script_ubuntu_only` | Skip on non-Ubuntu | `linux/script_ubuntu_only` |
-| `script_darwin_only` | Skip on non-macOS | `darwin/script_darwin_only` |
-| `script_windows_only` | Skip on non-Windows | `windows/script_windows_only` |
-| `script_is_zup` | Work (Zup) environment | `workplace/script_is_zup` |
-| `script_is_not_zup` | Not work environment | `workplace/script_is_not_zup` |
-| `script_is_instivo` | Instivo work context | `workplace/script_is_instivo` |
+**Lifecycle scripts:**
+- Purpose: isolate imperative bootstrapping from config rendering.
+- Examples: `home/.chezmoiscripts/linux/run_onchange_before_201-install-arch-packages.sh.tmpl`, `home/.chezmoiscripts/unix/run_once_after_503-install-mise.sh.tmpl`.
+- Pattern: idempotent `run_once_` and `run_onchange_` scripts with guards and `set -euo pipefail`.
 
-### Script Naming Convention
-Scripts use a numeric ordering scheme:
+**Template guards:**
+- Purpose: share platform/workplace checks across scripts.
+- Examples: `home/.chezmoitemplates/common/script_helper`, `home/.chezmoitemplates/linux/script_arch_based_only`, `home/.chezmoitemplates/workplace/script_is_not_zup`.
+- Pattern: small include-only snippets used through `{{ template "..." . }}`.
 
-| Range | Phase | Timing |
-|-------|-------|--------|
-| 100-199 | System-level setup (kernels, swap, drivers, package managers) | `run_once_before_` |
-| 200-299 | Package installation & basic config | `run_once_before_` / `run_onchange_before_` |
-| 500-599 | Tool installation (ollama, mise, AI CLIs, VPN) | `run_once_after_` / `run_onchange_after_` |
-| 600-699 | Configuration & repo cloning | `run_onchange_after_` / `run_once_after_` |
+**Modular app configs:**
+- Purpose: keep complex application configuration decomposed.
+- Examples: `home/dot_zshrc.d/`, `home/private_dot_config/niri/cfg/`.
+- Pattern: one concern per file, ordered by numeric prefix or explicit `include` statements.
 
-### Modular Application Configurations
-For complex applications, configurations are split into modular components rather than monolithic files:
-- **Niri WM**: `private_dot_config/niri/config.kdl` includes modular files from `cfg/` (e.g., `autostart.kdl`, `keybinds.kdl`, `rules.kdl`).
-- **Zsh**: The `dot_zshrc.d/` directory pattern breaks the monolithic shell config into 20+ purpose-specific files.
-- **Firefox Profiles**: Templated `profiles.ini.tmpl` and `user.js.tmpl` to manage browser environments cleanly.
+**Declarative package data:**
+- Purpose: separate package choices from install logic.
+- Examples: `home/.chezmoidata/linux/packages/archlinux.yaml`, `home/.chezmoidata/ollama.yaml`, `home/.chezmoidata/repos.json`.
+- Pattern: scripts iterate over data collections rather than hard-coding package names.
 
-### Reproducible Dev Environments
-Instead of relying on global package installations for project dependencies, the dotfiles leverage **Nix Flakes** and **Devenv** (`private_dot_local/private_share/environments/`). This provides isolated, declarative development environments for specific microservices and languages (Java, PHP, Node, Python).
+## Entry Points
 
-### chezmoi File Naming
-Uses chezmoi's naming conventions for file attributes:
-- `dot_` → `.` (hidden files)
-- `private_` → file permissions restricted
-- `encrypted_` → decrypted at apply time with age
-- `readonly_` → read-only permissions
-- `.tmpl` suffix → processed as Go template
+**Primary bootstrap:**
+- Location: `chezmoi init --apply`, `chezmoi apply`
+- Triggers: first install, re-apply after changes, refresh of generated home files.
+- Responsibilities: render templates, execute lifecycle hooks, manage source-to-home deployment.
 
-## Security Model
+**Environment config:**
+- Location: `home/.chezmoi.yaml.tmpl`
+- Triggers: every apply/init.
+- Responsibilities: detect runtime context, define feature flags, expose data consumed elsewhere.
 
-- **Encryption**: age with a local identity key + recipient public key
-- **Encrypted assets**: API keys, SSH keys, GPG keys, VPN certificates, service credentials
-- **17 encrypted `.age` files** in the repo
-- **No plaintext secrets** in version control
-- **Workplace guard templates** isolate work-specific configs
+**Shell startup:**
+- Location: `home/dot_zshrc.tmpl`
+- Triggers: interactive zsh sessions.
+- Responsibilities: source `home/dot_zshrc.d/*.zsh.tmpl` fragments in order.
+
+**Niri startup config:**
+- Location: `home/private_dot_config/niri/config.kdl`
+- Triggers: Niri session startup.
+- Responsibilities: assemble modular Wayland compositor config.
+
+## Architectural Constraints
+
+- **Threading:** single-process, sequential provisioning; no concurrent installer orchestration is defined.
+- **Global state:** machine classification lives in `.chezmoi.yaml.tmpl` and is reused across files via `.settings` and `.features`.
+- **Circular imports:** none detected in template includes; the modular configs use one-way inclusion.
+- **Platform gating:** platform- and workplace-specific files must remain behind `home/.chezmoiignore.tmpl` and template guards.
+
+## Anti-Patterns
+
+### Hard-coding package names in scripts
+
+**What happens:** package choices are embedded directly in shell scripts.
+**Why it's wrong:** it duplicates platform data and makes Arch/Debian/macOS variants harder to maintain.
+**Do this instead:** read package lists from `home/.chezmoidata/linux/packages/archlinux.yaml` and similar data files.
+
+### Putting platform checks directly in config fragments
+
+**What happens:** application config files attempt to re-detect OS or profile.
+**Why it's wrong:** it spreads environment logic across many files and makes behavior inconsistent.
+**Do this instead:** centralize gating in `home/.chezmoi.yaml.tmpl` and `home/.chezmoiignore.tmpl`, then keep fragments focused on one application.
+
+## Error Handling
+
+**Strategy:** fail fast in scripts, skip cleanly in unsupported environments, and keep templates best-effort.
+
+**Patterns:**
+- Shell scripts start with `set -euo pipefail` or equivalent helper behavior (`home/.chezmoitemplates/common/script_helper`).
+- Guards block execution on unsupported platforms or workplace profiles before any destructive work.
+- Templates use environment detection and defaulting to avoid hard failures during rendering.
+
+## Cross-Cutting Concerns
+
+**Logging:** shell scripts print colored status messages through `info`, `warn`, `error`, and `success` from `home/.chezmoitemplates/common/script_helper`.
+**Validation:** `home/.chezmoi.yaml.tmpl` validates runtime context through probes and feature flags before emitting dependent values.
+**Authentication:** secrets and auth material are encrypted in repo and decrypted on apply; external auth-config files live under `home/private_dot_*` and `home/dot_zshrc.d/`.
+
+---
+
+*Architecture analysis: 2026-06-12*
