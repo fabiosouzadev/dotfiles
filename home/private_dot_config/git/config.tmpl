@@ -1,16 +1,33 @@
-[user]
-	name       = Fabio Souza
-	email      = 1536954+fabiosouzadev@users.noreply.github.com
-	signingkey = F587673EDB1A5C95
+{{- if eq .settings.workplace "Zup"}}
+[include]
+	path = ~/.config/git/config.zup.inc
 
-[core]
-	sshCommand = "ssh -i $HOME/.ssh/id_ed25519_personal"
+[includeIf "gitdir:{{.dirs.workspaces.personal}}/"]
+	path = ~/.config/git/config.personal.inc
+
+[includeIf "gitdir:{{.dirs.workspaces.others}}/"]
+	path = ~/.config/git/config.personal.inc
+
+[includeIf "gitdir:{{.chezmoi.sourceDir}}/"]
+	path = ~/.config/git/config.personal.inc
+
+{{ else if .settings.vps -}}
+[include]
+	path = ~/.config/git/config.vps.inc
+{{ else -}}
+
+[include]
+	path = ~/.config/git/config.personal.inc
+{{- end }}
 
 [commit]
     gpgsign = true
 
 [tag]
     gpgSign = true
+
+[gpg]
+    program = {{ .gpg.program }}
 
 [color]
 	ui = true
@@ -39,12 +56,6 @@
 	prune  = true
 	rebase = true
 
-{{/*
-[merge]
-	tool = "nvimdiff"
-	conflictStyle = zdiff3
-*/}}
-
 [pull]
 	rebase = true
 
@@ -60,26 +71,4 @@
 [diff]
 	colorMoved = "zebra"
 
-[gpg]
-	program = "{{ .gpg.program }}"
 
-
-{{ if eq .settings.workplace "Zup" -}}
-
-{{/* Git > 2.36 hasconfig not working 
-[includeIf "hasconfig:remote.*.url:ssh://git@gitdev.clarobrasil.mobi/*"]
-    path = ~/.config/git/config.zup.inc
-*/}}
-
-[includeIf "gitdir:{{.dirs.workspaces.zup}}/"]
-    path = ~/.config/git/config.zup.inc
-
-[include]
-	path = ~/.config/git/config.zup.inc
-
-{{ end -}}
-
-{{ if .settings.vps -}}
-[include]
-	path = ~/.config/git/config.vps.inc
-{{ end -}}
