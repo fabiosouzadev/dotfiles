@@ -3,13 +3,13 @@
 	path = ~/.config/git/config.zup.inc
 
 [includeIf "gitdir:{{.dirs.workspaces.personal}}/"]
-	path = ~/.config/git/config.personal-ssh.inc.tmpl
+	path = ~/.config/git/config.personal-ssh.inc
 
 [includeIf "gitdir:{{.dirs.workspaces.others}}/"]
-	path = ~/.config/git/config.personal-ssh.inc.tmpl
+	path = ~/.config/git/config.personal-ssh.inc
 
 [includeIf "gitdir:{{.chezmoi.config.sourceDir}}/"]
-	path = ~/.config/git/config.personal-ssh.inc.tmpl
+	path = ~/.config/git/config.personal-ssh.inc
 {{- 	else if .settings.vps -}}
 [include]
 	path = ~/.config/git/config.vps.inc
