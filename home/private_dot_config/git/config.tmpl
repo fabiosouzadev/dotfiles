@@ -1,21 +1,19 @@
-{{- if eq .settings.workplace "Zup"}}
+{{- if eq .settings.workplace "Zup" -}}
 [include]
 	path = ~/.config/git/config.zup.inc
 
 [includeIf "gitdir:{{.dirs.workspaces.personal}}/"]
-	path = ~/.config/git/config.personal.inc
+	path = ~/.config/git/config.personal-ssh.inc.tmpl
 
 [includeIf "gitdir:{{.dirs.workspaces.others}}/"]
-	path = ~/.config/git/config.personal.inc
+	path = ~/.config/git/config.personal-ssh.inc.tmpl
 
-[includeIf "gitdir:{{.chezmoi.sourceDir}}/"]
-	path = ~/.config/git/config.personal.inc
-
-{{ else if .settings.vps -}}
+[includeIf "gitdir:{{.chezmoi.config.sourceDir}}/"]
+	path = ~/.config/git/config.personal-ssh.inc.tmpl
+{{- 	else if .settings.vps -}}
 [include]
 	path = ~/.config/git/config.vps.inc
-{{ else -}}
-
+{{- 	else -}}
 [include]
 	path = ~/.config/git/config.personal.inc
 {{- end }}
@@ -70,5 +68,3 @@
 
 [diff]
 	colorMoved = "zebra"
-
-
