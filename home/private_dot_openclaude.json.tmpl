@@ -1,19 +1,23 @@
-{{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
+{{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
 {
   "numStartups": 3,
   "installMethod": "native",
   "autoUpdates": false,
   "tipsHistory": {
     "atomic-setup-local": 3,
-    "new-user-warmup": 3
+    "new-user-warmup": 3,
+    "plan-mode-for-complex-tasks": 4,
+    "terminal-setup": 4,
+    "memory-command": 4,
+    "theme-command": 4
   },
   "providerProfiles": [
     {
       "id": "provider_61936244356f",
       "name": "Omniroute",
       "provider": "custom",
-      "baseUrl": "http://localhost:20128/v1",
-      "model": "fr-prod/gpt-5.5",
+      "baseUrl": "http://157.151.13.223/v1",
+      "model": "free",
       "apiKey": "{{ include $omniroute_key | decrypt | trim }}",
       "apiFormat": "chat_completions"
     }
@@ -21,8 +25,8 @@
   "openaiAdditionalModelOptionsCacheByProfile": {
     "provider_61936244356f": [
       {
-        "value": "fr-prod/gpt-5.5",
-        "label": "fr-prod/gpt-5.5",
+        "value": "free",
+        "label": "free",
         "description": "Provider: Omniroute"
       }
     ]
@@ -34,6 +38,7 @@
   "migrationVersion": 11,
   "githubRepoPaths": {
     "fabiosouzadev/dotfiles": [
+      "/home/fabio.souza/.local/share/chezmoi",
       "/Users/fabiosouzadev/.local/share/chezmoi"
     ]
   },
@@ -83,13 +88,75 @@
         "frame_duration_ms_p95": 5.937190600005532,
         "frame_duration_ms_p99": 9.675672580001079
       }
+    },
+    "/home/fabio.souza/.local/share/chezmoi": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 0,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesApprovedForUser": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "hasClaudeMdExternalIncludesWarningShownForUser": false,
+      "exampleFiles": [
+        "config.tmpl",
+        "encrypted_300-ai-api-keys.zsh.asc",
+        "opencode.json.tmpl",
+        ".chezmoi.yaml.tmpl",
+        "agentmemory.service.tmpl"
+      ],
+      "exampleFilesGeneratedAt": 1781625385967,
+      "lastCost": 0.135849,
+      "lastAPIDuration": 6493,
+      "lastAPIDurationWithoutRetries": 6490,
+      "lastToolDuration": 0,
+      "lastDuration": 106429,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 26795,
+      "lastTotalOutputTokens": 34,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 2048,
+      "lastTotalWebSearchRequests": 0,
+      "lastFpsAverage": 3.7,
+      "lastFpsLow1Pct": 311.46,
+      "lastModelUsage": {
+        "free": {
+          "inputTokens": 26795,
+          "outputTokens": 34,
+          "cacheReadInputTokens": 2048,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.135849
+        }
+      },
+      "lastSessionId": "592927ac-9b86-4340-bb45-3303984135e4",
+      "lastSessionMetrics": {
+        "frame_duration_ms_count": 433,
+        "frame_duration_ms_min": 0.045903999998699874,
+        "frame_duration_ms_max": 8.762046000000055,
+        "frame_duration_ms_avg": 0.5756190531177704,
+        "frame_duration_ms_p50": 0.4870570000002772,
+        "frame_duration_ms_p95": 1.3935791999952925,
+        "frame_duration_ms_p99": 3.1004047999987985,
+        "hook_duration_ms_count": 1,
+        "hook_duration_ms_min": 151,
+        "hook_duration_ms_max": 151,
+        "hook_duration_ms_avg": 151,
+        "hook_duration_ms_p50": 151,
+        "hook_duration_ms_p95": 151,
+        "hook_duration_ms_p99": 151
+      }
     }
   },
   "activeProviderProfileId": "provider_61936244356f",
   "openaiAdditionalModelOptionsCache": [
     {
-      "value": "fr-prod/gpt-5.5",
-      "label": "fr-prod/gpt-5.5",
+      "value": "free",
+      "label": "free",
       "description": "Provider: Omniroute"
     }
   ],

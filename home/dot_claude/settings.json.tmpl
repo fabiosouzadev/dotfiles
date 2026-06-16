@@ -1,12 +1,13 @@
 {
   "env": {
-    {{ $api_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
-    "ANTHROPIC_BASE_URL": "http://localhost:20128",
-    "ANTHROPIC_AUTH_TOKEN": "{{ include $api_key| decrypt | trim }}",
-    "ANTHROPIC_MODEL": "fr-claude/claude-opus-4-8",
-    "ANTHROPIC_SMALL_FAST_MODEL": "fr-claude/claude-haiku-4-5-20251001",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "fr-claude/claude-opus-4-8",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "fr-claude/claude-sonnet-4-6",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "fr-claude/claude-haiku-4-5-20251001"
-  }
+    {{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
+    "ANTHROPIC_BASE_URL": "http://157.151.13.223/v1",
+    "ANTHROPIC_AUTH_TOKEN": "{{ include $omniroute_key | decrypt | trim }}",
+    "ANTHROPIC_MODEL": "free",
+    "ANTHROPIC_SMALL_FAST_MODEL": "free",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "free",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "free",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "free"
+  },
+  "theme": "dark"
 }
