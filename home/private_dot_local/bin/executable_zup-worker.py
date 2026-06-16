@@ -2,6 +2,7 @@
 import http.server
 import json
 import os
+import shlex
 import subprocess
 import time
 from pathlib import Path
@@ -12,23 +13,17 @@ ALLOWED_BASE = Path(os.environ.get("ZUP_WORKER_ALLOWED_BASE", "/home/fabio.souza
 TOKEN = os.environ.get("ZUP_WORKER_TOKEN", "")
 GPG_KEY = os.environ.get("ZUP_AGENT_GPG_KEY", "232EFD8553CB22E5")
 MAX_TIMEOUT = int(os.environ.get("ZUP_WORKER_MAX_TIMEOUT", "1800"))
+MAX_DIFF_CHARS = int(os.environ.get("ZUP_WORKER_MAX_DIFF_CHARS", "120000"))
+
+
+def shell_cd(repo, command):
+    return ["bash", "-lc", f"cd {shlex.quote(repo)} && {command}"]
+
 
 AGENTS = {
-    "opencode": lambda prompt, d, repo: [
-        "bash",
-        "-lc",
-        f"cd {repo!s} && opencode run {prompt!r}",
-    ],
-    "claude": lambda prompt, d, repo: [
-        "bash",
-        "-lc",
-        f"cd {repo!s} && claude -p {prompt!r} --max-turns {int(d.get('max_turns', 12))}",
-    ],
-    "codex": lambda prompt, d, repo: [
-        "bash",
-        "-lc",
-        f"cd {repo!s} && codex exec --full-auto {prompt!r}",
-    ],
+    "opencode": lambda prompt, d, repo: shell_cd(repo, f"opencode run {shlex.quote(prompt)}"),
+    "claude": lambda prompt, d, repo: shell_cd(repo, f"claude -p {shlex.quote(prompt)} --max-turns {int(d.get('max_turns', 12))}"),
+    "codex": lambda prompt, d, repo: shell_cd(repo, f"codex exec --full-auto {shlex.quote(prompt)}"),
 }
 
 
@@ -42,13 +37,48 @@ def response(handler, code, payload):
 
 
 def authed(handler):
-    if not TOKEN:
-        return False
-    return handler.headers.get("Authorization") == f"Bearer {TOKEN}"
+    return bool(TOKEN) and handler.headers.get("Authorization") == f"Bearer {TOKEN}"
+
+
+def run_cmd(cmd, repo_path, env, timeout=60):
+    return subprocess.run(cmd, cwd=str(repo_path), env=env, text=True, capture_output=True, timeout=timeout)
+
+
+def git_info(repo_path, env):
+    def git(args, timeout=60):
+        proc = run_cmd(["git", *args], repo_path, env, timeout=timeout)
+        return {
+            "exit_code": proc.returncode,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+        }
+
+    inside = git(["rev-parse", "--is-inside-work-tree"])
+    if inside["exit_code"] != 0 or inside["stdout"].strip() != "true":
+        return {"is_git_repo": False, "error": inside}
+
+    status = git(["status", "--short"])
+    changed = git(["diff", "--name-only", "HEAD", "--"])
+    stat = git(["diff", "--stat", "HEAD", "--"])
+    diff = git(["diff", "--binary", "HEAD", "--"], timeout=120)
+    diff_text = diff["stdout"]
+    truncated = False
+    if len(diff_text) > MAX_DIFF_CHARS:
+        diff_text = diff_text[:MAX_DIFF_CHARS] + "\n\n[TRUNCATED: diff exceeded ZUP_WORKER_MAX_DIFF_CHARS]"
+        truncated = True
+
+    return {
+        "is_git_repo": True,
+        "status_short": status["stdout"],
+        "changed_files": [x for x in changed["stdout"].splitlines() if x.strip()],
+        "diff_stat": stat["stdout"],
+        "diff": diff_text,
+        "diff_truncated": truncated,
+    }
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    server_version = "ZupWorker/1.0"
+    server_version = "ZupWorker/1.1"
 
     def log_message(self, format, *args):
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {self.client_address[0]} {format % args}", flush=True)
@@ -60,10 +90,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return response(self, 403, {"error": "forbidden"})
         return response(self, 200, {
             "ok": True,
+            "version": self.server_version,
             "host": os.uname().nodename,
             "allowed_base": str(ALLOWED_BASE),
             "agents": sorted(AGENTS.keys()),
             "gpg_key": GPG_KEY,
+            "features": ["git_status", "diff", "diff_stat", "changed_files"],
         })
 
     def do_POST(self):
@@ -81,6 +113,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         prompt = data.get("prompt")
         repo = data.get("repo")
         agent = data.get("agent", "opencode")
+        include_diff = bool(data.get("include_diff", True))
         if not prompt or not repo:
             return response(self, 400, {"error": "missing_required", "required": ["repo", "prompt"]})
         if agent not in AGENTS:
@@ -107,8 +140,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         })
 
         start = time.time()
+        before = git_info(repo_path, env) if include_diff else None
         try:
             proc = subprocess.run(cmd, cwd=str(repo_path), env=env, text=True, capture_output=True, timeout=timeout)
+            after = git_info(repo_path, env) if include_diff else None
             result = {
                 "exit_code": proc.returncode,
                 "duration_sec": round(time.time() - start, 2),
@@ -117,9 +152,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "cmd": cmd[:2] + ["<prompt>"],
                 "stdout": proc.stdout,
                 "stderr": proc.stderr,
+                "git_before": before,
+                "git_after": after,
+                "dirty": bool(after and after.get("status_short")),
             }
             return response(self, 200, result)
         except subprocess.TimeoutExpired as e:
+            after = git_info(repo_path, env) if include_diff else None
             return response(self, 504, {
                 "error": "timeout",
                 "timeout": timeout,
@@ -127,6 +166,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 "repo": str(repo_path),
                 "stdout": e.stdout or "",
                 "stderr": e.stderr or "",
+                "git_before": before,
+                "git_after": after,
+                "dirty": bool(after and after.get("status_short")),
             })
         except Exception as e:
             return response(self, 500, {"error": "execution_failed", "detail": str(e)})
