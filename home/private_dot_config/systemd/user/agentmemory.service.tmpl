@@ -1,0 +1,15 @@
+[Unit]
+Description=agentmemory — Persistent memory server for AI coding agents
+Documentation=https://github.com/rohitg00/agentmemory
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=NODE_ENV=production
+ExecStart=%h/.local/share/mise/shims/agentmemory
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# vim: filetype=bash
+# chezmoi: run_once_after_530-install-camofox.sh.tmpl
+# Instala o Camofox-browser localmente
+
+set -euo pipefail
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "linux/script_linux_only" . }}
+{{ template "common/script_helper" . }}
+
+{{ if not .features.ai.camofox.install }}
+info ">> Camofox: not needed, skipping <<"
+exit 0
+{{ end }}
+
+CAMOFOX_DIR="$HOME/camofox"
+
+if [[ -d "$CAMOFOX_DIR/node_modules" ]]; then
+    info "Camofox already installed, skipping."
+    exit 0
+fi
+
+info ">> Installing Camofox-browser <<"
+
+mkdir -p "$CAMOFOX_DIR"
+cd "$CAMOFOX_DIR"
+
+if [[ ! -f package.json ]]; then
+    npm init -y
+fi
+
+npm install camofox-browser@latest
+
+systemctl --user daemon-reload
+systemctl --user enable --now camofox.service || true
+
+success "Camofox installed and service started."

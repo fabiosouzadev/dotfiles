@@ -219,6 +219,16 @@ Headless:
       "gateway"  false
       "telegram" false
     )
+
+    "camofox" (dict
+      "install" $isVps
+      "mode"    (ternary "vps-daemon" "local" $isVps)
+    )
+
+    "agentmemory" (dict
+      "install" $isVps
+      "mode"    (ternary "vps-daemon" "local" $isVps)
+    )
   )
 
   "networking" (dict

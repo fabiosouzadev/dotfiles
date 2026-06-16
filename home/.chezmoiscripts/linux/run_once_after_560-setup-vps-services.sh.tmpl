@@ -32,6 +32,16 @@ info "Installing Hermes Gateway systemd service"
 systemctl --user enable --now hermes-gateway.service || true
 {{ end }}
 
+{{ if .features.ai.camofox.install }}
+info "Starting Camofox Service"
+systemctl --user enable --now camofox.service || true
+{{ end }}
+
+{{ if .features.ai.agentmemory.install }}
+info "Starting Agentmemory Service"
+systemctl --user enable --now agentmemory.service || true
+{{ end }}
+
 {{ if .features.ai.openclaw.gateway }}
 info "Starting OpenClaw Gateway Service"
 # Note: openclaw gateway creates 'openclaw-gateway.service'
