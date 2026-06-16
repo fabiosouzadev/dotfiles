@@ -1,1 +1,1 @@
-{{ include (joinPath .chezmoi.sourceDir "home" "private_dot_zup-worker" "encrypted_token.txt.asc") | decrypt | trim }}
+{{ include (joinPath .chezmoi.sourceDir "private_dot_zup-worker" "encrypted_token.txt.asc") | decrypt | trim }}
