@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -euo pipefail
 
-WORKER_DIR="/home/fabio.souza/Workspaces/Zup"
+WORKER_DIR="/home/fabio.souza/Workspaces/Work/Zup"
 WORKER_BIN="$HOME/.local/bin/zup-worker.py"
 export ZUP_WORKER_ALLOWED_BASE="${ZUP_WORKER_ALLOWED_BASE:-$WORKER_DIR}"
 export ZUP_WORKER_PORT="${ZUP_WORKER_PORT:-9001}"

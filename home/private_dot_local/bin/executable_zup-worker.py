@@ -8,7 +8,7 @@ from pathlib import Path
 
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("ZUP_WORKER_PORT", "9001"))
-ALLOWED_BASE = Path(os.environ.get("ZUP_WORKER_ALLOWED_BASE", "/home/fabio.souza/Workspaces/Zup")).resolve()
+ALLOWED_BASE = Path(os.environ.get("ZUP_WORKER_ALLOWED_BASE", "/home/fabio.souza/Workspaces/Work/Zup")).resolve()
 TOKEN = os.environ.get("ZUP_WORKER_TOKEN", "")
 GPG_KEY = os.environ.get("ZUP_AGENT_GPG_KEY", "232EFD8553CB22E5")
 MAX_TIMEOUT = int(os.environ.get("ZUP_WORKER_MAX_TIMEOUT", "1800"))
