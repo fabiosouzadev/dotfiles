@@ -24,7 +24,7 @@ def shell_cd(repo: str, command: str) -> list[str]:
 
 AGENTS = {
     "opencode": lambda prompt, d, repo: shell_cd(repo, f"opencode run {shlex.quote(prompt)}"),
-    "claude": lambda prompt, d, repo: shell_cd(repo, f"claude -p {shlex.quote(prompt)} --max-turns {int(d.get('max_turns', 12))}"),
+    "openclaude": lambda prompt, d, repo: shell_cd(repo, f"openclaude -p {shlex.quote(prompt)} --max-turns {int(d.get('max_turns', 12))}"),
     "codex": lambda prompt, d, repo: shell_cd(repo, f"codex exec --full-auto {shlex.quote(prompt)}"),
 }
 
