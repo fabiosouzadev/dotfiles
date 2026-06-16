@@ -14,9 +14,24 @@ GPG_KEY = os.environ.get("ZUP_AGENT_GPG_KEY", "232EFD8553CB22E5")
 MAX_TIMEOUT = int(os.environ.get("ZUP_WORKER_MAX_TIMEOUT", "1800"))
 
 AGENTS = {
-    "opencode": lambda prompt, d: ["opencode", "run", prompt],
-    "claude": lambda prompt, d: ["claude", "-p", prompt, "--max-turns", str(int(d.get("max_turns", 12)))],
-    "codex": lambda prompt, d: ["codex", "exec", "--full-auto", prompt],
+    "opencode": lambda prompt, d, repo: [
+        "opencode",
+        "run",
+        f"You are already inside the repository at {repo}. Stay in this repository. Do not switch directories. First confirm your current working directory, then execute the task: {prompt}",
+    ],
+    "claude": lambda prompt, d, repo: [
+        "claude",
+        "-p",
+        f"You are already inside the repository at {repo}. Stay in this repository. First confirm your current working directory, then execute the task: {prompt}",
+        "--max-turns",
+        str(int(d.get("max_turns", 12))),
+    ],
+    "codex": lambda prompt, d, repo: [
+        "codex",
+        "exec",
+        "--full-auto",
+        f"You are already inside the repository at {repo}. Stay in this repository. First confirm your current working directory, then execute the task: {prompt}",
+    ],
 }
 
 
@@ -81,7 +96,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return response(self, 400, {"error": "repo_not_found", "repo": str(repo_path)})
 
         timeout = min(int(data.get("timeout", 900)), MAX_TIMEOUT)
-        cmd = AGENTS[agent](prompt, data)
+        cmd = AGENTS[agent](prompt, data, str(repo_path))
 
         env = os.environ.copy()
         env.update({
