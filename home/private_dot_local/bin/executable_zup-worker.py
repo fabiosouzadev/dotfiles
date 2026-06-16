@@ -15,22 +15,19 @@ MAX_TIMEOUT = int(os.environ.get("ZUP_WORKER_MAX_TIMEOUT", "1800"))
 
 AGENTS = {
     "opencode": lambda prompt, d, repo: [
-        "opencode",
-        "run",
-        f"You are already inside the repository at {repo}. Stay in this repository. Do not switch directories. First confirm your current working directory, then execute the task: {prompt}",
+        "bash",
+        "-lc",
+        f"cd {repo!s} && opencode run {prompt!r}",
     ],
     "claude": lambda prompt, d, repo: [
-        "claude",
-        "-p",
-        f"You are already inside the repository at {repo}. Stay in this repository. First confirm your current working directory, then execute the task: {prompt}",
-        "--max-turns",
-        str(int(d.get("max_turns", 12))),
+        "bash",
+        "-lc",
+        f"cd {repo!s} && claude -p {prompt!r} --max-turns {int(d.get('max_turns', 12))}",
     ],
     "codex": lambda prompt, d, repo: [
-        "codex",
-        "exec",
-        "--full-auto",
-        f"You are already inside the repository at {repo}. Stay in this repository. First confirm your current working directory, then execute the task: {prompt}",
+        "bash",
+        "-lc",
+        f"cd {repo!s} && codex exec --full-auto {prompt!r}",
     ],
 }
 
