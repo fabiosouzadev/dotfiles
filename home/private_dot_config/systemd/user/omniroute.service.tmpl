@@ -9,10 +9,10 @@ Type=simple
 Environment=HOST=0.0.0.0
 {{- end }}
 Environment=NODE_ENV=production
-ExecStart=%h/.local/share/mise/shims/omniroute
+ExecStart=$HOME/.local/share/mise/shims/omniroute
 Restart=on-failure
 RestartSec=5
-WorkingDirectory=%h/.omniroute
+WorkingDirectory=$HOME/.omniroute
 
 [Install]
 WantedBy=default.target

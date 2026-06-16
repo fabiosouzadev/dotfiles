@@ -8,10 +8,10 @@ Wants=network-online.target
 Type=simple
 Environment=NODE_ENV=production
 Environment=CAMOFOX_PORT=3030
-ExecStart=%h/.local/share/mise/shims/node %h/camofox/node_modules/camofox-browser/dist/src/server.js
+ExecStart=$HOME/.local/share/mise/shims/node %h/camofox/node_modules/camofox-browser/dist/src/server.js
 Restart=on-failure
 RestartSec=10
-WorkingDirectory=%h/camofox
+WorkingDirectory=$HOME/camofox
 
 [Install]
 WantedBy=default.target

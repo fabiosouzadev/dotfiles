@@ -7,7 +7,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 Environment=NODE_ENV=production
-ExecStart=%h/.local/share/mise/shims/agentmemory
+ExecStart=$HOME/.local/share/mise/shims/agentmemory
 Restart=on-failure
 RestartSec=5
 
