@@ -7,7 +7,7 @@ StartLimitIntervalSec=0
 [Service]
 Type=simple
 ExecStart={{ .chezmoi.homeDir }}/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main gateway run
-WorkingDirectory="{{ .chezmoi.homeDir }}/.hermes"
+WorkingDirectory={{ .chezmoi.homeDir }}/.hermes
 Environment="PATH={{ .chezmoi.homeDir }}/.hermes/hermes-agent/venv/bin:{{ .chezmoi.homeDir }}/.hermes/hermes-agent/node_modules/.bin:/usr/bin:{{ .chezmoi.homeDir }}/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 Environment="VIRTUAL_ENV={{ .chezmoi.homeDir }}/.hermes/hermes-agent/venv"
 Environment="HERMES_HOME={{ .chezmoi.homeDir }}/.hermes"
