@@ -29,6 +29,10 @@
               {
                 "repo": "git@gitdev.clarobrasil.mobi:devops/core-flex/flex-suspension-ms.git",
                 "path": "flex-suspension-ms"
+              },
+              {
+                "repo": "git@gitdev.clarobrasil.mobi:devops/core-flex/bff-core-flex-service.git",
+                "path": "bff-core-flex-service"
               }
             ]
          }
