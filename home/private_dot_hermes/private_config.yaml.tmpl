@@ -5,9 +5,10 @@ model:
   api_key: ${OMNIROUTE_API_KEY}
 providers:
   custom:
-    api_key: ${OMNIROUTE_API_KEY}
+    api_key: ${OMNIROUTE_BASE_URL}
     provider: custom
-    base_url: ${OMNIROUTE_BASE_URL}
+    base_url: ${OMNIROUTE_API_KEY}
+    default_model: free
 fallback_providers: []
 credential_pool_strategies: {}
 toolsets:
@@ -667,9 +668,9 @@ platform_toolsets:
   google_chat:
   - hermes-google_chat
 custom_providers:
-- name: Local (localhost:20128)
-  base_url: ${OMNI_BASE_URL}
-  api_key: ${OMNI_API_KEY}
+- name: Omniroute
+  base_url: ${OMNIROUTE_BASE_URL}
+  api_key: ${OMNIROUTE_API_KEY}
   model: free
   models:
     free:
