@@ -1,100 +1,284 @@
 #!/usr/bin/env bash
-# OmniRoute Configuration Sync Tool
-# Sincroniza configurações do OmniRoute (providers, combos, etc) via Chezmoi, ignorando métricas/logs.
+# OmniRoute Configuration/State Sync Tool
+# Sincroniza o estado essencial do OmniRoute via Chezmoi, criptografado com age.
+# Modelo sustentável: config pequena + secrets + export seletivo de SQLite + manifest.
 
-OMNIROUTE_DIR="${DATA_DIR:-${HOME}/.omniroute}"
+set -euo pipefail
+
+OMNIROUTE_DIR="${OMNIROUTE_HOME:-${DATA_DIR:-${HOME}/.omniroute}}"
 DB_FILE="${OMNIROUTE_DIR}/storage.sqlite"
-SYNC_FILE="${OMNIROUTE_DIR}/config.sql"
+SYNC_DIR="${OMNIROUTE_DIR}/sync"
+MANIFEST_FILE="${SYNC_DIR}/manifest.json"
+CONFIG_SQL_FILE="${OMNIROUTE_DIR}/config.sql"
+BACKUP_NOTE_FILE="${SYNC_DIR}/backup-note.txt"
 
-case "$1" in
+ENCRYPTED_FILES=(
+  .env
+  config.sql
+  sync/manifest.json
+  sync/backup-note.txt
+)
+
+FORBIDDEN_SOURCE_PATTERNS=(
+  'private_dot_omniroute/private_backup.tar.gz'
+  'private_dot_omniroute/encrypted_backup.tar.gz.asc'
+  'private_dot_omniroute/private_storage.sqlite'
+  'private_dot_omniroute/private_storage.sqlite-wal'
+  'private_dot_omniroute/private_storage.sqlite-shm'
+  'private_dot_omniroute/private_call_logs'
+  'private_dot_omniroute/private_db_backups'
+  'private_dot_omniroute/private_logs'
+  'private_dot_omniroute/private_cache'
+)
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "❌ Comando obrigatório não encontrado: $1"
+    exit 1
+  fi
+}
+
+source_root() {
+  chezmoi source-path 2>/dev/null | sed 's#/home$##'
+}
+
+print_usage() {
+  echo "Uso: omniroute-sync {push|pull|status|doctor|export}"
+  echo "  export : Gera manifest e SQL seletivo do OmniRoute"
+  echo "  push   : Exporta e adiciona arquivos pequenos ao chezmoi criptografado"
+  echo "  pull   : Restaura/importa estado seletivo depois de chezmoi apply"
+  echo "  status : Verifica estado local e arquivos de sincronização"
+  echo "  doctor : Valida se o chezmoi não contém blobs proibidos"
+}
+
+export_manifest() {
+  require_cmd python3
+  mkdir -p "$SYNC_DIR"
+  python3 - <<PY
+import json, os, sqlite3, subprocess, time
+from pathlib import Path
+root = Path(os.path.expanduser(${OMNIROUTE_DIR@Q}))
+sync = Path(os.path.expanduser(${SYNC_DIR@Q}))
+
+def size(path):
+    p=root/path
+    if not p.exists(): return None
+    if p.is_file(): return p.stat().st_size
+    total=0; files=0
+    for f in p.rglob('*'):
+        if f.is_file():
+            files += 1; total += f.stat().st_size
+    return {'files': files, 'bytes': total}
+
+manifest={
+    'created_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+    'source_host': os.uname().nodename,
+    'omniroute_dir': str(root),
+    'backup_model': 'chezmoi plaintext config template + encrypted secrets/small state + selective SQL; not full db/log backup',
+    'included_files': ['.env','config.sql','sync/manifest.json','sync/backup-note.txt'],
+    'semantic_tables': [
+        'provider_connections', 'provider_nodes', 'combos', 'model_combo_mappings',
+        'api_keys', 'upstream_proxy_config', 'key_value',
+        'compression_combos', 'compression_combo_assignments',
+        'api_key_token_limits', 'account_key_limits', 'provider_key_limits',
+        'domain_budgets', 'domain_fallback_chains',
+        'key_groups', 'key_group_members', 'group_model_permissions',
+        'quota_groups', 'quota_pools', 'quota_pool_connections', 'quota_allocations',
+        'proxy_registry', 'proxy_assignments', 'relay_tokens', 'webhooks',
+        'plugins', 'middleware_hooks', 'cloud_agent_credentials',
+        'agent_bridge_mappings', 'agent_bridge_bypass', 'agent_bridge_state',
+        'skills', 'api_key_context_sources', 'tier_config', 'tier_assignments'
+    ],
+    'sizes': {k: size(Path(k)) for k in ['.env','config.sql','storage.sqlite','call_logs','db_backups','server']},
+    'excluded_by_design': [
+        'storage.sqlite raw history/runtime state',
+        'storage.sqlite-wal', 'storage.sqlite-shm',
+        'call_logs/', 'db_backups/', 'logs/', 'cache/', 'server/.pid',
+        'any tarball-monolithic backup'
+    ]
+}
+(sync/'manifest.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
+(sync/'backup-note.txt').write_text('OmniRoute backup model: config + secrets in chezmoi, database exported selectively via SQL.\n')
+PY
+}
+
+export_config_sql() {
+  require_cmd python3
+  mkdir -p "$SYNC_DIR"
+  python3 - <<PY
+import os, sqlite3, time
+from pathlib import Path
+root = Path(os.path.expanduser(${OMNIROUTE_DIR@Q}))
+out = Path(os.path.expanduser(${CONFIG_SQL_FILE@Q}))
+tables = [
+    # Core routing/providers/API access
+    'provider_connections', 'provider_nodes', 'combos', 'model_combo_mappings',
+    'api_keys', 'upstream_proxy_config',
+
+    # Admin/dashboard/settings/secrets stored in the DB (includes dashboard password)
+    'key_value',
+
+    # Optional semantic configuration tables. Empty tables are harmless; if populated later,
+    # they will be restored. Runtime/history/cache tables stay intentionally excluded.
+    'compression_combos', 'compression_combo_assignments',
+    'api_key_token_limits', 'account_key_limits', 'provider_key_limits',
+    'domain_budgets', 'domain_fallback_chains',
+    'key_groups', 'key_group_members', 'group_model_permissions',
+    'quota_groups', 'quota_pools', 'quota_pool_connections', 'quota_allocations',
+    'proxy_registry', 'proxy_assignments',
+    'relay_tokens', 'webhooks',
+    'plugins', 'middleware_hooks',
+    'cloud_agent_credentials', 'agent_bridge_mappings', 'agent_bridge_bypass', 'agent_bridge_state',
+    'skills', 'api_key_context_sources',
+    'tier_config', 'tier_assignments',
+]
+delete_order = list(reversed(tables))
+
+def q_ident(name): return '"' + name.replace('"', '""') + '"'
+def q_value(value):
+    if value is None: return 'NULL'
+    if isinstance(value, bool): return '1' if value else '0'
+    if isinstance(value, int): return str(value)
+    if isinstance(value, float): return repr(value)
+    if isinstance(value, bytes): return "X'" + value.hex() + "'"
+    return "'" + str(value).replace("'", "''") + "'"
+
+con = sqlite3.connect(root / 'storage.sqlite')
+cur = con.cursor()
+existing = {row[0] for row in cur.execute("select name from sqlite_master where type='table'")}
+lines = [
+    '-- OmniRoute config export',
+    f"-- Exported at: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}",
+    '-- Generated by omniroute-sync; intentionally excludes logs/call logs/runtime state.',
+    'PRAGMA foreign_keys=OFF;',
+    'BEGIN TRANSACTION;'
+]
+for table in delete_order:
+    if table in existing:
+        lines.append(f'DELETE FROM {q_ident(table)};')
+for table in tables:
+    if table not in existing:
+        continue
+    rows = cur.execute(f'SELECT * FROM {q_ident(table)}').fetchall()
+    cols = [desc[0] for desc in cur.description]
+    col_sql = ', '.join(q_ident(c) for c in cols)
+    for row in rows:
+        values_sql = ', '.join(q_value(v) for v in row)
+        lines.append(f'INSERT OR REPLACE INTO {q_ident(table)} ({col_sql}) VALUES ({values_sql});')
+lines.append('COMMIT;')
+out.write_text('\n'.join(lines) + '\n')
+con.close()
+PY
+}
+
+run_export() {
+  echo "📦 Exportando estado seletivo do OmniRoute..."
+  if [ ! -f "$DB_FILE" ]; then
+    echo "❌ Banco de dados não encontrado em $DB_FILE"
+    exit 1
+  fi
+  export_config_sql
+  export_manifest
+  chmod 700 "$SYNC_DIR" 2>/dev/null || true
+  chmod 600 "$SYNC_DIR"/* 2>/dev/null || true
+  echo "✓ Gerado: $CONFIG_SQL_FILE"
+  echo "✓ Gerado: $MANIFEST_FILE"
+}
+
+add_existing_files() {
+  require_cmd chezmoi
+  echo "🔐 Adicionando arquivos pequenos ao Chezmoi com criptografia..."
+  for rel in "${ENCRYPTED_FILES[@]}"; do
+    path="$OMNIROUTE_DIR/$rel"
+    if [ -f "$path" ]; then
+      chezmoi add --encrypt "$path"
+      echo "  + $rel"
+    fi
+  done
+}
+
+run_doctor() {
+  require_cmd chezmoi
+  local src
+  src="$(source_root)"
+  if [ -z "$src" ] || [ ! -d "$src" ]; then
+    echo "⚠️  Não consegui localizar o source do chezmoi"
+    return 1
+  fi
+  echo "🩺 OmniRoute sync doctor"
+  echo "Chezmoi source: $src"
+  local failed=0
+  for pat in "${FORBIDDEN_SOURCE_PATTERNS[@]}"; do
+    if [ -e "$src/home/$pat" ]; then
+      echo "❌ Proibido encontrado: home/$pat"
+      failed=1
+    fi
+  done
+  while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    size=$(stat -c%s "$f" 2>/dev/null || echo 0)
+    if [ "$size" -gt 1048576 ]; then
+      case "$f" in
+        *.asc) echo "ℹ️  Arquivo criptografado >1MB: ${f#$src/} ($size bytes) — verifique se é intencional" ;;
+        *) echo "❌ Arquivo plaintext >1MB no chezmoi: ${f#$src/} ($size bytes)"; failed=1 ;;
+      esac
+    fi
+  done < <(find "$src/home/private_dot_omniroute" -type f 2>/dev/null || true)
+  if [ "$failed" -eq 0 ]; then
+    echo "✅ Nenhum blob proibido/plaintext perigoso encontrado"
+  fi
+  return "$failed"
+}
+
+case "${1:-}" in
+  export)
+    run_export
+    ;;
   push)
-    echo "📦 Exportando configurações do OmniRoute..."
-    if [ ! -f "$DB_FILE" ]; then
-      echo "❌ Banco de dados não encontrado em $DB_FILE"
-      exit 1
-    fi
-    
-    # Exporta tabelas estruturais de configuração (ignora métricas/logs/cache)
-    # Tabelas verificadas contra o schema real do OmniRoute
-    TABLES=(
-      provider_connections
-      provider_nodes
-      combos
-      model_combo_mappings
-      api_keys
-      upstream_proxy_config
-    )
-
-    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    echo "-- Exported at: $TIMESTAMP" > "${SYNC_FILE}.tmp"
-
-
-    for table in "${TABLES[@]}"; do
-      sqlite3 "$DB_FILE" <<EOF 2>/dev/null >> "${SYNC_FILE}.tmp"
-.mode insert $table
-SELECT * FROM $table;
-EOF
-    done
-    
-    # Transforma os INSERTs normais em INSERT OR REPLACE para não dar erro de UNIQUE constraint
-    sed 's/INSERT INTO/INSERT OR REPLACE INTO/g' "${SYNC_FILE}.tmp" > "$SYNC_FILE"
-    rm "${SYNC_FILE}.tmp"
-    
-    echo "✓ Configurações exportadas para $SYNC_FILE"
-    
-    echo "🔄 Adicionando ao Chezmoi com criptografia (age)..."
-    chezmoi add --encrypt "$SYNC_FILE"
-    # chezmoi add --encrypt "$DB_FILE"
-    echo "✓ Adicionado de forma segura ao Chezmoi! Agora você pode rodar 'chezmoi cd && git commit -m \"Update OmniRoute config\" && git push'"
+    run_export
+    add_existing_files
+    run_doctor
+    echo "✓ Pronto. Agora rode: chezmoi cd && git status && git add . && git commit -m \"backup: update OmniRoute sync\" && git push"
     ;;
-    
   pull)
-    echo "📥 Importando configurações do OmniRoute..."
-    
-    # Verifica se o arquivo de sync existe (depois do chezmoi update)
-    RESTORE_FILE="${HOME}/.omniroute/config.sql"
-    if [ ! -f "$RESTORE_FILE" ]; then
-      echo "❌ Arquivo de configuração não encontrado em $RESTORE_FILE."
-      echo "Execute 'chezmoi apply' primeiro para garantir que o arquivo esteja presente na máquina."
-      exit 1
+    require_cmd sqlite3
+    echo "📥 Restaurando estado seletivo do OmniRoute..."
+    echo "⚠️  Pressupõe que você já rodou 'chezmoi apply' para materializar os arquivos criptografados."
+    if [ -f "$CONFIG_SQL_FILE" ] && [ -f "$DB_FILE" ]; then
+      sqlite3 "$DB_FILE" < "$CONFIG_SQL_FILE"
+      echo "✓ Configuração semântica importada de $CONFIG_SQL_FILE"
+    else
+      echo "ℹ️  Import pulado (arquivo SQL ou banco ausente)"
     fi
-    
-    if [ ! -f "$DB_FILE" ]; then
-      echo "⚠️ Banco de dados não encontrado. Inicie o OmniRoute uma vez para criar a estrutura inicial antes de importar."
-      exit 1
-    fi
-    
-    # Restaura as configurações
-    sqlite3 "$DB_FILE" < "$RESTORE_FILE"
-    echo "✓ Configurações importadas com sucesso!"
-    echo "🔄 Lembre-se de reiniciar o OmniRoute (omniroute-restart) para carregar as novas configs."
+    echo "✓ Arquivos de configuração/secrets já são restaurados pelo chezmoi apply"
+    echo "🔄 Próximos passos recomendados: omniroute-restart && omniroute-health"
     ;;
-    
   status)
     echo "🔍 OmniRoute Sync Status"
     echo "--------------------------"
-    if [ -f "$DB_FILE" ]; then
-      echo "✅ Database: Present ($DB_FILE)"
-      ls -lh "$DB_FILE" | awk '{print "   Size: " $5 ", Last Modified: " $6 " " $7 " " $8}'
-    else
-      echo "❌ Database: Missing"
-    fi
-    
-    if [ -f "$SYNC_FILE" ]; then
-      echo "✅ Sync File: Present ($SYNC_FILE)"
-      ls -lh "$SYNC_FILE" | awk '{print "   Size: " $5 ", Last Modified: " $6 " " $7 " " $8}'
-      echo "   Version:"
-      head -n 1 "$SYNC_FILE" | grep "^--" || echo "   (No timestamp found)"
-    else
-      echo "❌ Sync File: Missing"
+    echo "OmniRoute dir: $OMNIROUTE_DIR"
+    [ -d "$OMNIROUTE_DIR" ] && echo "✅ OmniRoute dir: Present" || echo "❌ OmniRoute dir: Missing"
+    for rel in .env config.sql storage.sqlite storage.sqlite-wal storage.sqlite-shm call_logs db_backups sync/manifest.json sync/backup-note.txt; do
+      if [ -e "$OMNIROUTE_DIR/$rel" ]; then
+        ls -ld "$OMNIROUTE_DIR/$rel" 2>/dev/null | awk -v r="$rel" '{print "✅ " r ": " $5}'
+      else
+        echo "⚠️  $rel: Missing"
+      fi
+    done
+    if [ -f "$MANIFEST_FILE" ]; then
+      echo "   Manifest timestamp: $(python3 - "$MANIFEST_FILE" <<'PY' 2>/dev/null || echo unknown
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    print(json.load(fh).get('created_utc', 'unknown'))
+PY
+)"
     fi
     ;;
-    
+  doctor)
+    run_doctor
+    ;;
   *)
-    echo "Uso: omniroute-sync {push|pull|status}"
-    echo "  push   : Exporta a config atual e adiciona ao chezmoi"
-    echo "  pull   : Importa a config do chezmoi para o banco local"
-    echo "  status : Verifica a saúde dos arquivos de configuração e banco"
+    print_usage
     exit 1
     ;;
 esac
