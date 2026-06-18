@@ -5,9 +5,9 @@ model:
   api_key: ${OMNIROUTE_API_KEY}
 providers:
   custom:
-    api_key: ${OMNIROUTE_BASE_URL}
+    api_key: ${OMNIROUTE_API_KEY} 
     provider: custom
-    base_url: ${OMNIROUTE_API_KEY}
+    base_url: ${OMNIROUTE_BASE_URL}
     default_model: free
 fallback_providers: []
 credential_pool_strategies: {}
