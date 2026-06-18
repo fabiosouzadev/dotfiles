@@ -27,11 +27,11 @@ export OPENAI_API_KEY={{ include $omniroute_key | decrypt | trim }}
 
 {{ if and (eq .chezmoi.os "linux") (not .settings.wsl) (.features.sudo.enabled) }}
 ## Arch Linux / Ubuntu com systemd — usa o service do AUR ou custom unit
-alias -- omniroute-start="systemctl --user start omniroute.service"
-alias -- omniroute-stop="systemctl --user stop omniroute.service"
-alias -- omniroute-restart="systemctl --user restart omniroute.service"
-alias -- omniroute-status="systemctl --user status omniroute.service"
-alias -- omniroute-enable="systemctl --user enable omniroute.service"
+alias -- omniroute-start="sudo systemctl start omniroute.service"
+alias -- omniroute-stop="sudo systemctl stop omniroute.service"
+alias -- omniroute-restart="sudo systemctl restart omniroute.service"
+alias -- omniroute-status="sudo systemctl status omniroute.service"
+alias -- omniroute-enable="sudo systemctl enable omniroute.service"
 {{ else }}
 ## macOS / WSL / ambientes sem systemd
 alias -- omniroute-start="nohup omniroute > /dev/null 2>&1 &"
