@@ -1,0 +1,32 @@
+## ═══════════════════════════════════════════════════════════════════════════════
+## Hermes Agent — Aliases de gerenciamento e backup
+## ═══════════════════════════════════════════════════════════════════════════════
+
+{{ if and (eq .chezmoi.os "linux") (not .settings.wsl) }}
+## Linux com systemd user service
+alias -- hermes-gateway-start="systemctl --user start hermes-gateway.service"
+alias -- hermes-gateway-stop="systemctl --user stop hermes-gateway.service"
+alias -- hermes-gateway-restart="systemctl --user restart hermes-gateway.service"
+alias -- hermes-gateway-status="systemctl --user status hermes-gateway.service"
+alias -- hermes-gateway-enable="systemctl --user enable hermes-gateway.service"
+{{ else }}
+## macOS / WSL / ambientes sem systemd
+alias -- hermes-gateway-start="hermes gateway start"
+alias -- hermes-gateway-stop="hermes gateway stop"
+alias -- hermes-gateway-restart="hermes gateway restart"
+alias -- hermes-gateway-status="hermes gateway status"
+{{ end }}
+
+## Aliases universais
+alias -- hermes-doctor="hermes doctor"
+alias -- hermes-config="hermes config"
+alias -- hermes-logs="tail -f ${HOME}/.hermes/logs/gateway.log"
+
+## Backup/sincronização via Chezmoi
+## Modelo: arquivos pequenos + SQL seletivo + manifest -> chezmoi add --encrypt
+alias -- hermes-sync-push="hermes-sync push"
+alias -- hermes-sync-pull="hermes-sync pull"
+alias -- hermes-sync-status="hermes-sync status"
+alias -- hermes-sync-doctor="hermes-sync doctor"
+
+# vim: filetype=bash
