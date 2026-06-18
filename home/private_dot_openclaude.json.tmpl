@@ -1,4 +1,8 @@
-{{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
+{{- $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
+{{- if eq .settings.workplace "Zup" }}
+    {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
+{{- end }}
+
 {
   "numStartups": 3,
   "installMethod": "native",

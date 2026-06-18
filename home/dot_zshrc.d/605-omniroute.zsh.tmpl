@@ -4,7 +4,10 @@
 ## Claude Code usa settings.json (ANTHROPIC_*) — NÃO depende destas variáveis.
 ## ═══════════════════════════════════════════════════════════════════════════════
 
-{{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
+{{- $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
+{{- if eq .settings.workplace "Zup" }}
+    {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
+{{- end }}
 
 ## Base config para tools OpenAI-compatible (Codex, Aider, OpenCode, Copilot, etc.)
 {{- if eq .features.ai.omniroute.mode "vps-client" }}

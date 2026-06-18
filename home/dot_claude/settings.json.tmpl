@@ -1,6 +1,9 @@
 {
   "env": {
-    {{ $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
+    {{- $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
+    {{- if eq .settings.workplace "Zup" }}
+        {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
+    {{- end }}
     "ANTHROPIC_BASE_URL": "http://157.151.13.223/v1",
     "ANTHROPIC_AUTH_TOKEN": "{{ include $omniroute_key | decrypt | trim }}",
     "ANTHROPIC_MODEL": "free",
