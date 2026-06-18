@@ -4,11 +4,11 @@
 
 {{ if and (eq .chezmoi.os "linux") (not .settings.wsl) }}
 ## Linux com systemd user service
-alias -- hermes-gateway-start="systemctl --user start hermes-gateway.service"
-alias -- hermes-gateway-stop="systemctl --user stop hermes-gateway.service"
-alias -- hermes-gateway-restart="systemctl --user restart hermes-gateway.service"
-alias -- hermes-gateway-status="systemctl --user status hermes-gateway.service"
-alias -- hermes-gateway-enable="systemctl --user enable hermes-gateway.service"
+alias -- hermes-gateway-start="sudo systemctl start hermes-gateway.service"
+alias -- hermes-gateway-stop="sudo systemctl stop hermes-gateway.service"
+alias -- hermes-gateway-restart="sudo systemctl restart hermes-gateway.service"
+alias -- hermes-gateway-status="sudo systemctl status hermes-gateway.service"
+alias -- hermes-gateway-enable="sudo systemctl enable hermes-gateway.service"
 {{ else }}
 ## macOS / WSL / ambientes sem systemd
 alias -- hermes-gateway-start="hermes gateway start"
