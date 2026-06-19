@@ -1,5 +1,5 @@
 model:
-  default: free
+  default: omniroute/work
   provider: custom
   base_url: ${OMNIROUTE_BASE_URL}
   api_key: ${OMNIROUTE_API_KEY}
@@ -8,7 +8,7 @@ providers:
     api_key: ${OMNIROUTE_API_KEY} 
     provider: custom
     base_url: ${OMNIROUTE_BASE_URL}
-    default_model: free
+    default_model: omniroute/work
 fallback_providers: []
 credential_pool_strategies: {}
 toolsets:
@@ -671,9 +671,9 @@ custom_providers:
 - name: Omniroute
   base_url: ${OMNIROUTE_BASE_URL}
   api_key: ${OMNIROUTE_API_KEY}
-  model: free
+  model: omniroute/work
   models:
-    free:
+    omniroute/work:
       context_length: 256000
 known_plugin_toolsets:
   cli:
