@@ -1,17 +1,26 @@
 [Unit]
-Description=Camofox — Anti-detection browser (Camoufox/Firefox)
+Description=Camofox Browser Server for Hermes
 Documentation=https://github.com/jo-inc/camofox-browser
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-Environment=NODE_ENV=production
-Environment=CAMOFOX_PORT=3030
-ExecStart=$HOME/.local/share/mise/shims/node %h/camofox/node_modules/camofox-browser/dist/src/server.js
-Restart=on-failure
-RestartSec=10
-WorkingDirectory=$HOME/camofox
+WorkingDirectory={{ .chezmoi.homeDir }}/camofox
+Environment="PATH={{ .chezmoi.homeDir }}/.local/share/mise/installs/node/24/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment=CAMOFOX_PORT=9377
+Environment=CAMOFOX_USER_ID=hermes
+Environment=CAMOFOX_SESSION_KEY=hermes-session
+ExecStartPre=/usr/bin/chmod -R 755 {{ .chezmoi.homeDir }}/.cache/camoufox
+ExecStart={{ .chezmoi.homeDir }}/.local/share/mise/installs/node/24/bin/npx camofox-browser server start --port 9377
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=300
+StartLimitBurst=5
+TimeoutStopSec=30
+KillMode=process
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=default.target
