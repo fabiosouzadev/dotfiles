@@ -33,6 +33,10 @@
               {
                 "repo": "git@gitdev.clarobrasil.mobi:devops/core-flex/bff-core-flex-service.git",
                 "path": "bff-core-flex-service"
+              },
+              {
+                "repo": "git@gitdev.clarobrasil.mobi:claro-flex/extensions/claro-flex-rw-extensions.git",
+                "path": "claro-flex-rw-extensions"
               }
             ]
          }
