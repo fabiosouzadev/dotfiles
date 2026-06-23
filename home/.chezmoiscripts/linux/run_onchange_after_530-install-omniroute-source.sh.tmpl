@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Instala / atualiza o OmniRoute from source
-# Uso:
-#   run_once_after_530-install-omniroute-source.sh [versão]
-#   versão = "main" (padrão, mais recente) ou "v3.8.34" (tag específica)
+# Uso (via chezmoi apply): instala a versão do omniroute.yaml
+# Uso (direto ou via omniroute-update): passa versão como argumento
 set -euo pipefail
 
 SRC_DIR="{{ .chezmoi.homeDir }}/.local/src/OmniRoute"
@@ -10,17 +9,24 @@ BIN_SRC="$SRC_DIR/bin/omniroute"
 BIN_LINK="{{ .chezmoi.homeDir }}/.local/bin/omniroute"
 VERSION="{{ .omniroute.install.version }}"
 
-# Permite sobrescrever via argumento: chezmoi apply -v v3.8.34
-if [[ "${1:-}" =~ ^v?[0-9] ]]; then
+# Permite sobrescrever via argumento
+if [[ "${1:-}" =~ ^v?[0-9] || "${1:-}" == "main" || "${1:-}" == "master" ]]; then
   VERSION="$1"
 fi
 
 echo "==> OmniRoute — instalando from source (versão: $VERSION)"
 
-# Garante que ~/.local/bin existe
+# 1. Remove versão antiga do npm (se existir)
+echo "  → Removendo versão npm antiga..."
+npm uninstall -g omniroute 2>/dev/null || true
+
+# 2. Remove binário/shim antigo
+rm -f "$BIN_LINK" 2>/dev/null || true
+
+# 3. Garante diretórios
 mkdir -p "$(dirname "$BIN_LINK")"
 
-# Clona ou atualiza o repo
+# 4. Clona ou atualiza o repo
 if [[ -d "$SRC_DIR/.git" ]]; then
   echo "  → Repo já existe, atualizando..."
   cd "$SRC_DIR"
@@ -31,31 +37,32 @@ else
   cd "$SRC_DIR"
 fi
 
-# Checkout da versão desejada
+# 5. Checkout da versão desejada
 if [[ "$VERSION" == "main" || "$VERSION" == "master" ]]; then
+  echo "  → Checkout main (versão mais recente)..."
   git checkout main 2>&1 | sed 's/^/    /'
   git pull origin main 2>&1 | sed 's/^/    /'
 else
+  echo "  → Checkout $VERSION..."
   git checkout "$VERSION" 2>&1 | sed 's/^/    /'
 fi
 
-# Instala dependências e build
+# 6. Instala dependências e build
 echo "  → Instalando dependências..."
 npm ci 2>&1 | sed 's/^/    /'
 
 echo "  → Buildando..."
 npm run build 2>&1 | sed 's/^/    /'
 
-# Symlink do binário
+# 7. Symlink do binário
 if [[ -f "$BIN_SRC" ]]; then
   ln -sf "$BIN_SRC" "$BIN_LINK"
-  echo "  → Symlink criado: $BIN_LINK → $BIN_SRC"
+  echo "  → Symlink: $BIN_LINK → $BIN_SRC"
 else
   echo "  ✗ ERRO: binário não encontrado em $BIN_SRC"
-  echo "    Verifique se o build gerou o binário corretamente."
   exit 1
 fi
 
-# Verificação
+# 8. Verificação
 INSTALLED_VER=$("$BIN_LINK" --version 2>/dev/null || echo "desconhecida")
-echo "✓ OmniRoute instalado com sucesso (versão: $INSTALLED_VER)"
+echo "✓ OmniRoute $INSTALLED_VER instalado com sucesso"
