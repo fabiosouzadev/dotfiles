@@ -5,7 +5,8 @@
 set -euo pipefail
 
 SRC_DIR="{{ .chezmoi.homeDir }}/.local/src/OmniRoute"
-BIN_SRC="$SRC_DIR/bin/omniroute"
+DIST_DIR="$SRC_DIR/dist"
+SERVER_JS="$DIST_DIR/server.js"
 BIN_LINK="{{ .chezmoi.homeDir }}/.local/bin/omniroute"
 VERSION="{{ .omniroute.install.version }}"
 
@@ -16,9 +17,30 @@ fi
 
 echo "==> OmniRoute — instalando from source (versão: $VERSION)"
 
-# 1. Remove versão antiga do npm (se existir)
+# 0. Detecta Node.js (prioriza mise > sistema, exige >=20.9)
+NPM_CMD="npm"
+NODE_CMD="node"
+if command -v mise &>/dev/null; then
+  MISE_NODE="$(mise which node 2>/dev/null || true)"
+  MISE_NPM="$(mise which npm 2>/dev/null || true)"
+  if [[ -n "$MISE_NODE" && -x "$MISE_NODE" ]]; then
+    NODE_CMD="$MISE_NODE"
+    NPM_CMD="${MISE_NPM:-$MISE_NODE/bin/npm}"
+    echo "  → Usando Node via mise: $($NODE_CMD --version)"
+  fi
+fi
+
+NODE_VER=$("$NODE_CMD" --version 2>/dev/null | sed 's/v//')
+NODE_MAJOR=$(echo "$NODE_VER" | cut -d. -f1)
+if [[ "$NODE_MAJOR" -lt 20 ]]; then
+  echo "  ✗ ERRO: Node.js $NODE_VER encontrado, mas OmniRoute precisa >=20.9"
+  echo "    Instale o Node 20+ via mise: mise install node@lts"
+  exit 1
+fi
+
+# 1. Remove versão antiga do npm global (se existir)
 echo "  → Removendo versão npm antiga..."
-npm uninstall -g omniroute 2>/dev/null || true
+"$NPM_CMD" uninstall -g omniroute 2>/dev/null || true
 
 # 2. Remove binário/shim antigo
 rm -f "$BIN_LINK" 2>/dev/null || true
@@ -47,22 +69,38 @@ else
   git checkout "$VERSION" 2>&1 | sed 's/^/    /'
 fi
 
-# 6. Instala dependências e build
-echo "  → Instalando dependências..."
-npm ci 2>&1 | sed 's/^/    /'
+# 6. Build completo: next build + CLI
+echo "  → Instalando dependências (node $($NODE_CMD --version))..."
+"$NPM_CMD" ci 2>&1 | sed 's/^/    /'
 
-echo "  → Buildando..."
-npm run build 2>&1 | sed 's/^/    /'
+echo "  → Buildando (next build)..."
+PATH="$(dirname "$NODE_CMD"):$PATH" "$NPM_CMD" run build 2>&1 | sed 's/^/    /'
 
-# 7. Symlink do binário
-if [[ -f "$BIN_SRC" ]]; then
-  ln -sf "$BIN_SRC" "$BIN_LINK"
-  echo "  → Symlink: $BIN_LINK → $BIN_SRC"
-else
-  echo "  ✗ ERRO: binário não encontrado em $BIN_SRC"
+echo "  → Buildando CLI..."
+PATH="$(dirname "$NODE_CMD"):$PATH" "$NPM_CMD" run build:cli 2>&1 | sed 's/^/    /'
+
+# 7. Verifica que dist/ foi gerado
+if [[ ! -f "$SERVER_JS" ]]; then
+  echo "  ✗ ERRO: dist/server.js não encontrado após build"
+  echo "    Verifique os erros de build acima."
   exit 1
 fi
 
-# 8. Verificação
+# 8. Cria wrapper script em ~/.local/bin/omniroute
+cat > "$BIN_LINK" << 'WRAPPER'
+#!/usr/bin/env bash
+# OmniRoute wrapper — executa dist/server.js com Node do mise
+NODE_CMD="node"
+if command -v mise &>/dev/null; then
+  MISE_NODE="$(mise which node 2>/dev/null || true)"
+  [[ -n "$MISE_NODE" && -x "$MISE_NODE" ]] && NODE_CMD="$MISE_NODE"
+fi
+exec "$NODE_CMD" "{{ .chezmoi.homeDir }}/.local/src/OmniRoute/dist/server.js" "$@"
+WRAPPER
+chmod +x "$BIN_LINK"
+
+echo "  → Binário: $BIN_LINK → $SERVER_JS"
+
+# 9. Verificação
 INSTALLED_VER=$("$BIN_LINK" --version 2>/dev/null || echo "desconhecida")
-echo "✓ OmniRoute $INSTALLED_VER instalado com sucesso"
+echo "✓ OmniRoute instalado com sucesso (dist/ + wrapper)"
