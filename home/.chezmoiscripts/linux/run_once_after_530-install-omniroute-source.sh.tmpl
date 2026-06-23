@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════════════════════════════════
+# OmniRoute — Install from Source
+# Clona o repo, instala dependências, compila e cria symlink global.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+set -euo pipefail
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "common/script_helper" . }}
+
+{{- $srcDir := joinPath .chezmoi.homeDir ".local" "src" "omniroute" -}}
+
+info "Installing OmniRoute from source..."
+
+# Pré-requisito: Node.js >= 22
+if ! command -v node >/dev/null 2>&1; then
+    error "Node.js não encontrado. Instale Node >= 22 antes de continuar."
+    info "Sugestão: mise install node@lts"
+    exit 1
+fi
+
+NODE_MAJOR=$(node -e "process.stdout.write(String(process.versions.node.split('.')[0]))")
+if [ "$NODE_MAJOR" -lt 22 ]; then
+    error "Node.js versão $NODE_MAJOR detectada. OmniRoute requer >= 22."
+    exit 1
+fi
+
+# Clone ou update do repo
+if [ -d "{{ $srcDir }}/.git" ]; then
+    info "Repo encontrado em {{ $srcDir }}. Atualizando..."
+    cd "{{ $srcDir }}"
+    git fetch --all --quiet
+    git checkout main --quiet
+    git pull --quiet
+else
+    info "Clonando OmniRoute para {{ $srcDir }}..."
+    mkdir -p "$(dirname "{{ $srcDir }}")"
+    git clone https://github.com/diegosouzapw/OmniRoute.git "{{ $srcDir }}"
+    cd "{{ $srcDir }}"
+fi
+
+# Instalar dependências e build
+info "Instalando dependências..."
+npm install 2>&1 | tail -5
+
+info "Executando build..."
+npm run build 2>&1 | tail -5
+
+# Criar symlink global
+info "Criando symlink em ~/.local/bin/omniroute..."
+mkdir -p "{{ .chezmoi.homeDir }}/.local/bin"
+ln -sf "{{ $srcDir }}/bin/omniroute.mjs" "{{ .chezmoi.homeDir }}/.local/bin/omniroute"
+chmod +x "{{ $srcDir }}/bin/omniroute.mjs"
+
+# Verificar
+if command -v omniroute >/dev/null 2>&1; then
+    VERSION=$(omniroute --version 2>/dev/null || echo "desconhecida")
+    success "OmniRoute instalado com sucesso! Versão: $VERSION"
+    info "Local: {{ $srcDir }}"
+    info "Binário: {{ .chezmoi.homeDir }}/.local/bin/omniroute"
+else
+    warn "Symlink criado, mas omniroute não está no PATH."
+    info "Adicione ao PATH: export PATH=\"{{ .chezmoi.homeDir }}/.local/bin:\$PATH\""
+fi

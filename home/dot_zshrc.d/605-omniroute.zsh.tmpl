@@ -1,5 +1,6 @@
 ## ═══════════════════════════════════════════════════════════════════════════════
 ## OmniRoute — Gateway unificado para todas as AI coding tools
+## Instalado from source: ~/.local/src/omniroute
 ## Todas as tools (Codex, Aider, OpenCode, etc.) usam o mesmo endpoint local.
 ## Claude Code usa settings.json (ANTHROPIC_*) — NÃO depende destas variáveis.
 ## ═══════════════════════════════════════════════════════════════════════════════
@@ -29,23 +30,25 @@
 ## ═══════════════════════════════════════════════════════════════════════════════
 
 {{ if and (eq .chezmoi.os "linux") (not .settings.wsl) (.features.sudo.enabled) }}
-## Arch Linux / Ubuntu com systemd — usa o service do AUR ou custom unit
-alias -- omniroute-start="sudo systemctl start omniroute.service"
-alias -- omniroute-stop="sudo systemctl stop omniroute.service"
-alias -- omniroute-restart="sudo systemctl restart omniroute.service"
-alias -- omniroute-status="sudo systemctl status omniroute.service"
-alias -- omniroute-enable="sudo systemctl enable omniroute.service"
+## Arch Linux / Ubuntu com systemd — usa o service do systemd
+alias -- omniroute-start="systemctl --user start omniroute.service"
+alias -- omniroute-stop="systemctl --user stop omniroute.service"
+alias -- omniroute-restart="systemctl --user restart omniroute.service"
+alias -- omniroute-status="systemctl --user status omniroute.service"
+alias -- omniroute-enable="systemctl --user enable omniroute.service"
 {{ else }}
-## macOS / WSL / ambientes sem systemd
-alias -- omniroute-start="nohup omniroute > /dev/null 2>&1 &"
-alias -- omniroute-stop="pkill -f 'node.*omniroute'"
-alias -- omniroute-restart="pkill -f 'node.*omniroute' 2>/dev/null; sleep 1; nohup omniroute > /dev/null 2>&1 &"
+## macOS / WSL / ambientes sem systemd — roda from source diretamente
+OMNIROUTE_SRC="{{ .chezmoi.homeDir }}/.local/src/omniroute"
+alias -- omniroute-start="nohup node ${OMNIROUTE_SRC}/bin/omniroute.mjs > /dev/null 2>&1 &"
+alias -- omniroute-stop="pkill -f 'node.*omniroute' 2>/dev/null || true"
+alias -- omniroute-restart="pkill -f 'node.*omniroute' 2>/dev/null; sleep 1; nohup node ${OMNIROUTE_SRC}/bin/omniroute.mjs > /dev/null 2>&1 &"
 {{ end }}
 
 ## Aliases universais
 alias -- omniroute-health="curl -sf http://localhost:20128/health 2>/dev/null && echo ' ✓ OmniRoute healthy' || echo ' ✗ OmniRoute not running'"
 alias -- omniroute-dashboard="open http://localhost:20128 2>/dev/null || xdg-open http://localhost:20128 2>/dev/null || echo 'Dashboard: http://localhost:20128'"
-alias -- omniroute-models="curl -sf http://localhost:20128/v1/models -H 'Authorization: Bearer $(echo $OPENAI_API_KEY)' 2>/dev/null | jq '.data[].id' 2>/dev/null || echo 'OmniRoute not running or no models available'"
+alias -- omniroute-models="curl -sf http://localhost:20128/v1/models -H 'Authorization: Bearer ${OPENAI_API_KEY:-}' 2>/dev/null | jq '.data[].id' 2>/dev/null || echo 'OmniRoute not running or no models available'"
+alias -- omniroute-update="cd {{ .chezmoi.homeDir }}/.local/src/omniroute && git pull && npm install && npm run build && {{ if .features.sudo.enabled }}systemctl --user restart omniroute{{ else }}omniroute-restart{{ fi }}"
 
 ## Alias de sincronização via Chezmoi
 alias -- omniroute-sync-push="omniroute-sync push"

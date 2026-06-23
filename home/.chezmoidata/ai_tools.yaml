@@ -26,9 +26,6 @@ ai_tools:
     - name: openclaude
       package: "@gitlawb/openclaude@latest"
       feature_flag: coding_assistants
-    - name: omniroute
-      package: "omniroute"
-      feature_flag: omniroute.install
     - name: openclaw
       package: "openclaw@beta"
       feature_flag: openclaw.install
@@ -63,5 +60,3 @@ ai_tools:
       url: "https://hermes-agent.nousresearch.com/install.sh"
       shell: bash
       feature_flag: hermes.install
-
-    
