@@ -1,0 +1,14 @@
+[Unit]
+Description=OmniRoute — LLM API Router
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart={{ .chezmoi.homeDir }}/.local/bin/omniroute
+Restart=on-failure
+RestartSec=5
+Environment=PATH={{ .chezmoi.homeDir }}/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=default.target

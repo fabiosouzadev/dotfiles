@@ -47,8 +47,11 @@ alias -- omniroute-restart="pkill -f 'node.*omniroute' 2>/dev/null; sleep 1; noh
 ## Aliases universais
 alias -- omniroute-health="curl -sf http://localhost:20128/health 2>/dev/null && echo ' ✓ OmniRoute healthy' || echo ' ✗ OmniRoute not running'"
 alias -- omniroute-dashboard="open http://localhost:20128 2>/dev/null || xdg-open http://localhost:20128 2>/dev/null || echo 'Dashboard: http://localhost:20128'"
-alias -- omniroute-models="curl -sf http://localhost:20128/v1/models -H 'Authorization: Bearer ${OPENAI_API_KEY:-}' 2>/dev/null | jq '.data[].id' 2>/dev/null || echo 'OmniRoute not running or no models available'"
-alias -- omniroute-update="cd {{ .chezmoi.homeDir }}/.local/src/omniroute && git pull && npm install && npm run build && {{ if .features.sudo.enabled }}systemctl --user restart omniroute{{ else }}omniroute-restart{{ fi }}"
+alias -- omniroute-models="curl -sf http://localhost:20128/v1/models -H 'Authorization: Bearer ${OPEN...:-}' 2>/dev/null | jq '.data[].id' 2>/dev/null || echo 'OmniRoute not running or no models available'"
+## Update: usa versão do omniroute.yaml (padrão: main) ou passa versão específica
+## Uso: omniroute-update        → versão mais nova (main)
+##       omniroute-update v3.8.34 → versão específica
+alias -- omniroute-update="command omniroute-update"
 
 ## Alias de sincronização via Chezmoi
 alias -- omniroute-sync-push="omniroute-sync push"

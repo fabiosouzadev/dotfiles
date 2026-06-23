@@ -1,0 +1,10 @@
+# OmniRoute — configuração centralizada
+# Versão: git tag/branch/branch (ex: "main", "v3.8.34", "v3.9.0-rc.1")
+# Deixe "main" para sempre instalar a versão mais nova.
+# Fixe uma versão quando quiser congelar (ex: "v3.8.34").
+install:
+  version: "main"
+  repo: "https://github.com/diegosouzapw/OmniRoute.git"
+  src_dir: "{{ .chezmoi.homeDir }}/.local/src/OmniRoute"
+  bin_src: "{{ .chezmoi.homeDir }}/.local/src/OmniRoute/bin/omniroute"
+  bin_link: "{{ .chezmoi.homeDir }}/.local/bin/omniroute"

@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Atualiza o OmniRoute para a versão configurada em .chezmoidata/omniroute.yaml
+# Uso:
+#   omniroute-update           # usa a versão do omniroute.yaml (padrão: main)
+#   omniroute-update v3.8.34   # força versão específica
+set -euo pipefail
+
+SRC_DIR="{{ .chezmoi.homeDir }}/.local/src/OmniRoute"
+BIN_SRC="$SRC_DIR/bin/omniroute"
+BIN_LINK="{{ .chezmoi.homeDir }}/.local/bin/omniroute"
+CONFIG_FILE="{{ .chezmoi.sourceDir }}/.chezmoidata/omniroute.yaml"
+
+# Lê versão do config ou usa argumento
+if [[ "${1:-}" =~ ^v?[0-9] || "${1:-}" == "main" || "${1:-}" == "master" ]]; then
+  VERSION="$1"
+elif [[ -f "$CONFIG_FILE" ]]; then
+  VERSION=$(grep "^  version:" "$CONFIG_FILE" | awk '{print $2}' | tr -d '"')
+  VERSION="${VERSION:-main}"
+else
+  VERSION="main"
+fi
+
+echo "==> OmniRoute update (versão: $VERSION)"
+
+if [[ ! -d "$SRC_DIR/.git" ]]; then
+  echo "  ✗ Repo não encontrado em $SRC_DIR"
+  echo "  → Execute 'chezmoi apply' primeiro para instalar."
+  exit 1
+fi
+
+cd "$SRC_DIR"
+git fetch --all --tags --prune 2>&1 | sed 's/^/    /'
+
+if [[ "$VERSION" == "main" || "$VERSION" == "master" ]]; then
+  git checkout main 2>&1 | sed 's/^/    /'
+  git pull origin main 2>&1 | sed 's/^/    /'
+else
+  git checkout "$VERSION" 2>&1 | sed 's/^/    /'
+fi
+
+echo "  → Instalando dependências..."
+npm ci 2>&1 | sed 's/^/    /'
+
+echo "  → Buildando..."
+npm run build 2>&1 | sed 's/^/    /'
+
+ln -sf "$BIN_SRC" "$BIN_LINK"
+
+INSTALLED_VER=$("$BIN_LINK" --version 2>/dev/null || echo "desconhecida")
+echo "✓ OmniRoute atualizado (versão: $INSTALLED_VER)"
+
+# Reinicia o serviço se systemd estiver disponível
+if command -v systemctl &>/dev/null && systemctl --user is-enabled omniroute.service &>/dev/null; then
+  echo "  → Reiniciando serviço..."
+  systemctl --user restart omniroute.service
+  echo "  → Serviço reiniciado."
+fi
