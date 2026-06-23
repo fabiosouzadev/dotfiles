@@ -1,0 +1,35 @@
+# Termux (Android) — Dados específicos
+# Estes valores são usados nos templates cond Termux
+termux:
+  install:
+    packages:
+      - git
+      - openssh
+      - curl
+      - wget
+      - zsh
+      - gnupg
+      - age
+      - termux-api
+      - nano
+      - fzf
+      - bat
+      - eza
+      - fd
+      - ripgrep
+      - htop
+      - jq
+      - unzip
+    optional_packages:
+      - qrencode
+      - imagemagick
+      - ffmpeg
+  ssh:
+    vps_host: "fabiosouzadev.duckdns.org"
+    vps_user: "ubuntu"
+    key_file: "~/.ssh/id_ed25519_vps"
+  paths:
+    prefix: "/data/data/com.termux/files/usr"
+    home: "/data/data/com.termux/files/home"
+    local: "/data/data/com.termux/files/home/.local"
+    bin: "/data/data/com.termux/files/home/.local/bin"

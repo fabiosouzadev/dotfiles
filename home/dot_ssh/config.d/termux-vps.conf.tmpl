@@ -1,0 +1,19 @@
+{{- if .settings.termux -}}
+Host vps
+  HostName {{ .features.ai.omniroute.domain | default "fabiosouzadev.duckdns.org" }}
+  User ubuntu
+  Port 22
+  IdentityFile ~/.ssh/id_ed25519_vps
+  IdentitiesOnly yes
+  ServerAliveInterval 30
+  ServerAliveCountMax 3
+
+Host oracle-vps
+  HostName {{ .features.ai.omniroute.domain | default "fabiosouzadev.duckdns.org" }}
+  User ubuntu
+  Port 22
+  IdentityFile ~/.ssh/id_ed25519_vps
+  IdentitiesOnly yes
+  ServerAliveInterval 30
+  ServerAliveCountMax 3
+{{- end -}}

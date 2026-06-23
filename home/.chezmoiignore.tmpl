@@ -29,6 +29,13 @@ Library/LaunchAgents/**
 .chezmoiscripts/unix/**
 {{- end }}
 
+# === TERMUX FILTERS ===
+# Ignore Termux-specific files when NOT on Termux
+{{- if not .settings.termux }}
+.chezmoiscripts/termux/**
+.chezmoidata/termux/**
+{{- end }}
+
 # === VPS-SPECIFIC FILTERS ===
 # Ignore desktop/GUI scripts when running on VPS
 {{- if .settings.vps }}

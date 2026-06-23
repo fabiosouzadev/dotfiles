@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Termux: Instalar Tailscale
+# Opcional - permite conexão direta via Tailscale mesh
+set -euo pipefail
+
+echo "==> 🦎 Termux: Instalando Tailscale"
+
+# No Termux, Tailscale precisa ser instalado via package ou binary
+if command -v tailscale &>/dev/null; then
+  echo "  ✓ Tailscale já instalado: $(tailscale version | head -1)"
+else
+  echo "  → Instalando Tailscale..."
+  pkg install -y tailscale 2>&1 | tail -3
+fi
+
+# Configurar systemd não funciona no Termux, usar daemon direto
+echo "  → Configurando daemon Tailscale..."
+# No Termux, precisa rodar tailscaled em background
+if ! pgrep -x "tailscaled" &>/dev/null; then
+  echo "  → Iniciando tailscaled..."
+  tailscaled --state=/data/data/com.termux/files/usr/var/lib/tailscale/tailscaled.state --socket=/data/data/com.termux/files/usr/var/run/tailscale/tailscaled.sock &
+  sleep 2
+fi
+
+echo "  → Para conectar:"
+echo "    tailscale up"
+echo "    # Ou com auth key: tailscale up --authkey=tskey-xxx"
+echo ""
+echo "  → Verificar status:"
+echo "    tailscale status"
+echo ""
+echo "  → IP Tailscale:"
+echo "    tailscale ip -4"
+echo ""
+echo "  ⚠️  Nota: Tailscale no Termux precisa ser reiniciado após reboot"

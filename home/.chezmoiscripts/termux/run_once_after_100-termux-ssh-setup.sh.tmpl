@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Termux: Configurar conexão SSH com a VPS
+# Roda após o setup base, quando o usuário já tem a SSH key
+set -euo pipefail
+
+echo "==> 🔑 Termux: Configurando SSH para VPS"
+
+SSH_DIR="$HOME/.ssh"
+VPS_HOST="{{ .termux.ssh.vps_host }}"
+VPS_USER="{{ .termux.ssh.vps_user }}"
+KEY_FILE="$SSH_DIR/{{ .termux.ssh.key_file | replace "~/" "" }}"
+
+# 1. Verificar se a chave SSH existe
+if [[ ! -f "$KEY_FILE" ]]; then
+  echo "  ⚠️  Chave SSH não encontrada em $KEY_FILE"
+  echo "  Opções:"
+  echo "    1. Gerar nova chave: ssh-keygen -t ed25519 -f $KEY_FILE"
+  echo "    2. Copiar chave existente: scp vps:~/.ssh/id_ed25519_vps $KEY_FILE"
+  echo "    3. Usar senha (menos seguro): ssh $VPS_USER@$VPS_HOST"
+  echo ""
+  echo "  Para copiar a chave da VPS:"
+  echo "    ssh-copy-id -i ~/.ssh/id_ed25519_vps.pub $VPS_USER@$VPS_HOST"
+  return 0 2>/dev/null || exit 0
+fi
+
+# 2. Permissões corretas
+chmod 600 "$KEY_FILE" 2>/dev/null || true
+chmod 600 "$KEY_FILE.pub" 2>/dev/null || true
+
+# 3. Testar conexão
+echo "  → Testando conexão SSH..."
+if ssh -o ConnectTimeout=10 -o BatchMode=yes -i "$KEY_FILE" "$VPS_USER@$VPS_HOST" "echo '✅ Conexão OK'" 2>/dev/null; then
+  echo "✓ SSH configurado com sucesso!"
+  echo "  Use: ssh vps"
+else
+  echo "  ⚠️  Conexão falhou. Verifique:"
+  echo "    1. A chave pública está na VPS?"
+  echo "    2. O domínio/IP está correto: $VPS_HOST"
+  echo "    3. O Tailscale está ativo?"
+fi

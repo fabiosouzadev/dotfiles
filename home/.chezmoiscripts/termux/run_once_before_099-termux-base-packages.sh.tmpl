@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Setup inicial do Termux no Android
+# Roda uma vez na primeira instalação
+# Requisitos mínimos: zsh + git + ssh + chezmoi
+set -euo pipefail
+
+echo "==> 🤖 Termux: setup inicial"
+
+# 1. Atualizar pacotes base
+echo "  → Atualizando repositórios Termux..."
+pkg update -y 2>&1 | tail -3
+echo "  → Instalando pacotes essenciais..."
+pkg install -y \
+  git \
+  openssh \
+  curl \
+  wget \
+  zsh \
+  gnupg \
+  age \
+  termux-api \
+  2>&1 | tail -3
+
+# 2. Zsh como shell padrão
+echo "  → Configurando zsh como shell padrão..."
+if ! command -v zsh &>/dev/null; then
+  echo "  ✗ zsh não instalado"
+  exit 1
+fi
+chsh -s zsh 2>/dev/null || true
+
+# 3. Configurar zinit (gerenciador de plugins)
+echo "  → Instalando zinit..."
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+if [[ ! -d "$ZINIT_HOME" ]]; then
+  git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME" 2>&1 | tail -3
+fi
+
+# 4. SSH para VPS
+echo "  → Configurando diretórios SSH..."
+mkdir -p "$HOME/.ssh"
+chmod 700 "$HOME/.ssh"
+
+echo "✓ Termux setup concluído"
+echo "  Próximos passos (via chezmoi apply):"
+echo "  1. zsh plugins e aliases"
+echo "  2. SSH keys (encrypted)"
+echo "  3. Config VPS + Tailscale"
