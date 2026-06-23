@@ -12,9 +12,6 @@ MANIFEST_FILE="${SYNC_DIR}/manifest.json"
 CONFIG_SQL_FILE="${OMNIROUTE_DIR}/config.sql"
 BACKUP_NOTE_FILE="${SYNC_DIR}/backup-note.txt"
 
-SOURCE_DIR="${HOME}/.local/src/OmniRoute"
-DIST_DIR="${SOURCE_DIR}/dist"
-
 ENCRYPTED_FILES=(
   .env
   config.sql
@@ -260,10 +257,7 @@ case "${1:-}" in
     echo "🔍 OmniRoute Sync Status"
     echo "--------------------------"
     echo "Data dir:  $OMNIROUTE_DIR"
-    echo "Source dir: $SOURCE_DIR"
     [ -d "$OMNIROUTE_DIR" ] && echo "✅ Data dir: Present" || echo "❌ Data dir: Missing"
-    [ -d "$SOURCE_DIR" ] && echo "✅ Source dir: Present" || echo "⚠️  Source dir: Not found"
-    [ -f "$DIST_DIR/server.js" ] && echo "✅ dist/server.js: Present (build OK)" || echo "⚠️  dist/server.js: Missing (run build)"
     echo "---"
     for rel in .env config.sql storage.sqlite storage.sqlite-wal storage.sqlite-shm call_logs db_backups sync/manifest.json sync/backup-note.txt; do
       if [ -e "$OMNIROUTE_DIR/$rel" ]; then

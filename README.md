@@ -103,6 +103,13 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 | **Local Inference** | Ollama (pre-configured models) |
 | **Gateway** | OmniRoute (`http://localhost:20128/v1`, VPS via Tailscale, Caddy on VPS) |
 
+#### OmniRoute
+- **Instalação**: via `npm install -g omniroute@<version>` (gerenciado pelo mise/node 24)
+- **Config**: `~/.omniroute/.env` (STORAGE_ENCRYPTION_KEY) + `~/.omniroute/config.sql` (config semântica)
+- **Backup/Restore**: `omniroute-sync {push|pull|status|doctor}` — sincroniza estado via chezmoi criptografado
+- **Atualização**: `omniroute-update [version]` — ex: `omniroute-update 3.8.35`
+- **Serviço**: systemd user (`omniroute.service`) ou direto via `omniroute`
+
 ### 📦 Runtime Management
 - **[mise](https://mise.jdx.dev)** — Multi-language version manager (Java, Node.js, Go, Python)
 - **[Nix/Devenv](https://devenv.sh)** — Isolated, reproducible project environments

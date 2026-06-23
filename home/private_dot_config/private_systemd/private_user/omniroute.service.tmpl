@@ -5,10 +5,10 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart={{ .chezmoi.homeDir }}/.local/bin/omniroute
+ExecStart={{ .chezmoi.homeDir }}/.local/share/mise/installs/node/24/bin/omniroute
 Restart=on-failure
 RestartSec=5
-Environment=PATH={{ .chezmoi.homeDir }}/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PATH={{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/.local/share/mise/installs/node/24/bin:/usr/local/bin:/usr/bin:/bin
 
 [Install]
 WantedBy=default.target
