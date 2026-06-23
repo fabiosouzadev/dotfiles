@@ -1,65 +1,61 @@
 #!/usr/bin/env bash
-# ═══════════════════════════════════════════════════════════════════════════════
-# OmniRoute — Install from Source
-# Clona o repo, instala dependências, compila e cria symlink global.
-# ═══════════════════════════════════════════════════════════════════════════════
-
+# Instala / atualiza o OmniRoute from source
+# Uso:
+#   run_once_after_530-install-omniroute-source.sh [versão]
+#   versão = "main" (padrão, mais recente) ou "v3.8.34" (tag específica)
 set -euo pipefail
 
-{{ template "common/script_is_not_ephemeral" . }}
-{{ template "common/script_helper" . }}
+SRC_DIR="{{ .chezmoi.homeDir }}/.local/src/OmniRoute"
+BIN_SRC="$SRC_DIR/bin/omniroute"
+BIN_LINK="{{ .chezmoi.homeDir }}/.local/bin/omniroute"
+VERSION="{{ .omniroute.install.version }}"
 
-{{- $srcDir := joinPath .chezmoi.homeDir ".local" "src" "omniroute" -}}
-
-info "Installing OmniRoute from source..."
-
-# Pré-requisito: Node.js >= 22
-if ! command -v node >/dev/null 2>&1; then
-    error "Node.js não encontrado. Instale Node >= 22 antes de continuar."
-    info "Sugestão: mise install node@lts"
-    exit 1
+# Permite sobrescrever via argumento: chezmoi apply -v v3.8.34
+if [[ "${1:-}" =~ ^v?[0-9] ]]; then
+  VERSION="$1"
 fi
 
-NODE_MAJOR=$(node -e "process.stdout.write(String(process.versions.node.split('.')[0]))")
-if [ "$NODE_MAJOR" -lt 22 ]; then
-    error "Node.js versão $NODE_MAJOR detectada. OmniRoute requer >= 22."
-    exit 1
-fi
+echo "==> OmniRoute — instalando from source (versão: $VERSION)"
 
-# Clone ou update do repo
-if [ -d "{{ $srcDir }}/.git" ]; then
-    info "Repo encontrado em {{ $srcDir }}. Atualizando..."
-    cd "{{ $srcDir }}"
-    git fetch --all --quiet
-    git checkout main --quiet
-    git pull --quiet
+# Garante que ~/.local/bin existe
+mkdir -p "$(dirname "$BIN_LINK")"
+
+# Clona ou atualiza o repo
+if [[ -d "$SRC_DIR/.git" ]]; then
+  echo "  → Repo já existe, atualizando..."
+  cd "$SRC_DIR"
+  git fetch --all --tags --prune 2>&1 | sed 's/^/    /'
 else
-    info "Clonando OmniRoute para {{ $srcDir }}..."
-    mkdir -p "$(dirname "{{ $srcDir }}")"
-    git clone https://github.com/diegosouzapw/OmniRoute.git "{{ $srcDir }}"
-    cd "{{ $srcDir }}"
+  echo "  → Clonando {{ .omniroute.install.repo }}..."
+  git clone "{{ .omniroute.install.repo }}" "$SRC_DIR" 2>&1 | sed 's/^/    /'
+  cd "$SRC_DIR"
 fi
 
-# Instalar dependências e build
-info "Instalando dependências..."
-npm install 2>&1 | tail -5
-
-info "Executando build..."
-npm run build 2>&1 | tail -5
-
-# Criar symlink global
-info "Criando symlink em ~/.local/bin/omniroute..."
-mkdir -p "{{ .chezmoi.homeDir }}/.local/bin"
-ln -sf "{{ $srcDir }}/bin/omniroute.mjs" "{{ .chezmoi.homeDir }}/.local/bin/omniroute"
-chmod +x "{{ $srcDir }}/bin/omniroute.mjs"
-
-# Verificar
-if command -v omniroute >/dev/null 2>&1; then
-    VERSION=$(omniroute --version 2>/dev/null || echo "desconhecida")
-    success "OmniRoute instalado com sucesso! Versão: $VERSION"
-    info "Local: {{ $srcDir }}"
-    info "Binário: {{ .chezmoi.homeDir }}/.local/bin/omniroute"
+# Checkout da versão desejada
+if [[ "$VERSION" == "main" || "$VERSION" == "master" ]]; then
+  git checkout main 2>&1 | sed 's/^/    /'
+  git pull origin main 2>&1 | sed 's/^/    /'
 else
-    warn "Symlink criado, mas omniroute não está no PATH."
-    info "Adicione ao PATH: export PATH=\"{{ .chezmoi.homeDir }}/.local/bin:\$PATH\""
+  git checkout "$VERSION" 2>&1 | sed 's/^/    /'
 fi
+
+# Instala dependências e build
+echo "  → Instalando dependências..."
+npm ci 2>&1 | sed 's/^/    /'
+
+echo "  → Buildando..."
+npm run build 2>&1 | sed 's/^/    /'
+
+# Symlink do binário
+if [[ -f "$BIN_SRC" ]]; then
+  ln -sf "$BIN_SRC" "$BIN_LINK"
+  echo "  → Symlink criado: $BIN_LINK → $BIN_SRC"
+else
+  echo "  ✗ ERRO: binário não encontrado em $BIN_SRC"
+  echo "    Verifique se o build gerou o binário corretamente."
+  exit 1
+fi
+
+# Verificação
+INSTALLED_VER=$("$BIN_LINK" --version 2>/dev/null || echo "desconhecida")
+echo "✓ OmniRoute instalado com sucesso (versão: $INSTALLED_VER)"
