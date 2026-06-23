@@ -8,7 +8,7 @@ set -euo pipefail
 SRC_DIR="{{ .chezmoi.homeDir }}/.local/src/OmniRoute"
 BIN_SRC="$SRC_DIR/bin/omniroute"
 BIN_LINK="{{ .chezmoi.homeDir }}/.local/bin/omniroute"
-CONFIG_FILE="{{ .chezmoi.sourceDir }}/.chezmoidata/omniroute.yaml"
+CONFIG_FILE="{{ .chezmoi.sourceDir }}/home/.chezmoidata/omniroute.yaml"
 
 # Lê versão do config ou usa argumento
 if [[ "${1:-}" =~ ^v?[0-9] || "${1:-}" == "main" || "${1:-}" == "master" ]]; then
