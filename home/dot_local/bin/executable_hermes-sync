@@ -331,7 +331,7 @@ case "${1:-}" in
     run_export
     add_existing_files
     run_doctor
-    echo "✓ Pronto. Agora rode: chezmoi cd && git status && git add . && git commit -m \"backup: update Hermes sync\" && git push"
+    echo "✓ Pronto. Agora rode: cd ~/.local/share/chezmoi && git status && git add . && git commit -m \"backup: update Hermes sync\" && git push"
     ;;
   pull)
     require_cmd sqlite3
