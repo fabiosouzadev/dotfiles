@@ -8,7 +8,6 @@
 #   - Secrets: ~/.hermes/.env, ~/.hermes/auth.json, ~/.hermes/gmail_app_password.txt
 #   - Memórias: ~/.hermes/memories/USER.md, ~/.hermes/memories/MEMORY.md
 #   - Cron: ~/.hermes/cron/jobs.json
-#   - Canais: ~/.hermes/channel_directory.json
 #   - Estado do Gateway: ~/.hermes/gateway_state.json
 #   - Manifestos gerados: ~/.hermes/sync/manifest.json, ~/.hermes/sync/kanban-config.sql, ~/.hermes/sync/skills-manifest.tsv
 #
@@ -40,7 +39,6 @@ ENCRYPTED_FILES=(
   memories/USER.md
   memories/MEMORY.md
   cron/jobs.json
-  channel_directory.json
   gateway_state.json
   sync/manifest.json
   sync/kanban-config.sql
@@ -51,7 +49,6 @@ ENCRYPTED_FILES=(
 # Diretórios que serão adicionados ao backup (relativos a ~/.hermes/)
 ENCRYPTED_DIRS=(
   skills/
-  agents/
 )
 
 # Arquivos/diretórios do Hermes que NÃO devem ir para o backup
@@ -111,7 +108,7 @@ manifest={
     'source_host': os.uname().nodename,
     'hermes_dir': str(root),
     'backup_model': 'chezmoi plaintext config template + encrypted secrets + selective SQL + manifest; not full state.db/logs/sessions backup',
-    'included_files': ['config.yaml','.env','auth.json','gmail_app_password.txt','memories/USER.md','memories/MEMORY.md','cron/jobs.json','channel_directory.json','gateway_state.json','sync/manifest.json','sync/kanban-config.sql','sync/skills-manifest.tsv','sync/backup-note.txt'],
+    'included_files': ['config.yaml','.env','auth.json','gmail_app_password.txt','memories/USER.md','memories/MEMORY.md','cron/jobs.json','gateway_state.json','sync/manifest.json','sync/kanban-config.sql','sync/skills-manifest.tsv','sync/backup-note.txt'],
     'excluded_by_design': [
         'state.db (runtime session history)',
         'state.db-wal', 'state.db-shm',
@@ -121,7 +118,7 @@ manifest={
         'any tarball-monolithic backup'
     ]
 }
-manifest['sizes'] = {k: size(Path(k)) for k in ['config.yaml','.env','auth.json','gmail_app_password.txt','memories','cron','channel_directory.json','gateway_state.json','sync']}
+manifest['sizes'] = {k: size(Path(k)) for k in ['config.yaml','.env','auth.json','gmail_app_password.txt','memories','cron','gateway_state.json','sync']}
 (sync/'manifest.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
 (sync/'backup-note.txt').write_text('Hermes Agent backup model: config + secrets in chezmoi, kanban SQL exported selectively, skills manifest generated.\n')
 PY
