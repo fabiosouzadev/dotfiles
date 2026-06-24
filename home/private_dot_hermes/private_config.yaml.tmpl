@@ -667,6 +667,14 @@ mcp_servers:
     - -y
     - '@agentmemory/mcp'
     command: npx
+  notion:
+    args:
+    - -y
+    - 'mcp-remote'
+    - 'https://mcp.notion.com/mcp'
+    command: npx
+    env:
+    - NOTION_TOKEN: ${NOTION_API_KEY}
 platform_toolsets:
   cli:
   - browser
