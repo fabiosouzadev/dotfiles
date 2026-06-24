@@ -1,32 +1,15 @@
-## ═══════════════════════════════════════════════════════════════════════════════
-## Hermes Agent — Aliases de gerenciamento e backup
-## ═══════════════════════════════════════════════════════════════════════════════
+# Hermes Agent CLI
+# Aliases para comandos Hermes
+alias hermes-sync='hermes-sync-push'
 
-{{ if and (eq .chezmoi.os "linux") (not .settings.wsl) }}
-## Linux com systemd user service
-alias -- hermes-gateway-start="sudo systemctl start hermes-gateway.service"
-alias -- hermes-gateway-stop="sudo systemctl stop hermes-gateway.service"
-alias -- hermes-gateway-restart="sudo systemctl restart hermes-gateway.service"
-alias -- hermes-gateway-status="sudo systemctl status hermes-gateway.service"
-alias -- hermes-gateway-enable="sudo systemctl enable hermes-gateway.service"
-{{ else }}
-## macOS / WSL / ambientes sem systemd
-alias -- hermes-gateway-start="hermes gateway start"
-alias -- hermes-gateway-stop="hermes gateway stop"
-alias -- hermes-gateway-restart="hermes gateway restart"
-alias -- hermes-gateway-status="hermes gateway status"
-{{ end }}
+# Aliases para OmniRoute
+alias omniroute-restart='systemctl --user restart omniroute'
+alias omniroute-health='curl -s http://localhost:20128/status'
 
-## Aliases universais
-alias -- hermes-doctor="hermes doctor"
-alias -- hermes-config="hermes config"
-alias -- hermes-logs="tail -f ${HOME}/.hermes/logs/gateway.log"
+# Aliases para chezmoi
+alias chezmoi-cd='chezmoi cd'
+alias chezmoi-apply='chezmoi apply'
 
-## Backup/sincronização via Chezmoi
-## Modelo: arquivos pequenos + SQL seletivo + manifest -> chezmoi add --encrypt
-alias -- hermes-sync-push="hermes-sync push"
-alias -- hermes-sync-pull="hermes-sync pull"
-alias -- hermes-sync-status="hermes-sync status"
-alias -- hermes-sync-doctor="hermes-sync doctor"
-
-# vim: filetype=bash
+# Aliases para SSH
+alias vps='ssh vps'
+alias vps-status='ssh vps -- systemctl status omniroute'

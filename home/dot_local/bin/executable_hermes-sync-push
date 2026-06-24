@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Hermes Sync Push — Wrapper para sincronizar o chezmoi com o repositório remoto
+# Uso: hermes-sync-push [--message "mensagem personalizada"]
+
+set -euo pipefail
+
+# 1. Aplicar configurações locais
+if command -v chezmoi >/dev/null 2>&1; then
+  echo "🔄 Aplicando configurações com chezmoi..."
+  chezmoi apply
+else
+  echo "⚠️  chezmoi não encontrado. Pulando apply."
+fi
+
+# 2. Verificar mudanças
+if ! command -v git >/dev/null 2>&1; then
+  echo "❌ Git não encontrado. Instale o git para sincronizar."
+  exit 1
+fi
+
+REPO_ROOT="$(chezmoi source-path 2>/dev/null || echo "")"
+if [ -z "$REPO_ROOT" ] || [ ! -d "$REPO_ROOT" ]; then
+  echo "⚠️  Não consegui localizar o source do chezmoi. Verifique se está em um repositório."
+  exit 1
+fi
+
+cd "$REPO_ROOT"
+
+# 3. Verificar status
+if [ -n "$(git status --porcelain)" ]; then
+  echo "📝 Há mudanças não commitadas. Commitando..."
+  
+  # 4. Commit
+  MESSAGE="${1:-backup: sync via hermes-sync-push}"
+  git add .
+  git commit -m "$MESSAGE"
+  
+  # 5. Push
+  echo "🔐 Fazendo push para o repositório remoto..."
+  git push
+  
+  echo "✅ Sincronização concluída!"
+else
+  echo "ℹ️  Nenhuma mudança detectada. Nada para sincronizar."
+fi
