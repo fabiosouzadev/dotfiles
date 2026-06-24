@@ -27,7 +27,7 @@ termux:
   ssh:
     vps_host: "fabiosouzadev.duckdns.org"
     vps_user: "ubuntu"
-    key_file: "~/.ssh/id_ed25519_vps"
+    key_file: "~/.ssh/private_readonly_ssh-key-oracle-dev-2.key"
   paths:
     prefix: "/data/data/com.termux/files/usr"
     home: "/data/data/com.termux/files/home"

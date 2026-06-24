@@ -8,7 +8,7 @@ echo "==> 🔑 Termux: Configurando SSH para VPS"
 SSH_DIR="$HOME/.ssh"
 VPS_HOST="{{ .termux.ssh.vps_host }}"
 VPS_USER="{{ .termux.ssh.vps_user }}"
-KEY_FILE="$SSH_DIR/{{ .termux.ssh.key_file | replace "~/" "" }}"
+KEY_FILE="$SSH_DIR/private_readonly_ssh-key-oracle-dev-2.key"
 
 # 1. Verificar se a chave SSH existe
 if [[ ! -f "$KEY_FILE" ]]; then

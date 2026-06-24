@@ -1,19 +1,21 @@
-{{- if .settings.termux -}}
+# Conexão SSH para VPS (Oracle Cloud)
+# A chave privada é gerenciada pelo chezmoi (encrypted + .asc)
+# e descriptografada para: ~/.ssh/private_readonly_ssh-key-oracle-dev-2.key
 Host vps
-  HostName {{ .features.ai.omniroute.domain | default "fabiosouzadev.duckdns.org" }}
-  User ubuntu
-  Port 22
-  IdentityFile ~/.ssh/id_ed25519_vps
-  IdentitiesOnly yes
-  ServerAliveInterval 30
-  ServerAliveCountMax 3
+    HostName {{ .termux.ssh.vps_host }}
+    User {{ .termux.ssh.vps_user }}
+    Port 22
+    IdentityFile ~/.ssh/private_readonly_ssh-key-oracle-dev-2.key
+    IdentitiesOnly yes
+    ServerAliveInterval 30
+    ServerAliveCountMax 3
 
 Host oracle-vps
-  HostName {{ .features.ai.omniroute.domain | default "fabiosouzadev.duckdns.org" }}
-  User ubuntu
-  Port 22
-  IdentityFile ~/.ssh/id_ed25519_vps
-  IdentitiesOnly yes
-  ServerAliveInterval 30
-  ServerAliveCountMax 3
+    HostName {{ .termux.ssh.vps_host }}
+    User {{ .termux.ssh.vps_user }}
+    Port 22
+    IdentityFile ~/.ssh/private_readonly_ssh-key-oracle-dev-2.key
+    IdentitiesOnly yes
+    ServerAliveInterval 30
+    ServerAliveCountMax 3
 {{- end -}}
