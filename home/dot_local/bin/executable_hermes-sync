@@ -263,7 +263,7 @@ add_existing_files() {
         if [ -f "$file" ]; then
           chezmoi add --encrypt --force "$file"
         fi
-      done < <(find "$path" -type f -print0)
+      done < <(find "$path" -type f -print0 | head -n 1000)
     else
       echo "  ⚠️  Diretório não encontrado (pode ser opcional): $dir"
     fi
