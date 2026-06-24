@@ -113,9 +113,9 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 #### 🔄 Hermes Sync
 - **Backup**: `hermes-sync push` ou alias `hermes-sync-push`
 - **Restore**: `hermes-sync pull` ou alias `hermes-sync-pull`
-- **O que faz**: Sincroniza o **repositório chezmoi** com o remoto (commit + push) e restaura o estado completo do ambiente (Hermes Agent + OmniRoute)
+- **O que faz**: Sincroniza **apenas o estado do Hermes Agent** (config, secrets, memories, kanban semantic SQL, skills manifest) via chezmoi criptografado + manifest
 - **Localização**: `~/.local/bin/hermes-sync`
-- **Escopo**: Backup do Hermes Agent (configs, skills, estado do ambiente)
+- **Escopo**: Backup seletivo do Hermes Agent (exclui state.db, sessions, logs, cache, código fonte)
 
 #### 🔄 OmniRoute Sync
 - **Backup**: `omniroute-sync push`
