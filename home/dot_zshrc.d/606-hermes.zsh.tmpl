@@ -24,9 +24,8 @@ alias -- hermes-logs="tail -f ${HOME}/.hermes/logs/gateway.log"
 
 ## Backup/sincronização via Chezmoi
 ## Modelo: arquivos pequenos + SQL seletivo + manifest -> chezmoi add --encrypt
-alias -- hermes-sync-push="hermes-sync push && cd {{ .chezmoi.src }} && git add . && git commit -m "backup: update Hermes sync" && git push"
+alias -- hermes-sync-push="hermes-sync push && cd {{ .chezmoi.sourceDir }} && git add . && git commit -m "backup: update Hermes sync" && git push"
 alias -- hermes-sync-pull="hermes-sync pull"
 alias -- hermes-sync-status="hermes-sync status"
 alias -- hermes-sync-doctor="hermes-sync doctor"
-
 # vim: filetype=bash
