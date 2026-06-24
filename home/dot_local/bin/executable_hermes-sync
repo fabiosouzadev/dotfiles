@@ -180,38 +180,41 @@ export_skills_manifest() {
   require_cmd python3
   mkdir -p "$SYNC_DIR"
   python3 - <<PY
-import json, os, time
+import json, os, sys, time
 from pathlib import Path
 root = Path(os.path.expanduser(${HERMES_DIR@Q}))
 skills_dir = root / 'skills'
 out = Path(os.path.expanduser(${SKILLS_MANIFEST_TSV@Q}))
 
-if not skills_dir.exists():
-    out.write_text('')
-    return
+def main():
+    if not skills_dir.exists():
+        out.write_text('')
+        return
 
-manifest = []
-for skill_dir in sorted(skills_dir.iterdir()):
-    if not skill_dir.is_dir():
-        continue
-    skill_name = skill_dir.name
-    files = []
-    total_bytes = 0
-    for f in skill_dir.rglob('*'):
-        if f.is_file():
-            files.append(str(f.relative_to(skill_dir)))
-            total_bytes += f.stat().st_size
-    manifest.append({
-        'skill': skill_name,
-        'category': skill_dir.parent.name,
-        'files': len(files),
-        'bytes': total_bytes,
-        'file_list': ', '.join(files[:5]) + ('...' if len(files) > 5 else '')
-    })
+    manifest = []
+    for skill_dir in sorted(skills_dir.iterdir()):
+        if not skill_dir.is_dir():
+            continue
+        skill_name = skill_dir.name
+        files = []
+        total_bytes = 0
+        for f in skill_dir.rglob('*'):
+            if f.is_file():
+                files.append(str(f.relative_to(skill_dir)))
+                total_bytes += f.stat().st_size
+        manifest.append({
+            'skill': skill_name,
+            'category': skill_dir.parent.name,
+            'files': len(files),
+            'bytes': total_bytes,
+            'file_list': ', '.join(files[:5]) + ('...' if len(files) > 5 else '')
+        })
 
-out.write_text('skill\tcategory\tfiles\tbytes\tfile_list\n')
-for m in manifest:
-    out.write_text(f"{m['skill']}\t{m['category']}\t{m['files']}\t{m['bytes']}\t{m['file_list']}\n")
+    out.write_text('skill\\tcategory\\tfiles\\tbytes\\tfile_list\\n')
+    for m in manifest:
+        out.write_text(f"{m['skill']}\\t{m['category']}\\t{m['files']}\\t{m['bytes']}\\t{m['file_list']}\\n")
+
+main()
 PY
 }
 
@@ -243,7 +246,7 @@ add_existing_files() {
   for rel in "${ENCRYPTED_FILES[@]}"; do
     path="$HERMES_DIR/$rel"
     if [ -f "$path" ]; then
-      chezmoi add --encrypt "$path"
+      chezmoi add --encrypt --force "$path"
       echo "  + $rel"
     else
       echo "  ⚠️  Arquivo não encontrado (pode ser opcional): $rel"
@@ -258,7 +261,7 @@ add_existing_files() {
       # Adiciona cada arquivo dentro do diretório
       while IFS= read -r -d '' file; do
         if [ -f "$file" ]; then
-          chezmoi add --encrypt "$file"
+          chezmoi add --encrypt --force "$file"
         fi
       done < <(find "$path" -type f -print0)
     else
