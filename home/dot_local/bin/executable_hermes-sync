@@ -32,23 +32,11 @@ BACKUP_NOTE_FILE="${SYNC_DIR}/backup-note.txt"
 
 # Arquivos que serão adicionados ao backup (relativos a ~/.hermes/)
 ENCRYPTED_FILES=(
-  config.yaml
   .env
   auth.json
   gmail_app_password.txt
   memories/USER.md
   memories/MEMORY.md
-  cron/jobs.json
-  gateway_state.json
-  sync/manifest.json
-  sync/kanban-config.sql
-  sync/skills-manifest.tsv
-  sync/backup-note.txt
-)
-
-# Diretórios que serão adicionados ao backup (relativos a ~/.hermes/)
-ENCRYPTED_DIRS=(
-  skills/
 )
 
 # Arquivos/diretórios do Hermes que NÃO devem ir para o backup
@@ -250,22 +238,6 @@ add_existing_files() {
       echo "  + $rel"
     else
       echo "  ⚠️  Arquivo não encontrado (pode ser opcional): $rel"
-    fi
-  done
-  
-  # Diretórios completos (skills e agents)
-  for dir in "${ENCRYPTED_DIRS[@]}"; do
-    path="$HERMES_DIR/$dir"
-    if [ -d "$path" ]; then
-      echo "  + $dir (diretório completo)"
-      # Adiciona cada arquivo dentro do diretório
-      while IFS= read -r -d '' file; do
-        if [ -f "$file" ]; then
-          chezmoi add --encrypt --force "$file"
-        fi
-      done < <(find "$path" -type f -print0 | head -n 1000)
-    else
-      echo "  ⚠️  Diretório não encontrado (pode ser opcional): $dir"
     fi
   done
 }
