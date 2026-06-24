@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# Hermes Sync — Gerencia backup e restore do estado do Hermes Agent
+# Uso:
+#   hermes-sync push [--message "mensagem"]  → Backup (commit + push) do chezmoi
+#   hermes-sync pull                        → Restaurar estado completo do ambiente
+#
+# O que faz:
+#   - Backup: Sincroniza o repositório chezmoi com o remoto (commit + push)
+#   - Restore: Aplica as configurações do chezmoi e restaura estado do OmniRoute
+#
+# Dependências:
+#   - chezmoi
+#   - git
+#   - age (para descriptografar)
+#   - sqlite3 (para restore do OmniRoute)
+
+set -euo pipefail
+
+log() { echo "🔹 $1"; }
+warn() { echo "⚠️  $1"; }
+error() { echo "❌ $1" >&2; exit 1; }
+
+# 1. Verificar dependências
+for cmd in chezmoi git; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    error "$cmd não encontrado. Instale-o primeiro."
+  fi
+done
+
+# 2. Localizar source do chezmoi
+REPO_ROOT="$(chezmoi source-path 2>/dev/null || echo "")"
+if [ -z "$REPO_ROOT" ] || [ ! -d "$REPO_ROOT" ]; then
+  error "Não consegui localizar o source do chezmoi. Verifique se está em um repositório."
+fi
+
+cd "$REPO_ROOT"
+
+# 3. Funções
+backup() {
+  local message="${1:-backup: sync via hermes-sync push}"
+  
+  log "Verificando mudanças..."
+  if [ -n "$(git status --porcelain)" ]; then
+    log "Commitando mudanças..."
+    git add .
+    git commit -m "$message"
+    
+    log "Fazendo push para o repositório remoto..."
+    git push
+    
+    log "✅ Backup concluído!"
+  else
+    warn "Nenhuma mudança detectada. Nada para sincronizar."
+  fi
+}
+
+restore() {
+  log "🔄 Restaurando estado completo do ambiente..."
+  
+  # Restaurar arquivos criptografados do chezmoi
+  log "Aplicando configurações do chezmoi..."
+  chezmoi apply
+  
+  # Restaurar estado do OmniRoute (se existir backup)
+  local omniroute_dir="${OMNIROUTE_HOME:-${DATA_DIR:-${HOME}/.omniroute}}"
+  if [ -d "$omniroute_dir" ]; then
+    local config_sql="$omniroute_dir/config.sql"
+    local db_file="$omniroute_dir/storage.sqlite"
+    
+    if [ -f "$config_sql" ] && command -v sqlite3 >/dev/null 2>&1; then
+      log "Importando configuração semântica do OmniRoute..."
+      sqlite3 "$db_file" < "$config_sql"
+      log "✅ Configuração do OmniRoute restaurada!"
+    else
+      warn "Arquivo de configuração do OmniRoute não encontrado ou sqlite3 ausente."
+    fi
+  else
+    warn "Diretório do OmniRoute não encontrado: $omniroute_dir"
+  fi
+  
+  log "✅ Restaurar concluído!"
+}
+
+# 4. Main
+case "${1:-}" in
+  push)
+    shift || true
+    backup "${1:-backup: sync via hermes-sync push}"
+    ;;
+  pull)
+    restore
+    ;;
+  *)
+    echo "Uso: hermes-sync {push [--message \"msg\"]|pull}"
+    echo "  push   : Faz backup (commit + push) das mudanças"
+    echo "  pull   : Restaura estado completo do ambiente"
+    exit 1
+    ;;
+esac

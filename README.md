@@ -110,6 +110,20 @@ Then re-encrypt all secrets with your public key. See [docs/FORK-GUIDE.md](docs/
 - **Atualização**: `omniroute-update [version]` — ex: `omniroute-update 3.8.35`
 - **Serviço**: systemd user (`omniroute.service`) ou direto via `omniroute`
 
+#### 🔄 Hermes Sync
+- **Backup**: `hermes-sync push` ou alias `hermes-sync-push`
+- **Restore**: `hermes-sync pull` ou alias `hermes-sync-pull`
+- **O que faz**: Sincroniza o **repositório chezmoi** com o remoto (commit + push) e restaura o estado completo do ambiente (Hermes Agent + OmniRoute)
+- **Localização**: `~/.local/bin/hermes-sync`
+- **Escopo**: Backup do Hermes Agent (configs, skills, estado do ambiente)
+
+#### 🔄 OmniRoute Sync
+- **Backup**: `omniroute-sync push`
+- **Restore**: `omniroute-sync pull`
+- **O que faz**: Sincroniza **apenas o estado do OmniRoute** (banco, secrets, config) via chezmoi criptografado
+- **Localização**: `~/.local/bin/omniroute-sync`
+- **Escopo**: Backup seletivo do OmniRoute (exclui logs, cache, runtime state)
+
 ### 📦 Runtime Management
 - **[mise](https://mise.jdx.dev)** — Multi-language version manager (Java, Node.js, Go, Python)
 - **[Nix/Devenv](https://devenv.sh)** — Isolated, reproducible project environments
