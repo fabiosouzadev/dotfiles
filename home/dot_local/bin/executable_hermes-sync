@@ -48,6 +48,12 @@ ENCRYPTED_FILES=(
   sync/backup-note.txt
 )
 
+# Diretórios que serão adicionados ao backup (relativos a ~/.hermes/)
+ENCRYPTED_DIRS=(
+  skills/
+  agents/
+)
+
 # Arquivos/diretórios do Hermes que NÃO devem ir para o backup
 FORBIDDEN_SOURCE_PATTERNS=(
   'private_dot_hermes/private_backup.tar.gz'
@@ -235,6 +241,8 @@ run_export() {
 add_existing_files() {
   require_cmd chezmoi
   echo "🔐 Adicionando arquivos pequenos ao Chezmoi com criptografia..."
+  
+  # Arquivos individuais
   for rel in "${ENCRYPTED_FILES[@]}"; do
     path="$HERMES_DIR/$rel"
     if [ -f "$path" ]; then
@@ -242,6 +250,22 @@ add_existing_files() {
       echo "  + $rel"
     else
       echo "  ⚠️  Arquivo não encontrado (pode ser opcional): $rel"
+    fi
+  done
+  
+  # Diretórios completos (skills e agents)
+  for dir in "${ENCRYPTED_DIRS[@]}"; do
+    path="$HERMES_DIR/$dir"
+    if [ -d "$path" ]; then
+      echo "  + $dir (diretório completo)"
+      # Adiciona cada arquivo dentro do diretório
+      while IFS= read -r -d '' file; do
+        if [ -f "$file" ]; then
+          chezmoi add --encrypt "$file"
+        fi
+      done < <(find "$path" -type f -print0)
+    else
+      echo "  ⚠️  Diretório não encontrado (pode ser opcional): $dir"
     fi
   done
 }
