@@ -121,3 +121,8 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && command -v dbus-launch >/dev/null; then
 fi
 
 eval "$(mise activate bash)"
+
+# Hermes Agent Aliases
+if [ -f "$HOME/.hermes/aliases/hermes-sync.sh" ]; then
+    source "$HOME/.hermes/aliases/hermes-sync.sh"
+fi
