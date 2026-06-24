@@ -1,99 +1,174 @@
 #!/usr/bin/env bash
-# Hermes Sync — Gerencia backup e restore do estado do Hermes Agent
-# Uso:
-#   hermes-sync push [--message "mensagem"]  → Backup (commit + push) do chezmoi
-#   hermes-sync pull                        → Restaurar estado completo do ambiente
+# Hermes Agent — Backup & Restore via Chezmoi
+# Sincroniza o estado completo do Hermes Agent com o repositório remoto.
+# Modelo: chezmoi apply (restaura tudo) + git push (backup do repo).
 #
-# O que faz:
-#   - Backup: Sincroniza o repositório chezmoi com o remoto (commit + push)
-#   - Restore: Aplica as configurações do chezmoi e restaura estado do OmniRoute
+# O que entra no backup:
+#   - Todo o repositório chezmoi (configs, scripts, templates)
+#   - Arquivos criptografados (SSH keys, API tokens, secrets)
+#   - Estado do Hermes Agent (skills, cronjobs, memories)
 #
-# Dependências:
-#   - chezmoi
-#   - git
-#   - age (para descriptografar)
-#   - sqlite3 (para restore do OmniRoute)
+# O que NÃO entra no backup (por design):
+#   - Runtime state do Hermes (sessões temporárias, cache de conversas)
+#   - Dados do OmniRoute (gerenciados pelo omniroute-sync)
+#   - Arquivos >1MB não criptografados (validado pelo doctor)
 
 set -euo pipefail
 
-log() { echo "🔹 $1"; }
-warn() { echo "⚠️  $1"; }
-error() { echo "❌ $1" >&2; exit 1; }
+HERMES_HOME="${HOME}/.hermes"
+CHEZMOI_REPO="$(chezmoi source-path 2>/dev/null || echo "")"
 
-# 1. Verificar dependências
-for cmd in chezmoi git; do
-  if ! command -v "$cmd" >/dev/null 2>&1; then
-    error "$cmd não encontrado. Instale-o primeiro."
+# Diretórios e arquivos incluídos no backup (via chezmoi)
+BACKUP_SOURCES=(
+  "home/.hermes/"
+  "home/.chezmoiconfig/"
+  "home/.local/bin/"
+  "home/.config/"
+  "home/.ssh/"
+  "home/.gnupg/"
+)
+
+# Arquivos/diretórios do Hermes que NÃO devem ir para o backup
+EXCLUDED_PATTERNS=(
+  '*/cache/*'
+  '*/tmp/*'
+  '*/logs/*'
+  '*/sessions/*'
+  '*.tmp'
+  '*.log'
+)
+
+# Arquivos proibidos no chezmoi (segurança)
+FORBIDDEN_SOURCE_PATTERNS=(
+  'private_dot_hermes/private_*.key'
+  'private_dot_hermes/*_unencrypted*'
+)
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "❌ Comando obrigatório não encontrado: $1"
+    exit 1
   fi
-done
+}
 
-# 2. Localizar source do chezmoi
-REPO_ROOT="$(chezmoi source-path 2>/dev/null || echo "")"
-if [ -z "$REPO_ROOT" ] || [ ! -d "$REPO_ROOT" ]; then
-  error "Não consegui localizar o source do chezmoi. Verifique se está em um repositório."
-fi
+print_usage() {
+  echo "Uso: hermes-sync {push|pull|status|doctor}"
+  echo "  push   : Aplica configs e faz backup (commit + push) para o repositório remoto"
+  echo "  pull   : Restaura estado completo do ambiente (chezmoi apply)"
+  echo "  status : Verifica estado local e arquivos de sincronização"
+  echo "  doctor : Valida se o chezmoi não contém blobs proibidos"
+}
 
-cd "$REPO_ROOT"
+run_doctor() {
+  require_cmd chezmoi
+  local src
+  src="$(chezmoi source-path 2>/dev/null || echo "")"
+  if [ -z "$src" ] || [ ! -d "$src" ]; then
+    echo "⚠️  Não consegui localizar o source do chezmoi"
+    return 1
+  fi
+  echo "🩺 Hermes sync doctor"
+  echo "Chezmoi source: $src"
+  local failed=0
+  for pat in "${FORBIDDEN_SOURCE_PATTERNS[@]}"; do
+    if [ -e "$src/home/$pat" ]; then
+      echo "❌ Proibido encontrado: home/$pat"
+      failed=1
+    fi
+  done
+  while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    size=$(stat -c%s "$f" 2>/dev/null || echo 0)
+    if [ "$size" -gt 1048576 ]; then
+      case "$f" in
+        *.asc) echo "ℹ️  Arquivo criptografado >1MB: ${f#$src/} ($size bytes) — verifique se é intencional" ;;
+        *) echo "❌ Arquivo plaintext >1MB no chezmoi: ${f#$src/} ($size bytes)"; failed=1 ;;
+      esac
+    fi
+  done < <(find "$src/home" -type f 2>/dev/null || true)
+  if [ "$failed" -eq 0 ]; then
+    echo "✅ Nenhum blob proibido/plaintext perigoso encontrado"
+  fi
+  return "$failed"
+}
 
-# 3. Funções
-backup() {
-  local message="${1:-backup: sync via hermes-sync push}"
-  
-  log "Verificando mudanças..."
+run_status() {
+  echo "🔍 Hermes Sync Status"
+  echo "----------------------"
+  echo "Hermes home: $HERMES_HOME"
+  [ -d "$HERMES_HOME" ] && echo "✅ Hermes dir: Present" || echo "❌ Hermes dir: Missing"
+  echo "---"
+  for rel in "${BACKUP_SOURCES[@]}"; do
+    if [ -e "$HOME/$rel" ]; then
+      echo "✅ $rel: Present"
+    else
+      echo "⚠️  $rel: Missing"
+    fi
+  done
+  if [ -d "$HERMES_HOME" ]; then
+    echo "---"
+    echo "Hermes subdirs:"
+    for d in skills cronjobs memories; do
+      [ -d "$HERMES_HOME/$d" ] && echo "  ✅ $d" || echo "  ⚠️  $d (missing)"
+    done
+  fi
+}
+
+run_push() {
+  local message="${1:-backup: update Hermes Agent sync}"
+  require_cmd chezmoi
+  require_cmd git
+
+  echo "📦 Iniciando backup do Hermes Agent..."
+
+  # 1. Aplicar configurações locais
+  echo "  → Aplicando configurações com chezmoi..."
+  chezmoi apply
+
+  # 2. Verificar mudanças
+  cd "$CHEZMOI_REPO"
   if [ -n "$(git status --porcelain)" ]; then
-    log "Commitando mudanças..."
+    echo "  → Commitando mudanças..."
     git add .
     git commit -m "$message"
-    
-    log "Fazendo push para o repositório remoto..."
+
+    echo "  → Fazendo push para o repositório remoto..."
     git push
-    
-    log "✅ Backup concluído!"
+
+    echo "✓ Pronto. Backup do Hermes Agent concluído!"
   else
-    warn "Nenhuma mudança detectada. Nada para sincronizar."
+    echo "ℹ️  Nenhuma mudança detectada. Nada para sincronizar."
   fi
 }
 
-restore() {
-  log "🔄 Restaurando estado completo do ambiente..."
-  
-  # Restaurar arquivos criptografados do chezmoi
-  log "Aplicando configurações do chezmoi..."
+run_pull() {
+  echo "📥 Restaurando estado completo do Hermes Agent..."
+  require_cmd chezmoi
+
+  echo "  → Aplicando configurações do chezmoi..."
   chezmoi apply
-  
-  # Restaurar estado do OmniRoute (se existir backup)
-  local omniroute_dir="${OMNIROUTE_HOME:-${DATA_DIR:-${HOME}/.omniroute}}"
-  if [ -d "$omniroute_dir" ]; then
-    local config_sql="$omniroute_dir/config.sql"
-    local db_file="$omniroute_dir/storage.sqlite"
-    
-    if [ -f "$config_sql" ] && command -v sqlite3 >/dev/null 2>&1; then
-      log "Importando configuração semântica do OmniRoute..."
-      sqlite3 "$db_file" < "$config_sql"
-      log "✅ Configuração do OmniRoute restaurada!"
-    else
-      warn "Arquivo de configuração do OmniRoute não encontrado ou sqlite3 ausente."
-    fi
-  else
-    warn "Diretório do OmniRoute não encontrado: $omniroute_dir"
-  fi
-  
-  log "✅ Restaurar concluído!"
+
+  echo "✓ Pronto. Ambiente restaurado!"
+  echo ""
+  echo "  Para restaurar também o OmniRoute, rode: omniroute-sync pull"
 }
 
-# 4. Main
 case "${1:-}" in
   push)
     shift || true
-    backup "${1:-backup: sync via hermes-sync push}"
+    run_push "${1:-backup: update Hermes Agent sync}"
     ;;
   pull)
-    restore
+    run_pull
+    ;;
+  status)
+    run_status
+    ;;
+  doctor)
+    run_doctor
     ;;
   *)
-    echo "Uso: hermes-sync {push [--message \"msg\"]|pull}"
-    echo "  push   : Faz backup (commit + push) das mudanças"
-    echo "  pull   : Restaura estado completo do ambiente"
+    print_usage
     exit 1
     ;;
 esac
