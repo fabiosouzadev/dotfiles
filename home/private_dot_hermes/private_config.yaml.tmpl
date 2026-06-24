@@ -668,12 +668,10 @@ mcp_servers:
     - '@agentmemory/mcp'
     command: npx
   notion:
-    args:
-    - -y
-    - '@notionhq/notion-mcp-server'
     command: npx
+    args: ["-y", "@notionhq/notion-mcp-server"]
     env:
-    - NOTION_API_TOKEN: ${NOTION_API_KEY}
+      NOTION_API_TOKEN: ${NOTION_API_KEY}
 platform_toolsets:
   cli:
   - browser
