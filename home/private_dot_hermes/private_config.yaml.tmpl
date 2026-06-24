@@ -670,8 +670,7 @@ mcp_servers:
   notion:
     args:
     - -y
-    - 'mcp-remote'
-    - 'https://mcp.notion.com/mcp'
+    - '@notionhq/notion-mcp-server'
     command: npx
     env:
     - NOTION_TOKEN: ${NOTION_API_KEY}
