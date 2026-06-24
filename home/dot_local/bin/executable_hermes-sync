@@ -1,47 +1,64 @@
 #!/usr/bin/env bash
 # Hermes Agent — Backup & Restore via Chezmoi
-# Sincroniza o estado completo do Hermes Agent com o repositório remoto.
-# Modelo: chezmoi apply (restaura tudo) + git push (backup do repo).
+# Sincroniza o estado essencial do Hermes Agent com o repositório remoto.
+# Modelo sustentável: arquivos pequenos estáveis + SQL seletivo + manifest -> chezmoi add --encrypt -> git push
 #
-# O que entra no backup:
-#   - Todo o repositório chezmoi (configs, scripts, templates)
-#   - Arquivos criptografados (SSH keys, API tokens, secrets)
-#   - Estado do Hermes Agent (skills, cronjobs, memories)
+# O que entra no backup (criptografado via age/chezmoi):
+#   - Configuração: ~/.hermes/config.yaml
+#   - Secrets: ~/.hermes/.env, ~/.hermes/auth.json, ~/.hermes/gmail_app_password.txt
+#   - Memórias: ~/.hermes/memories/USER.md, ~/.hermes/memories/MEMORY.md
+#   - Cron: ~/.hermes/cron/jobs.json
+#   - Canais: ~/.hermes/channel_directory.json
+#   - Estado do Gateway: ~/.hermes/gateway_state.json
+#   - Manifestos gerados: ~/.hermes/sync/manifest.json, ~/.hermes/sync/kanban-config.sql, ~/.hermes/sync/skills-manifest.tsv
 #
 # O que NÃO entra no backup (por design):
-#   - Runtime state do Hermes (sessões temporárias, cache de conversas)
-#   - Dados do OmniRoute (gerenciados pelo omniroute-sync)
-#   - Arquivos >1MB não criptografados (validado pelo doctor)
+#   - state.db (histórico de sessões)
+#   - sessions/ (transcrições completas)
+#   - logs/ (logs de runtime)
+#   - cache/ (cache de modelos)
+#   - hermes-agent/ (código fonte do Hermes)
+#   - state.db-wal, state.db-shm, gateway.pid, gateway.lock, processes.json
+#   - node_modules/, venv/, .venv/, __pycache__/, *.pyc
+#   - qualquer backup.tar.gz monolítico
 
 set -euo pipefail
 
-HERMES_HOME="${HOME}/.hermes"
-CHEZMOI_REPO="$(chezmoi source-path 2>/dev/null || echo "")"
+HERMES_DIR="${HOME}/.hermes"
+SYNC_DIR="${HERMES_DIR}/sync"
+MANIFEST_FILE="${SYNC_DIR}/manifest.json"
+KANBAN_CONFIG_SQL="${SYNC_DIR}/kanban-config.sql"
+SKILLS_MANIFEST_TSV="${SYNC_DIR}/skills-manifest.tsv"
+BACKUP_NOTE_FILE="${SYNC_DIR}/backup-note.txt"
 
-# Diretórios e arquivos incluídos no backup (via chezmoi)
-BACKUP_SOURCES=(
-  "home/.hermes/"
-  "home/.chezmoiconfig/"
-  "home/.local/bin/"
-  "home/.config/"
-  "home/.ssh/"
-  "home/.gnupg/"
+# Arquivos que serão adicionados ao backup (relativos a ~/.hermes/)
+ENCRYPTED_FILES=(
+  config.yaml
+  .env
+  auth.json
+  gmail_app_password.txt
+  memories/USER.md
+  memories/MEMORY.md
+  cron/jobs.json
+  channel_directory.json
+  gateway_state.json
+  sync/manifest.json
+  sync/kanban-config.sql
+  sync/skills-manifest.tsv
+  sync/backup-note.txt
 )
 
 # Arquivos/diretórios do Hermes que NÃO devem ir para o backup
-EXCLUDED_PATTERNS=(
-  '*/cache/*'
-  '*/tmp/*'
-  '*/logs/*'
-  '*/sessions/*'
-  '*.tmp'
-  '*.log'
-)
-
-# Arquivos proibidos no chezmoi (segurança)
 FORBIDDEN_SOURCE_PATTERNS=(
-  'private_dot_hermes/private_*.key'
-  'private_dot_hermes/*_unencrypted*'
+  'private_dot_hermes/private_backup.tar.gz'
+  'private_dot_hermes/private_state.db'
+  'private_dot_hermes/private_state.db-wal'
+  'private_dot_hermes/private_state.db-shm'
+  'private_dot_hermes/private_sessions'
+  'private_dot_hermes/private_logs'
+  'private_dot_hermes/private_cache'
+  'private_dot_hermes/private_audio_cache'
+  'private_dot_hermes/private_hermes-agent'
 )
 
 require_cmd() {
@@ -51,18 +68,188 @@ require_cmd() {
   fi
 }
 
+source_root() {
+  chezmoi source-path 2>/dev/null | sed 's#/home$##'
+}
+
 print_usage() {
-  echo "Uso: hermes-sync {push|pull|status|doctor}"
-  echo "  push   : Aplica configs e faz backup (commit + push) para o repositório remoto"
-  echo "  pull   : Restaura estado completo do ambiente (chezmoi apply)"
+  echo "Uso: hermes-sync {push|pull|status|doctor|export}"
+  echo "  export : Gera manifest e SQL seletivo do Hermes Agent"
+  echo "  push   : Exporta e adiciona arquivos pequenos ao chezmoi criptografado"
+  echo "  pull   : Restaura/importa estado seletivo depois de chezmoi apply"
   echo "  status : Verifica estado local e arquivos de sincronização"
   echo "  doctor : Valida se o chezmoi não contém blobs proibidos"
+}
+
+export_manifest() {
+  require_cmd python3
+  mkdir -p "$SYNC_DIR"
+  python3 - <<PY
+import json, os, time
+from pathlib import Path
+root = Path(os.path.expanduser(${HERMES_DIR@Q}))
+sync = Path(os.path.expanduser(${SYNC_DIR@Q}))
+
+def size(path):
+    p=root/path
+    if not p.exists(): return None
+    if p.is_file(): return p.stat().st_size
+    total=0; files=0
+    for f in p.rglob('*'):
+        if f.is_file():
+            files += 1; total += f.stat().st_size
+    return {'files': files, 'bytes': total}
+
+manifest={
+    'created_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+    'source_host': os.uname().nodename,
+    'hermes_dir': str(root),
+    'backup_model': 'chezmoi plaintext config template + encrypted secrets + selective SQL + manifest; not full state.db/logs/sessions backup',
+    'included_files': ['config.yaml','.env','auth.json','gmail_app_password.txt','memories/USER.md','memories/MEMORY.md','cron/jobs.json','channel_directory.json','gateway_state.json','sync/manifest.json','sync/kanban-config.sql','sync/skills-manifest.tsv','sync/backup-note.txt'],
+    'excluded_by_design': [
+        'state.db (runtime session history)',
+        'state.db-wal', 'state.db-shm',
+        'sessions/', 'logs/', 'cache/', 'audio_cache/',
+        'hermes-agent/',
+        'node_modules/', 'venv/', '.venv/', '__pycache__/', '*.pyc',
+        'any tarball-monolithic backup'
+    ]
+}
+manifest['sizes'] = {k: size(Path(k)) for k in ['config.yaml','.env','auth.json','gmail_app_password.txt','memories','cron','channel_directory.json','gateway_state.json','sync']}
+(sync/'manifest.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
+(sync/'backup-note.txt').write_text('Hermes Agent backup model: config + secrets in chezmoi, kanban SQL exported selectively, skills manifest generated.\n')
+PY
+}
+
+export_kanban_config_sql() {
+  require_cmd python3
+  mkdir -p "$SYNC_DIR"
+  python3 - <<PY
+import os, sqlite3, time
+from pathlib import Path
+root = Path(os.path.expanduser(${HERMES_DIR@Q}))
+out = Path(os.path.expanduser(${KANBAN_CONFIG_SQL@Q}))
+
+# Tabelas semânticas do Kanban (exclui runtime/events)
+tables = [
+    'tasks', 'task_links', 'task_comments'
+]
+
+def q_ident(name): return '"' + name.replace('"', '""') + '"'
+
+def q_value(value):
+    if value is None: return 'NULL'
+    if isinstance(value, bool): return '1' if value else '0'
+    if isinstance(value, int): return str(value)
+    if isinstance(value, float): return repr(value)
+    if isinstance(value, bytes): return "X'" + value.hex() + "'"
+    return "'" + str(value).replace("'", "''") + "'"
+
+con = sqlite3.connect(root / 'kanban.db')
+cur = con.cursor()
+existing = {row[0] for row in cur.execute("select name from sqlite_master where type='table'")}
+lines = [
+    '-- Hermes Kanban config export',
+    f"-- Exported at: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}",
+    '-- Generated by hermes-sync; intentionally excludes runtime/event tables.',
+    'PRAGMA foreign_keys=OFF;',
+    'BEGIN TRANSACTION;'
+]
+for table in reversed(tables):
+    if table in existing:
+        lines.append(f'DELETE FROM {q_ident(table)};')
+for table in tables:
+    if table not in existing:
+        continue
+    rows = cur.execute(f'SELECT * FROM {q_ident(table)}').fetchall()
+    cols = [desc[0] for desc in cur.description]
+    col_sql = ', '.join(q_ident(c) for c in cols)
+    for row in rows:
+        values_sql = ', '.join(q_value(v) for v in row)
+        lines.append(f'INSERT OR REPLACE INTO {q_ident(table)} ({col_sql}) VALUES ({values_sql});')
+lines.append('COMMIT;')
+out.write_text('\n'.join(lines) + '\n')
+con.close()
+PY
+}
+
+export_skills_manifest() {
+  require_cmd python3
+  mkdir -p "$SYNC_DIR"
+  python3 - <<PY
+import json, os, time
+from pathlib import Path
+root = Path(os.path.expanduser(${HERMES_DIR@Q}))
+skills_dir = root / 'skills'
+out = Path(os.path.expanduser(${SKILLS_MANIFEST_TSV@Q}))
+
+if not skills_dir.exists():
+    out.write_text('')
+    return
+
+manifest = []
+for skill_dir in sorted(skills_dir.iterdir()):
+    if not skill_dir.is_dir():
+        continue
+    skill_name = skill_dir.name
+    files = []
+    total_bytes = 0
+    for f in skill_dir.rglob('*'):
+        if f.is_file():
+            files.append(str(f.relative_to(skill_dir)))
+            total_bytes += f.stat().st_size
+    manifest.append({
+        'skill': skill_name,
+        'category': skill_dir.parent.name,
+        'files': len(files),
+        'bytes': total_bytes,
+        'file_list': ', '.join(files[:5]) + ('...' if len(files) > 5 else '')
+    })
+
+out.write_text('skill\tcategory\tfiles\tbytes\tfile_list\n')
+for m in manifest:
+    out.write_text(f"{m['skill']}\t{m['category']}\t{m['files']}\t{m['bytes']}\t{m['file_list']}\n")
+PY
+}
+
+run_export() {
+  echo "📦 Exportando estado seletivo do Hermes Agent..."
+  
+  if [ ! -d "$HERMES_DIR" ]; then
+    echo "⚠️  Diretório Hermes não encontrado em $HERMES_DIR"
+    exit 1
+  fi
+  
+  export_kanban_config_sql
+  export_skills_manifest
+  export_manifest
+  
+  chmod 700 "$SYNC_DIR" 2>/dev/null || true
+  chmod 600 "$SYNC_DIR"/* 2>/dev/null || true
+  
+  echo "✓ Gerado: $MANIFEST_FILE"
+  echo "✓ Gerado: $KANBAN_CONFIG_SQL"
+  echo "✓ Gerado: $SKILLS_MANIFEST_TSV"
+}
+
+add_existing_files() {
+  require_cmd chezmoi
+  echo "🔐 Adicionando arquivos pequenos ao Chezmoi com criptografia..."
+  for rel in "${ENCRYPTED_FILES[@]}"; do
+    path="$HERMES_DIR/$rel"
+    if [ -f "$path" ]; then
+      chezmoi add --encrypt "$path"
+      echo "  + $rel"
+    else
+      echo "  ⚠️  Arquivo não encontrado (pode ser opcional): $rel"
+    fi
+  done
 }
 
 run_doctor() {
   require_cmd chezmoi
   local src
-  src="$(chezmoi source-path 2>/dev/null || echo "")"
+  src="$(source_root)"
   if [ -z "$src" ] || [ ! -d "$src" ]; then
     echo "⚠️  Não consegui localizar o source do chezmoi"
     return 1
@@ -85,7 +272,7 @@ run_doctor() {
         *) echo "❌ Arquivo plaintext >1MB no chezmoi: ${f#$src/} ($size bytes)"; failed=1 ;;
       esac
     fi
-  done < <(find "$src/home" -type f 2>/dev/null || true)
+  done < <(find "$src/home/private_dot_hermes" -type f 2>/dev/null || true)
   if [ "$failed" -eq 0 ]; then
     echo "✅ Nenhum blob proibido/plaintext perigoso encontrado"
   fi
@@ -95,71 +282,51 @@ run_doctor() {
 run_status() {
   echo "🔍 Hermes Sync Status"
   echo "----------------------"
-  echo "Hermes home: $HERMES_HOME"
-  [ -d "$HERMES_HOME" ] && echo "✅ Hermes dir: Present" || echo "❌ Hermes dir: Missing"
+  echo "Hermes dir: $HERMES_DIR"
+  [ -d "$HERMES_DIR" ] && echo "✅ Hermes dir: Present" || echo "❌ Hermes dir: Missing"
   echo "---"
-  for rel in "${BACKUP_SOURCES[@]}"; do
-    if [ -e "$HOME/$rel" ]; then
-      echo "✅ $rel: Present"
+  for rel in config.yaml .env auth.json memories/USER.md memories/MEMORY.md cron/jobs.json channel_directory.json gateway_state.json sync/manifest.json sync/kanban-config.sql sync/skills-manifest.tsv; do
+    if [ -e "$HERMES_DIR/$rel" ]; then
+      ls -ld "$HERMES_DIR/$rel" 2>/dev/null | awk -v r="$rel" '{print "✅ " r ": " $5}'
     else
       echo "⚠️  $rel: Missing"
     fi
   done
-  if [ -d "$HERMES_HOME" ]; then
-    echo "---"
-    echo "Hermes subdirs:"
-    for d in skills cronjobs memories; do
-      [ -d "$HERMES_HOME/$d" ] && echo "  ✅ $d" || echo "  ⚠️  $d (missing)"
-    done
-  fi
-}
-
-run_push() {
-  local message="${1:-backup: update Hermes Agent sync}"
-  require_cmd chezmoi
-  require_cmd git
-
-  echo "📦 Iniciando backup do Hermes Agent..."
-
-  # 1. Aplicar configurações locais
-  echo "  → Aplicando configurações com chezmoi..."
-  chezmoi apply
-
-  # 2. Verificar mudanças
-  cd "$CHEZMOI_REPO"
-  if [ -n "$(git status --porcelain)" ]; then
-    echo "  → Commitando mudanças..."
-    git add .
-    git commit -m "$message"
-
-    echo "  → Fazendo push para o repositório remoto..."
-    git push
-
-    echo "✓ Pronto. Backup do Hermes Agent concluído!"
-  else
-    echo "ℹ️  Nenhuma mudança detectada. Nada para sincronizar."
-  fi
-}
-
-run_pull() {
-  echo "📥 Restaurando estado completo do Hermes Agent..."
-  require_cmd chezmoi
-
-  echo "  → Aplicando configurações do chezmoi..."
-  chezmoi apply
-
-  echo "✓ Pronto. Ambiente restaurado!"
-  echo ""
-  echo "  Para restaurar também o OmniRoute, rode: omniroute-sync pull"
+  if [ -f "$MANIFEST_FILE" ]; then
+    echo "   Manifest timestamp: $(python3 - "$MANIFEST_FILE" <<'PY' 2>/dev/null || echo unknown
+import json, sys
+with open(sys.argv[1], encoding='utf-8') as fh:
+    print(json.load(fh).get('created_utc', 'unknown'))
+PY
+)"
+    fi
 }
 
 case "${1:-}" in
+  export)
+    run_export
+    ;;
   push)
-    shift || true
-    run_push "${1:-backup: update Hermes Agent sync}"
+    run_export
+    add_existing_files
+    run_doctor
+    echo "✓ Pronto. Agora rode: chezmoi cd && git status && git add . && git commit -m \"backup: update Hermes sync\" && git push"
     ;;
   pull)
-    run_pull
+    require_cmd sqlite3
+    echo "📥 Restaurando estado seletivo do Hermes Agent..."
+    echo "⚠️  Pressupõe que você já rodou 'chezmoi apply' para materializar os arquivos criptografados."
+    if [ -f "$KANBAN_CONFIG_SQL" ]; then
+      if [ -f "$HERMES_DIR/kanban.db" ]; then
+        sqlite3 "$HERMES_DIR/kanban.db" < "$KANBAN_CONFIG_SQL"
+        echo "✓ Configuração do Kanban importada de $KANBAN_CONFIG_SQL"
+      else
+        echo "⚠️  kanban.db não encontrado — pulando restore do Kanban"
+      fi
+    else
+      echo "ℹ️  Arquivo de configuração do Kanban não encontrado — pulando restore"
+    fi
+    echo "✓ Arquivos de configuração/secrets já são restaurados pelo chezmoi apply"
     ;;
   status)
     run_status
