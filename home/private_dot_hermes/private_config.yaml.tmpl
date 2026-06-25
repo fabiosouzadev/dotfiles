@@ -672,6 +672,7 @@ mcp_servers:
     args: ["-y", "@notionhq/notion-mcp-server"]
     env:
       NOTION_TOKEN: ${NOTION_API_KEY}
+    enabled: true
 platform_toolsets:
   cli:
   - browser
