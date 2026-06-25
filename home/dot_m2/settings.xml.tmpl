@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+<localRepository>${user.home}/.m2/repository</localRepository>
+<interactiveMode>true</interactiveMode>
+<usePluginRegistry>false</usePluginRegistry>
+<offline>false</offline>
+
+<servers>
+    <server>
+        <id>claro-codeartifact-claro-flex-artifacts</id>
+        <username>aws</username>
+        <password>eyJ2ZXIiOjEsImlzdSI6MTc4MjQxNjYzOCwiZW5jIjoiQTEyOEdDTSIsInRhZyI6InhkR1ZhQjlDcjJsQkF4cmhvWVI5aUEiLCJleHAiOjE3ODI0NTk4MzgsImFsZyI6IkExMjhHQ01LVyIsIml2IjoiMGw1VXB3ZmVvLUxTaG9UOSJ9.9mIQFy0Bq0jNBlQ32rRHhQ.3dLS3sc5sqXwL7sK.Lxjp1p_zPpc8unXpnNZslipe-5uweBNPL-dJUA3ygOSAsKKrEENMOeOlXyau46t74AfzMvkycLAHTCDyJdxQ07dm6rwiKZmHmIjqLVmdBEcKThy0omLIq9iI8OtcCIKcGYTMG60NaTYpELZ6n1Bz8hpWlE-kpD2nwpmoelNegVjEb-SJiE6rTzCoRnjDij1AMU9_2O52cD7vsMMQyLTG3JtT0h5XrToYdoi8DaYWIjcrVhxRfSb1XSphdemHe1RoeALTM_YSPvOjY5RBtPnPkHSeJUe2gR25X89L7UAch5LxpNDjDkPeeUdjqmxOvSBq-eUc-VBo1fjxTGLRxnlWuoNAUl0g4n7uj5RgpCKEiETdFzEUMkB33g96EY_VO6DdRffHI40K5_0K051dXWuwj2j_SekwiQWTIzZ2tSVn2V7cUSW-4ionjQCLAjFLBnmYmaENmFDakoDDINLs3ebC7bs9by0leZkeour0CVmTub_4WzS-lfWw_NNLrREbVqJTeHo40i5nkf3wYy7Z3p6HTHeHr0pT31jlVuUvi_cq9RSn3U3eevJyx7jmD36bH2A-9EYOllMi8_RSHmSQLWNHgn7qzccNcyFVa_21wBVNFJOyZS42WXX5xhmfkRrmeb-CfFDfc8PsaIuLqR8PfYRhcuybqATIKPSSIOQEineJtXuhqIsq4U0-_XetBrX70sjen-WXDad2_0juMWUj70rtrl_RRLQ1hxE9SEIM61D4DvjG9Axs6kWMHei6zIVPmNTa_OA-lVsk9se2imAmAKjuHuFBwHNUW2T_YRdXZ6iTeFumXAL87zYwI2wFUE9VvpUChP2QuN98bEyEUBrp-1xcU4miWhEo-n6kXW9DsyTzkp27VHdRl_CBbVQ6BF5IVyqtwtYW8ud3lhMVdanxGyn2mvkz-GhNbY5W67SBlWitrotYUlJ-clCz-gkjcPOsAoiGKvsB0op_HJRh_ZXmlxQkGdsMcL-bSVDtuJxGe_iIArjsvT-AVPk17NkmB18Fv3L7HcAAY4XA_oIYiZaFAyZXDBOuvAClqBnRX8WS5WUas2TGZuxjGlLYIeBRayrAny8OJwVZK23lKc59-zciaMdfoI5gdY7l8hz_H0l220HqA49KHgksPUnGiLrM8RbnLfZ8ggLz-ms4VxTFrHSASKW3xwg6oNEqvuSpmOhLUksF16hJxtlwcVHEORFu8r-GCYipaWqs-5neIx6sVr4Ar61GVMqJlWbovVawMlzEaFkR9X_wCYc7nba1uofizo7ClYIrVrriJCDZEiJA3YCu8p8ealqzb2rNynDCLvnEQpmxBQhxkGY4uXBY6ZUm5UnPvOS9hoHHmDxo9P9zmxERwVAY0kk5dJyy_RkOOH6tEfpC7_yzbkZSub5zb0rEGnatgn5s7rxpYcc-fQ-xBbBOiVf-GhGY_G8J7ZZDO8kVJ_eBx0YfH1eJ3MCCkpdo613p5ikC74bjyX4iYlbY04x6bbf7vfnuvNjd1pbEzSCqGOGUwktJ5270Z9yvv1SLYwSHp1O8rJTg6pWAN02bxfT8jXhXqNp2vQ.zHH_di9-DyCpQAUJ6yRgOQ
+</password>
+    </server>
+</servers>
+
+<profiles>
+    <profile>
+        <id>claro-codeartifact-claro-flex-artifacts</id>
+        <activation>
+            <activeByDefault>true</activeByDefault>
+        </activation>
+
+        <repositories>
+            <repository>
+                <id>claro-codeartifact-claro-flex-artifacts</id>
+                <url>https://claro-codeartifact-319569500149.d.codeartifact.us-east-1.amazonaws.com/maven/claro-flex-artifacts/</url>
+                <releases>
+                    <checksumPolicy>fail</checksumPolicy>
+                </releases>
+            </repository>
+        </repositories>
+    </profile>
+</profiles>
+
+<mirrors>
+    <mirror>
+        <id>claro-codeartifact-claro-flex-artifacts</id>
+        <name>claro-codeartifact-claro-flex-artifacts</name>
+        <url>https://claro-codeartifact-319569500149.d.codeartifact.us-east-1.amazonaws.com/maven/claro-flex-artifacts/</url>
+        <mirrorOf>*</mirrorOf>
+    </mirror>
+</mirrors>
+
+</settings>
