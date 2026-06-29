@@ -1,4 +1,7 @@
 {
-  {{ $api_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_freemodels-key.txt.asc" -}}
-  "OPENAI_API_KEY": "{{ include $api_key| decrypt | trim }}"
+  {{- $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
+  {{- if eq .settings.workplace "Zup" }}
+    {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
+  {{- end }}
+  "OPENAI_API_KEY": "{{ include $omniroute_key | decrypt | trim }}"
 }

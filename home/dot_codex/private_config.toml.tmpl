@@ -1,5 +1,5 @@
-model_provider = "freemodel"
-model = "gpt-5.5"
+model_provider = "omniroute"
+model = "omniroute/work"
 model_reasoning_effort = "xhigh"
 disable_response_storage = true
 preferred_auth_method = "apikey"
@@ -7,6 +7,11 @@ preferred_auth_method = "apikey"
 [model_providers.freemodel]
 name = "freemodel"
 base_url = "https://api.freemodel.dev"
+wire_api = "responses"
+
+[model_providers.omniroute]
+name = "omniroute"
+base_url = "http://157.151.13.223"
 wire_api = "responses"
 
 [hooks.state]
