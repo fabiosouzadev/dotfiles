@@ -26,6 +26,9 @@ ai_tools:
     - name: openclaude
       package: "@gitlawb/openclaude@latest"
       feature_flag: coding_assistants
+    - name: freebuff
+      package: "freebuff"
+      feature_flag: coding_assistants
     - name: openclaw
       package: "openclaw@beta"
       feature_flag: openclaw.install
@@ -34,8 +37,8 @@ ai_tools:
       feature_flag: spec_tools
       env: "OPENSPEC_NO_COMPLETIONS=1"
       completions_cmd: "openspec completion generate zsh"
-    - name: get-shit-done
-      package: "@opengsd/get-shit-done-redux@latest"
+    - name: gsd-core
+      package: "@opengsd/gsd-core@latest --force --all --global"
       feature_flag: spec_tools
   curl:
     - name: aider
@@ -56,6 +59,10 @@ ai_tools:
       shell: bash
       feature_flag: coding_assistants
       block_on_workplace: Zup
+    - name: kimchi
+      url: "https://github.com/getkimchi/kimchi/releases/latest/download/install.sh"
+      shell: bash
+      feature_flag: coding_assistants
     - name: hermes
       url: "https://hermes-agent.nousresearch.com/install.sh"
       shell: bash
