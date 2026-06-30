@@ -528,18 +528,19 @@ approvals:
   mcp_reload_confirm: true
   destructive_slash_confirm: false
 command_allowlist:
-- in-place edit of Hermes config/env
-- script execution via heredoc
-- stop/restart system service
-- recursive delete
-- overwrite project env/config file
-- delete in root path
-- execute_code
-- script execution via -e/-c flag
 - overwrite system file via redirection
 - sudo with privilege flag (stdin/askpass/shell/list)
+- overwrite project env/config file
 - stop/restart hermes gateway (kills running agents)
+- script execution via heredoc
+- pipe remote content to shell
 - copy/move file into system config path
+- stop/restart system service
+- execute_code
+- recursive delete
+- delete in root path
+- in-place edit of Hermes config/env
+- script execution via -e/-c flag
 quick_commands: {}
 platform_hints: {}
 hooks: {}
@@ -669,7 +670,9 @@ mcp_servers:
     command: npx
   notion:
     command: npx
-    args: ["-y", "@notionhq/notion-mcp-server"]
+    args:
+    - -y
+    - '@notionhq/notion-mcp-server'
     env:
       NOTION_TOKEN: ${NOTION_API_KEY}
     enabled: true
