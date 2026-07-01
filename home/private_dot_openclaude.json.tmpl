@@ -1,14 +1,10 @@
-{{- $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
-{{- if eq .settings.workplace "Zup" }}
-    {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
-{{- end }}
 {
-  "numStartups": 6,
+  "numStartups": 8,
   "installMethod": "native",
   "autoUpdates": false,
   "tipsHistory": {
     "atomic-setup-local": 3,
-    "new-user-warmup": 3,
+    "new-user-warmup": 8,
     "plan-mode-for-complex-tasks": 4,
     "terminal-setup": 4,
     "memory-command": 4,
@@ -22,24 +18,31 @@
     "double-esc-code-restore": 5,
     "continue": 6,
     "shift-tab": 6,
-    "image-paste": 6
+    "image-paste": 6,
+    "colorterm-truecolor": 7,
+    "custom-agents": 7,
+    "agent-flag": 7,
+    "desktop-app": 8,
+    "web-app": 8,
+    "feedback-command": 8
   },
+  "promptQueueUseCount": 2,
   "providerProfiles": [
     {
       "id": "provider_61936244356f",
       "name": "Omniroute",
       "provider": "custom",
       "baseUrl": "http://157.151.13.223/v1",
-      "model": "free",
-      "apiKey": "{{ include $omniroute_key | decrypt | trim }}",
+      "model": "omniroute/work",
+      "apiKey": "sk-a290490cc389b700-5d59fa-1d4af907",
       "apiFormat": "chat_completions"
     }
   ],
   "openaiAdditionalModelOptionsCacheByProfile": {
     "provider_61936244356f": [
       {
-        "value": "free",
-        "label": "free",
+        "value": "omniroute/work",
+        "label": "omniroute/work",
         "description": "Provider: Omniroute"
       }
     ]
@@ -163,13 +166,66 @@
         "hook_duration_ms_p95": 136,
         "hook_duration_ms_p99": 136
       }
+    },
+    "/home/fabio.souza/Workspaces/Work/Zup/claro-flex-rw-extensions": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 0,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesApprovedForUser": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "hasClaudeMdExternalIncludesWarningShownForUser": false,
+      "exampleFiles": [
+        "R__ParameterData.sql",
+        "TermEnum.java",
+        "ClaroErrorCode.java",
+        "ClaroProductService.java",
+        "messages.properties"
+      ],
+      "exampleFilesGeneratedAt": 1782822403380,
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastAPIDurationWithoutRetries": 0,
+      "lastToolDuration": 0,
+      "lastDuration": 1121866,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastTotalWebSearchRequests": 0,
+      "lastFpsAverage": 5.99,
+      "lastFpsLow1Pct": 599.91,
+      "lastModelUsage": {},
+      "lastSessionId": "1c69f476-4e11-4dce-bb00-cd0d49324402",
+      "lastSessionMetrics": {
+        "frame_duration_ms_count": 6457,
+        "frame_duration_ms_min": 0.0582950001116842,
+        "frame_duration_ms_max": 26.884223000030033,
+        "frame_duration_ms_avg": 0.3351874793245458,
+        "frame_duration_ms_p50": 0.27604599999904167,
+        "frame_duration_ms_p95": 0.7740624999765714,
+        "frame_duration_ms_p99": 1.9502387000317674,
+        "hook_duration_ms_count": 1,
+        "hook_duration_ms_min": 239,
+        "hook_duration_ms_max": 239,
+        "hook_duration_ms_avg": 239,
+        "hook_duration_ms_p50": 239,
+        "hook_duration_ms_p95": 239,
+        "hook_duration_ms_p99": 239
+      }
     }
   },
   "activeProviderProfileId": "provider_61936244356f",
   "openaiAdditionalModelOptionsCache": [
     {
-      "value": "free",
-      "label": "free",
+      "value": "omniroute/work",
+      "label": "omniroute/work",
       "description": "Provider: Omniroute"
     }
   ],
@@ -177,5 +233,11 @@
     "lastShownAt": 3,
     "totalShown": 1
   },
-  "userID": "e20cfce8a0d491729d2f1d09a70bd10b423d440a9b9d8dbeaadac9f55a945493"
+  "userID": "e20cfce8a0d491729d2f1d09a70bd10b423d440a9b9d8dbeaadac9f55a945493",
+  "skillUsage": {
+    "gsd-quick": {
+      "usageCount": 1,
+      "lastUsedAt": 1782822470734
+    }
+  }
 }
