@@ -4,7 +4,7 @@
     {{- if eq .settings.workplace "Zup" }}
         {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
     {{- end }}
-    "ANTHROPIC_BASE_URL": "http://157.151.13.223/v1",
+    "ANTHROPIC_BASE_URL": "http://157.151.13.223:20129/v1",
     "ANTHROPIC_AUTH_TOKEN": "{{ include $omniroute_key | decrypt | trim }}",
     "ANTHROPIC_MODEL": "free",
     "ANTHROPIC_SMALL_FAST_MODEL": "free",

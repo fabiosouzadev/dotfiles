@@ -49,26 +49,21 @@ alias -- omniroute-sync-pull="omniroute-sync pull"
 alias -- omniroute-sync-status="omniroute-sync status"
 alias -- omniroute-sync-doctor="omniroute-sync doctor"
 
-{{ if eq .settings.workplace "Zup" }}
-## ═══════════════════════════════════════════════════════════════════════════════
-## Proxy corporativo da Zup para OmniRoute
-## ═══════════════════════════════════════════════════════════════════════════════
-## O proxy corporativo é configurado DENTRO do OmniRoute (via dashboard).
-## Passos:
-##   1. Abra o dashboard: http://localhost:20128
-##   2. Vá em Settings → Proxy
-##   3. Configure o proxy global:
-##      - Type: http (ou socks5)
-##      - Host: <proxy-host-da-zup>
-##      - Port: <porta-do-proxy>
-##      - Username/Password: (se necessário)
-##   4. O OmniRoute encripta as credenciais com AES-256-GCM no SQLite
-##
-## Alternativa via variáveis de ambiente (caso o dashboard não funcione):
-## Descomente e preencha as linhas abaixo:
-# export HTTP_PROXY=http://proxy.zup.com:8080
-# export HTTPS_PROXY=http://proxy.zup.com:8080
-# export NO_PROXY=localhost,127.0.0.1,::1
+
+{{ if and (eq .chezmoi.os "linux") (not .settings.wsl) (eq .settings.workplace "Zup")}}
+## Linux com systemd user service
+alias -- omniroute-start="sudo systemctl start omniroute.service"
+alias -- omniroute-stop="sudo systemctl stop omniroute.service"
+alias -- omniroute-restart="sudo systemctl restart omniroute.service"
+alias -- omniroute-status="sudo systemctl status omniroute.service"
+alias -- omniroute-enable="sudo systemctl enable omniroute.service"
+{{ else }}
+## macOS / WSL / ambientes sem systemd
+alias -- omniroute-start="omniroute start"
+alias -- omniroute-stop="omniroute stop"
+alias -- omniroute-restart="omniroute restart"
+alias -- omniroute-status="omniroute status"
+alias -- omniroute-enable="omniroute enable"
 {{ end }}
 
 # vim: filetype=bash

@@ -75,7 +75,7 @@
 - Recommendations: Bind OmniRoute to `127.0.0.1` when Caddy is the intended ingress, enforce firewall rules, and document direct-port exposure requirements when `HOST=0.0.0.0` is intentional.
 
 **OpenCode uses a public HTTP AI gateway URL:**
-- Risk: `home/private_dot_config/opencode/opencode.json.tmpl` sends `apiKey` to `http://157.151.13.223/v1` without TLS in the template.
+- Risk: `home/private_dot_config/opencode/opencode.json.tmpl` sends `apiKey` to `http://157.151.13.223:20129/v1` without TLS in the template.
 - Files: `home/private_dot_config/opencode/opencode.json.tmpl`, `home/private_dot_config/caddy/Caddyfile.tmpl`
 - Current mitigation: API key is encrypted at rest in source and decrypted during render.
 - Recommendations: Use an HTTPS domain from `home/private_dot_config/caddy/Caddyfile.tmpl`, avoid raw public IP HTTP, and keep direct HTTP only for localhost/Tailscale-private addresses.
