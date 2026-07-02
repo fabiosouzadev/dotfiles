@@ -5,4 +5,4 @@
 omniroute:
   install:
     version: "3.8.35"
-    method: "npm"
+    method: "source"
