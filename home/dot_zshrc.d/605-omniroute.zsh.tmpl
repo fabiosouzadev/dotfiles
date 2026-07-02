@@ -57,7 +57,7 @@ alias -- omniroute-stop="sudo systemctl stop omniroute.service"
 alias -- omniroute-restart="sudo systemctl restart omniroute.service"
 alias -- omniroute-status="sudo systemctl status omniroute.service"
 alias -- omniroute-enable="sudo systemctl enable omniroute.service"
-{{ else }}
+{{ else if (eq .settings.workplace "Zup") }}
 ## macOS / WSL / ambientes sem systemd
 alias -- omniroute-start="omniroute start"
 alias -- omniroute-stop="omniroute stop"
