@@ -67,3 +67,7 @@ ai_tools:
       url: "https://hermes-agent.nousresearch.com/install.sh"
       shell: bash
       feature_flag: hermes.install
+    - name: beads
+      url: "https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh"
+      shell: bash
+      feature_flag: spec_tools

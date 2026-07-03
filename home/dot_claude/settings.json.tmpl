@@ -6,11 +6,11 @@
     {{- end }}
     "ANTHROPIC_BASE_URL": "http://157.151.13.223:20129/v1",
     "ANTHROPIC_AUTH_TOKEN": "{{ include $omniroute_key | decrypt | trim }}",
-    "ANTHROPIC_MODEL": "free",
-    "ANTHROPIC_SMALL_FAST_MODEL": "free",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "free",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "free",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "free"
+    "ANTHROPIC_MODEL": "omniroute/work",
+    "ANTHROPIC_SMALL_FAST_MODEL": "omniroute/work",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "omniroute/work",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "omniroute/work",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "omniroute/work"
   },
   "theme": "dark"
 }
