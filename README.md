@@ -1,140 +1,157 @@
 # 🏠 fabiosouzadev/dotfiles
 
-![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)
-![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?style=flat-square&logo=arch-linux&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=flat-square&logo=ubuntu&logoColor=white)
-![Windows](https://img.shields.io/badge/WSL-0078D4?style=flat-square&logo=windows&logoColor=white)
+![WSL](https://img.shields.io/badge/WSL-0078D4?style=flat-square&logo=windows&logoColor=white)
+![Arch Linux](https://img.shields.io/badge/Arch-1793D1?style=flat-square&logo=arch-linux&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)
+![Shell](https://img.shields.io/badge/shell-zsh-green?style=flat-square)
 ![chezmoi](https://img.shields.io/badge/chezmoi-managed-blue?style=flat-square)
-![Shell](https://img.shields.io/badge/shell-zsh-green?style=flat-square&logo=gnu-bash)
 
-Cross‑platform dotfiles managed by [chezmoi](https://chezmoi.io), providing a fully reproducible development environment for **macOS**, **Arch Linux**, **Ubuntu**, and **Windows/WSL**. The repository bundles a tuned shell, editor, terminal multiplexer, modern CLI tools, AI coding assistants, encrypted secrets, and service orchestration (OmniRoute, Hermes) – ready to bootstrap in minutes.
+Repositório de dotfiles gerenciado pelo [chezmoi](https://chezmoi.io), focado em reprodutibilidade, versionamento de configurações e bootstrap limpo de máquinas.  
+O objetivo não é apenas manter arquivos de configuração, mas representar um ambiente de operação completo: shell, editor, terminal, ferramentas modernas, segredos criptografados, integração com IA local/remota e fluxos de sincronização.
 
-> 🇧🇷 **Português:** Dotfiles multiplataforma gerenciados com chezmoi. Ambiente de desenvolvimento completo com shell, editor, multiplexador, ferramentas CLI modernas, assistentes de IA e segredos criptografados – pronto em minutos em qualquer máquina.
+> 🇧🇷 **Português:** Repositório pessoal de dotfiles, automações e infraestrutura local.  
+> Repositório completo em `~/.local/share/chezmoi`.
 
 ---
 
 ## 🚀 Quick Start
 
-Bootstrap a new machine with a single command:
-
-### macOS / Ubuntu / WSL
+### Ubuntu / WSL
 ```bash
-sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin init --apply fabiosouzadev
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply fabiosouzadev
 ```
 
 ### Arch Linux
 ```bash
-pacman -S chezmoi
+sudo pacman -S chezmoi
 chezmoi init --apply fabiosouzadev
 ```
 
-> ⚠️ **Note:** Encrypted files (SSH keys, API tokens, VPN certificates, etc.) require your own **age** key. See the *Prerequisites* section below.
+> ⚠️ Arquivos criptografados dependem da sua própria chave `age`.  
+> Se for fork, gere uma nova chave e reencode os segredos antes de aplicar.
 
 ---
 
-## 📋 Prerequisites
+## 📋 Pré-requisitos
 
-Before running the install command, ensure you have:
-
-| Requirement | Why | Install |
-|-------------|-----|---------|
-| **git** | Clone the repository | Pre‑installed on most systems |
-| **chezmoi** | Dotfile manager | `sh -c "$(curl -fsLS get.chezmoi.io)"` |
-| **age** | Decrypt secrets (SSH, GPG, API keys) | `brew install age` / `pacman -S age` / `apt install age` |
-| **Nerd Font** | Icons in terminal (Starship, eza, yazi) | Installed automatically via bootstrap scripts |
-
-### 🔑 Setting up your age key (if forking)
-If you fork this repo, generate your own age key and re‑encrypt all secrets:
-
-```bash
-age-keygen -o ~/.config/chezmoi/key.txt
-# Then follow the instructions in docs/FORK-GUIDE.md
-```
+| Requisito | Motivo |
+|-----------|--------|
+| **git** | Clonar e versionar o repo |
+| **chezmoi** | Gerenciar dotfiles de forma segura e reprodutível |
+| **age** | Proteger segredos com criptografia moderna |
+| **Nerd Font** | Ícones no terminal para `eza`, `yazi`, `starship`, etc. |
 
 ---
 
-## 🏗️ Repository Overview
+## 🏗️ O que este repositório representa
+
+Ele não é apenas “alguns arquivos de shell”.  
+Ele codifica:
+
+- ambiente de shell modular com **zinit** e aliases versionados
+- editor e multiplexor de terminal configurados
+- ferramentas CLI modernas e suas configurações
+- segredos criptografados com **age** e gerenciados via **chezmoi**
+- integração com ferramentas de IA mediante gateway local (**OmniRoute**) e assistente pessoal (**Hermes**)
+- scripts生命周期 por OS, incluindo instalação de pacotes, fontes, drivers e serviços
+- fluxos de backup/restore seletivos para estado sensível, sem poluir o Git com histórico grande
+
+---
+
+## 📂 Estrutura
 
 ```
 .
-├── home/                     # ← chezmoi source root (see .chezmoiroot)
-│   ├── .chezmoi.yaml.tmpl   # ⚙️ Environment detection (OS, work/personal)
-│   ├── .chezmoidata/        # 📊 Package lists & data per OS
-│   │   ├── darwin/          #    macOS packages (Homebrew, MacPorts)
-│   │   ├── linux/           #    Linux packages (Arch, Ubuntu)
-│   │   └── windows/         #    Windows packages (winget, scoop)
-│   ├── .chezmoiexternals/   # 🔗 External dependencies (TPM, Catppuccin, etc.)
-│   ├── .chezmoiscripts/     # 🔄 Lifecycle hooks (pre/post install, OS‑specific)
-│   │   ├── darwin/          #    macOS‑only
-│   │   ├── linux/           #    Linux‑only (≈25 scripts)
-│   │   ├── unix/            #    Shared (≈19 scripts: AI tools, mise, lazygit, atuin…)
-│   │   └── windows/         #    Windows‑only
-│   ├── .chezmoitemplates/   # 🧩 Reusable template guards
-│   ├── dot_zshrc.d/         # 🐚 Modular zsh configuration (numbered 099‑999)
-│   ├── private_dot_config/  # ⚙️ Application configs (~30 apps)
-│   │   ├── git/             #    Git config with conditional includes
-│   │   ├── mise/            #    Runtime version manager
-│   │   ├── tmux/            #    tmux + Catppuccin Mocha
-│   │   └── …                #    kitty, wezterm, starship, bat, etc.
-│   └── private_dot_local/   # 📁 Local data
-│       └── environments/    #    Nix/Devenv project environments
-├── docs/                    # 📖 Detailed documentation
+├── home/
+│   ├── .chezmoi.yaml.tmpl                 # Detecção de SO e perfis
+│   ├── .chezmoidata/                      # Pacotes por plataforma
+│   │   ├── darwin/linux/windows/termux
+│   ├── .chezmoiexternals/                 # Dependências externas
+│   ├── .chezmoiscripts/                   # Hooks e bootstrap
+│   │   ├── darwin/linux/unix/windows/termux
+│   ├── .chezmoitemplates/                 # Guards/templates reutilizaveis
+│   ├── dot_zshrc.d/                       # Zsh modular
+│   ├── private_dot_config/                # Configs de apps
+│   ├── private_dot_ssh/                   # Chaves e configs SSH
+│   ├── private_dot_hermes/                # Estado criptografado do Hermes
+│   ├── dot_omniroute/                     # Estado criptografado do OmniRoute
+│   └── ...
+├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── CONFIGURATION.md
 │   ├── GETTING-STARTED.md
 │   ├── DEVELOPMENT.md
-│   ├── TESTING.md
+│   ├── HERMES-BACKUP.md
+│   ├── OMNIROUTE-BACKUP.md
 │   ├── KEYMAPS.md
-│   └── FORK-GUIDE.md
-├── .planning/               # 🗺 GSD workflow state (stack, concerns, milestones)
-└── README.md                # 👈 You are here
+│   ├── FORK-GUIDE.md
+│   └── WINDOWS-SETUP.md
+├── .planning/
+└── README.md
 ```
 
-### 🔐 Secrets Management
-All sensitive data (SSH keys, API tokens, VPN certificates, etc.) are encrypted with **age** and managed by chezmoi’s built‑in encryption (`chezmoi add --encrypt`).  
-The public age key must be placed at `~/.config/chezmoi/key.txt` on each host.  
-Encrypted files live under `home/` with the `.asc` suffix (e.g., `dot_ssh/encrypted_private_id_ed25519_vps.asc`).
+---
 
-### 🤖 AI Coding Infrastructure
-- **OmniRoute** – central API gateway for local and remote LLMs (Claude Code, OpenCode, Aider, Codex, etc.).  
-  *Installed via `mise` (Node 24) and configured via `~/.omniroute/.env` + `~/.omniroute/config.sql`.*  
-  *Backup/restore of selective state (config, secrets, semantic SQL) is handled by the `omniroute-sync` tool (`push|pull|status|doctor`).*
-- **Hermes Agent** – the assistant you are currently interacting with; its own encrypted state (memories, skills, config) is synchronized via `hermes-sync`.
-- Numerous other AI tools are installed automatically (see the **AI Coding Tools** table in the original README).
+## 🤖 Integrações: Hermes e OmniRoute
 
-### ⚙️ Runtime & Development Tooling
-- **[mise](https://mise.jdx.dev)** – version manager for Node, Java, Go, Python, etc.  
-- **Nix/Devenv** – isolated, reproducible project environments (optional).  
-- **Direnv** – per‑directory environment variables.  
-- **Atuin** – magical, synchronized shell history.  
-- **LazyGit, yazi, delta, eza, bat, fd, fzf, zoxide** – modern CLI replacements.  
-- **Starship** – cross‑shell prompt.  
-- **Zinit** – Zsh plugin manager.  
+### Hermes
+- Orquestra skills/memórias e automações pessoais.
+- Estado criptografado versionado via `hermes-sync`.
+- Documentação do modelo: `docs/HERMES-BACKUP.md`.
 
-### 🧪 Development & Contribution
-See the dedicated documents in `docs/`:
-- **DEVELOPMENT.md** – contributing guide, coding style, and workflow.
-- **TESTING.md** – how tests are structured and executed.
-- **FORK-GUIDE.md** – how to fork and customize this dotfiles repo.
-- **CONFIGURATION.md** – reference for environment variables and toggles.
-- **KEYMAPS.md** – cheat‑sheet for tmux, Neovim, and Zsh bindings.
+### OmniRoute
+- Gateway local/remoto de IA para os agentes de código e chat.
+- Config e segredos versionados de forma seletiva.
+- Documentação do modelo: `docs/OMNIROUTE-BACKUP.md`.
 
-### 📖 Additional Documentation
-- **ARCHITECTURE.md** – high‑level design and data flow.
-- **GETTING-STARTED.md** – step‑by‑step installation guide.
-- **HERMES-BACKUP.md** & **OMNIROUTE-BACKUP.md** – details on the selective backup model for Hermes and OmniRoute.
-- **WINDOWS-SETUP.md** – Windows/WSL‑specific notes.
+---
 
-### 🙏 Acknowledgments
-- [chezmoi](https://chezmoi.io) – dotfile management done right  
-- [Catppuccin Mocha](https://github.com/catppuccin/catppuccin) – unifying pastel theme  
-- [Zinit](https://github.com/zdharma-continuum/zinit) – flexible Zsh plugin manager  
-- [Starship](https://starship.rs) – minimal, blazing‑fast prompt  
-- [mise](https://mise.jdx.dev) – dev tools, any language, any tool  
-- [age](https://age-encryption.org) – simple, modern encryption  
-- [Tailscale](https://tailscale.com) – zero‑config VPN  
-- OmniRoute – AI gateway  
-- Hermes Agent – personal AI assistant  
+## 🔐 O que entra e o que fica fora
+
+**Entra no repo:**
+- configurações estáveis e pequenas
+- templates e scripts de bootstrap
+- estado sensencial criptografado
+- manifests/SQL seletivo
+
+**Fica fora:**
+- históricos grandes, caches, runtime state, logs e blobs binários
+- estratégias de backup completo devem ser tratadas externamente
+
+---
+
+## 📖 Documentação
+
+- `docs/GETTING-STARTED.md` — instalação detalhada
+- `docs/ARCHITECTURE.md` — visão geral do ambiente e fluxos
+- `docs/CONFIGURATION.md` — variáveis e ajustes
+- `docs/DEVELOPMENT.md` — como contribuir no repo
+- `docs/TESTING.md` — smoke checks úteis
+- `docs/KEYMAPS.md` — atalhos tmux/nvim/zsh
+- `docs/FORK-GUIDE.md` — como fork sem herdar segredos
+
+---
+
+## 🍴 Fork
+
+Se quiser adaptar este ambiente para outro perfil/cliente/máquina:
+- use `docs/FORK-GUIDE.md`
+- gere seu próprio par de chaves `age`
+- revise scripts e perfis antes de aplicar em produção
+
+---
+
+## 🙏 Créditos
+
+- [chezmoi](https://chezmoi.io) — gerenciamento de dotfiles
+- [zinit](https://github.com/zdharma-continuum/zinit) — plugins ZSH
+- [starship](https://starship.rs) — prompt minimal
+- [mise](https://mise.jdx.dev) — versionamento de runtime
+- [age](https://age-encryption.org) — criptografia simples e moderna
+- [Tailscale](https://tailscale.com) — VPN ponto a ponto
+- **OmniRoute** — gateway de IA
+- **Hermes Agent** — assistente pessoal
 
 ---
 
