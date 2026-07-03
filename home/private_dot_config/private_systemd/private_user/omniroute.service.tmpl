@@ -1,14 +1,36 @@
 [Unit]
-Description=OmniRoute — LLM API Router
+Description=OmniRoute — Smart AI Router with Auto Fallback
+Documentation=https://github.com/omniroute/omniroute
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart={{ .chezmoi.homeDir }}/.local/share/mise/installs/node/24/bin/omniroute
-Restart=on-failure
-RestartSec=5
-Environment=PATH={{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/.local/share/mise/installs/node/24/bin:/usr/local/bin:/usr/bin:/bin
+User={{ .chezmoi.username }}
+Group={{ .chezmoi.username }}
+WorkingDirectory={{ .chezmoi.homeDir }}/.local/src/OmniRoute
+
+# Node.js via mise (source build)
+ExecStart={{ .chezmoi.homeDir }}/.local/share/mise/installs/node/lts/bin/node {{ .chezmoi.homeDir }}/.local/src/OmniRoute/bin/omniroute.mjs serve
+
+# Environment
+EnvironmentFile={{ .chezmoi.homeDir }}/.omniroute/.env
+Environment=PATH={{ .chezmoi.homeDir }}/.local/share/mise/installs/node/lts/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=NODE_ENV=production
+
+# Restart behaviour — keep it alive
+Restart=always
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Safety
+TimeoutStopSec=30
+KillMode=process
+
+# Logging
+StandardOutput=journal
+StandardError=journal
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
