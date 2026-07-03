@@ -10,18 +10,18 @@
     "opencode-wakatime"
   ],
   "theme": "catppuccin",
-  "model": "omniroute/free",
+  "model": "omniroute/work",
   "provider": {
     "omniroute": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "OmniRoute",
       "options": {
-        "baseURL": "http://157.151.13.223:20129/v1",
+        "baseURL": "http://157.151.13.223/v1",
         "apiKey": "{{ include $omniroute_key | decrypt | trim }}"
       },
       "models": {
-        "free": {
-          "name": "free"
+        "omniroute/work": {
+          "name": "omniroute/work"
         },
         "fmd/gpt-5.5": {
           "name": "fmd/gpt-5.5"
