@@ -105,19 +105,19 @@ Ele codifica:
 - Gateway local/remoto de IA para os agentes de código e chat.
 - Config e segredos versionados de forma seletiva via chezmoi:
   - Template de serviço systemd: `private_dot_config/private_systemd/private_user/omniroute.service.tmpl`
-  - Script de instalação automatizada: `.chezmoiscripts/linux/install-omniroute-from-source.sh`
+  - Script de instalação automatizada: `.chezmoiscripts/run_once_after_install-omniroute-from-source.sh.tmpl`
 - Documentação do modelo: `docs/OMNIROUTE-BACKUP.md`.
 - **Como funciona para instalação automática**:
   1. O chezmoi aplica o template do systemd (e outros arquivos de configuração)
-  2. O script de instalação (`install-omniroute-from-source.sh`) é executado para:
+  2. O script de instalação (`run_once_after_install-omniroute-from-source.sh.tmpl`) é executado automaticamente após `chezmoi apply` para:
      - Clonar/atualizar o repositório do OmniRoute
      - Instalar dependências Node.js via mise
      - Compilar o CLI com `npm run build:cli`
-     - Configurar e iniciar o serviço systemd
+     - Recarregar e reiniciar o serviço systemd
   3. Isso permite bootstrap consistente em qualquer máquina executando:
      ```bash
      chezmoi init --apply <seu-repo>
-     ~/.local/share/chezmoi/.chezmoiscripts/linux/install-omniroute-from-source.sh
+     # O script run_once_after é executado automaticamente
      ```
 
 ## 🔐 O que entra e o que fica fora

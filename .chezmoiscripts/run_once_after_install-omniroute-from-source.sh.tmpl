@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# OmniRoute installation script for chezmoi (run_once_after)
+# Installs/Updates OmniRoute from source
+# This script runs once, but if its content changes, it will run again.
+
+set -euo pipefail
+
+# Configuration from chezmoi data
+OMNIROUTE_REPO="https://github.com/omniroute/omniroute.git"
+OMNIROUTE_DIR="{{ .chezmoi.homeDir }}/.local/src/OmniRoute"
+OMNIROUTE_VERSION="{{ .omninroute.install.version | default \"main\" }}"
+
+echo "🚀 Running OmniRoute installation/update..."
+
+# Create directory
+mkdir -p "$(dirname "$OMNIROUTE_DIR")"
+
+# Clone or update repository
+if [ -d "$OMNIROUTE_DIR" ]; then
+    echo "📁 Updating OmniRoute source..."
+    cd "$OMNIROUTE_DIR"
+    git fetch origin --tags
+    
+    # Checkout the specified version (tag/branch/commit)
+    if git rev-parse --verify "refs/tags/$OMNIROUTE_VERSION" >/dev/null 2>&1; then
+        echo "🔖 Checking out version $OMNIROUTE_VERSION"
+        git checkout "$OMNIROUTE_VERSION"
+    elif git rev-parse --verify "refs/heads/$OMNIROUTE_VERSION" >/dev/null 2>&1; then
+        echo "🌿 Checking out branch $OMNIROUTE_VERSION"
+        git checkout "$OMNIROUTE_VERSION"
+    else
+        # Assume it's a commit hash or fallback to main
+        echo "🔄 Resetting to $OMNIROUTE_VERSION"
+        git reset --hard "$OMNIROUTE_VERSION"
+    fi
+    
+    git pull origin "$OMNIROUTE_VERSION"
+else
+    echo "📥 Cloning OmniRoute repository..."
+    git clone "$OMNIROUTE_REPO" "$OMNIROUTE_DIR"
+    cd "$OMNIROUTE_DIR"
+    
+    # Checkout the specified version
+    if [ "$OMNIROUTE_VERSION" != "main" ]; then
+        if git rev-parse --verify "refs/tags/$OMNIROUTE_VERSION" >/dev/null 2>&1; then
+            echo "🔖 Checking out version $OMNIROUTE_VERSION"
+            git checkout "$OMNIROUTE_VERSION"
+        elif git rev-parse --verify "refs/heads/$OMNIROUTE_VERSION" >/dev/null 2>&1; then
+            echo "🌿 Checking out branch $OMNIROUTE_VERSION"
+            git checkout "$OMNIROUTE_VERSION"
+        else
+            echo "⚠️  Version/branch/tag $OMNIROUTE_VERSION not found, using default branch"
+        fi
+    fi
+fi
+
+# Ensure mise is used for Node.js
+if command -v mise &> /dev/null; then
+    echo "📦 Installing/Updating Node.js LTS via mise..."
+    mise install node@lts
+    mise use node@lts --local
+else
+    echo "⚠️  mise not found. Please ensure Node.js LTS is installed."
+    # Try to use system node if available
+    if ! command -v node &> /dev/null; then
+        echo "❌ Node.js not found. Please install Node.js LTS and mise."
+        exit 1
+    fi
+fi
+
+# Install dependencies and build
+echo "📦 Installing Node.js dependencies..."
+npm ci
+
+echo "🔨 Building OmniRoute CLI..."
+npm run build:cli
+
+# Verify build succeeded
+if [ ! -f "bin/omniroute.mjs" ]; then
+    echo "❌ Build failed: bin/omniroute.mjs not found"
+    exit 1
+fi
+
+# Reload systemd and restart the service
+echo "📋 Refreshing systemd..."
+sudo systemctl daemon-reload
+sudo systemctl enable omniroute.service
+sudo systemctl restart omniroute.service
+
+echo "✅ OmniRoute installation/update complete!"
+echo "📊 Dashboard: http://localhost:20128"
+echo "🔌 API Base: http://localhost:20129/v1"
