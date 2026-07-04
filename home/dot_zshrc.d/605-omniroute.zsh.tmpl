@@ -50,20 +50,13 @@ alias -- omniroute-sync-status="omniroute-sync status"
 alias -- omniroute-sync-doctor="omniroute-sync doctor"
 
 
-{{ if and (eq .chezmoi.os "linux") (not .settings.wsl) (eq .settings.workplace "Zup")}}
+{{ if and (eq .chezmoi.os "linux") (not .settings.wsl)}}
 ## Linux com systemd user service
-alias -- omniroute-start="sudo systemctl start omniroute.service"
-alias -- omniroute-stop="sudo systemctl stop omniroute.service"
-alias -- omniroute-restart="sudo systemctl restart omniroute.service"
-alias -- omniroute-status="sudo systemctl status omniroute.service"
-alias -- omniroute-enable="sudo systemctl enable omniroute.service"
-{{ else if (eq .settings.workplace "Zup") }}
-## macOS / WSL / ambientes sem systemd
-alias -- omniroute-start="omniroute start"
-alias -- omniroute-stop="omniroute stop"
-alias -- omniroute-restart="omniroute restart"
-alias -- omniroute-status="omniroute status"
-alias -- omniroute-enable="omniroute enable"
+alias -- omniroute-start="systemctl --user start omniroute.service"
+alias -- omniroute-stop="systemctl --user stop omniroute.service"
+alias -- omniroute-restart="systemctl --user restart omniroute.service"
+alias -- omniroute-status="systemctl --user status omniroute.service"
+alias -- omniroute-enable="systemctl --user enable omniroute.service"
 {{ end }}
 
 # vim: filetype=bash

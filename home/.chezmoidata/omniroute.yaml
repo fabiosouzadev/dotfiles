@@ -4,5 +4,5 @@
 # Fixe uma versão quando quiser congelar (ex: "3.8.35").
 omniroute:
   install:
-    version: "3.8.35"
+    version: "3.8.44"
     method: "source"
