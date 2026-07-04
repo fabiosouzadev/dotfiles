@@ -29,7 +29,7 @@
 ## ═══════════════════════════════════════════════════════════════════════════════
 
 ## Aliases universais (funcionam em qualquer OS)
-alias -- omniroute-health="curl -sf http://localhost:20128/health 2>/dev/null && echo ' ✓ OmniRoute healthy' || echo ' ✗ OmniRoute not running'"
+alias -- omniroute-health="curl -sf http://localhost:20128/dashboard/health 2>/dev/null && echo ' ✓ OmniRoute healthy' || echo ' ✗ OmniRoute not running'"
 alias -- omniroute-dashboard="open http://localhost:20128 2>/dev/null || xdg-open http://localhost:20128 2>/dev/null || echo 'Dashboard: http://localhost:20128'"
 alias -- omniroute-models="curl -sf http://localhost:20128/v1/models -H 'Authorization: Bearer ' 2>/dev/null | jq '.data[].id' 2>/dev/null || echo 'OmniRoute not running or no models available'"
 

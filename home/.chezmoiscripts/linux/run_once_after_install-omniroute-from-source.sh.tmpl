@@ -134,7 +134,7 @@ ensure_env_file
 
 # Read PORT from .env file for health check
 OMNIROUTE_PORT=$(read_env_port "$OMNIROUTE_ENV_DIR/.env")
-HEALTH_CHECK_URL="http://localhost:${OMNIROUTE_PORT}/health"
+HEALTH_CHECK_URL="http://localhost:${OMNIROUTE_PORT}/dashboard/health"
 echo "🔍 Health check will target: $HEALTH_CHECK_URL"
 
 echo "📋 Refreshing systemd..."
@@ -149,7 +149,7 @@ echo "🏥 Performing health check..."
 if health_check; then
     echo "✅ OmniRoute installation/update completed successfully!"
     echo "📊 Dashboard: http://localhost:${OMNIROUTE_PORT}"
-    echo "🔌 API Base: http://localhost:$(($OMNIROUTE_PORT + 1))/v1  # Assuming API is PORT+1"
+    echo "🔌 API Base: http://localhost:${OMNIROUTE_PORT}/v1  # Assuming API is PORT+1"
 else
     echo "❌ OmniRoute installation/update failed. Check logs at $LOG_FILE"
     exit 1
