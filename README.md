@@ -7,10 +7,9 @@
 ![Shell](https://img.shields.io/badge/shell-zsh-green?style=flat-square)
 ![chezmoi](https://img.shields.io/badge/chezmoi-managed-blue?style=flat-square)
 
-Repositório de dotfiles gerenciado pelo [chezmoi](https://chezmoi.io), focado em reprodutibilidade, versionamento de configurações e bootstrap limpo de máquinas.  
-O objetivo não é apenas manter arquivos de configuração, mas representar um ambiente de operação completo: shell, editor, terminal, ferramentas modernas, segredos criptografados, integração com IA local/remota e fluxos de sincronização.
+Repositório de dotfiles gerenciado pelo [chezmoi](https://chezmoi.io), focado em reprodutibilidade, versionamento de configurações e bootstrap limpo de máquinas. O objetivo não é apenas manter arquivos de configuração, mas representar um ambiente de operação completo: shell, editor, terminal, ferramentas modernas, segredos criptografados, integração com IA local/remota e fluxos de sincronização.
 
-> 🇧🇷 **Português:** Repositório pessoal de dotfiles, automações e infraestrutura local.  
+> 🇧🇷 **Português:** Repositório pessoal de dotfiles, automações e infraestrutura local.
 > Repositório completo em `~/.local/share/chezmoi`.
 
 ---
@@ -28,7 +27,7 @@ sudo pacman -S chezmoi
 chezmoi init --apply fabiosouzadev
 ```
 
-> ⚠️ Arquivos criptografados dependem da sua própria chave `age`.  
+> ⚠️ Arquivos criptografados dependem da sua própria chave `age`.
 > Se for fork, gere uma nova chave e reencode os segredos antes de aplicar.
 
 ---
@@ -46,16 +45,15 @@ chezmoi init --apply fabiosouzadev
 
 ## 🏗️ O que este repositório representa
 
-Ele não é apenas “alguns arquivos de shell”.  
-Ele codifica:
+Ele não é apenas “alguns arquivos de shell”. Ele codifica:
 
 - ambiente de shell modular com **zinit** e aliases versionados
 - editor e multiplexor de terminal configurados
 - ferramentas CLI modernas e suas configurações
 - segredos criptografados com **age** e gerenciados via **chezmoi**
 - integração com ferramentas de IA mediante gateway local (**OmniRoute**) e assistente pessoal (**Hermes**)
-- scripts生命周期 por OS, incluindo instalação de pacotes, fontes, drivers e serviços
-- chezmoi-managed systemd files and installation scripts (.chezmoifiles/, .chezmoiscripts/)
+- scripts de ciclo de vida por OS, incluindo instalação de pacotes, fontes, drivers e serviços
+- arquivos chezmoi-managed de systemd e scripts de instalação (.chezmoifiles/, .chezmoiscripts/)
 - fluxos de backup/restore seletivos para estado sensível, sem poluir o Git com histórico grande
 
 ---
@@ -67,11 +65,11 @@ Ele codifica:
 ├── home/
 │   ├── .chezmoi.yaml.tmpl                 # Detecção de SO e perfis
 │   ├── .chezmoidata/                      # Pacotes por plataforma
-│   │   ├── darwin/linux/windows/termux
+│   │   ├── darwin/ linux/ windows/ termux/
 │   ├── .chezmoiexternals/                 # Dependências externas
 │   ├── .chezmoiscripts/                   # Hooks e bootstrap
-│   │   ├── darwin/linux/unix/windows/termux
-│   ├── .chezmoitemplates/                 # Guards/templates reutilizaveis
+│   │   ├── darwin/ linux/ unix/ windows/ termux/
+│   ├── .chezmoitemplates/                 # Guards/templates reutilizáveis
 │   ├── dot_zshrc.d/                       # Zsh modular
 │   ├── private_dot_config/                # Configs de apps
 │   ├── private_dot_ssh/                   # Chaves e configs SSH
@@ -82,7 +80,6 @@ Ele codifica:
 │   ├── ARCHITECTURE.md
 │   ├── CONFIGURATION.md
 │   ├── GETTING-STARTED.md
-│   ├── DEVELOPMENT.md
 │   ├── HERMES-BACKUP.md
 │   ├── OMNIROUTE-BACKUP.md
 │   ├── KEYMAPS.md
@@ -107,7 +104,7 @@ Ele codifica:
   - Template de serviço systemd: `private_dot_config/private_systemd/private_user/omniroute.service.tmpl`
   - Script de instalação automatizada: `.chezmoiscripts/run_once_after_install-omniroute-from-source.sh.tmpl`
 - Documentação do modelo: `docs/OMNIROUTE-BACKUP.md`.
-- **Como funciona para instalação automática**:
+- **Como funciona para instalação automática:**
   1. O chezmoi aplica o template do systemd (e outros arquivos de configuração)
   2. O script de instalação (`run_once_after_install-omniroute-from-source.sh.tmpl`) é executado automaticamente após `chezmoi apply` para:
      - Clonar/atualizar o repositório do OmniRoute
@@ -120,12 +117,14 @@ Ele codifica:
      # O script run_once_after é executado automaticamente
      ```
 
+---
+
 ## 🔐 O que entra e o que fica fora
 
 **Entra no repo:**
 - configurações estáveis e pequenas
 - templates e scripts de bootstrap
-- estado sensencial criptografado
+- estado sensorial criptografado
 - manifests/SQL seletivo
 
 **Fica fora:**
