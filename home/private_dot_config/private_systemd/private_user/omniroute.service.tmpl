@@ -6,8 +6,6 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User={{ .chezmoi.username }}
-Group={{ .chezmoi.username }}
 WorkingDirectory={{ .chezmoi.homeDir }}/.local/src/OmniRoute
 
 # Node.js via mise (source build)
@@ -33,4 +31,4 @@ StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

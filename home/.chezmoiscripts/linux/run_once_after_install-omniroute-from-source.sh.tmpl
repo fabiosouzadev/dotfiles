@@ -138,11 +138,11 @@ HEALTH_CHECK_URL="http://localhost:${OMNIROUTE_PORT}/health"
 echo "🔍 Health check will target: $HEALTH_CHECK_URL"
 
 echo "📋 Refreshing systemd..."
-sudo systemctl daemon-reload
-sudo systemctl enable omniroute.service
+systemctl --user daemon-reload
+systemctl --user enable omniroute.service
 
 echo "🔄 Restarting OmniRoute service..."
-sudo systemctl restart omniroute.service
+systemctl --user restart omniroute.service
 
 # --- Verificação ---
 echo "🏥 Performing health check..."
