@@ -117,7 +117,7 @@ fi
 echo "📦 Ensuring Node.js LTS is installed via mise..."
 if command -v mise &> /dev/null; then
  mise install node@lts
- mise use --local node@lts
+ mise use node@lts
 else
     echo "❌ mise not found. Please install mise or ensure Node.js LTS is available."
     exit 1
