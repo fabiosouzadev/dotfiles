@@ -74,23 +74,43 @@ mkdir -p "$(dirname "$OMNIROUTE_DIR")"
 
 echo "🔍 Checking OmniRoute repository..."
 if [[ -d "$OMNIROUTE_DIR" ]]; then
-    rm -rf "$OMNIROUTE_DIR"
-fi
-
-echo "📥 Cloning OmniRoute repository..."
-git clone "$OMNIROUTE_REPO" "$OMNIROUTE_DIR"
-cd "$OMNIROUTE_DIR"
-git fetch --tags origin
-if [[ "$OMNIROUTE_VERSION" == "latest" ]]; then
-    echo "🔖 Checking out latest version (main branch)..."
-    git checkout main
-else
-    if git show-ref --tags --quiet --verify -- "refs/tags/$OMNIROUTE_VERSION"; then
-        echo "🔖 Checking out version $OMNIROUTE_VERSION..."
-        git checkout "$OMNIROUTE_VERSION"
+    echo "📁 OmniRoute directory found. Updating..."
+    cd "$OMNIROUTE_DIR"
+    if ! git diff --quiet; then
+        echo "⚠️  Uncommitted changes detected. Stashing changes..."
+        git stash
+    fi
+    git fetch origin
+    git fetch --tags origin
+    if [[ "$OMNIROUTE_VERSION" == "latest" ]]; then
+        echo "🔖 Checking out latest version (main branch)..."
+        git reset --hard origin/main
     else
-        echo "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
+        echo "🔖 Checking out version $OMNIROUTE_VERSION..."
+        # Check if the tag exists
+        if git show-ref --tags --quiet --verify -- "refs/tags/$OMNIROUTE_VERSION"; then
+            git reset --hard "$OMNIROUTE_VERSION"
+        else
+            echo "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
+            git reset --hard origin/main
+        fi
+    fi
+else
+    echo "📥 Cloning OmniRoute repository..."
+    git clone "$OMNIROUTE_REPO" "$OMNIROUTE_DIR"
+    cd "$OMNIROUTE_DIR"
+    git fetch --tags origin
+    if [[ "$OMNIROUTE_VERSION" == "latest" ]]; then
+        echo "🔖 Checking out latest version (main branch)..."
         git checkout main
+    else
+        if git show-ref --tags --quiet --verify -- "refs/tags/$OMNIROUTE_VERSION"; then
+            echo "🔖 Checking out version $OMNIROUTE_VERSION..."
+            git checkout "$OMNIROUTE_VERSION"
+        else
+            echo "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
+            git checkout main
+        fi
     fi
 fi
 
@@ -107,14 +127,14 @@ echo "📦 Installing Node.js dependencies..."
 npm ci
 
 echo "🔨 Building OmniRoute CLI..."
-npm run build:cli
+npm run build:release
 
 # --- Configuração do Serviço ---
 ensure_env_file
 
 # Read PORT from .env file for health check
 OMNIROUTE_PORT=$(read_env_port "$OMNIROUTE_ENV_DIR/.env")
-HEALTH_CHECK_URL="http://localhost:${OMNIROUTE_PORT}/dashboard/health"
+HEALTH_CHECK_URL="http://localhost:${OMNIROUTE_PORT}/api/monitoring/health"
 echo "🔍 Health check will target: $HEALTH_CHECK_URL"
 
 echo "📋 Refreshing systemd..."
