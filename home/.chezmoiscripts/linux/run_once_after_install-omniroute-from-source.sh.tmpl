@@ -74,43 +74,24 @@ mkdir -p "$(dirname "$OMNIROUTE_DIR")"
 
 echo "🔍 Checking OmniRoute repository..."
 if [[ -d "$OMNIROUTE_DIR" ]]; then
-    echo "📁 OmniRoute directory found. Updating..."
-    cd "$OMNIROUTE_DIR"
-    if ! git diff --quiet; then
-        echo "⚠️  Uncommitted changes detected. Stashing changes..."
-        git stash
-    fi
-    git fetch origin
-    git fetch --tags origin
-    if [[ "$OMNIROUTE_VERSION" == "latest" ]]; then
-        echo "🔖 Checking out latest version (main branch)..."
-        git reset --hard origin/main
-    else
-        echo "🔖 Checking out version $OMNIROUTE_VERSION..."
-        # Check if the tag exists
-        if git show-ref --tags --quiet --verify -- "refs/tags/$OMNIROUTE_VERSION"; then
-            git reset --hard "$OMNIROUTE_VERSION"
-        else
-            echo "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
-            git reset --hard origin/main
-        fi
-    fi
+    echo "📁 OmniRoute directory found. Deleting..."
+    rm -rf "$OMNIROUTE_DIR"
+fi
+
+echo "📥 Cloning OmniRoute repository..."
+git clone "$OMNIROUTE_REPO" "$OMNIROUTE_DIR"
+cd "$OMNIROUTE_DIR"
+git fetch --tags origin
+if [[ "$OMNIROUTE_VERSION" == "latest" ]]; then
+    echo "🔖 Checking out latest version (main branch)..."
+    git checkout main
 else
-    echo "📥 Cloning OmniRoute repository..."
-    git clone "$OMNIROUTE_REPO" "$OMNIROUTE_DIR"
-    cd "$OMNIROUTE_DIR"
-    git fetch --tags origin
-    if [[ "$OMNIROUTE_VERSION" == "latest" ]]; then
-        echo "🔖 Checking out latest version (main branch)..."
-        git checkout main
+    if git show-ref --tags --quiet --verify -- "refs/tags/$OMNIROUTE_VERSION"; then
+        echo "🔖 Checking out version $OMNIROUTE_VERSION..."
+        git checkout "$OMNIROUTE_VERSION"
     else
-        if git show-ref --tags --quiet --verify -- "refs/tags/$OMNIROUTE_VERSION"; then
-            echo "🔖 Checking out version $OMNIROUTE_VERSION..."
-            git checkout "$OMNIROUTE_VERSION"
-        else
-            echo "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
-            git checkout main
-        fi
+        echo "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
+        git checkout main
     fi
 fi
 
