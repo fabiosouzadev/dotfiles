@@ -1,10 +1,11 @@
-{{ if .features.ai.coding_assistants -}}
-#!/usr/bin/env bash
 
+#!/usr/bin/env bash
 {{ template "common/script_is_not_ephemeral" . }}
-{{ template "common/script_eval_mise" . }}
 {{ template "common/script_helper" . }}
 {{ template "workplace/script_is_not_vps" . }}
+
+
+{{ if .features.ai.coding_assistants -}}
 
 {{- if or ( .settings.osid | lower | contains "endeavouros" ) ( .settings.osid | lower | contains "cachyos" ) }}
 
