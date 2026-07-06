@@ -3,7 +3,11 @@
 # Installs/Updates OmniRoute from source with health checks and logging.
 # This script is idempotent and safe to re-run.
 
-set -euo pipefail
+{{ template "common/script_helper" . -}}
+{{ template "common/script_is_not_ephemeral" . -}}
+{{ template "workplace/script_is_vps" . }}
+
+{{ if .features.ai.omniroute.install }}
 
 # --- Configuração ---
 OMNIROUTE_REPO="https://github.com/diegosouzapw/OmniRoute.git"
@@ -14,7 +18,7 @@ OMNIROUTE_VERSION="{{ .omniroute.install.version }}"
 # --- Normalizar versão ---
 # Adicionar prefixo 'v' se for versão semântica no formato numérique (ex: 3.8.35 → v3.8.35)
 if [[ "$OMNIROUTE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "🔧 Normalizando versão: '$OMNIROUTE_VERSION' → 'v$OMNIROUTE_VERSION'"
+    info "🔧 Normalizando versão: '$OMNIROUTE_VERSION' → 'v$OMNIROUTE_VERSION'"
     OMNIROUTE_VERSION="v$OMNIROUTE_VERSION"
 fi
 LOG_FILE="/tmp/chezmoi/logs/omniroute-install-$(date +%Y%m%d_%H%M%S).log"
@@ -24,29 +28,29 @@ RETRY_DELAY=5
 # --- Logging ---
 mkdir -p "$(dirname "$LOG_FILE")"
 exec > >(tee -a "$LOG_FILE") 2>&1
-echo "🚀 OmniRoute Installation Log - $(date)"
-echo "----------------------------------------"
+info "🚀 OmniRoute Installation Log - $(date)"
+info "----------------------------------------"
 
 # --- Funções Auxiliares ---
 function health_check() {
     local retries=0
     while (( retries < MAX_RETRIES )); do
         if curl -sSf "$HEALTH_CHECK_URL" >/dev/null 2>&1; then
-            echo "✅ OmniRoute is healthy and responding."
+            success "OmniRoute is healthy and responding."
             return 0
         else
             retries=$((retries + 1))
-            echo "⚠️  Health check failed (attempt $retries/$MAX_RETRIES). Retrying in $RETRY_DELAY seconds..."
+            info "⚠️  Health check failed (attempt $retries/$MAX_RETRIES). Retrying in $RETRY_DELAY seconds..."
             sleep "$RETRY_DELAY"
         fi
     done
-    echo "❌ OmniRoute health check failed after $MAX_RETRIES attempts."
+    info "❌ OmniRoute health check failed after $MAX_RETRIES attempts."
     return 1
 }
 
 function ensure_env_file() {
     if [[ ! -d "$OMNIROUTE_ENV_DIR" ]]; then
-        echo "📝 Creating OmniRoute config directory..."
+        info "📝 Creating OmniRoute config directory..."
         mkdir -p "$OMNIROUTE_ENV_DIR"
     fi
 }
@@ -60,73 +64,73 @@ function read_env_port() {
         # If port is empty or not a number, use default
         if [[ -z "$port" ]] || ! [[ "$port" =~ ^[0-9]+$ ]]; then
             port=20128
-            echo "⚠️  Invalid or missing PORT in $env_file. Using default: $port"
+            info "⚠️  Invalid or missing PORT in $env_file. Using default: $port"
         fi
     else
-        echo "⚠️  $env_file not found. Using default PORT: $port"
+        info "⚠️  $env_file not found. Using default PORT: $port"
     fi
-    echo "$port"
+    info "$port"
 }
 
 # --- Instalação/Atualização ---
-echo "📁 Ensuring OmniRoute directory exists..."
+info "📁 Ensuring OmniRoute directory exists..."
 mkdir -p "$(dirname "$OMNIROUTE_DIR")"
 
-echo "🔍 Checking OmniRoute repository..."
+info "🔍 Checking OmniRoute repository..."
 if [[ -d "$OMNIROUTE_DIR" ]]; then
-    echo "📁 OmniRoute directory found. Updating..."
+    info "📁 OmniRoute directory found. Updating..."
     cd "$OMNIROUTE_DIR"
     if ! git diff --quiet; then
-        echo "⚠️  Uncommitted changes detected. Stashing changes..."
+        warn "⚠️  Uncommitted changes detected. Stashing changes..."
         git stash
     fi
     git fetch origin
     git fetch --tags origin
     if [[ "$OMNIROUTE_VERSION" == "latest" ]]; then
-        echo "🔖 Checking out latest version (main branch)..."
+        info "🔖 Checking out latest version (main branch)..."
         git reset --hard origin/main
     else
-        echo "🔖 Checking out version $OMNIROUTE_VERSION..."
+        info "🔖 Checking out version $OMNIROUTE_VERSION..."
         # Check if the tag exists
         if git show-ref --tags --quiet --verify -- "refs/tags/$OMNIROUTE_VERSION"; then
             git reset --hard "$OMNIROUTE_VERSION"
         else
-            echo "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
+            error "Tag $OMNIROUTE_VERSION not found. Falling back to main."
             git reset --hard origin/main
         fi
     fi
 else
-    echo "📥 Cloning OmniRoute repository..."
+    info "📥 Cloning OmniRoute repository..."
     git clone "$OMNIROUTE_REPO" "$OMNIROUTE_DIR"
     cd "$OMNIROUTE_DIR"
     git fetch --tags origin
     if [[ "$OMNIROUTE_VERSION" == "latest" ]]; then
-        echo "🔖 Checking out latest version (main branch)..."
+        info "🔖 Checking out latest version (main branch)..."
         git checkout main
     else
         if git show-ref --tags --quiet --verify -- "refs/tags/$OMNIROUTE_VERSION"; then
-            echo "🔖 Checking out version $OMNIROUTE_VERSION..."
+            info "🔖 Checking out version $OMNIROUTE_VERSION..."
             git checkout "$OMNIROUTE_VERSION"
         else
-            echo "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
+            error "❌ Tag $OMNIROUTE_VERSION not found. Falling back to main."
             git checkout main
         fi
     fi
 fi
 
-echo "📦 Ensuring Node.js LTS is installed via mise..."
+info "📦 Ensuring Node.js LTS is installed via mise..."
 if command -v mise &> /dev/null; then
  mise install node@lts
  mise use node@lts
 else
-    echo "❌ mise not found. Please install mise or ensure Node.js LTS is available."
+    error "❌ mise not found. Please install mise or ensure Node.js LTS is available."
     exit 1
 fi
 
-echo "📦 Installing Node.js dependencies..."
+info "📦 Installing Node.js dependencies..."
 npm ci
 
-echo "🔨 Building OmniRoute CLI..."
+info "🔨 Building OmniRoute CLI..."
 npm run build:release
 
 # --- Configuração do Serviço ---
@@ -135,22 +139,24 @@ ensure_env_file
 # Read PORT from .env file for health check
 OMNIROUTE_PORT=$(read_env_port "$OMNIROUTE_ENV_DIR/.env")
 HEALTH_CHECK_URL="http://localhost:${OMNIROUTE_PORT}/api/monitoring/health"
-echo "🔍 Health check will target: $HEALTH_CHECK_URL"
+info "🔍 Health check will target: $HEALTH_CHECK_URL"
 
-echo "📋 Refreshing systemd..."
+info "📋 Refreshing systemd..."
 systemctl --user daemon-reload
 systemctl --user enable omniroute.service
 
-echo "🔄 Restarting OmniRoute service..."
+info "🔄 Restarting OmniRoute service..."
 systemctl --user restart omniroute.service
 
 # --- Verificação ---
-echo "🏥 Performing health check..."
+info "🏥 Performing health check..."
 if health_check; then
-    echo "✅ OmniRoute installation/update completed successfully!"
-    echo "📊 Dashboard: http://localhost:${OMNIROUTE_PORT}"
-    echo "🔌 API Base: http://localhost:${OMNIROUTE_PORT}/v1  # Assuming API is PORT+1"
+    info "✅ OmniRoute installation/update completed successfully!"
+    info "📊 Dashboard: http://localhost:${OMNIROUTE_PORT}"
+    info "🔌 API Base: http://localhost:${OMNIROUTE_PORT}/v1  # Assuming API is PORT+1"
 else
-    echo "❌ OmniRoute installation/update failed. Check logs at $LOG_FILE"
+    error "OmniRoute installation/update failed. Check logs at $LOG_FILE"
     exit 1
 fi
+
+{{ end }}

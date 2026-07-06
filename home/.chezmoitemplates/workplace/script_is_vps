@@ -1,0 +1,4 @@
+{{ if not (.settings.vps) }}
+info "❌ >> VPS not detected, skipping installation <<"
+exit 0
+{{ end }}
