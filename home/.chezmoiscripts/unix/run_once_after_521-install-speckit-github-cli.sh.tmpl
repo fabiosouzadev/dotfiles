@@ -1,10 +1,8 @@
-{{ if .features.ai.spec_tools -}}
 #!/usr/bin/env bash
-
+{{ template "common/script_helper" . }}
 {{ template "common/script_is_not_ephemeral" . }}
 
-
-{{ template "common/script_helper" . }}
+{{ if .features.ai.spec_tools }}
 
 #Install SpecKit CLI -> Spec Framework
 # https://github.com/github/spec-kit
@@ -15,6 +13,6 @@ uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
 success ">>> SpecKit Github Cli Installed"
 specify version
 
-{{- end }}
+{{ end }}
 
 # vim: filetype=bash
