@@ -1,7 +1,7 @@
 {{- $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
-{{- if eq .settings.workplace "Zup" }}
-    {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
-{{- end }}
+{{- if eq .settings.workplace "Zup" -}}
+{{-   $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
+{{- end -}}
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": true,
@@ -9,7 +9,6 @@
   "plugin": [
     "opencode-wakatime"
   ],
-  "theme": "catppuccin",
   "model": "omniroute/work",
   "provider": {
     "omniroute": {
@@ -23,21 +22,15 @@
         "omniroute/work": {
           "name": "omniroute/work"
         },
-        "fmd/gpt-5.5": {
-          "name": "fmd/gpt-5.5"
-        },
-        "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": {
-          "name": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
-        },
-        "openrouter/openrouter/free": {
-          "name": "openrouter/openrouter/free"
-        }
       }
+    }
+  },
+  "permission": {
+    "read": {
+      "~/.config/opencode/gsd-core/*": "allow"
     },
-    "fireworks": {
-      "models": {
-        "accounts/fireworks/routers/kimi-k2p5-turbo": {},
-      }
+    "external_directory": {
+      "~/.config/opencode/gsd-core/*": "allow"
     }
   }
 }
