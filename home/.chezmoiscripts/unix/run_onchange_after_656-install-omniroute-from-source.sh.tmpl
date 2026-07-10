@@ -22,8 +22,8 @@ if [[ "$OMNIROUTE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     OMNIROUTE_VERSION="v$OMNIROUTE_VERSION"
 fi
 LOG_FILE="/tmp/chezmoi/logs/omniroute-install-$(date +%Y%m%d_%H%M%S).log"
-MAX_RETRIES=5
-RETRY_DELAY=5
+MAX_RETRIES=15
+RETRY_DELAY=15
 
 # --- Logging ---
 mkdir -p "$(dirname "$LOG_FILE")"
@@ -137,8 +137,7 @@ npm run build:release
 ensure_env_file
 
 # Read PORT from .env file for health check
-OMNIROUTE_PORT=$(read_env_port "$OMNIROUTE_ENV_DIR/.env")
-HEALTH_CHECK_URL="http://localhost:${OMNIROUTE_PORT}/api/monitoring/health"
+HEALTH_CHECK_URL="http://localhost:20128/api/monitoring/health"
 info "🔍 Health check will target: $HEALTH_CHECK_URL"
 
 info "📋 Refreshing systemd..."
@@ -151,9 +150,7 @@ systemctl --user restart omniroute.service
 # --- Verificação ---
 info "🏥 Performing health check..."
 if health_check; then
-    info "✅ OmniRoute installation/update completed successfully!"
-    info "📊 Dashboard: http://localhost:${OMNIROUTE_PORT}"
-    info "🔌 API Base: http://localhost:${OMNIROUTE_PORT}/v1  # Assuming API is PORT+1"
+    systemctl --user status omniroute.service
 else
     error "OmniRoute installation/update failed. Check logs at $LOG_FILE"
     exit 1
