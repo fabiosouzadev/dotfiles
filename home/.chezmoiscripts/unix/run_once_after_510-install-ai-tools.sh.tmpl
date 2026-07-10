@@ -13,6 +13,7 @@ info ">>>>>> 🤖 Installing AI Tools 🤖 <<<<<<<"
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
 {{- if eq .feature_flag "omniroute.install" }}{{ $featureEnabled = $.features.ai.omniroute.install }}{{- end -}}
 {{- if eq .feature_flag "openclaw.install" }}{{ $featureEnabled = $.features.ai.openclaw.install }}{{- end -}}
+{{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled = $.features.ai.multiplexer }}{{- end -}}
 {{- $blocked := false -}}
 {{- if and (hasKey . "block_on_workplace") (eq .block_on_workplace $.settings.workplace) }}{{ $blocked = true }}{{- end -}}
 
@@ -34,6 +35,7 @@ info "Installing {{ .name }} (NPM)"
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
 {{- if eq .feature_flag "omniroute.install" }}{{ $featureEnabled = $.features.ai.omniroute.install }}{{- end -}}
 {{- if eq .feature_flag "hermes.install" }}{{ $featureEnabled = $.features.ai.hermes.install }}{{- end -}}
+{{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled = $.features.ai.multiplexer }}{{- end -}}
 {{- $blocked := false -}}
 {{- if and (hasKey . "block_on_workplace") (eq .block_on_workplace $.settings.workplace) }}{{ $blocked = true }}{{- end -}}
 
