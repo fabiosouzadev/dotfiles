@@ -645,6 +645,12 @@ mcp_servers:
     env:
       NOTION_TOKEN: ${NOTION_API_KEY}
     enabled: true
+  composio:
+    url: "https://connect.composio.dev/mcp"
+    headers:
+      x-consumer-api-key: "${COMPOSIO_API_KEY}"
+    connect_timeout: 60
+    timeout: 180
 platform_toolsets:
   cli:
     - browser
