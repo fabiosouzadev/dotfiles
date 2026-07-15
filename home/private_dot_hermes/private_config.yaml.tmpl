@@ -339,10 +339,9 @@ dashboard:
     client_id: ''
     portal_url: ''
   basic_auth:
-    username: admin
-    password_hash: scrypt$16384$8$1$uuVvR3P6S5XeVPoCaDFbdg==$a3KKvYsi1ot2gnZAoQhSklhNpqKk5qBck0fbOYEntDM=
-    password: ''
-    secret: ''
+    username: ${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
+    password_hash: ${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
+    secret: ${HERMES_DASHBOARD_BASIC_AUTH_SECRET}
     session_ttl_seconds: 0
   public_url: ''
 privacy:
