@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# Hermes Dashboard installation script for chezmoi (run_once_after)
+# Installs/Updates Hermes Dashboard with health checks and systemd integration.
+# This script is idempotent and safe to re-run.
+
+{{ template "common/script_helper" . -}}
+{{ template "common/script_is_not_ephemeral" . -}}
+{{ template "workplace/script_is_vps" . }}
+
+{{ if .features.ai.hermes.dashboard.install }}
+
+# --- Configuração ---
+HERMES_DASHBOARD_PORT="{{ .features.ai.hermes.dashboard.port }}"
+HERMES_DASHBOARD_HOST="{{ .features.ai.hermes.dashboard.host }}"
+HERMES_DASHBOARD_DOMAIN="{{ .features.ai.hermes.dashboard.domain }}"
+LOG_FILE="/tmp/chezmoi/logs/hermes-dashboard-install-$(date +%Y%m%d_%H%M%S).log"
+MAX_RETRIES=15
+RETRY_DELAY=10
+
+# --- Logging ---
+mkdir -p "$(dirname "$LOG_FILE")"
+exec > >(tee -a "$LOG_FILE") 2>&1
+info "🚀 Hermes Dashboard Installation Log - $(date)"
+info "----------------------------------------"
+
+# --- Funções Auxiliares ---
+function health_check() {
+    local retries=0
+    local health_url="http://127.0.0.1:$HERMES_DASHBOARD_PORT/healthz"
+    info "🔍 Health check will target: $health_url"
+    while (( retries < MAX_RETRIES )); do
+        if curl -sSf "$health_url" >/dev/null 2>&1; then
+            success "Hermes Dashboard is healthy and responding."
+            return 0
+        else
+            retries=$((retries + 1))
+            info "⚠️  Health check failed (attempt $retries/$MAX_RETRIES). Retrying in $RETRY_DELAY seconds..."
+            sleep "$RETRY_DELAY"
+        fi
+    done
+    error "❌ Hermes Dashboard health check failed after $MAX_RETRIES attempts."
+    return 1
+}
+
+function ensure_hermes_installed() {
+    if command -v hermes &> /dev/null; then
+        success "✅ Hermes CLI already installed: $(hermes --version | head -1)"
+        return 0
+    fi
+
+    info "📦 Installing Hermes Agent..."
+    # Usa o método de instalação oficial (pipx/uv)
+    if command -v uv &> /dev/null; then
+        uv tool install hermes-agent
+    elif command -v pipx &> /dev/null; then
+        pipx install hermes-agent
+    else
+        error "❌ Neither uv nor pipx found. Please install one first."
+        return 1
+    fi
+
+    # Verifica instalação
+    if command -v hermes &> /dev/null; then
+        success "✅ Hermes installed: $(hermes --version | head -1)"
+    else
+        error "❌ Hermes installation failed"
+        return 1
+    fi
+}
+
+function ensure_env_file() {
+    local env_file="{{ .chezmoi.homeDir }}/.hermes/.env"
+    if [[ ! -f "$env_file" ]]; then
+        info "📝 Creating Hermes .env file from template..."
+        mkdir -p "$(dirname "$env_file")"
+        # O arquivo .env é gerenciado pelo chezmoi via template criptografado
+        warn "⚠️  Ensure .hermes/.env is populated with required keys (OMNIROUTE_API_KEY, etc.)"
+    fi
+}
+
+# --- Instalação/Atualização ---
+info "📁 Ensuring Hermes directory exists..."
+mkdir -p "{{ .chezmoi.homeDir }}/.hermes"
+
+info "🔍 Checking Hermes installation..."
+if ! ensure_hermes_installed; then
+    exit 1
+fi
+
+info "📋 Checking environment configuration..."
+ensure_env_file
+
+info "📋 Refreshing systemd..."
+systemctl --user daemon-reload
+systemctl --user enable hermes-dashboard.service
+
+info "🔄 Restarting Hermes Dashboard service..."
+systemctl --user restart hermes-dashboard.service
+
+# --- Verificação ---
+info "🏥 Performing health check..."
+if health_check; then
+    systemctl --user status hermes-dashboard.service
+    success "✅ Hermes Dashboard installation/update completed successfully!"
+    info "🌐 Dashboard available at: http://$HERMES_DASHBOARD_HOST:$HERMES_DASHBOARD_PORT"
+    if [[ -n "$HERMES_DASHBOARD_DOMAIN" ]]; then
+        info "🌍 Public URL (via Caddy): https://$HERMES_DASHBOARD_DOMAIN/hermes"
+    fi
+else
+    error "Hermes Dashboard installation/update failed. Check logs at $LOG_FILE"
+    exit 1
+fi
+
+{{ end }}

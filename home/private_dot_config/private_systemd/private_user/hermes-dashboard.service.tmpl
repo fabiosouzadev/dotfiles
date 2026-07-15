@@ -1,0 +1,24 @@
+# =====================================================================
+# HERMES DASHBOARD — Systemd User Service
+# =====================================================================
+[Unit]
+Description=Hermes Agent Dashboard
+After=network.target
+
+[Service]
+Type=simple
+Environment=HOME=%h
+EnvironmentFile=%h/.config/hermes/.env
+WorkingDirectory=%h
+ExecStart=%h/.local/bin/hermes dashboard --port {{ .features.ai.hermes.dashboard.port }} --host {{ .features.ai.hermes.dashboard.host }} {{- if .features.ai.hermes.dashboard.isolated }}--isolated{{- end }}
+Restart=always
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=5
+TimeoutStopSec=30
+KillMode=process
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

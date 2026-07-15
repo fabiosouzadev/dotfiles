@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# Hermes Dashboard installation script for chezmoi (run_once_after)
+# Installs/Updates Hermes Dashboard with health checks and logging.
+# This script is idempotent and safe to re-run.
+
+{{ template "common/script_helper" . -}}
+{{ template "common/script_is_not_ephemeral" . -}}
+{{ template "workplace/script_is_vps" . }}
+
+{{ if .features.ai.hermes.dashboard.install }}
+
+# --- Configuração ---
+HERMES_DASHBOARD_PORT="{{ .features.ai.hermes.dashboard.port }}"
+HERMES_DASHBOARD_HOST="{{ .features.ai.hermes.dashboard.host }}"
+HERMES_DASHBOARD_DOMAIN="{{ .features.ai.hermes.dashboard.domain }}"
+HERMES_DASHBOARD_ISOLATED="{{ .features.ai.hermes.dashboard.isolated }}"
+LOG_FILE="/tmp/chezmoi/logs/hermes-dashboard-install-$(date +%Y%m%d_%H%M%S).log"
+MAX_RETRIES=15
+RETRY_DELAY=15
+
+# --- Logging ---
+mkdir -p "$(dirname "$LOG_FILE")"
+exec > >(tee -a "$LOG_FILE") 2>&1
+info "🚀 Hermes Dashboard Installation Log - $(date)"
+info "----------------------------------------"
+
+# --- Funções Auxiliares ---
+function health_check() {
+    local retries=0
+    local health_url="http://${HERMES_DASHBOARD_HOST}:${HERMES_DASHBOARD_PORT}/healthz"
+    while (( retries < MAX_RETRIES )); do
+        if curl -sSf "$health_url" >/dev/null 2>&1; then
+            success "✅ Hermes Dashboard is healthy and responding on $health_url"
+            return 0
+        else
+            retries=$((retries + 1))
+            info "⚠️  Health check failed (attempt $retries/$MAX_RETRIES). Retrying in $RETRY_DELAY seconds..."
+            sleep "$RETRY_DELAY"
+        fi
+    done
+    error "❌ Hermes Dashboard health check failed after $MAX_RETRIES attempts."
+    return 1
+}
+
+function ensure_hermes_installed() {
+    if command -v hermes &> /dev/null; then
+        info "✅ Hermes CLI already installed: $(hermes --version | head -1)"
+    else
+        info "📦 Installing Hermes Agent..."
+        # Install via pipx (preferred) or uv
+        if command -v pipx &> /dev/null; then
+            pipx install hermes-agent
+        elif command -v uv &> /dev/null; then
+            uv tool install hermes-agent
+        else
+            error "❌ Neither pipx nor uv found. Please install one first."
+            exit 1
+        fi
+        success "✅ Hermes Agent installed"
+    fi
+}
+
+# --- Instalação/Atualização ---
+info "📁 Ensuring Hermes directory exists..."
+mkdir -p "{{ .chezmoi.homeDir }}/.hermes"
+
+info "🔍 Checking Hermes installation..."
+ensure_hermes_installed
+
+# --- Configuração do Serviço Systemd ---
+info "📋 Refreshing systemd user daemon..."
+systemctl --user daemon-reload
+
+info "🔧 Enabling hermes-dashboard service..."
+systemctl --user enable hermes-dashboard.service
+
+info "🔄 Starting hermes-dashboard service..."
+systemctl --user restart hermes-dashboard.service
+
+# --- Verificação ---
+info "🏥 Performing health check..."
+if health_check; then
+    info "📊 Service status:"
+    systemctl --user status hermes-dashboard.service --no-pager
+    success "🎉 Hermes Dashboard installed and running successfully!"
+else
+    error "❌ Hermes Dashboard installation failed. Check logs at $LOG_FILE"
+    systemctl --user status hermes-dashboard.service --no-pager
+    exit 1
+fi
+
+{{ end }}

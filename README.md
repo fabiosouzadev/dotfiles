@@ -97,6 +97,22 @@ Ele não é apenas “alguns arquivos de shell”. Ele codifica:
 - Orquestra skills/memórias e automações pessoais.
 - Estado criptografado versionado via `hermes-sync`.
 - Documentação do modelo: `docs/HERMES-BACKUP.md`.
+- **Web Dashboard** — Interface web para gerenciar skills, memórias, agentes e automações:
+  - Serviço systemd: `private_dot_config/private_systemd/private_user/hermes-dashboard.service.tmpl`
+  - Script de instalação: `.chezmoiscripts/unix/run_once_after_535-install-hermes-dashboard.sh.tmpl`
+  - Acesso via proxy reverso Caddy (apenas subdomínios dedicados, sem path-based routing):
+    - `https://hermes.fabiosouzadev.duckdns.org/` (subdomínio dedicado HTTPS)
+    - `http://157.151.13.223:9119` (acesso direto na porta, requer Oracle Cloud Security List open)
+  - Configurável via feature flags em `.chezmoi.yaml.tmpl`:
+    - `features.ai.hermes.dashboard.port` (padrão: 9119)
+    - `features.ai.hermes.dashboard.host` (padrão: 0.0.0.0 no VPS, 127.0.0.1 local)
+    - `features.ai.hermes.dashboard.domain` (padrão: hermes.fabiosouzadev.duckdns.org)
+    - `features.ai.hermes.dashboard.isolated` (padrão: true)
+  - Variáveis de ambiente de override:
+    - `CHEZMOI_HERMES_DASHBOARD_PORT`
+    - `CHEZMOI_HERMES_DASHBOARD_HOST`
+    - `CHEZMOI_HERMES_DASHBOARD_DOMAIN`
+  - Autenticação: Basic Auth configurado em `~/.hermes/config.yaml` (dashboard.basic_auth)
 
 ### OmniRoute
 - Gateway local/remoto de IA para os agentes de código e chat.
@@ -104,18 +120,19 @@ Ele não é apenas “alguns arquivos de shell”. Ele codifica:
   - Template de serviço systemd: `private_dot_config/private_systemd/private_user/omniroute.service.tmpl`
   - Script de instalação automatizada: `.chezmoiscripts/run_once_after_install-omniroute-from-source.sh.tmpl`
 - Documentação do modelo: `docs/OMNIROUTE-BACKUP.md`.
-- **Como funciona para instalação automática:**
-  1. O chezmoi aplica o template do systemd (e outros arquivos de configuração)
-  2. O script de instalação (`run_once_after_install-omniroute-from-source.sh.tmpl`) é executado automaticamente após `chezmoi apply` para:
-     - Clonar/atualizar o repositório do OmniRoute
-     - Instalar dependências Node.js via mise
-     - Compilar o CLI com `npm run build:cli`
-     - Recarregar e reiniciar o serviço systemd
-  3. Isso permite bootstrap consistente em qualquer máquina executando:
-     ```bash
-     chezmoi init --apply <seu-repo>
-     # O script run_once_after é executado automaticamente
-     ```
+- **Web Dashboard** — Interface de login/gestão do gateway:
+  - Acesso via proxy reverso Caddy (apenas subdomínios dedicados):
+    - `https://omniroute.fabiosouzadev.duckdns.org/` (subdomínio dedicado HTTPS)
+    - `http://157.151.13.223:20128` (acesso direto na porta, requer Oracle Cloud Security List open)
+  - Configurável via feature flags em `.chezmoi.yaml.tmpl`:
+    - `features.ai.omniroute.dashboard_port` (padrão: 20128)
+    - `features.ai.omniroute.bind` (padrão: 0.0.0.0 no VPS, localhost local)
+    - `features.ai.omniroute.domain` (padrão: fabiosouzadev.duckdns.org)
+  - Variáveis de ambiente de override:
+    - `CHEZMOI_OMNIROUTE_DASHBOARD_PORT`
+    - `CHEZMOI_OMNIROUTE_BIND`
+    - `CHEZMOI_OMNIROUTE_DOMAIN`
+  - Autenticação: Password via `INITIAL_PASSWORD` env var (padrão: CHANGEME)
 
 ---
 
