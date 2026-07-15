@@ -9,13 +9,13 @@
   "plugin": [
     "opencode-wakatime"
   ],
-  "model": "omniroute/work",
+  "model": "omniroute/omniroute/work",
   "provider": {
     "omniroute": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "OmniRoute",
       "options": {
-        "baseURL": "http://157.151.13.223/v1",
+        "baseURL": "http://157.151.13.223:20128/v1",
         "apiKey": "{{ include $omniroute_key | decrypt | trim }}"
       },
       "models": {
