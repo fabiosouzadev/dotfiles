@@ -206,7 +206,7 @@ Headless:
     "omniroute" (dict
       "install" $isVps
       "mode"    (ternary "vps-server" "client" $isVps)
-      "domain"  (env "CHEZMOI_OMNIROUTE_DOMAIN" | default "fabiosouzadev.duckdns.org")
+      "domain"  (env "CHEZMOI_OMNIROUTE_DOMAIN" | default "omniroute.fabiosouzadev.duckdns.org")
       "bind"    (ternary "0.0.0.0" "localhost" $isVps)
       "dashboard_path" (env "CHEZMOI_OMNIROUTE_DASHBOARD_PATH" | default "/omniroute")
       "dashboard_port" (env "CHEZMOI_OMNIROUTE_DASHBOARD_PORT" | default "20128")

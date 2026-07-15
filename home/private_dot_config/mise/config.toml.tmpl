@@ -1,11 +1,19 @@
 [tools]
-node           = "20"
-"npm:npx"      = 'latest'
-"npm:prettier" = 'latest'
-java           = [ "latest", "21" ]
-go             = "1.25.1"
-python         = 'latest'
-uv             = 'latest'
+### NODE ####
+node             = [ 'latest', 'lts' ]
+"npm:typescript" = 'latest'
+"npm:eslint"     = 'latest'
+"npm:jest"       = 'latest'
+"npm:npx"        = 'latest'
+"npm:prettier"   = 'latest'
+
+### JAVA ####
+java             = [ 'latest', '21' ]
+
+
+go               = [ 'latest', '1.25.1' ]
+python           = 'latest'
+uv               = 'latest'
 
 
 [settings]
@@ -13,3 +21,9 @@ experimental = true
 
 # read version files used by other version managers, such as .nvmrc
 idiomatic_version_file_enable_tools = ['java', 'node', 'python']
+
+trusted_config_paths = [
+    '~/Workspaces/Personal',
+    '~/Workspaces/Work',
+    '~/Workspaces/Others',
+]

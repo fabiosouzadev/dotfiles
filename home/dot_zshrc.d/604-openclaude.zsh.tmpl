@@ -114,12 +114,13 @@
 # export OPENAI_API_KEY={{ include $api_key| decrypt | trim }}
 # export OPENAI_MODEL=gpt-5.5
 
-### Freemodel (OMNIROUTE)
+#Omniroute
 {{- $omniroute_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key.txt.asc" -}}
 {{- if eq .settings.workplace "Zup" }}
     {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
 {{- end }}
+
 export CLAUDE_CODE_USE_OPENAI=1
-export OPENAI_BASE_URL=http://localhost:20128/v1
-export OPENAI_API_KEY={{ include $omniroute_key| decrypt | trim }}
-export OPENAI_MODEL=fr-prod/gpt-5.5
+export OPENAI_BASE_URL=http://157.151.13.223:20128/v1
+export OPENAI_API_KEY={{ include $omniroute_key | decrypt | trim }}
+export OPENAI_MODEL=omniroute/work
