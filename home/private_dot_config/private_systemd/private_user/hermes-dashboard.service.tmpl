@@ -10,7 +10,7 @@ Type=simple
 Environment=HOME=%h
 EnvironmentFile=%h/.hermes/.env
 WorkingDirectory=%h
-ExecStart=%h/.local/bin/hermes dashboard --port {{ .features.ai.hermes.dashboard.port }} --host {{ .features.ai.hermes.dashboard.host }} {{- if .features.ai.hermes.dashboard.isolated }}--isolated{{- end }}
+ExecStart=%h/.local/bin/hermes dashboard --port 9119 --host 0.0.0.0 --isolated
 Restart=always
 RestartSec=10
 StartLimitIntervalSec=300
