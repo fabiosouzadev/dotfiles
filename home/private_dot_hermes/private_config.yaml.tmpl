@@ -333,14 +333,14 @@ display:
   long_running_notifications: true
   tool_progress: all
 dashboard:
-  theme: default
+  theme: cyberpunk
   show_token_analytics: false
   oauth:
     client_id: ''
     portal_url: ''
   basic_auth:
-    username: ''
-    password_hash: ''
+    username: admin
+    password_hash: scrypt$16384$8$1$uuVvR3P6S5XeVPoCaDFbdg==$a3KKvYsi1ot2gnZAoQhSklhNpqKk5qBck0fbOYEntDM=
     password: ''
     secret: ''
     session_ttl_seconds: 0
@@ -440,6 +440,7 @@ skills:
   guard_agent_created: false
   write_approval: false
   creation_nudge_interval: 15
+  disabled: []
 curator:
   enabled: true
   interval_hours: 168
@@ -503,20 +504,21 @@ approvals:
   mcp_reload_confirm: true
   destructive_slash_confirm: false
 command_allowlist:
-  - overwrite project env/config file
-  - stop/restart system service
-  - in-place edit of Hermes config/env
-  - script execution via heredoc
   - overwrite system file via tee
-  - overwrite system file via redirection
-  - stop/restart hermes gateway (kills running agents)
-  - delete in root path
-  - pipe remote content to shell
   - copy/move file into system config path
+  - shell command via -c/-lc flag
+  - delete in root path
+  - script execution via heredoc
+  - overwrite system file via redirection
   - sudo with privilege flag (stdin/askpass/shell/list)
   - recursive delete
-  - execute_code
+  - stop/restart hermes gateway (kills running agents)
   - script execution via -e/-c flag
+  - overwrite project env/config file
+  - pipe remote content to shell
+  - in-place edit of Hermes config/env
+  - execute_code
+  - stop/restart system service
 hooks_auto_accept: false
 security:
   allow_private_urls: false
@@ -646,9 +648,9 @@ mcp_servers:
       NOTION_TOKEN: ${NOTION_API_KEY}
     enabled: true
   composio:
-    url: "https://connect.composio.dev/mcp"
+    url: https://connect.composio.dev/mcp
     headers:
-      x-consumer-api-key: "${COMPOSIO_API_KEY}"
+      x-consumer-api-key: ${COMPOSIO_API_KEY}
     connect_timeout: 60
     timeout: 180
 platform_toolsets:
