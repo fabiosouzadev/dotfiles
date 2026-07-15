@@ -100,9 +100,8 @@ Ele não é apenas “alguns arquivos de shell”. Ele codifica:
 - **Web Dashboard** — Interface web para gerenciar skills, memórias, agentes e automações:
   - Serviço systemd: `private_dot_config/private_systemd/private_user/hermes-dashboard.service.tmpl`
   - Script de instalação: `.chezmoiscripts/unix/run_once_after_535-install-hermes-dashboard.sh.tmpl`
-  - Acesso via proxy reverso Caddy (apenas subdomínios dedicados, sem path-based routing):
-    - `https://hermes.fabiosouzadev.duckdns.org/` (subdomínio dedicado HTTPS)
-    - `http://157.151.13.223:9119` (acesso direto na porta, requer Oracle Cloud Security List open)
+  - Acesso via proxy reverso Caddy (subdomínio dedicado):
+    - `https://hermes.fabiosouzadev.duckdns.org/` (HTTPS, Caddy managed TLS)
   - Configurável via feature flags em `.chezmoi.yaml.tmpl`:
     - `features.ai.hermes.dashboard.port` (padrão: 9119)
     - `features.ai.hermes.dashboard.host` (padrão: 0.0.0.0 no VPS, 127.0.0.1 local)
@@ -112,7 +111,7 @@ Ele não é apenas “alguns arquivos de shell”. Ele codifica:
     - `CHEZMOI_HERMES_DASHBOARD_PORT`
     - `CHEZMOI_HERMES_DASHBOARD_HOST`
     - `CHEZMOI_HERMES_DASHBOARD_DOMAIN`
-  - Autenticação: Basic Auth configurado em `~/.hermes/config.yaml` (dashboard.basic_auth)
+  - Autenticação: Basic Auth (configurável em `~/.hermes/config.yaml` via `dashboard.basic_auth`)
 
 ### OmniRoute
 - Gateway local/remoto de IA para os agentes de código e chat.
