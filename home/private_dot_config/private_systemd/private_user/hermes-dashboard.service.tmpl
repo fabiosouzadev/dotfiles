@@ -8,7 +8,7 @@ After=network.target
 [Service]
 Type=simple
 Environment=HOME=%h
-EnvironmentFile=%h/.config/hermes/.env
+EnvironmentFile=%h/.hermes/.env
 WorkingDirectory=%h
 ExecStart=%h/.local/bin/hermes dashboard --port {{ .features.ai.hermes.dashboard.port }} --host {{ .features.ai.hermes.dashboard.host }} {{- if .features.ai.hermes.dashboard.isolated }}--isolated{{- end }}
 Restart=always
