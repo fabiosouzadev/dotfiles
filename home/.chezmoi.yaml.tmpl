@@ -191,11 +191,11 @@ Headless:
   "niri"     (dict "enabled" (not $isVps))
 
   "ai" (dict
-    "coding_assistants" (not $isVps)
-    "spec_tools"        (not $isVps)
-    "gsd"               (not $isVps)
-    "multiplexer"       (not $isVps)
-    "composio"          (not $isVps)
+      "coding_assistants" true
+      "spec_tools"        true
+      "gsd"               true
+      "multiplexer"       true
+      "composio"          (not $isVps)
 
     "ollama" (dict
       "install"      (not $isVps)
