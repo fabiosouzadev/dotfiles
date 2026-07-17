@@ -85,15 +85,15 @@ log_event "context_gathering" "started" "{}"
 info "📋 Coletando contexto..."
 
 CONTEXT_FILE="$LOG_DIR/$TASK_ID-context.json"
+CONTEXT_DIR="$LOG_DIR/$TASK_ID"
+mkdir -p "$CONTEXT_DIR"
 
-# TODO: Implementar coleta real de contexto
-# - GitHub API (issue/PR details)
-# - Git log/diff
-# - Notion MCP
-# - Mem0 memory
-# - Files (README, CLAUDE.md, etc)
-
-cat > "$CONTEXT_FILE" <<EOF
+# Chama gather-context.sh se tiver repo e issue
+if [[ -n "$REPO" && -n "$ISSUE_NUM" ]]; then
+    "$SKILL_DIR/scripts/gather-context.sh" "$TASK_ID" "$REPO" "$ISSUE_NUM" "$BRANCH" "$CONTEXT_DIR"
+else
+    # Placeholder context para manual/testes
+    cat > "$CONTEXT_FILE" <<EOF
 {
   "task_id": "$TASK_ID",
   "trigger": "$TRIGGER_TYPE",
@@ -111,6 +111,7 @@ cat > "$CONTEXT_FILE" <<EOF
   "gathered_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 }
 EOF
+fi
 
 log_event "context_gathering" "completed" "{\"context_file\": \"$CONTEXT_FILE\"}"
 

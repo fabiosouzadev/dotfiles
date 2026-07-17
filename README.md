@@ -60,34 +60,7 @@ Ele não é apenas “alguns arquivos de shell”. Ele codifica:
 
 ## 📂 Estrutura
 
-```
-.
-├── home/
-│   ├── .chezmoi.yaml.tmpl                 # Detecção de SO e perfis
-│   ├── .chezmoidata/                      # Pacotes por plataforma
-│   │   ├── darwin/ linux/ windows/ termux/
-│   ├── .chezmoiexternals/                 # Dependências externas
-│   ├── .chezmoiscripts/                   # Hooks e bootstrap
-│   │   ├── darwin/ linux/ unix/ windows/ termux/
-│   ├── .chezmoitemplates/                 # Guards/templates reutilizáveis
-│   ├── dot_zshrc.d/                       # Zsh modular
-│   ├── private_dot_config/                # Configs de apps
-│   ├── private_dot_ssh/                   # Chaves e configs SSH
-│   ├── private_dot_hermes/                # Estado criptografado do Hermes
-│   ├── dot_omniroute/                     # Estado criptografado do OmniRoute
-│   └── ...
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── CONFIGURATION.md
-│   ├── GETTING-STARTED.md
-│   ├── HERMES-BACKUP.md
-│   ├── OMNIROUTE-BACKUP.md
-│   ├── KEYMAPS.md
-│   ├── FORK-GUIDE.md
-│   └── WINDOWS-SETUP.md
-├── .planning/
-└── README.md
-```
+```\n.\n├── home/\n│   ├── .chezmoi.yaml.tmpl                 # Detecção de SO e perfis\n│   ├── .chezmoidata/                      # Pacotes por plataforma\n│   │   ├── darwin/ linux/ windows/ termux/\n│   ├── .chezmoiexternals/                 # Dependências externas\n│   ├── .chezmoiscripts/                   # Hooks e bootstrap\n│   │   ├── darwin/ linux/ unix/ windows/ termux/\n│   │   │   ├── run_once_after_510-install-ai-tools.sh.tmpl\n│   │   │   ├── run_once_after_535-install-hermes-dashboard.sh.tmpl\n│   │   │   ├── run_once_after_540-install-coding-orchestrator.sh.tmpl\n│   │   │   ├── run_onchange_after_610-deploy-hermes-cron-jobs.sh.tmpl\n│   │   │   └── ...\n│   ├── .chezmoitemplates/                 # Guards/templates reutilizáveis\n│   ├── dot_zshrc.d/                       # Zsh modular\n│   ├── private_dot_config/                # Configs de apps\n│   ├── private_dot_ssh/                   # Chaves e configs SSH\n│   ├── private_dot_hermes/                # Estado criptografado do Hermes\n│   ├── dot_omniroute/                     # Estado criptografado do OmniRoute\n│   └── .hermes/skills/coding-orchestrator/ # Skill de coding agents\n├── docs/\n│   ├── ARCHITECTURE.md\n│   ├── CONFIGURATION.md\n│   ├── GETTING-STARTED.md\n│   ├── HERMES-BACKUP.md\n│   ├── OMNIROUTE-BACKUP.md\n│   ├── KEYMAPS.md\n│   ├── FORK-GUIDE.md\n│   └── WINDOWS-SETUP.md\n├── .planning/\n└── README.md\n```
 
 ---
 
@@ -112,6 +85,23 @@ Ele não é apenas “alguns arquivos de shell”. Ele codifica:
     - `CHEZMOI_HERMES_DASHBOARD_HOST`
     - `CHEZMOI_HERMES_DASHBOARD_DOMAIN`
   - Autenticação: Basic Auth (configurável em `~/.hermes/config.yaml` via `dashboard.basic_auth`)
+
+### Coding Orchestrator (Autonomous Coding Agents)
+- **Skill**: `coding-orchestrator` — Orquestra agentes de código (Aider, Claude, Codex, Gemini, OpenCode) para execução autônoma noturna ("coding enquanto eu durmo").
+- **Triggers**: GitHub label `coding-agent`, Telegram mention `@hermes coding-agent:`, webhook, cron noturno (02:00 UTC).
+- **Worktree Isolation**: Cada task roda em worktree Git isolada (`~/worktrees/task-<id>`).
+- **Agents Suportados**: Aider (padrão, via OmniRoute), Claude Code, Codex CLI, Gemini CLI, OpenCode.
+- **Budget Control**: Budget total/noite ($5) e por task ($2) via `--max-budget-usd`.
+- **Context Gathering**: GitHub API, Git diff, Notion MCP, mem0 memory, repo files.
+- **Delivery**: Telegram, Notion, GitHub PR comments (configurável).
+- **Cron Job**: `coding-orchestrator-nightly` agendado para `0 2 * * *`.
+- **Feature Flags** (`.chezmoi.yaml.tmpl`):
+  - `features.ai.coding_orchestrator.install` (default: true no VPS)
+  - `features.ai.coding_orchestrator.cron_schedule` (default: "0 2 * * *")
+  - `features.ai.coding_orchestrator.nightly_budget_usd` (default: 5)
+  - `features.ai.coding_orchestrator.per_task_budget_usd` (default: 2)
+- **Install Script**: `.chezmoiscripts/unix/run_once_after_540-install-coding-orchestrator.sh.tmpl`
+- **Cron Deploy Script**: `.chezmoiscripts/unix/run_onchange_after_610-deploy-hermes-cron-jobs.sh.tmpl`
 
 ### OmniRoute
 - Gateway local/remoto de IA para os agentes de código e chat.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # run-agent.sh — Executa o coding agent na worktree
-# Uso: ./run-agent.sh <task_id> <agent> <worktree_path> <context_dir> <instructions_file>
+# Uso: ./run-agent.sh <task_id> <agent> <worktree_path> <context_dir> <instructions_file> [budget_usd] [timeout_sec]
 
 set -euo pipefail
 
@@ -76,7 +76,6 @@ info "Executando $AGENT com prompt de ${#FULL_PROMPT} chars..."
 run_with_monitoring() {
     local agent_cmd="$1"
     local start_time=$(date +%s)
-    local last_heartbeat=$start_time
     
     info "Comando: $agent_cmd"
     
@@ -91,6 +90,7 @@ run_with_monitoring() {
     local duration=$((end_time - start_time))
     
     info "Agent finalizado em ${duration}s (exit code: $exit_code)"
+    echo "$end_time" > /tmp/agent_end_time_$$
     return $exit_code
 }
 
@@ -102,7 +102,7 @@ case "$AGENT" in
         ;;
     aider)
         # Aider com modelo do OmniRoute
-        AGENT_CMD="aider --model omniroute/work --api-base http://localhost:20128/v1 --max-tokens 8192 --yes --message '$FULL_PROMPT'"
+        AGENT_CMD="OPENAI_API_KEY=\"$OMNIROUTE_API_KEY\" aider --model openai/omniroute/work --openai-api-base http://localhost:20128/v1 --yes --message '$FULL_PROMPT'"
         ;;
     codex)
         # Codex CLI
@@ -122,8 +122,13 @@ case "$AGENT" in
 esac
 
 # Executa
+start_time=$(date +%s)
 run_with_monitoring "$AGENT_CMD"
 EXIT_CODE=$?
+
+# Pega o end_time salvo pelo run_with_monitoring
+end_time=$(cat /tmp/agent_end_time_$$ 2>/dev/null || date +%s)
+rm -f /tmp/agent_end_time_$$
 
 # Coleta resultado
 info "Coletando resultados..."

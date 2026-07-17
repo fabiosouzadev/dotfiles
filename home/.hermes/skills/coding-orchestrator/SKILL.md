@@ -18,6 +18,7 @@ tags:
   - claude-code
   - aider
   - codex
+  - omniroute
 requires:
   - hermes >= 0.18.0
   - mise (para Node.js agents)
@@ -48,8 +49,8 @@ fixar bugs, refatorar código e criar testes — tudo enquanto você dorme.
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
 │   TRIGGERS      │────▶│  ORCHESTRATOR    │────▶│   AGENTS        │
 ├─────────────────┤     ├──────────────────┤     ├─────────────────┤
-│ • Telegram      │     │ • Context gather │     │ • Claude Code   │
-│ • Webhook       │     │ • Agent select   │     │ • Aider         │
+│ • Telegram      │     │ • Context gather │     │ • Aider (padrão)│
+│ • Webhook       │     │ • Agent select   │     │ • Claude Code   │
 │ • GitHub label  │     │ • Worktree create│     │ • Codex         │
 │ • Cron (noite)  │     │ • Agent execute  │     │ • Gemini        │
 └─────────────────┘     │ • Validate/Commit│     │ • OpenCode      │
@@ -102,14 +103,14 @@ cron:
 
 # Seleção de agent
 agent_selection:
-  default: "claude"
+  default: "aider"
   rules:
-    - pattern: "fix|bug|hotfix"
-      agent: "claude"
-    - pattern: "refactor|cleanup"
+    - pattern: "fix|bug|hotfix|debug"
       agent: "aider"
-    - pattern: "feature|implement|create"
-      agent: "codex"
+    - pattern: "refactor|cleanup|restructure"
+      agent: "aider"
+    - pattern: "feature|implement|create|new"
+      agent: "aider"
     - pattern: "spec|spec-to-code"
       agent: "openspec"
 
@@ -168,17 +169,9 @@ Headers necessários:
 - `Content-Type: application/json`
 
 ### 3. GitHub Issue Label
-Quando uma issue recebe label `auto-fix`, `auto-refactor`, ou `auto-implement`:
+Quando uma issue recebe label `coding-agent`:
 - Skill `github` monitora via webhook GitHub App
 - Dispara orchestrator com contexto da issue
-
-Labels suportados:
-| Label | Agent | Descrição |
-|-------|-------|-----------|
-| `auto-fix` | claude | Bug fixes |
-| `auto-refactor` | aider | Refatoração |
-| `auto-implement` | codex | Nova feature |
-| `auto-spec` | openspec | Spec-to-code |
 
 ### 4. Cron Noturno
 Agendado via Hermes cron job (`0 2 * * *`):
@@ -211,9 +204,9 @@ Salva em: `/tmp/hermes-context-<task_id>/CONTEXT_SUMMARY.md`
 
 ### 2. Agent Selection
 Baseado em regras no `config.yaml`:
-- `fix/bug/hotfix` → **Claude Code** (melhor raciocínio)
-- `refactor/cleanup` → **Aider** (bom para multi-file edits)
-- `feature/implement` → **Codex** (OpenAI, bom para features)
+- `fix/bug/hotfix/debug` → **Aider** (funciona com OmniRoute)
+- `refactor/cleanup/restructure` → **Aider** (bom para multi-file edits)
+- `feature/implement/create/new` → **Aider** (padrão atual)
 - `spec/spec-to-code` → **OpenSpec** (spec-driven)
 
 ### 3. Worktree Creation
@@ -229,11 +222,16 @@ Executa agent com:
 - Timeout (default 30min)
 - Modo não-interativo (print/headless)
 
+**Aider + OmniRoute (validado):**
+```bash
+OPENAI_API_KEY="$OMNIROUTE_API_KEY" aider --model openai/omniroute/work --openai-api-base http://localhost:20128/v1 --message "task"
+```
+
 Agents suportados:
 | Agent | Comando | Modelo |
 |-------|---------|--------|
+| aider | `aider --model openai/omniroute/work --openai-api-base http://localhost:20128/v1` | OmniRoute |
 | claude | `mise exec node@20 -- claude -p --max-budget-usd $X` | OmniRoute |
-| aider | `aider --model omniroute/work --api-base http://localhost:20128/v1` | OmniRoute |
 | codex | `mise exec node@20 -- codex exec --model omniroute/work` | OmniRoute |
 | gemini | `mise exec node@20 -- gemini -p` | OmniRoute |
 | opencode | `mise exec node@20 -- opencode run` | OmniRoute |
@@ -268,7 +266,7 @@ tasks:
     budget: 2
     
   - trigger: github_label
-    label: "auto-refactor"
+    label: "coding-agent"
     repo: "myorg/frontend"
     issue: 112
     budget: 2
@@ -305,10 +303,10 @@ Estrutura do log JSONL:
 {"ts":"2026-07-17T02:00:00Z","task_id":"task-123","phase":"init","status":"started","extra":{}}
 {"ts":"2026-07-17T02:00:01Z","task_id":"task-123","phase":"context_gathering","status":"started","extra":{}}
 {"ts":"2026-07-17T02:00:05Z","task_id":"task-123","phase":"context_gathering","status":"completed","extra":{"context_file":"/tmp/..."}}
-{"ts":"2026-07-17T02:00:05Z","task_id":"task-123","phase":"agent_selection","status":"completed","extra":{"agent":"claude"}}
+{"ts":"2026-07-17T02:00:05Z","task_id":"task-123","phase":"agent_selection","status":"completed","extra":{"agent":"aider"}}
 {"ts":"2026-07-17T02:00:06Z","task_id":"task-123","phase":"worktree_create","status":"completed","extra":{"worktree":"~/worktrees/task-123","branch":"coding-agent/fix-login"}}
-{"ts":"2026-07-17T02:00:06Z","task_id":"task-123","phase":"agent_execution","status":"started","extra":{"agent":"claude"}}
-{"ts":"2026-07-17T02:15:32Z","task_id":"task-123","phase":"agent_execution","status":"completed","extra":{"agent":"claude","duration_sec":926,"exit_code":0}}
+{"ts":"2026-07-17T02:00:06Z","task_id":"task-123","phase":"agent_execution","status":"started","extra":{"agent":"aider"}}
+{"ts":"2026-07-17T02:15:32Z","task_id":"task-123","phase":"agent_execution","status":"completed","extra":{"agent":"aider","duration_sec":926,"exit_code":0}}
 {"ts":"2026-07-17T02:15:33Z","task_id":"task-123","phase":"validation","status":"completed","extra":{"committed":true}}
 {"ts":"2026-07-17T02:15:34Z","task_id":"task-123","phase":"delivery","status":"completed","extra":{}}
 {"ts":"2026-07-17T02:15:35Z","task_id":"task-123","phase":"cleanup","status":"completed","extra":{}}
@@ -341,12 +339,18 @@ Templates para nova VPS:
 - `home/.chezmoiscripts/unix/run_once_after_XXX-install-coding-orchestrator.sh.tmpl`
 - Feature flag no `.chezmoi.yaml.tmpl`: `features.ai.coding_orchestrator: true`
 
-## Próximos Passos (Roadmap)
+## Referências
 
-- [ ] Integração nativa com Hermes cron (job type `coding-orchestrator`)
-- [ ] Dashboard web para monitorar tasks noturnas
-- [ ] Suporte a Docker containers para isolation total
-- [ ] Auto-retry com exponential backoff
-- [ ] Integração com Linear/Jira (além de GitHub)
-- [ ] Skill `telegram` handler para mentions
-- [ ] Webhook endpoint no Caddy/Hermes gateway
+- `references/omniroute-aider-integration.md` — Como configurar Aider com OmniRoute
+- `references/worktree-patterns.md` — Padrões de isolamento com Git worktrees
+- `references/trigger-implementation.md` — Detalhes de cada trigger (Telegram, Webhook, GitHub, Cron)
+
+## Pitfalls Conhecidos
+
+| Problema | Causa | Solução |
+|----------|-------|---------|
+| Aider "unrecognized arguments: --api-base" | Flags erradas | Use `--openai-api-base` + `--model openai/omniroute/work` |
+| Aider "OPENAI_API_KEY not set" | Falta env var | Export `OPENAI_API_KEY=$OMNIROUTE_API_KEY` |
+| Codex conecta no IP público | Config errada | Ajustar `OPENAI_BASE_URL` para localhost |
+| Claude Code timeout (exit 124) | Sem auth ou prompt complexo | Configurar `ANTHROPIC_API_KEY` ou OAuth; simplificar prompt |
+| Worktree "fatal: not a git repository" | Executando fora de repo | Garantir `cd <repo>` antes de chamar orchestrator |
