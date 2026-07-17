@@ -102,7 +102,7 @@ case "$AGENT" in
         ;;
     aider)
         # Aider com modelo do OmniRoute
-        AGENT_CMD="OPENAI_API_KEY=\"$OMNIROUTE_API_KEY\" aider --model openai/omniroute/work --openai-api-base http://localhost:20128/v1 --yes --message '$FULL_PROMPT'"
+        AGENT_CMD="OPENAI_API_KEY=\"$OMNIROUTE_API_KEY\" aider --model openai/omniroute/work --openai-api-base http://localhost:20128/v1 --yes --auto-commits --message '$FULL_PROMPT'"
         ;;
     codex)
         # Codex CLI

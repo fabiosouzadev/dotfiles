@@ -246,8 +246,8 @@ if [[ $AGENT_EXIT -eq 0 ]]; then
     log_event "validation" "started" "{}"
     info "✅ Validando mudanças..."
     
-    # Verifica se há mudanças
-    if ! git diff --quiet HEAD; then
+    # Verifica se há mudanças não commitadas
+    if ! git diff --quiet HEAD || [[ -n "$(git status --porcelain)" ]]; then
         info "Mudanças detectadas, rodando testes..."
         
         # Tenta rodar testes comuns
@@ -259,9 +259,10 @@ if [[ $AGENT_EXIT -eq 0 ]]; then
             cargo test 2>&1 | tee -a "$TASK_LOG" || warn "Testes cargo falharam"
         fi
         
-        # Commit
-        git add -A
-        COMMIT_MSG=$(cat <<EOF
+        # Force commit se auto-commit não funcionou
+        if ! git diff --quiet HEAD~1..HEAD 2>/dev/null; then
+            git add -A
+            COMMIT_MSG=$(cat <<EOF
 $TASK_DESC
 
 Automated by coding-orchestrator (task: $TASK_ID)
@@ -269,9 +270,13 @@ Agent: $AGENT
 Trigger: $TRIGGER_TYPE
 EOF
 )
-        git commit -m "$COMMIT_MSG"
-        log_event "validation" "completed" "{\"committed\": true}"
-        info "✅ Commit realizado"
+            git commit -m "$COMMIT_MSG"
+            log_event "validation" "completed" "{\"committed\": true, \"forced\": true}"
+            info "✅ Commit forçado realizado"
+        else
+            log_event "validation" "completed" "{\"committed\": true, \"auto\": true}"
+            info "✅ Auto-commit detectado"
+        fi
     else
         warn "Nenhuma mudança detectada"
         log_event "validation" "completed" "{\"committed\": false, \"reason\": \"no_changes\"}"
