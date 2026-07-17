@@ -1,0 +1,49 @@
+{
+  "jobs": [
+    {
+      "id": "coding-orchestrator-nightly",
+      "name": "\U0001f319 Coding Orchestrator \u2014 Nocturnal Agent Execution",
+      "prompt": "Execute o orchestrator de coding agents para processar a fila de tasks noturnas. Trigger: cron schedule 02:00 UTC. Busque issues com label 'coding-agent' no GitHub, tasks no Notion com tag 'auto-code', e mensagens Telegram com men\u00e7\u00e3o '@hermes coding-agent:'. Para cada task encontrada: 1) Colete contexto (repo, issue, Notion, mem0), 2) Crie worktree isolada, 3) Execute agent (Aider/Claude/Codex) com budget $2/task, 4) Valide mudan\u00e7as (testes), 5) Commit, 6) Entregue resultado via Telegram + Notion + GitHub comment. Limite total da noite: $5 USD. Reporte resumo no final.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": "custom",
+      "model_snapshot": "omniroute/work",
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "{{ .features.ai.coding_orchestrator.cron_schedule | default `\"0 2 * * *\"` }}",
+        "display": "{{ .features.ai.coding_orchestrator.cron_schedule | default `\"0 2 * * *\"` }}"
+      },
+      "schedule_display": "{{ .features.ai.coding_orchestrator.cron_schedule | default `\"0 2 * * *\"` }}",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": {{ if .features.ai.coding_orchestrator.install }}true{{ else }}false{{ end }},
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "{{ now | date `\"2006-01-02T15:04:05.000000Z\"` }}",
+      "next_run_at": null,
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "644615401",
+        "chat_name": "Fabio Souza",
+        "thread_id": "8430"
+      },
+      "enabled_toolsets": null,
+      "workdir": null,
+      "fire_claim": null
+    }
+  ]
+}

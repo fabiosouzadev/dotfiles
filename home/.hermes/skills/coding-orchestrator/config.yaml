@@ -1,0 +1,49 @@
+triggers:
+  telegram:
+    enabled: true
+    pattern: "@hermes coding-agent:"
+  webhook:
+    enabled: true
+    path: "/webhook/coding"
+    secret_env: "GITHUB_WEBHOOK_SECRET"
+  github:
+    enabled: true
+    label: "coding-agent"
+    repos: []
+  cron:
+    enabled: true
+    schedule: "0 2 * * *"
+    timezone: "UTC"
+
+agent_selection:
+  default: "aider"
+  rules:
+    - pattern: "fix|bug|hotfix|debug"
+      agent: "aider"
+    - pattern: "refactor|cleanup|restructure"
+      agent: "aider"
+    - pattern: "feature|implement|create|new"
+      agent: "aider"
+    - pattern: "spec|spec-to-code"
+      agent: "openspec"
+
+worktree:
+  base_path: "~/worktrees"
+  cleanup_after: true
+  keep_on_failure: true
+
+budget:
+  nightly_usd: 5
+  per_task_usd: 2
+  hard_limit: true
+
+monitoring:
+  heartbeat_interval_sec: 300
+  timeout_sec: 1800
+  alert_on_stuck_sec: 600
+
+delivery:
+  telegram: true
+  notion: true
+  github_comment: true
+  log_path: "~/.hermes/logs/coding-orchestrator/"

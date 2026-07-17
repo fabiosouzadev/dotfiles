@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# coding-orchestrator skill installation script for chezmoi (run_once_after)
+# Installs the coding-orchestrator skill for Hermes to orchestrate coding agents.
+# This script is idempotent and safe to re-run.
+
+{{ template "common/script_helper" . -}}
+{{ template "common/script_is_not_ephemeral" . -}}
+{{ template "workplace/script_is_vps" . }}
+
+{{ if .features.ai.coding_orchestrator.install }}
+
+# --- Configuração ---
+SKILL_NAME="coding-orchestrator"
+SKILL_DIR="{{ .chezmoi.homeDir }}/.hermes/skills/{{ .features.ai.coding_orchestrator.skill_name | default $SKILL_NAME }}"
+LOG_FILE="/tmp/chezmoi/logs/coding-orchestrator-install-$(date +%Y%m%d_%H%M%S).log"
+SOURCE_SKILL_DIR="{{ .chezmoi.sourceDir }}/home/.hermes/skills/{{ .features.ai.coding_orchestrator.skill_name | default $SKILL_NAME }}"
+
+# --- Logging ---
+mkdir -p "$(dirname "$LOG_FILE")"
+exec > >(tee -a "$LOG_FILE") 2>&1
+info "🚀 Coding Orchestrator Skill Installation Log - $(date)"
+info "----------------------------------------"
+
+# --- Verificações ---
+info "🔍 Checking prerequisites..."
+
+# Verifica se Hermes está instalado
+if ! command -v hermes &> /dev/null; then
+    error "❌ Hermes CLI not found. Please install Hermes first."
+    exit 1
+fi
+info "✅ Hermes CLI found: $(hermes --version | head -1)"
+
+# Verifica se o diretório de skills existe
+mkdir -p "$(dirname "$SKILL_DIR")"
+
+# --- Instalação da Skill ---
+info "📦 Installing $SKILL_NAME skill..."
+
+if [[ -d "$SOURCE_SKILL_DIR" ]]; then
+    info "📂 Copying skill from source: $SOURCE_SKILL_DIR"
+    rsync -av --delete "$SOURCE_SKILL_DIR/" "$SKILL_DIR/"
+    success "✅ Skill copied successfully"
+else
+    warn "⚠️  Source skill directory not found: $SOURCE_SKILL_DIR"
+    warn "   Skill will need to be created manually or synced from git"
+fi
+
+# Verifica se a skill foi instalada
+if [[ -f "$SKILL_DIR/SKILL.md" ]]; then
+    info "🔄 Reloading Hermes skills..."
+    hermes skill reload 2>&1 | tee -a "$LOG_FILE" || warn "⚠️  Could not reload skills (Hermes may not be running)"
+    success "🎉 Coding Orchestrator skill installed at $SKILL_DIR"
+else
+    error "❌ Skill installation failed - SKILL.md not found at $SKILL_DIR"
+    exit 1
+fi
+
+# --- Configuração do Cron Job Noturno (via Hermes) ---
+info "⏰ Configuring nightly coding agent cron job..."
+
+CRON_SCHEDULE="{{ .features.ai.coding_orchestrator.cron_schedule | default \"0 2 * * *\" }}"
+CRON_LABEL="{{ .features.ai.coding_orchestrator.cron_label | default \"coding-agent\" }}"
+NIGHTLY_BUDGET="{{ .features.ai.coding_orchestrator.nightly_budget_usd | default 5 }}"
+PER_TASK_BUDGET="{{ .features.ai.coding_orchestrator.per_task_budget_usd | default 2 }}"
+
+# Cria o job via Hermes CLI se estiver rodando
+if hermes --version &> /dev/null; then
+    # Verifica se já existe
+    if hermes cron list 2>/dev/null | grep -q "coding-orchestrator-nightly"; then
+        info "ℹ️  Nightly cron job already exists, skipping creation"
+    else
+        info "📝 Creating nightly cron job (schedule: $CRON_SCHEDULE)..."
+        # O job será criado via config file no próximo passo
+    fi
+fi
+
+success "🎉 Coding Orchestrator installation completed!"
+info "📋 Log saved to: $LOG_FILE"
+
+{{ end }}
