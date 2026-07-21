@@ -5,15 +5,16 @@
 
 {{ template "common/script_helper" . -}}
 {{ template "common/script_is_not_ephemeral" . -}}
-{{ template "workplace/script_is_vps" . }}
+{{ template "workplace/script_is_vps" . -}}
 
 {{ if .features.ai.coding_orchestrator.install }}
 
 # --- Configuração ---
-SKILL_NAME="coding-orchestrator"
-SKILL_DIR="{{ .chezmoi.homeDir }}/.hermes/skills/{{ .features.ai.coding_orchestrator.skill_name | default $SKILL_NAME }}"
+{{ $skillName := .features.ai.coding_orchestrator.skill_name | default "coding-orchestrator" }}
+SKILL_NAME="{{ $skillName }}"
+SKILL_DIR="{{ .chezmoi.homeDir }}/.hermes/skills/{{ $skillName }}"
 LOG_FILE="/tmp/chezmoi/logs/coding-orchestrator-install-$(date +%Y%m%d_%H%M%S).log"
-SOURCE_SKILL_DIR="{{ .chezmoi.sourceDir }}/home/.hermes/skills/{{ .features.ai.coding_orchestrator.skill_name | default $SKILL_NAME }}"
+SOURCE_SKILL_DIR="{{ .chezmoi.sourceDir }}/home/.hermes/skills/{{ $skillName }}"
 
 # --- Logging ---
 mkdir -p "$(dirname "$LOG_FILE")"
@@ -59,10 +60,10 @@ fi
 # --- Configuração do Cron Job Noturno (via Hermes) ---
 info "⏰ Configuring nightly coding agent cron job..."
 
-CRON_SCHEDULE="{{ .features.ai.coding_orchestrator.cron_schedule | default \"0 2 * * *\" }}"
-CRON_LABEL="{{ .features.ai.coding_orchestrator.cron_label | default \"coding-agent\" }}"
-NIGHTLY_BUDGET="{{ .features.ai.coding_orchestrator.nightly_budget_usd | default 5 }}"
-PER_TASK_BUDGET="{{ .features.ai.coding_orchestrator.per_task_budget_usd | default 2 }}"
+CRON_SCHEDULE='{{ .features.ai.coding_orchestrator.cron_schedule | default `0 2 * * *` }}'
+CRON_LABEL='{{ .features.ai.coding_orchestrator.cron_label | default `coding-agent` }}'
+NIGHTLY_BUDGET='{{ .features.ai.coding_orchestrator.nightly_budget_usd | default 5 }}'
+PER_TASK_BUDGET='{{ .features.ai.coding_orchestrator.per_task_budget_usd | default 2 }}'
 
 # Cria o job via Hermes CLI se estiver rodando
 if hermes --version &> /dev/null; then

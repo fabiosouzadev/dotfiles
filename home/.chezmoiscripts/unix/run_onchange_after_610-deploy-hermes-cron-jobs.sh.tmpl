@@ -23,7 +23,7 @@ chezmoi execute-template "$TEMPLATE_FILE" > "$TARGET_FILE"
 
 if [[ $? -eq 0 ]]; then
     success "✅ Cron jobs deployed to $TARGET_FILE"
-    
+
     # Reload Hermes cron if running
     if command -v hermes &> /dev/null; then
         info "🔄 Reloading Hermes cron jobs..."
