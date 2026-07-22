@@ -52,7 +52,7 @@ fi
     mkdir -p "$HOME/.local/bin"
     find . -name "delta" -type f -executable -exec cp {} "$HOME/.local/bin/" \;
     rm -rf "$TMPDIR_DELTA"
-    
+    export PATH="$PATH:$HOME/.local/bin"
 {{ end }}
 
 # Verify installation
