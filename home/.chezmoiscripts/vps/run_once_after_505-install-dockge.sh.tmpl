@@ -11,8 +11,8 @@ exit 0
 
 
 # Create directories that store your stacks and store Dockge's stack
-mkdir -p /opt/stacks /opt/dockge
-cd /opt/dockge
+mkdir -p ~/.local/opt/dockge
+cd ~/.local/opt/dockge
 
 # Download your compose.yaml
 curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=%7E%2F.local%2Fopt%2Fstacks" --output compose.yaml
