@@ -78,3 +78,7 @@ home/private_dot_config/niri/
 home/private_dot_config/greenclip.toml
 
 {{- end }}
+
+{{- if (not .settings.vps) }}
+.chezmoiscripts/vps/**
+{{- end }}
