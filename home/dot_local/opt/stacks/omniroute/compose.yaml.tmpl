@@ -5,10 +5,12 @@ services:
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
+    ports:
+      - 20128:20128
     environment:
       - PORT=20128
       # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
-      - NEXT_PUBLIC_BASE_URL=https://your-domain.com
+      # - NEXT_PUBLIC_BASE_URL=https://your-domain.com
       # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
