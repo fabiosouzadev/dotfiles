@@ -6,11 +6,7 @@ set -euo pipefail
 {{ template "common/script_is_not_ephemeral" . }}
 {{ template "linux/script_linux_only" . }}
 {{ template "common/script_helper" . }}
-
-{{ if not .settings.vps }}
-info ">> VPS Services: not a VPS profile, skipping <<"
-exit 0
-{{ end }}
+{{ template "workplace/script_is_vps" . }}
 
 info ">>>>>>> 🚀 Setting up VPS Services 🚀 <<<<<<<"
 
@@ -21,12 +17,12 @@ fi
 
 systemctl --user daemon-reload
 
-{{ if eq .features.ai.omniroute.mode "vps-server" }}
+{{ if and (.features.ai.omniroute.install) (eq .features.ai.omniroute.mode "vps-server") }}
 info "Starting OmniRoute Service"
 systemctl --user enable --now omniroute.service || true
 {{ end }}
 
-{{ if eq .features.ai.hermes.mode "vps-daemon" }}
+{{ if and (.features.ai.hermes.install) (eq .features.ai.hermes.mode "vps-daemon") }}
 info "Installing Hermes Gateway systemd service"
 # Hermes own installer creates system-level service; prefer user service via chezmoi
 systemctl --user enable --now hermes-gateway.service || true
@@ -48,7 +44,7 @@ info "Starting OpenClaw Gateway Service"
 systemctl --user enable --now openclaw-gateway.service || true
 {{ end }}
 
-{{ if ne .features.ai.omniroute.domain "" }}
+{{ if and (.features.ai.omniroute.install) (ne .features.ai.omniroute.domain "") }}
 info "Applying Caddy Configuration"
 if command -v caddy &> /dev/null; then
     sudo cp "$HOME/.config/caddy/Caddyfile" /etc/caddy/Caddyfile

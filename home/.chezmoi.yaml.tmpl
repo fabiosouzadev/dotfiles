@@ -123,6 +123,7 @@ Headless:
 {{-   $isVps = or
         (env "CHEZMOI_VPS" | not | not)
         ($hostLower | contains "vps")
+        ($hostLower | contains "vnic")
         $hostnameInstance
         (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.username "ubuntu") $sshSession (not $guiAvailable))
 -}}
@@ -174,17 +175,16 @@ Headless:
 {{- end -}}
 
 {{- $features := dict
-  "sudo"        (dict "enabled" $hasSudo)
-  "systemd"     (dict "enabled" $hasSystemd)
-  "runtime"     (dict "background_services" (not $ismanaged))
-  "kernels"     (dict "install" false)
+  "sudo"           (dict "enabled" $hasSudo)
+  "systemd"        (dict "enabled" $hasSystemd)
+  "runtime"        (dict "background_services" (not $ismanaged))
+  "kernels"        (dict "install" false)
   "rtl8821ce"      (dict "install" $dell3530)
-  "personal_repos" (ternary false (not $ephemeral) $isVps)
   
   "repos" (dict
-    "personal" (not $isVps)
-    "other"    (not $isVps)
-    "work"     (eq $workplace "Zup")
+    "personal"  true
+    "other"     true
+    "work"      (eq $workplace "Zup")
   )
 
   "i3"       (dict "enabled" (not $isVps))
@@ -195,7 +195,7 @@ Headless:
       "spec_tools"        true
       "gsd"               true
       "multiplexer"       (not $isVps)
-      "composio"          (not $isVps)
+      "composio"          false
 
     "ollama" (dict
       "install"      (not $isVps)
@@ -204,7 +204,7 @@ Headless:
     )
 
     "omniroute" (dict
-      "install" $isVps
+      "install" false
       "mode"    (ternary "vps-server" "client" $isVps)
       "domain"  (env "CHEZMOI_OMNIROUTE_DOMAIN" | default "omniroute.fabiosouzadev.duckdns.org")
       "bind"    (ternary "0.0.0.0" "localhost" $isVps)
@@ -215,7 +215,7 @@ Headless:
     )
 
     "hermes" (dict
-      "install"       $isVps
+      "install"       false
       "mode"          (ternary "vps-daemon" "local" $isVps)
       "dashboard" (dict
         "install"      $isVps
@@ -235,17 +235,17 @@ Headless:
     )
 
     "camofox" (dict
-      "install" $isVps
+      "install" false
       "mode"    (ternary "vps-daemon" "local" $isVps)
     )
 
     "agentmemory" (dict
-      "install" $isVps
+      "install" false
       "mode"    (ternary "vps-daemon" "local" $isVps)
     )
 
     "coding_orchestrator" (dict
-      "install"             $isVps
+      "install"             false
       "skill_name"          "coding-orchestrator"
       "cron_schedule"       "0 2 * * *"
       "cron_label"          "coding-agent"
@@ -256,9 +256,15 @@ Headless:
 
   "networking" (dict
     "tailscale" (dict
-      "install" true
+      "install" (not $isVps)
     )
   )
+
+  "coolify" (dict
+    "install" $isVps
+  )
+
+
 -}}
 
 {{- /* GPG Program */ -}}
@@ -290,6 +296,8 @@ Headless:
 {{- writeToStdout (printf "Termux: %v\n" $termux) -}}
 {{- writeToStdout (printf "Dirs: \n\tlocal: %v,\n\tbin: %v,\n\tsrc: %v\n" $dirs.local $dirs.bin $dirs.src) -}}
 {{- writeToStdout (printf "Workspaces: \n\tpersonal: %v,\n\tothers: %v,\n\tzup: %v\n" $dirs.workspaces.personal $dirs.workspaces.others $dirs.workspaces.zup) -}}
+{{- writeToStdout (printf "VPS: %v\n" $isVps) -}}
+{{- writeToStdout (printf "Termux: %v\n" $termux) -}}
 
 {{- end -}}
 
