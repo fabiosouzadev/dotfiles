@@ -26,6 +26,7 @@
           "xclip",
           "xsel",
           "zip",
+          "unzip",
           "wine",
           "zoxide"
         ],
