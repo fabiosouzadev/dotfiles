@@ -1,0 +1,26 @@
+services:
+  omniroute:
+    image: diegosouzapw/omniroute:latest
+    container_name: omniroute
+    restart: unless-stopped
+    volumes:
+      - omniroute-data:/app/data
+    environment:
+      - PORT=20128
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
+      - NEXT_PUBLIC_BASE_URL=https://your-domain.com
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
+      - BASE_URL=http://omniroute:20128
+      - AUTH_COOKIE_SECURE=true
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    command: caddy reverse-proxy --from https://your-domain.com --to http://omniroute:20128
+
+volumes:
+  omniroute-data:
