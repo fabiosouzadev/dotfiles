@@ -55,7 +55,7 @@ fi
 
 # Verify installation
 if command -v "$INSTALL_PATH/delta" &> /dev/null; then
-    success ">>> 📝 Installed delta: $($INSTALL_PATH/delta --version) 📝"
+    success ">>> 📝 Installed delta: $( ${INSTALL_PATH}/delta --version) 📝"
 else
     error "Failed to install delta"
     exit 1
