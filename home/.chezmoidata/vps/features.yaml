@@ -1,5 +1,6 @@
 features:
-  coolify: true
+  dockge:
+    install: true
   tailscale: 
     enabled: true
   hermes:
