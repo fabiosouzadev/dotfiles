@@ -7,6 +7,8 @@ set -euo pipefail
 # Install delta (git pager with syntax highlighting)
 info ">>>>>> 📝 Installing delta (git pager) 📝 <<<<<<"
 
+export PATH="$PATH:$HOME/.local/bin"
+
 # Check if delta is already installed
 if command -v delta &> /dev/null; then
     info "Delta is already installed: $(delta --version)"
@@ -50,7 +52,7 @@ fi
     mkdir -p "$HOME/.local/bin"
     find . -name "delta" -type f -executable -exec cp {} "$HOME/.local/bin/" \;
     rm -rf "$TMPDIR_DELTA"
-    export PATH="$PATH:$HOME/.local/bin"
+    
 {{ end }}
 
 # Verify installation
