@@ -15,7 +15,7 @@ mkdir -p {{ .chezmoi.homeDir }}/.local/opt/dockge
 cd {{ .chezmoi.homeDir }}/.local/opt/dockge
 
 # Download your compose.yaml
-curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=%7E%2F.local%2Fopt%2Fstacks" --output compose.yaml
+#curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=%7E%2F.local%2Fopt%2Fstacks" --output compose.yaml
 
 # Start the Server
 docker compose up -d
