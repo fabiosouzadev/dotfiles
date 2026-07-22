@@ -42,19 +42,20 @@ fi
     
     DELTA_FILE="delta-${DELTA_VERSION}-${DELTA_ARCH}.tar.gz"
     DELTA_URL="https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/${DELTA_FILE}"
+    INSTALL_PATH="$HOME/.local/bin"
     
     TMPDIR_DELTA=$(mktemp -d)
     cd "$TMPDIR_DELTA"
     curl -fLO "$DELTA_URL"
     tar -xzf "$DELTA_FILE"
-    mkdir -p "$HOME/.local/bin"
+    mkdir -p "$INSTALL_PATH"
     find . -name "delta" -type f -executable -exec cp {} "$HOME/.local/bin/" \;
     rm -rf "$TMPDIR_DELTA"
 {{ end }}
 
 # Verify installation
-if command -v delta &> /dev/null; then
-    success ">>> 📝 Installed delta: $(delta --version) 📝"
+if command -v "$INSTALL_PATH/delta" &> /dev/null; then
+    success ">>> 📝 Installed delta: $($INSTALL_PATH/delta --version) 📝"
 else
     error "Failed to install delta"
     exit 1
