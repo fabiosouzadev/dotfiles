@@ -1,4 +1,4 @@
-{{-  if .features.ai.composio }}
+{{-  if and (.settings.vps) (.features.composio.enabled) }}
 export COMPOSIO_INSTALL_DIR="$HOME/.composio"
 export PATH="$COMPOSIO_INSTALL_DIR:$PATH"
 {{- end }}

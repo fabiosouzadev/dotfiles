@@ -1,4 +1,11 @@
 {
+  "features":{
+   "repos": {
+      "personal": true,
+      "other": true,
+      "work": true
+   }
+  },
   "repos": {
     "personal": [
       { "repo": "git@github.com:fabiosouzadev/personal.git",

@@ -6,23 +6,23 @@
 {{ template "workplace/script_is_not_vps" . }}
 
 INSTALL_DIR= {{- .dirs.local }}
-LOG_DIR={{ .features.ai.ollama.path.logs }}
+LOG_DIR={{ .features.ollama.path.logs }}
 SRC_DIR={{ .dirs.src }}
 BIN_DIR={{ .dirs.bin }}
 
-{{- if .features.ai.ollama.install }}
+{{- if .features.ollama.install }}
 
-info ">>> 🐑 Installing Ollama in mode {{ .features.ai.ollama.mode }}  🐑"
+info ">>> 🐑 Installing Ollama in mode {{ .features.ollama.mode }}  🐑"
 
 # --------------------------------------------------------------------
 # USER MODE (WSL / ambiente gerenciado)
 # --------------------------------------------------------------------
-{{-  if eq .features.ai.ollama.mode "user" }}
+{{-  if eq .features.ollama.mode "user" }}
 
-{{- if eq .features.ai.ollama.version "latest" }}
+{{- if eq .features.ollama.version "latest" }}
 OLLAMA_VERSION=$(curl -s https://api.github.com/repos/ollama/ollama/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 {{- else }}
-OLLAMA_VERSION="{{ .features.ai.ollama.version }}"
+OLLAMA_VERSION="{{ .features.ollama.version }}"
 {{- end }}
 
 rm -rf "$HOME/.ollama"
@@ -63,7 +63,7 @@ success "🐑 Ollama Installed in $INSTALL_DIR version: $(ollama -v) 🐑 "
 # ROOT MODE
 # --------------------------------------------------------------------
 
-{{-  else if eq .features.ai.ollama.mode "root" }}
+{{-  else if eq .features.ollama.mode "root" }}
 
 {{ if .features.systemd.enabled }}
 sudo systemctl stop ollama
@@ -87,7 +87,7 @@ success "Ollama Installed version: $(ollama -v) 🐑"
 {{- end }}
 
 ### Override Service
-{{- if not (eq .features.ai.ollama.mode "user")}}
+{{- if not (eq .features.ollama.mode "user")}}
 
 [ -d /etc/systemd/system/ollama.service.d ] || sudo mkdir /etc/systemd/system/ollama.service.d/
 

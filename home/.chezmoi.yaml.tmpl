@@ -180,90 +180,14 @@ Headless:
   "runtime"        (dict "background_services" (not $ismanaged))
   "kernels"        (dict "install" false)
   "rtl8821ce"      (dict "install" $dell3530)
-  
-  "repos" (dict
-    "personal"  true
-    "other"     true
-    "work"      (eq $workplace "Zup")
-  )
 
   "i3"       (dict "enabled" (not $isVps))
   "niri"     (dict "enabled" (not $isVps))
 
-  "ai" (dict
-      "coding_assistants" true
-      "spec_tools"        true
-      "gsd"               true
-      "multiplexer"       (not $isVps)
-      "composio"          false
-
-    "ollama" (dict
-      "install"      (not $isVps)
-      "mode"         $ollamaMode
-      "localmodels"  false
-    )
-
-    "omniroute" (dict
-      "install" false
-      "mode"    (ternary "vps-server" "client" $isVps)
-      "domain"  (env "CHEZMOI_OMNIROUTE_DOMAIN" | default "omniroute.fabiosouzadev.duckdns.org")
-      "bind"    (ternary "0.0.0.0" "localhost" $isVps)
-      "dashboard_path" (env "CHEZMOI_OMNIROUTE_DASHBOARD_PATH" | default "/omniroute")
-      "dashboard_port" (env "CHEZMOI_OMNIROUTE_DASHBOARD_PORT" | default "20128")
-      "api_path"       (env "CHEZMOI_OMNIROUTE_API_PATH" | default "/api")
-      "api_port"       (env "CHEZMOI_OMNIROUTE_API_PORT" | default "20128")
-    )
-
-    "hermes" (dict
-      "install"       false
-      "mode"          (ternary "vps-daemon" "local" $isVps)
-      "dashboard" (dict
-        "install"      $isVps
-        "port"         (env "CHEZMOI_HERMES_DASHBOARD_PORT" | default "9119")
-        "host"         (env "CHEZMOI_HERMES_DASHBOARD_HOST" | default (ternary "0.0.0.0" "127.0.0.1" $isVps))
-        "domain"       (env "CHEZMOI_HERMES_DASHBOARD_DOMAIN" | default "hermes.fabiosouzadev.duckdns.org")
-        "isolated"     true
-        "path_prefix"  "/hermes"
-      )
-    )
-
-    "openclaw" (dict
-      "install"  false
-      "mode"     (ternary "vps-daemon" "local" $isVps)
-      "gateway"  false
-      "telegram" false
-    )
-
-    "camofox" (dict
-      "install" false
-      "mode"    (ternary "vps-daemon" "local" $isVps)
-    )
-
-    "agentmemory" (dict
-      "install" false
-      "mode"    (ternary "vps-daemon" "local" $isVps)
-    )
-
-    "coding_orchestrator" (dict
-      "install"             false
-      "skill_name"          "coding-orchestrator"
-      "cron_schedule"       "0 2 * * *"
-      "cron_label"          "coding-agent"
-      "nightly_budget_usd"  5
-      "per_task_budget_usd" 2
-    )
+  "ollama" (dict
+    "install"      (not $isVps)
+    "mode"         $ollamaMode
   )
-
-  "networking" (dict
-    "tailscale" (dict
-      "install" (not $isVps)
-    )
-  )
-
-  "coolify" (dict
-    "install" $isVps
-  )
-
 
 -}}
 

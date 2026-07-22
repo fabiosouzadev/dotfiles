@@ -1,0 +1,12 @@
+features:
+  coolify: true
+  tailscale: 
+    enabled: true
+  hermes:
+    enabled: true
+    agentmemory:
+      enabled: true
+    camofox:
+      enabled: true
+    composio:
+      enabled: true

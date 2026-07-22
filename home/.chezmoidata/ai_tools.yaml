@@ -1,3 +1,10 @@
+features:
+  ai: 
+    coding_assistants: true
+    spec_tools:        true
+    gsd:               true
+    multiplexer:       true
+
 ai_tools:
   npm:
     - name: opencode
@@ -29,9 +36,6 @@ ai_tools:
     - name: freebuff
       package: "freebuff"
       feature_flag: coding_assistants
-    - name: openclaw
-      package: "openclaw@beta"
-      feature_flag: openclaw.install
     - name: openspec
       package: "@fission-ai/openspec@latest"
       feature_flag: spec_tools
@@ -63,10 +67,6 @@ ai_tools:
       url: "https://github.com/getkimchi/kimchi/releases/latest/download/install.sh"
       shell: bash
       feature_flag: coding_assistants
-    - name: hermes
-      url: "https://hermes-agent.nousresearch.com/install.sh"
-      shell: bash
-      feature_flag: hermes.install
     - name: beads
       url: "https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh"
       shell: bash
