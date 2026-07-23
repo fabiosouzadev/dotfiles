@@ -47,7 +47,7 @@ services:
       redis:
         condition: service_healthy
     build:
-      context: .
+      context: https://github.com/diegosouzapw/OmniRoute.git
       target: runner-cli
     image: omniroute:prod
     restart: unless-stopped
