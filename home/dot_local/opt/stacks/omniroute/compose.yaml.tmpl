@@ -69,7 +69,7 @@ services:
     volumes:
       - omniroute-prod-data:/app/data
     networks:
-      - caddy
+      - reverse_proxy
     healthcheck:
       test: ["CMD", "node", "healthcheck.mjs"]
       interval: 30s
@@ -87,4 +87,5 @@ volumes:
     name: redis-prod-data
 
 networks:
-  caddy:
+  reverse_proxy:
+    external: true
