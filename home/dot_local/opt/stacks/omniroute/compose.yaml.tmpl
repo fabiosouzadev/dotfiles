@@ -69,7 +69,7 @@ services:
     volumes:
       - omniroute-data:/app/data
     networks:
-      - reverse_proxy
+      - edge
     healthcheck:
       test: ["CMD", "node", "healthcheck.mjs"]
       interval: 30s
