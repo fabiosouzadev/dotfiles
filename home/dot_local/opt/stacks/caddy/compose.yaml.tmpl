@@ -1,3 +1,17 @@
+# ──────────────────────────────────────────────────────────────────────
+#  OmniRoute — Docker Compose (Production Snapshot)
+# ──────────────────────────────────────────────────────────────────────
+#
+#  Create a edge network
+#
+#  Usage:
+#    docker network create edge
+#
+#  networks:
+#   edge:
+#     external: true
+#
+# ──────────────────────────────────────────────────────────────────────
 services:
   caddy:
     image: caddy:alpine
@@ -8,8 +22,8 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp" # HTTP/3 support
-      - "20130:20130"
-      - "20131:20131"
+      - "20128:20128"
+      - "20129:20129"
       - "20132:20132"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
@@ -20,7 +34,6 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-
 networks:
   edge:
     external: true

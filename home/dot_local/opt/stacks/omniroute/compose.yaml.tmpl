@@ -25,7 +25,6 @@
 #            target: runner-web
 #          image: omniroute:prod-web
 # ──────────────────────────────────────────────────────────────────────
-
 services:
   # ── Redis (Rate Limiter Backend) ──────────────────────────────────
   redis:
@@ -40,15 +39,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-
   omniroute:
     depends_on:
       redis:
         condition: service_healthy
     build:
       context: https://github.com/diegosouzapw/OmniRoute.git
-      target: runner-cli
-    image: omniroute:prod
+      target: runner-web
+    image: omniroute:prod-web
     restart: unless-stopped
     stop_grace_period: 40s
     env_file: .env
@@ -63,9 +61,9 @@ services:
       - HOSTNAME=0.0.0.0
       - DATA_DIR=/app/data
     expose:
-      - "20128" #20130
-      - "20129" #20131
-      - "20132" #20132
+      - "20128"
+      - "20129"
+      - "20132"
     volumes:
       - omniroute-data:/app/data
     networks:
@@ -78,14 +76,12 @@ services:
       start_period: 15s
     deploy:
       mode: replicated
-      replicas: 3
-
+      replicas: 2
 volumes:
   omniroute-data:
     name: omniroute-data
   redis-data:
     name: redis-data
-
 networks:
   edge:
     external: true
