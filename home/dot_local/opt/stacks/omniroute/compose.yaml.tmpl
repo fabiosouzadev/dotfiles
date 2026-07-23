@@ -6,11 +6,12 @@ services:
     env_file:
       - .env
     environment:
+      - API_PORT=20128
       - DASHBOARD_PORT=20129
       - REDIS_URL=redis://redis:6379
       - REDIS_PORT=6379
     volumes:
-      - omniroute-data:/app/data
+      - $(PWD)/app/data
     ports:
       - 20128:20128
       - 20129:20129
