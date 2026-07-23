@@ -5,6 +5,10 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - DASHBOARD_PORT=20129
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PORT=6379
     volumes:
       - omniroute-data:/app/data
     ports:
