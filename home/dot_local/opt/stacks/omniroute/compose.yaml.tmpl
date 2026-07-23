@@ -62,7 +62,7 @@ services:
       - API_HOST=0.0.0.0
       - HOSTNAME=0.0.0.0
       - DATA_DIR=/app/data
-    ports:
+    expose:
       - "20128" #20130
       - "20129" #20131
       - "20132" #20132
@@ -85,3 +85,7 @@ volumes:
     name: omniroute-prod-data
   redis-prod-data:
     name: redis-prod-data
+
+networks:
+  caddy:
+    external: true
