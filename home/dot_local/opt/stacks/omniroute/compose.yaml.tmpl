@@ -30,10 +30,10 @@ services:
   # ── Redis (Rate Limiter Backend) ──────────────────────────────────
   redis:
     image: redis:8.6.2-alpine
-    container_name: omniroute-redis-prod
+    container_name: omniroute-redis
     restart: unless-stopped
     volumes:
-      - redis-prod-data:/data
+      - redis-data:/data
     command: redis-server --save 60 1 --loglevel warning
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -41,7 +41,7 @@ services:
       timeout: 5s
       retries: 3
 
-  omniroute-prod:
+  omniroute:
     depends_on:
       redis:
         condition: service_healthy
@@ -67,7 +67,7 @@ services:
       - "20129" #20131
       - "20132" #20132
     volumes:
-      - omniroute-prod-data:/app/data
+      - omniroute-data:/app/data
     networks:
       - reverse_proxy
     healthcheck:
@@ -81,11 +81,11 @@ services:
       replicas: 3
 
 volumes:
-  omniroute-prod-data:
-    name: omniroute-prod-data
-  redis-prod-data:
-    name: redis-prod-data
+  omniroute-data:
+    name: omniroute-data
+  redis-data:
+    name: redis-data
 
 networks:
-  reverse_proxy:
+  edge:
     external: true

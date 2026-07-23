@@ -1,14 +1,14 @@
-:20130 {
+http://:20130 {
     encode gzip
-    reverse_proxy omniroute-prod:20128
+    reverse_proxy omniroute:20128
 }
 
-:20131 {
+http://:20131 {
     encode gzip
-    reverse_proxy omniroute-prod:20129
+    reverse_proxy omniroute:20129
 }
 
-:20132 {
+http://:20132 {
     encode gzip
-    reverse_proxy omniroute-prod:20132
+    reverse_proxy omniroute:20132
 }
