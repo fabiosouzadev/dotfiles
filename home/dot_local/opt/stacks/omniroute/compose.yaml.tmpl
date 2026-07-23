@@ -11,7 +11,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - REDIS_PORT=6379
     volumes:
-      - $(PWD)/app/data
+      - .:/app/data
     ports:
       - 20128:20128
       - 20129:20129
