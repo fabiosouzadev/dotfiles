@@ -5,6 +5,8 @@ features:
     enabled: true
   hermes:
     enabled: true
+    dashboard:
+      enabled: true
     agentmemory:
       enabled: true
     camofox:

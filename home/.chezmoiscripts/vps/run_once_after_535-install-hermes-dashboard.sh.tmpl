@@ -7,7 +7,7 @@
 {{ template "common/script_is_not_ephemeral" . -}}
 {{ template "workplace/script_is_vps" . }}
 
-{{ if .features.ai.hermes.dashboard.install }}
+{{ if and (.features.hermes.enabled) (.features.hermes.dashboard.enabled) }}
 
 # --- Configuração ---
 HERMES_DASHBOARD_PORT="{{ .features.ai.hermes.dashboard.port }}"

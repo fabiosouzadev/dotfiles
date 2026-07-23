@@ -10,7 +10,7 @@ set -euo pipefail
 {{ template "common/script_helper" . }}
 {{ template "workplace/script_is_vps" . }}
 
-{{ if not .features.ai.camofox.install }}
+{{ if or (not .features.hermes.enabled) (not .features.hermes.camofox.enabled) }}
 info ">> Camofox: not needed, skipping <<"
 exit 0
 {{ end }}
