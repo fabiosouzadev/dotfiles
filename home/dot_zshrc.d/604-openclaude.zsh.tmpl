@@ -113,6 +113,6 @@
     {{- $omniroute_key = joinPath .chezmoi.sourceDir "dot_keys" "encrypted_omniroute-key-zup.txt.asc" -}}
 {{- end }}
 export CLAUDE_CODE_USE_OPENAI=1
-export OPENAI_BASE_URL=http://157.151.13.223:20128/v1
+export OPENAI_BASE_URL=http://193.123.97.209:20129/v1
 export OPENAI_API_KEY={{ include $omniroute_key | decrypt | trim }}
 export OPENAI_MODEL=omniroute/work
