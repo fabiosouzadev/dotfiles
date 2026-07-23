@@ -1,19 +1,38 @@
 services:
+  # ── Redis (Rate Limiter Backend) ──────────────────────────────────
+  redis:
+    image: redis:8.6.2-alpine
+    container_name: omniroute-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   omniroute:
     image: diegosouzapw/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    stop_grace_period: 40s
     env_file:
       - .env
     environment:
-      - API_PORT=20128
-      - DASHBOARD_PORT=20129
-      - REDIS_URL=redis://redis:6379
-      - REDIS_PORT=6379
-    volumes:
-      - omniroute-data:/app/data
+      - API_PORT=20129
+      - DASHBOARD_PORT=20128
     ports:
       - 20128:20128
       - 20129:20129
+    volumes:
+      - omniroute-data:/app/data
 volumes:
-  omniroute-data:
+  omniroute-prod-data:
+    name: omniroute-data
+  redis-prod-data:
+    name: redis-data
