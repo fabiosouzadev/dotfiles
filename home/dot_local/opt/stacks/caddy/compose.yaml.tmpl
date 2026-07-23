@@ -14,11 +14,8 @@ services:
       - caddy_config:/config
     networks:
       - caddy
-
 volumes:
   caddy_data:
   caddy_config:
-
 networks:
-  caddy:
-    external: true
+  caddy: null
