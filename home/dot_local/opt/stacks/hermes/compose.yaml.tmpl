@@ -10,10 +10,10 @@ services:
     volumes:
       - {{ .chezmoi.homeDir }}/.hermes:/opt/data
     environment:
-      PUID: "${PUID:-1000}"
-      PGID: "${PGID:-1000}"
-      HERMES_DASHBOARD: "1"
-      OMNIROUTE_BASE_URL: "http://omniroute:20129/v1"
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - HERMES_DASHBOARD=1
+      - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
     shm_size: "1g"  
     networks:
       - edge
