@@ -8,6 +8,8 @@ services:
       - 8642:8642 # gateway API
     volumes:
       - ./data:/opt/data
+    environment:
+      - OMNIROUTE_BASE_URL=omniroute/v1
     deploy:
       resources:
         limits:
