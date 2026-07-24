@@ -1,8 +1,8 @@
 model:
   default: omniroute/work
   provider: custom
-  base_url: http://193.123.97.209:20129/v1
-  api_key:
+  base_url: ${OMNIROUTE_BASE_URL}
+  api_key: ${OMNIROUTE_API_KEY}
 agent:
   max_turns: 150
   verify_on_stop: false
@@ -190,8 +190,8 @@ plugins:
   enabled: []
 custom_providers:
   - name: Omniroute
-    base_url: http://193.123.97.209:20129/v1
-    api_key:
+    base_url: ${OMNIROUTE_BASE_URL}
+    api_key: ${OMNIROUTE_API_KEY}
     model: omniroute/work
 known_plugin_toolsets:
   cli:
