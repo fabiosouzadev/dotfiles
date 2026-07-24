@@ -1,57 +1,13 @@
-# ──────────────────────────────────────────────────────────────────────
-#  OmniRoute — Docker Compose (Production Snapshot)
-# ──────────────────────────────────────────────────────────────────────
-#
-#  Isolated production instance running on port 20130.
-#  Keeps the app running while you continue developing locally.
-#
-#  Usage:
-#    docker compose -f docker-compose.prod.yml up -d --build
-#    docker compose -f docker-compose.prod.yml down
-#    docker compose -f docker-compose.prod.yml logs -f
-#
-#  Image flavors (two Dockerfile stages):
-#    runner-base (default / omniroute:prod)
-#      Lean image — no Playwright/Chromium. Suitable for all providers
-#      except web-cookie ones (gemini-web, claude-web, claude-turnstile).
-#
-#    runner-web (omniroute:prod-web) — opt-in, ~300 MB extra
-#      Includes Playwright + Chromium system libs. Required for web-cookie
-#      providers. To use this flavor, override the build target:
-#
-#        omniroute-prod:
-#          build:
-#            context: .
-#            target: runner-web
-#          image: omniroute:prod-web
-# ──────────────────────────────────────────────────────────────────────
 services:
-  # ── Redis (Rate Limiter Backend) ──────────────────────────────────
-  redis:
-    image: redis:8.6.2-alpine
-    container_name: omniroute-redis
-    restart: unless-stopped
-    volumes:
-      - redis-data:/data
-    command: redis-server --save 60 1 --loglevel warning
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
   omniroute:
+    image: diegosouzapw/omniroute:latest
+    restart: unless-stopped
+    stop_grace_period: 40s
     depends_on:
       redis:
         condition: service_healthy
-    build:
-      context: https://github.com/diegosouzapw/OmniRoute.git
-      target: runner-web
-    image: omniroute:prod-web
-    restart: unless-stopped
-    stop_grace_period: 40s
     env_file: .env
     environment:
-      - NODE_ENV=production
       - DASHBOARD_PORT=20128
       - API_PORT=20129
       - LIVE_WS_PORT=20132
@@ -60,6 +16,11 @@ services:
       - API_HOST=0.0.0.0
       - HOSTNAME=0.0.0.0
       - DATA_DIR=/app/data
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
+      # - NEXT_PUBLIC_BASE_URL=https://your-domain.com
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
+      - BASE_URL=http://omniroute:20128
+      - AUTH_COOKIE_SECURE=true
     expose:
       - "20128"
       - "20129"
@@ -69,7 +30,10 @@ services:
     networks:
       - edge
     healthcheck:
-      test: ["CMD", "node", "healthcheck.mjs"]
+      test:
+        - CMD
+        - node
+        - healthcheck.mjs
       interval: 30s
       timeout: 5s
       retries: 3
@@ -77,11 +41,25 @@ services:
     deploy:
       mode: replicated
       replicas: 3
+  # ── Redis (Rate Limiter Backend) ──────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 10s
+      timeout: 5s
+      retries: 3
 volumes:
-  omniroute-data:
-    name: omniroute-data
-  redis-data:
-    name: redis-data
+  omniroute-data: null
+  redis-data: null
 networks:
   edge:
     external: true
