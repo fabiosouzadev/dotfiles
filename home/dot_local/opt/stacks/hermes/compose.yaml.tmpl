@@ -1,30 +1,40 @@
 services:
-  hermes:
+  hermes-gateway:
     image: nousresearch/hermes-agent:latest
-    container_name: hermes
+    container_name: hermes-gateway
     restart: unless-stopped
-    command: gateway run
+    command:
+      - gateway
+      - run
     ports:
-      - 8642:8642 # gateway API
+      - 8642:8642
     volumes:
       - /home/ubuntu/.hermes:/opt/data
     environment:
       - PUID=1001
       - PGID=1001
-      # - HERMES_DASHBOARD=1
       - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
-      # Uncomment to forward specific env vars instead of using .env file:
-      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      # - OPENAI_API_KEY=${OPENAI_API_KEY}
-      # - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-    mem_limit: 2g
-    cpus: 2.0
-    healthcheck:
-      test: ["CMD", "hermes", "doctor", "--quiet"]
-      interval: 60s
-      timeout: 30s
-      retries: 3
-      start_period: 90s
+    networks:
+      - edge
+  hermes-dashboard:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes-dashboard
+    restart: unless-stopped
+    command:
+      - dashboard
+      - --host
+      - 127.0.0.1
+      - --no-open
+    expose:
+      - 9119
+    volumes:
+      - /home/ubuntu/.hermes:/opt/data
+    environment:
+      - PUID=1001
+      - PGID=1001
+      - HERMES_DASHBOARD=1
+      - HERMES_DASHBOARD_HOST=0.0.0.0
+      - HERMES_DASHBOARD_PORT=9119
     networks:
       - edge
 networks:
