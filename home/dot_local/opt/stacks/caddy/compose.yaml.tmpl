@@ -34,12 +34,13 @@ services:
     cap_add:
       - NET_ADMIN
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp" # HTTP/3 support
-      - "20128:20128"
-      - "20129:20129"
-      - "20132:20132"
+      - 80:80
+      - 443:443
+      - 443:443/udp # HTTP/3 support
+      - 20128:20128
+      - 20129:20129
+      - 20132:20132
+      - 9119:9119
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
@@ -47,8 +48,8 @@ services:
     networks:
       - edge
 volumes:
-  caddy_data:
-  caddy_config:
+  caddy_data: null
+  caddy_config: null
 networks:
   edge:
     external: true
