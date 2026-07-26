@@ -46,7 +46,7 @@ agent:
       is AMAZING and we're gonna CRUSH IT together! This is gonna be LEGENDARY! ARE
       YOU READY?! LET'S DO THIS! 💪😤🚀
 terminal:
-  backend: local
+  backend: docker
   cwd: .
   timeout: 180
   home_mode: auto
@@ -127,6 +127,8 @@ updates:
   pre_update_backup: false
   backup_keep: 5
   non_interactive_local_changes: stash
+proxy:
+  enabled: true
 _config_version: 33
 session_reset:
   mode: none
@@ -139,6 +141,7 @@ platform_toolsets:
     - clarify
     - code_execution
     - computer_use
+    - context_engine
     - cronjob
     - delegation
     - file
@@ -191,7 +194,7 @@ plugins:
 custom_providers:
   - name: Omniroute
     base_url: ${OMNIROUTE_BASE_URL}
-    api_key: ${OMNIROUTE_API_KEY}
+    key_env: ${OMNIROUTE_API_KEY}
     model: omniroute/work
 known_plugin_toolsets:
   cli:
@@ -201,4 +204,3 @@ known_plugin_toolsets:
 onboarding:
   seen:
     profile_build_offered: true
-    busy_input_prompt: true
