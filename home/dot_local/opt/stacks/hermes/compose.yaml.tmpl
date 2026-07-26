@@ -8,7 +8,8 @@ services:
       - run
     ports:
       - 8642:8642
-      - 9120:9120
+    expose:
+      - 9119
     volumes:
       - /home/ubuntu/.hermes:/opt/data
     environment:
@@ -16,7 +17,6 @@ services:
       - PGID=1001
       - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
       - HERMES_DASHBOARD=1
-      - HERMES_DASHBOARD_PORT=9120
     networks:
       - edge
 networks:
