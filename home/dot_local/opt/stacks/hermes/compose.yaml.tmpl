@@ -1,40 +1,22 @@
 services:
-  hermes-gateway:
+  hermes:
     image: nousresearch/hermes-agent:latest
-    container_name: hermes-gateway
+    container_name: hermes
     restart: unless-stopped
     command:
       - gateway
       - run
     ports:
       - 8642:8642
+      - 9120:9120
     volumes:
       - /home/ubuntu/.hermes:/opt/data
     environment:
       - PUID=1001
       - PGID=1001
       - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
-    networks:
-      - edge
-  hermes-dashboard:
-    image: nousresearch/hermes-agent:latest
-    container_name: hermes-dashboard
-    restart: unless-stopped
-    command:
-      - dashboard
-      - --host
-      - 127.0.0.1
-      - --no-open
-    expose:
-      - 9119
-    volumes:
-      - /home/ubuntu/.hermes:/opt/data
-    environment:
-      - PUID=1001
-      - PGID=1001
       - HERMES_DASHBOARD=1
-      - HERMES_DASHBOARD_HOST=0.0.0.0
-      - HERMES_DASHBOARD_PORT=9119
+      - HERMES_DASHBOARD_PORT=9120
     networks:
       - edge
 networks:
