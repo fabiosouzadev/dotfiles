@@ -209,3 +209,17 @@ known_plugin_toolsets:
     - spotify
   telegram:
     - spotify
+platforms:
+  telegram:
+    extra:
+      ignore_root_dm: true
+      dm_topics:
+      - chat_id: ${TELEGRAM_ALLOWED_USERS}
+        topics:
+        - name: Geral
+          icon_color: 7322096
+          icon_custom_emoji_id: :like:
+        - name: Produtividade
+          icon_color: 9367192 
+        - name: Code
+          icon_color: 16766590     
