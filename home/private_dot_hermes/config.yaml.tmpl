@@ -54,10 +54,10 @@ terminal:
   container_memory: 5120
   container_disk: 51200
   container_persistent: true
+  docker_volumes:
+    - /home/user/.hermes/cache/documents:/output
   docker_mount_cwd_to_workspace: false
   lifetime_seconds: 300
-  docker_volumes:
-    - "/home/user/.hermes/cache/documents:/output"
 browser:
   inactivity_timeout: 120
   cloud_provider: local
@@ -122,6 +122,7 @@ delegation:
   max_iterations: 50
 skills:
   creation_nudge_interval: 15
+  disabled: []
 code_execution:
   timeout: 300
   max_tool_calls: 50
@@ -209,17 +210,54 @@ known_plugin_toolsets:
     - spotify
   telegram:
     - spotify
+
+# ── Security ──────────────────────────────────────────────────────────
+# Secret redaction is ON by default — strings that look like API keys,
+# tokens, and passwords are masked in tool output, logs, and chat
+# responses before the model or user ever sees them. Set redact_secrets
+# to false to disable (e.g. when developing the redactor itself).
+# tirith pre-exec scanning is enabled by default when the tirith binary
+# is available. Configure via security.tirith_* keys or env vars
+# (TIRITH_ENABLED, TIRITH_BIN, TIRITH_TIMEOUT, TIRITH_FAIL_OPEN).
+#
+# security:
+#   redact_secrets: true
+#   tirith_enabled: true
+#   tirith_path: "tirith"
+#   tirith_timeout: 5
+#   tirith_fail_open: true
+
+# ── Fallback Model ────────────────────────────────────────────────────
+# Automatic provider failover when primary is unavailable.
+# Uncomment and configure to enable. Triggers on rate limits (429),
+# overload (529), service errors (503), or connection failures.
+#
+# Supported providers:
+#   openrouter   (OPENROUTER_API_KEY)  — routes to any model
+#   openai-codex (OAuth — hermes auth) — OpenAI Codex
+#   nous         (OAuth — hermes auth) — Nous Portal
+#   zai          (ZAI_API_KEY)         — Z.AI / GLM
+#   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
+#   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
+#   minimax      (MINIMAX_API_KEY)     — MiniMax
+#   minimax-cn   (MINIMAX_CN_API_KEY)  — MiniMax (China)
+#   bedrock      (AWS IAM / boto3)     — AWS Bedrock (Converse API)
+#
+# For custom OpenAI-compatible endpoints, add base_url and key_env.
+#
+# fallback_model:
+#   provider: openrouter
+#   model: anthropic/claude-sonnet-4
 platforms:
   telegram:
     extra:
       ignore_root_dm: true
       dm_topics:
-      - chat_id: ${TELEGRAM_ALLOWED_USERS}
+      - chat_id: 8687825860
         topics:
         - name: Geral
           icon_color: 7322096
-          icon_custom_emoji_id: :like:
         - name: Produtividade
-          icon_color: 9367192 
+          icon_color: 9367192
         - name: Code
-          icon_color: 16766590     
+          icon_color: 16766590
