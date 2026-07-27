@@ -56,6 +56,8 @@ terminal:
   container_persistent: true
   docker_mount_cwd_to_workspace: false
   lifetime_seconds: 300
+  docker_volumes:
+    - "/home/user/.hermes/cache/documents:/output"
 browser:
   inactivity_timeout: 120
   cloud_provider: local
