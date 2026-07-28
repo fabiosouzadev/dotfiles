@@ -1,24 +1,53 @@
+(common) {
+    encode zstd gzip
+
+    header {
+        -Server
+        X-Content-Type-Options nosniff
+    }
+
+    log {
+        output stdout
+        format json
+    }
+}
+
 http://:20128 {
-    encode gzip
-    reverse_proxy omniroute:20128
+    import common
+
+    reverse_proxy omniroute:20128 {
+        health_uri /
+    }
 }
 
 http://:20129 {
-    encode gzip
-    reverse_proxy omniroute:20129
+    import common
+
+    reverse_proxy omniroute:20129 {
+        health_uri /
+    }
 }
 
 http://:20132 {
-    encode gzip
-    reverse_proxy omniroute:20132
-}
+    import common
 
-http://:9119 {
-    encode gzip
-    reverse_proxy hermes:9119
+    reverse_proxy omniroute:20132 {
+        health_uri /
+    }
 }
 
 http://:8642 {
-    encode gzip
-    reverse_proxy hermes:8642
+    import common
+
+    reverse_proxy hermes:8642 {
+        transport http {
+            read_timeout 300s
+            write_timeout 300s
+        }
+    }
+}
+
+http://:9119 {
+    import common
+    reverse_proxy hermes:9119
 }
