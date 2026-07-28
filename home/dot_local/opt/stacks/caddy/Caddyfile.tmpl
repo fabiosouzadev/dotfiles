@@ -15,9 +15,10 @@
 http://:20128 {
     import common
 
-    reverse_proxy omniroute:20128 {
-        health_uri /
-    }
+    # reverse_proxy omniroute:20128 {
+    #     health_uri /
+    # }
+    reverse_proxy omniroute:20128
 }
 
 http://:20129 {
