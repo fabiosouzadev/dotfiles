@@ -14,6 +14,33 @@
     }
 }
 
+http://:5001 {
+    import common
+    reverse_proxy dockge:5001
+}
+
+http://:8642 {
+    import common
+    reverse_proxy hermes:8642 {
+        transport http {
+            read_timeout 300s
+            write_timeout 300s
+        }
+    }
+}
+
+http://:9119 {
+    import common
+    reverse_proxy hermes:9119
+}
+
+http://:9377 {
+    import common
+    reverse_proxy camofox:9377 {
+        health_uri /health
+    }
+}
+
 http://:20128 {
     import common
 
@@ -40,27 +67,4 @@ http://:20132 {
     # }
 
     reverse_proxy omniroute:20132
-}
-
-http://:8642 {
-    import common
-
-    reverse_proxy hermes:8642 {
-        transport http {
-            read_timeout 300s
-            write_timeout 300s
-        }
-    }
-}
-
-http://:9119 {
-    import common
-    reverse_proxy hermes:9119
-}
-
-http://:9377 {
-    import common
-    reverse_proxy camofox:9377 {
-        health_uri /health
-    }
 }
