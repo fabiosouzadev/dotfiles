@@ -24,17 +24,20 @@ http://:20128 {
 http://:20129 {
     import common
 
-    reverse_proxy omniroute:20129 {
-        health_uri /
-    }
+    # reverse_proxy omniroute:20129 {
+    #     health_uri /
+    # }
+    reverse_proxy omniroute:20129
 }
 
 http://:20132 {
     import common
 
-    reverse_proxy omniroute:20132 {
-        health_uri /
-    }
+    # reverse_proxy omniroute:20132 {
+    #     health_uri /
+    # }
+
+    reverse_proxy omniroute:20132
 }
 
 http://:8642 {
@@ -51,4 +54,11 @@ http://:8642 {
 http://:9119 {
     import common
     reverse_proxy hermes:9119
+}
+
+http://:9377 {
+    import common
+    reverse_proxy camofox:9377 {
+        health_uri /health
+    }
 }
