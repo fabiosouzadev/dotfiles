@@ -37,11 +37,12 @@ services:
       - 80:80
       - 443:443
       - 443:443/udp # HTTP/3 support
-      - 20128:20128
-      - 20129:20129
-      - 20132:20132
-      - 8642:8642
-      - 9119:9119
+      - 20128:20128 #omniroute dashboard
+      - 20129:20129 #omniroute api
+      - 20132:20132 #omniroute webhook
+      - 8642:8642 #hermes gateway
+      - 9119:9119 #hermes dashboard
+      - 9377:9377 #camofox
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
