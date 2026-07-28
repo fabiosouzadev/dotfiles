@@ -29,7 +29,6 @@
 # ──────────────────────────────────────────────────────────────────────
 services:
   caddy:
-    name: caddy
     image: caddy:alpine
     restart: unless-stopped
     cap_add:
@@ -50,7 +49,6 @@ services:
       - caddy_config:/config
     networks:
       - edge
-
 volumes:
   caddy_data: null
   caddy_config: null
