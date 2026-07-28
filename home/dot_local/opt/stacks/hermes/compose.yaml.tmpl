@@ -18,6 +18,28 @@ services:
       - HERMES_DASHBOARD=1
     networks:
       - edge
+      - hermes-net
+  camofox:
+    build:
+      context: https://github.com/jo-inc/camofox-browser.git
+      args:
+        ARCH: arm64
+    container_name: camofox
+    restart: unless-stopped
+    ports:
+      - 9377:9377
+      - 6080:6080
+      - 5901:5900
+    environment:
+      - CAMOFOX_PORT=9377
+      - ENABLE_VNC=1
+      - VNC_BIND=0.0.0.0
+      - VNC_RESOLUTION=1920x1080
+      - MAX_OLD_SPACE_SIZE=2048
+    networks:
+      - hermes-net
 networks:
+  hermes-net:
+    driver: bridge
   edge:
     external: true
