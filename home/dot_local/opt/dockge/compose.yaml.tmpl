@@ -2,8 +2,8 @@ services:
   dockge:
     image: louislam/dockge:1
     restart: unless-stopped
-    expose:
-      - 5001
+    ports:
+      - 5001:5001
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/app/data
@@ -16,8 +16,3 @@ services:
       # Tell Dockge where to find the stacks
       - DOCKGE_STACKS_DIR={{ .chezmoi.homeDir }}/.local/opt/stacks
       - DOCKGE_ENABLE_CONSOLE=true
-    networks:
-      - edge
-networks:
-  edge:
-    external: true
