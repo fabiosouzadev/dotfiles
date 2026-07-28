@@ -4,7 +4,7 @@ model:
   base_url: ${OMNIROUTE_BASE_URL}
   api_key: ${OMNIROUTE_API_KEY}
 agent:
-  max_turns: 150
+  max_turns: 80
   verify_on_stop: false
   verbose: false
   reasoning_effort: medium
@@ -76,9 +76,9 @@ tool_loop_guardrails:
 compression:
   enabled: true
   progress_notices: false
-  threshold: 0.5
-  target_ratio: 0.2
-  protect_last_n: 20
+  threshold: 0.9
+  target_ratio: 0.3
+  protect_last_n: 10
   min_tail_user_messages: 1
   max_attempts: 3
   proactive_prune_tokens: 0
