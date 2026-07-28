@@ -6,9 +6,8 @@ services:
     command:
       - gateway
       - run
-    ports:
-      - 8642:8642
     expose:
+      - 8642
       - 9119
     volumes:
       - /home/ubuntu/.hermes:/opt/data
