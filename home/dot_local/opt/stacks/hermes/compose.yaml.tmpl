@@ -3,6 +3,9 @@ services:
     image: nousresearch/hermes-agent:latest
     container_name: hermes
     restart: unless-stopped
+    depends_on:
+      camofox:
+        condition: service_healthy
     command:
       - gateway
       - run
@@ -15,10 +18,10 @@ services:
       - PUID=1001
       - PGID=1001
       - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
+      - CAMOFOX_URL=http://camofox:9377
       - HERMES_DASHBOARD=1
     networks:
       - edge
-      - hermes-net
   camofox:
     build:
       context: https://github.com/jo-inc/camofox-browser.git
@@ -26,10 +29,20 @@ services:
         ARCH: arm64
     container_name: camofox
     restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:9377/health
+      interval: 15s
+      timeout: 5s
+      retries: 10
     ports:
-      - 9377:9377
       - 6080:6080
       - 5901:5900
+    expose:
+      - 9377
     environment:
       - CAMOFOX_PORT=9377
       - ENABLE_VNC=1
@@ -37,9 +50,13 @@ services:
       - VNC_RESOLUTION=1920x1080
       - MAX_OLD_SPACE_SIZE=2048
     networks:
-      - hermes-net
+      - edge
+    shm_size: 2gb
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 3G
 networks:
-  hermes-net:
-    driver: bridge
   edge:
     external: true
