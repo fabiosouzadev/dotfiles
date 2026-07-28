@@ -16,3 +16,8 @@ services:
       # Tell Dockge where to find the stacks
       - DOCKGE_STACKS_DIR={{ .chezmoi.homeDir }}/.local/opt/stacks
       - DOCKGE_ENABLE_CONSOLE=true
+    networks:
+      - edge
+networks:
+  edge:
+    external: true
