@@ -227,6 +227,14 @@ platforms:
               thread_id: 14271
             - name: Software Engineer
               thread_id: 14273
+mcp_servers:
+  Notion:
+    command: npx
+    args:
+      - -y
+      - '@notionhq/notion-mcp-server'
+    env:
+      NOTION_API_KEY: ${NOTION_API_KEY}
 
 # ── Security ──────────────────────────────────────────────────────────
 # Secret redaction is ON by default — strings that look like API keys,
