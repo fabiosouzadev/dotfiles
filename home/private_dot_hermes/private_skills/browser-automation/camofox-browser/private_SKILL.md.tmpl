@@ -155,6 +155,8 @@ camofox_logs
 | Cookies not persisting | Check `CAMOFOX_PROFILE_DIR` volume mount + `DELETE /sessions/<userId>` called |
 | Snapshot truncated | Increase `CAMOFOX_SNAPSHOT_MAX_ELEMENTS` or paginate with offset |
 | Container OOM | Limit `CAMOFOX_MAX_CONCURRENT_TABS`, reduce idle timeout |
+| Empty snapshots from LinkedIn | May need longer wait (15-30s), scroll, fresh cookies, residential proxy, or test with example.com. |
+| API parameter requirements | Remember to include userId in snapshot query and both userId and schema in extract body. |
 
 ## References
 

@@ -41,14 +41,16 @@ services:
     ports:
       - 6080:6080
       - 5901:5900
-    expose:
-      - 9377
+      - 9377:9377
     environment:
       - CAMOFOX_PORT=9377
+      - CAMOFOX_API_KEY=
       - ENABLE_VNC=1
       - VNC_BIND=0.0.0.0
       - VNC_RESOLUTION=1920x1080
       - MAX_OLD_SPACE_SIZE=2048
+    volumes:
+      - ~/.camofox/cookies:/home/node/.camofox/cookies:ro
     networks:
       - edge
     shm_size: 2gb

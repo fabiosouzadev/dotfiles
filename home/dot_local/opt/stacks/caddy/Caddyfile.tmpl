@@ -33,6 +33,7 @@ http://:9377 {
     import common
     reverse_proxy camofox:9377 {
         health_uri /health
+	health_interval 10s 
     }
 }
 
