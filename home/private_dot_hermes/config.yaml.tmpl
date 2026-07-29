@@ -60,10 +60,10 @@ terminal:
   lifetime_seconds: 300
 browser:
   inactivity_timeout: 120
-  cloud_provider: camofox
-  use_gateway: false
   camofox:
     managed_persistence: true
+  cloud_provider: camofox
+  use_gateway: false
 tool_loop_guardrails:
   warnings_enabled: true
   hard_stop_enabled: false
@@ -118,6 +118,7 @@ memory:
   user_profile_enabled: true
   memory_char_limit: 2200
   user_char_limit: 1375
+  provider: mem0
   nudge_interval: 10
   flush_min_turns: 6
 delegation:
