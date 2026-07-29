@@ -32,8 +32,6 @@ services:
       - 9377:9377
     env_file: data/camofox/.env
     environment:
-      # === OBRIGATÓRIO: Chave da API (gere com: openssl rand -hex 32) ===
-      - CAMOFOX_API_KEY=CHANGE_ME_GENERATE_WITH_OPENSSL_RAND_HEX_32
       # === Diretórios persistidos (mapeados nos volumes abaixo) ===
       - CAMOFOX_COOKIES_DIR=/home/node/.camofox/cookies
       - CAMOFOX_PROFILE_DIR=/home/node/.camofox/profiles
