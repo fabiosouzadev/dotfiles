@@ -4,7 +4,7 @@ model:
   base_url: ${OMNIROUTE_BASE_URL}
   api_key: ${OMNIROUTE_API_KEY}
 agent:
-  max_turns: 80
+  max_turns: 150
   verify_on_stop: false
   verbose: false
   reasoning_effort: medium
@@ -58,6 +58,9 @@ terminal:
     - /home/user/.hermes/cache/documents:/output
   docker_mount_cwd_to_workspace: false
   lifetime_seconds: 300
+web:
+  backend: ddgs
+  use_gateway: false
 browser:
   inactivity_timeout: 120
   camofox:
@@ -107,6 +110,9 @@ display:
   background_process_notifications: all
 dashboard:
   theme: cyberpunk
+tts:
+  provider: kittentts
+  use_gateway: false
 stt:
   enabled: true
   local:
@@ -126,6 +132,9 @@ delegation:
 skills:
   creation_nudge_interval: 15
   disabled: []
+approvals:
+  mode: smart
+  destructive_slash_confirm: false  
 code_execution:
   timeout: 300
   max_tool_calls: 50
@@ -152,7 +161,6 @@ platform_toolsets:
     - browser
     - clarify
     - code_execution
-    - computer_use
     - context_engine
     - cronjob
     - delegation
@@ -171,7 +179,6 @@ platform_toolsets:
     - browser
     - clarify
     - code_execution
-    - computer_use
     - cronjob
     - delegation
     - file
@@ -251,6 +258,7 @@ mcp_servers:
       x-consumer-api-key: ${COMPOSIO_API_KEY}
     connect_timeout: 60
     timeout: 180
-approvals:
-  mode: smart
-  destructive_slash_confirm: true
+image_gen:
+  provider: openai-codex
+  use_gateway: false
+  model: gpt-image-2-medium
