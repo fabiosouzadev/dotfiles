@@ -1,0 +1,19 @@
+# Configuração do Himalaya para Gmail Pessoal
+# Email: fabiovanderlei.developer@gmail.com
+# App Password lido de /opt/data/.env (variável GMAIL_APP_PASSWORD)
+
+[accounts.gmail]
+default = true
+imap.server = "imaps://imap.gmail.com:993"
+imap.sasl.plain.username = "fabiovanderlei.developer@gmail.com"
+imap.sasl.plain.password.cmd = "grep '^GMAIL_APP_PASSWORD=' /opt/data/.env | cut -d'=' -f2-"
+
+smtp.server = "smtps://smtp.gmail.com:465"
+smtp.sasl.plain.username = "fabiovanderlei.developer@gmail.com"
+smtp.sasl.plain.password.cmd = "grep '^GMAIL_APP_PASSWORD=' /opt/data/.env | cut -d'=' -f2-"
+
+mailbox.alias.inbox = "INBOX"
+mailbox.alias.sent = "[Gmail]/Sent Mail"
+mailbox.alias.drafts = "[Gmail]/Drafts"
+mailbox.alias.trash = "[Gmail]/Trash"
+mailbox.alias.archive = "[Gmail]/All Mail"
