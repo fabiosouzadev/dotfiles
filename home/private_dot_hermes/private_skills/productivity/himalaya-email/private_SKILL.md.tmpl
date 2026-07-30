@@ -1,0 +1,376 @@
+---
+name: himalaya-email
+description: "Himalaya CLI for Gmail IMAP/SMTP with cron automation."
+version: 1.0.0
+author: fabiosouzadev
+license: MIT
+platforms: [linux, macos]
+metadata:
+  hermes:
+    tags: [Email, IMAP, SMTP, CLI, Productivity, Gmail, Automation]
+    homepage: https://github.com/pimalaya/himalaya
+prerequisites:
+  commands: [himalaya]
+---
+
+# Himalaya Email - Produtividade com Email no Terminal
+
+Skill para **enviar, receber, buscar e automatizar emails** via Himalaya CLI. Configurado para Gmail (pessoal e corporativo Zup) com App Passwords.
+
+## Armazenamento de Senhas: Duas Opções
+
+| Método | Segurança | Complexidade | Requer |
+|--------|-----------|--------------|--------|
+| **`pass` (password-store)** | Alta (GPG) | Média | `pass`, `gnupg2` |
+| **`.env` do Hermes** | Média (texto plano) | Baixa | Acesso ao `/opt/data/.env` |
+
+> **Padrão testado**: `.env` (simples, já funciona no VPS). `pass` recomendado para produção multi-usuário.
+
+## Estrutura
+
+```plaintext
+skills/productivity/himalaya-email/
+├── SKILL.md
+├── references/
+│   ├── gmail-config.md       # Configuração Gmail (pessoal + Zup) - ambas opções
+│   ├── message-composition.md # MML syntax para emails ricos
+│   └── troubleshooting.md    # Problemas comuns e soluções
+├── scripts/
+│   ├── send-email.sh         # Envio rápido (com/sem anexo)
+│   ├── list-inbox.sh         # Listar últimos N emails
+│   ├── search-email.sh       # Buscar por remetente/assunto
+│   ├── read-email.sh         # Ler email por ID
+│   └── cron-check-jobs.sh    # Verificador de vagas (cron 08:00 UTC)
+├── schemas/
+│   └── email-config.json     # Schema validação config.toml
+└── docker/
+    └── Dockerfile.himalaya   # Container opcional
+```
+
+---
+
+## 1. Instalação Rápida
+
+```bash
+# Instalar Himalaya
+curl -sSL https://raw.githubusercontent.com/pimalaya/himalaya/master/install.sh | PREFIX=~/.local sh
+
+# Opção A: Usar .env (simples, sem pass)
+# → Adicione GMAIL_APP_PASSWORD no /opt/data/.env
+# → Use config.toml com auth_cmd lendo do .env (ver references/gmail-config.md)
+
+# Opção B: Usar pass (mais seguro)
+sudo apt-get update && sudo apt-get install -y pass gnupg2
+pass init "seu-email@gmail.com"
+```
+
+## 2. Configuração Gmail (Pessoal + Zup)
+
+### Gerar App Passwords
+1. Acesse: https://myaccount.google.com/apppasswords
+2. Crie **dois** App Passwords:
+   - Nome: "Himalaya Pessoal" → senha 16 chars
+   - Nome: "Himalaya Zup" → senha 16 chars
+
+### Opção A: Senha no `.env` (Recomendado para VPS)
+
+**1. Adicionar no `/opt/data/.env`:**
+```bash
+GMAIL_APP_PASSWORD=vrhm aagq frws zcrn
+GMAIL_ZUP_APP_PASSWORD=sua_senha_zup_aqui
+```
+
+**2. Config.toml (`~/.config/himalaya/config.toml`):**
+```toml
+# ===== CONTA PESSOAL (Gmail) =====
+[accounts.gmail]
+default = true
+email = "fabiovanderlei.developer@gmail.com"
+display-name = "Fábio Souza"
+
+imap.server = "imaps://imap.gmail.com:993"
+imap.sasl.plain.username = "fabiovanderlei.developer@gmail.com"
+imap.sasl.plain.password.cmd = "grep '^GMAIL_APP_PASSWORD=' /opt/data/.env | cut -d'=' -f2-"
+
+smtp.server = "smtps://smtp.gmail.com:465"
+smtp.sasl.plain.username = "fabiovanderlei.developer@gmail.com"
+smtp.sasl.plain.password.cmd = "grep '^GMAIL_APP_PASSWORD=' /opt/data/.env | cut -d'=' -f2-"
+
+mailbox.alias.inbox = "INBOX"
+mailbox.alias.sent = "[Gmail]/Sent Mail"
+mailbox.alias.drafts = "[Gmail]/Drafts"
+mailbox.alias.trash = "[Gmail]/Trash"
+mailbox.alias.archive = "[Gmail]/All Mail"
+
+# ===== CONTA ZUP (Gmail Corporativo) =====
+[accounts.zup]
+email = "fabio.vanderlei@zup.com.br"
+display-name = "Fábio Souza (Zup)"
+
+imap.server = "imaps://imap.gmail.com:993"
+imap.sasl.plain.username = "fabio.vanderlei@zup.com.br"
+imap.sasl.plain.password.cmd = "grep '^GMAIL_ZUP_APP_PASSWORD=' /opt/data/.env | cut -d'=' -f2-"
+
+smtp.server = "smtps://smtp.gmail.com:465"
+smtp.sasl.plain.username = "fabio.vanderlei@zup.com.br"
+smtp.sasl.plain.password.cmd = "grep '^GMAIL_ZUP_APP_PASSWORD=' /opt/data/.env | cut -d'=' -f2-"
+
+mailbox.alias.inbox = "INBOX"
+mailbox.alias.sent = "[Gmail]/Sent Mail"
+mailbox.alias.drafts = "[Gmail]/Drafts"
+mailbox.alias.trash = "[Gmail]/Trash"
+mailbox.alias.archive = "[Gmail]/All Mail"
+```
+
+> ✅ **Testado e funcionando** (2026-07-30): IMAP + SMTP + Sent Mail salvando corretamente.
+
+### Opção B: Senha no `pass` (Mais seguro)
+
+```bash
+pass insert gmail/himalaya-pessoal
+# Cole a senha do "Himalaya Pessoal"
+
+pass insert gmail/himalaya-zup
+# Cole a senha do "Himalaya Zup"
+```
+
+Config.toml com `pass`:
+```toml
+[accounts.pessoal]
+email = "fabiovanderlei.developer@gmail.com"
+display-name = "Fábio Souza"
+default = true
+
+backend.type = "imap"
+backend.server = "imap.gmail.com"
+backend.port = 993
+backend.tls = true
+backend.login = "fabiovanderlei.developer@gmail.com"
+backend.auth_type = "password"
+backend.auth_cmd = "pass show gmail/himalaya-pessoal"
+
+message.send.backend.type = "smtp"
+message.send.backend.server = "smtp.gmail.com"
+message.send.backend.port = 465
+message.send.backend.tls = true
+message.send.backend.login = "fabiovanderlei.developer@gmail.com"
+message.send.backend.auth_type = "password"
+message.send.backend.auth_cmd = "pass show gmail/himalaya-pessoal"
+
+folder.aliases.inbox = "INBOX"
+folder.aliases.sent = "[Gmail]/Sent Mail"
+folder.aliases.drafts = "[Gmail]/Drafts"
+folder.aliases.trash = "[Gmail]/Trash"
+folder.aliases.archive = "[Gmail]/All Mail"
+
+# [accounts.zup] ... similar com pass show gmail/himalaya-zup
+```
+
+Ver `references/gmail-config.md` para config.toml completo das duas opções.
+
+backend.type = "imap"
+backend.server = "imap.gmail.com"
+backend.port = 993
+backend.tls = true
+backend.login = "fabiovanderlei.developer@gmail.com"
+backend.auth_type = "password"
+backend.auth_cmd = "pass show gmail/himalaya-pessoal"
+
+message.send.backend.type = "smtp"
+message.send.backend.server = "smtp.gmail.com"
+message.send.backend.port = 465
+message.send.backend.tls = true
+message.send.backend.login = "fabiovanderlei.developer@gmail.com"
+message.send.backend.auth_type = "password"
+message.send.backend.auth_cmd = "pass show gmail/himalaya-pessoal"
+
+folder.aliases.inbox = "INBOX"
+folder.aliases.sent = "[Gmail]/Sent Mail"
+folder.aliases.drafts = "[Gmail]/Drafts"
+folder.aliases.trash = "[Gmail]/Trash"
+folder.aliases.archive = "[Gmail]/All Mail"
+
+# ===== CONTA ZUP (Gmail corporativo) =====
+[accounts.zup]
+email = "fabio.vanderlei@zup.com.br"
+display-name = "Fábio Souza (Zup)"
+
+backend.type = "imap"
+backend.server = "imap.gmail.com"
+backend.port = 993
+backend.tls = true
+backend.login = "fabio.vanderlei@zup.com.br"
+backend.auth_type = "password"
+backend.auth_cmd = "pass show gmail/himalaya-zup"
+
+message.send.backend.type = "smtp"
+message.send.backend.server = "smtp.gmail.com"
+message.send.backend.port = 465
+message.send.backend.tls = true
+message.send.backend.login = "fabio.vanderlei@zup.com.br"
+message.send.backend.auth_type = "password"
+message.send.backend.auth_cmd = "pass show gmail/himalaya-zup"
+
+folder.aliases.inbox = "INBOX"
+folder.aliases.sent = "[Gmail]/Sent Mail"
+folder.aliases.drafts = "[Gmail]/Drafts"
+folder.aliases.trash = "[Gmail]/Trash"
+folder.aliases.archive = "[Gmail]/All Mail"
+```
+
+## 3. Testar Configuração
+
+```bash
+# Listar contas
+himalaya account list
+
+# Testar conexão IMAP
+himalaya --account pessoal envelope list --page-size 3
+
+# Enviar teste (para si mesmo)
+cat << 'EOF' | himalaya --account pessoal message write
+To: fabiovanderlei.developer@gmail.com
+Subject: ✅ Teste Himalaya
+
+Email de teste do Himalaya configurado via skill productivity/himalaya-email
+EOF
+```
+
+---
+
+## 4. Operações Principais (Scripts Prontos)
+
+### Enviar Email Simples
+```bash
+./scripts/send-email.sh \
+  --account pessoal \
+  --to "destino@email.com" \
+  --subject "Assunto" \
+  --body "Corpo do email"
+```
+
+### Enviar com Anexo
+```bash
+./scripts/send-email.sh \
+  --account pessoal \
+  --to "destino@email.com" \
+  --subject "Com anexo" \
+  --body "Veja o anexo" \
+  --attach "/caminho/arquivo.pdf"
+```
+
+### Listar Últimos N Emails
+```bash
+./scripts/list-inbox.sh --account pessoal --count 10
+./scripts/list-inbox.sh --account zup --count 5 --mailbox "[Gmail]/Sent Mail"
+```
+
+### Buscar Emails
+```bash
+./scripts/search-email.sh --account pessoal --from "linkedin.com" --subject "vaga"
+./scripts/search-email.sh --account zup --since "2026-07-01" --until "2026-07-31"
+```
+
+### Ler Email Completo
+```bash
+./scripts/read-email.sh --account pessoal --id 222105
+```
+
+---
+
+## 5. Automação: Cron Job Diário (Vagas LinkedIn)
+
+**Arquivo**: `scripts/cron-check-jobs.sh`
+
+```bash
+#!/bin/bash
+# Executa 08:00 UTC (05:00 BRT) - verifica vagas no Gmail pessoal
+# Requer: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID no ambiente
+
+ACCOUNT="pessoal"
+SINCE=$(date -d "1 day ago" '+%Y-%m-%d')
+KEYWORDS=("vaga" "oportunidade" "linkedin" "contratação" "tech lead" "arquiteto" "senior")
+
+# Busca emails não lidos com palavras-chave
+for kw in "${KEYWORDS[@]}"; do
+  himalaya --account "$ACCOUNT" envelope list \
+    --search "from:linkedin.com subject:$kw since:$SINCE" \
+    --output json | jq -r '.[] | "\(.id)|\(.subject)|\(.from)|\(.date)"'
+done
+```
+
+**Instalar no crontab**:
+```bash
+0 8 * * * /opt/data/skills/productivity/himalaya-email/scripts/cron-check-jobs.sh
+```
+
+---
+
+## 6. Integração com Hermes Agent
+
+### Via Terminal Tool (recomendado)
+```python
+# Listar inbox
+terminal(command="himalaya --account pessoal envelope list --page-size 5 --output json")
+
+# Enviar email
+terminal(command="cat << 'EOF' | himalaya --account pessoal message write
+To: destino@email.com
+Subject: Assunto
+Body aqui
+EOF")
+```
+
+### Via Skill (este arquivo)
+```bash
+# Carregar skill
+skill_load("productivity/himalaya-email")
+
+# Usar scripts
+./scripts/send-email.sh --account zup --to "fabio.vanderlei@zup.com.br" ...
+```
+
+---
+
+## 7. Referências Rápidas
+
+| Comando | Descrição |
+|---------|-----------|
+| `himalaya account list` | Listar contas configuradas |
+| `himalaya envelope list` | Listar emails (INBOX default) |
+| `himalaya envelope list --mailbox "[Gmail]/Sent Mail"` | Ver enviados |
+| `himalaya message read <ID>` | Ler email completo |
+| `himalaya message write` | Escrever/enviar (stdin) |
+| `himalaya template send` | Enviar via template MML |
+| `himalaya attachment download <ID>` | Baixar anexos |
+| `himalaya search "from:linkedin subject:vaga"` | Busca avançada |
+
+---
+
+## 8. Troubleshooting
+
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `Invalid credentials` | App Password errado/expirado | Gerar novo em myaccount.google.com/apppasswords |
+| `No backend matching auto` | Config.toml mal formatado | Verificar sintaxe TOML, usar `folder.aliases` (plural) |
+| `Secret command not found` | `pass` não instalado | `apt-get install pass` + `pass init email` |
+| Anexos não vão | MIME mal formado | Usar `himalaya template send` com MML (ver references/message-composition.md) |
+
+---
+
+## 9. Segurança
+
+- **NUNCA** coloque senhas diretas no `config.toml`
+- Use **`pass`** (password-store) com GPG
+- App Passwords do Google **expiram** se trocar senha principal/2FA
+- Rotacione App Passwords a cada 90 dias
+- `config.toml` fica em `~/.config/himalaya/` (fora do repo)
+
+---
+
+## 10. Próximos Passos
+
+- [ ] Adicionar suporte a OAuth2 (Gmail API)
+- [ ] Script para responder automaticamente a vagas
+- [ ] Integração com Notion (salvar vagas)
+- [ ] Filtro anti-spam para vagas irrelevantes
