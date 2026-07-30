@@ -227,6 +227,7 @@ platforms:
               thread_id: 14271
             - name: Software Engineer
               thread_id: 14273
+    enabled: true
 mcp_servers:
   Notion:
     command: npx
@@ -235,6 +236,10 @@ mcp_servers:
       - '@notionhq/notion-mcp-server'
     env:
       NOTION_TOKEN: ${NOTION_TOKEN}
+  Composio:
+    transport: http
+    url: https://connect.composio.dev/mcp
+    headers: '{ "x-consumer-api-key": ${COMPOSIO_API_KEY} }'
 
 # ── Security ──────────────────────────────────────────────────────────
 # Secret redaction is ON by default — strings that look like API keys,
