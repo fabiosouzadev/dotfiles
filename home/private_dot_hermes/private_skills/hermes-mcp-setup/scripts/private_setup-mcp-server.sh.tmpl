@@ -1,0 +1,78 @@
+#!/bin/bash
+# Script to help set up MCP servers in Hermes configuration
+# Usage: ./setup-mcp-server.sh <name> <transport> <url> [--env KEY=VALUE] [--header KEY=VALUE]
+
+set -e
+
+NAME=""
+TRANSPORT=""
+URL=""
+ENV_VARS=()
+HEADERS=()
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --env)
+            ENV_VARS+=("$2")
+            shift 2
+            ;;
+        --header)
+            HEADERS+=("$2")
+            shift 2
+            ;;
+        *)
+            if [[ -z "$NAME" ]]; then
+                NAME="$1"
+            elif [[ -z "$TRANSPORT" ]]; then
+                TRANSPORT="$1"
+            elif [[ -z "$URL" ]]; then
+                URL="$1"
+            else
+                echo "Unknown argument: $1"
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
+
+if [[ -z "$NAME" || -z "$TRANSPORT" || -z "$URL" ]]; then
+    echo "Usage: $0 <name> <transport> <url> [--env KEY=VALUE] [--header KEY=VALUE]"
+    exit 1
+fi
+
+# Set the MCP server configuration
+echo "Setting up MCP server: $NAME"
+hermes config set mcp_servers.$NAME.transport "$TRANSPORT"
+hermes config set mcp_servers.$NAME.url "$URL"
+
+# Set headers if provided
+if [[ ${#HEADERS[@]} -gt 0 ]]; then
+    HEADERS_JSON="{"
+    for i in "${!HEADERS[@]}"; do
+        IFS='=' read -r key value <<< "${HEADERS[$i]}"
+        HEADERS_JSON+="\"$key\":\"$value\""
+        if [[ $i -lt $((${#HEADERS[@]}-1)) ]]; then
+            HEADERS_JSON+=","
+        fi
+    done
+    HEADERS_JSON+="}"
+    hermes config set mcp_servers.$NAME.headers "$HEADERS_JSON"
+else
+    hermes config set mcp_servers.$NAME.headers '{}'
+fi
+
+# Set environment variables if provided
+if [[ ${#ENV_VARS[@]} -gt 0 ]]; then
+    for env_pair in "${ENV_VARS[@]}"; do
+        IFS='=' read -r key value <<< "$env_pair"
+        hermes config set mcp_servers.$NAME.env.$key "\${$value}"
+    done
+fi
+
+echo "MCP server '$NAME' configured successfully!"
+echo "Remember to restart the Hermes gateway from the host:"
+echo "  docker restart hermes"
+echo "  or"
+echo "  docker compose -f /path/to/docker-compose.yml restart hermes"

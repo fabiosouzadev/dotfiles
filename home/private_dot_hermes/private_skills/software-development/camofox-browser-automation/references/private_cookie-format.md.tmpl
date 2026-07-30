@@ -1,0 +1,106 @@
+# Cookie Format: Netscape → Camofox Conversion
+
+## Netscape Format (Input)
+Standard `cookies.txt` format (e.g., from browser export):
+```
+# Netscape HTTP Cookie File
+# http://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file!  Do not edit.
+
+.domain.com	TRUE	/path	FALSE	1234567890	cookie_name	cookie_value
+```
+
+**Fields** (tab-separated):
+1. `domain` — with leading dot for all subdomains (`.linkedin.com`)
+2. `flag` — `TRUE`/`FALSE` (include subdomains)
+3. `path` — URL path
+4. `secure` — `TRUE`/`FALSE` (HTTPS only)
+5. `expires` — Unix timestamp (seconds)
+6. `name` — cookie name
+7. `value` — cookie value (may be quoted)
+
+## Camofox Format (Output)
+```json
+{
+  "cookies": [
+    {
+      "name": "li_at",
+      "value": "AQEDA...",
+      "domain": "linkedin.com",
+      "path": "/",
+      "expires": 1800861663,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ]
+}
+```
+
+**Key Differences**:
+| Field | Netscape | Camofox |
+|-------|----------|---------|
+| Domain | `.linkedin.com` (leading dot) | `linkedin.com` (no leading dot) |
+| Secure | `TRUE`/`FALSE` | `true`/`false` (boolean) |
+| HttpOnly | Implicit (no field) | Explicit `httpOnly: true` |
+| SameSite | Not present | Required: `Strict` \| `Lax` \| `None` |
+| Expires | Seconds | Seconds (same) |
+
+## Conversion Rules
+
+```python
+def netscape_to_camofox(line: str) -> dict:
+    parts = line.strip().split('\t')
+    if len(parts) < 7:
+        return None
+    
+    domain = parts[0].lstrip('.')  # STRIP LEADING DOT
+    secure = parts[3] == 'TRUE'
+    expires = int(parts[4])
+    name = parts[5]
+    value = parts[6].strip('"')  # Remove surrounding quotes if present
+    
+    return {
+        "name": name,
+        "value": value,
+        "domain": domain,
+        "path": parts[2],
+        "expires": expires,
+        "httpOnly": True,  # Assume True for security cookies
+        "secure": secure,
+        "sameSite": "Lax"  # Default; adjust if known
+    }
+```
+
+## Common Pitfalls
+
+1. **Leading dot on domain** — Camofox rejects `.linkedin.com`; must be `linkedin.com`
+2. **Quoted values** — Netscape may quote values with spaces/special chars; strip quotes
+3. **SameSite missing** — Default to `Lax`; `None` requires `secure: true`
+4. **HttpOnly implicit** — Netscape doesn't store it; set `true` for session/auth cookies
+5. **Expired cookies** — Filter `expires < now` before import
+
+## Validation Checklist
+
+Before `POST /sessions/{userId}/cookies`:
+- [ ] All domains stripped of leading dot
+- [ ] `secure` is boolean, not string
+- [ ] `httpOnly` is boolean
+- [ ] `sameSite` is one of `Strict`, `Lax`, `None`
+- [ ] `expires` is integer (Unix seconds)
+- [ ] No duplicate `(name, domain, path)` tuples
+- [ ] Count ≤ 500 (Camofox limit)
+
+## Example: LinkedIn Cookies from `/opt/data/camofox-data/cookies/linkedin.txt`
+
+Key cookies to preserve:
+| Name | Purpose | Required |
+|------|---------|----------|
+| `li_at` | Primary auth token | **YES** |
+| `JSESSIONID` | Session ID | Yes |
+| `bcookie` | Browser ID | Yes |
+| `bscookie` | Secure browser ID | Yes |
+| `li_sugr` | User GUID | Helpful |
+| `timezone` | Timezone pref | Optional |
+
+**Note**: Even with all 23 LinkedIn cookies imported correctly, Camofox still gets blocked (see `references/linkedin-anti-bot.md`). Cookie import works; the issue is browser fingerprinting.

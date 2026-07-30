@@ -1,0 +1,82 @@
+# Palmeiras Elenco Extraction — Case Study (Jul 2026)
+
+## Session Summary
+Systematic extraction of all 28+ Palmeiras first-team players with photos and stats from `palmeiras.com.br/elenco` using LOOP ENGINEERING pattern.
+
+## Index Page
+- URL: `https://www.palmeiras.com.br/elenco`
+- 28+ player cards with links to individual profiles
+- Each card: jersey number, name, position, link to `?jogador={ID}`
+
+## Profile URL Pattern
+`https://www.palmeiras.com.br/jogador/?jogador={ID}`
+
+## Player IDs Extracted (from index page snapshot - Jul 2026)
+
+| # | Name | Position | ID | Status |
+|---|------|----------|-----|--------|
+| 1 | Carlos Miguel | Goleiro | 274779 | ✅ Captured |
+| 21 | Kaique | Goleiro | 250788 | ✅ Captured |
+| 14 | Marcelo Lomba | Goleiro | 214178 | ✅ Captured |
+| 2 | Alexander Barboza | Zagueiro | 287141 | ⚠️ Photo mismatch (Gabigol) |
+| 43 | Benedetti | Zagueiro | 268218 | ✅ Captured |
+| 3 | Bruno Fuchs | Zagueiro | 267312 | ✅ Captured |
+| 15 | Gustavo Gómez | Zagueiro | 2297 | ❌ Generic/error page |
+| 26 | Murilo | Zagueiro | 215247 | ✅ Captured |
+| 4 | Agustín Giay | Lat-Direito | 258174 | ✅ Captured |
+| 12 | Khellven | Lat-Direito | 274160 | ✅ Captured |
+| 56 | Arthur | Lat-Esquerdo | 281739 | ✅ Captured |
+| 6 | Jefte | Lat-Esquerdo | 274785 | ❌ Not visited |
+| 22 | Joaquín Piquerez | Lat-Esquerdo | 200996 | ✅ Captured |
+| 8 | Andreas Pereira | Meio | 275250 | ✅ Captured |
+| 32 | Emiliano Martínez | Meio | 266610 | ✅ Captured |
+| 7 | Felipe Anderson | Meio | 258290 | ✅ Captured |
+| 48 | Larson | Meio | 280023 | ✅ Captured |
+| 30 | Lucas Evangelista | Meio | 268255 | ✅ Captured |
+| 17 | Marlon Freitas | Meio | 279379 | ✅ Captured |
+| 18 | Mauricio | Meio | 258136 | ✅ Captured |
+| 40 | Allan | Atacante | 23175 | ❌ Not visited |
+| 11 | Jhon Arias | Atacante | 280688 | ❌ Not visited |
+| 42 | López | Atacante | 224097 | ❌ Not visited |
+| 31 | Luighi | Atacante | 268243 | ❌ Not visited |
+| 10 | Paulinho | Atacante | 265723 | ❌ Not visited |
+
+**Total captured: 17/25 profiles with photos**
+
+## Issues Discovered
+
+### 1. ID Drift Between Seasons
+- Original 28 IDs from earlier extraction ≠ current index page IDs
+- Example: Mayke (214181) → redirects to Eduard Atuesta profile
+- Flaco López old ID 214189 → new ID 224097
+- Rony old ID 214190 → replaced by Paulinho 265723
+
+### 2. Broken/Generic Profiles
+- Gustavo Gómez (2297): Returns generic silhouette, no data
+- Murilo (214180): Returns "Lomba-transp-1" placeholder
+- Some profiles load old news articles instead of player data
+
+### 3. Photo Mismatch (Site Bug)
+- Alexander Barboza (287141): Profile photo shows Gabigol (meme/placeholder)
+- Vision analysis correctly detected the mismatch
+
+### 4. New Signings Not in Original 28
+- Vitor Roque (267679) - #9
+- Paulinho (265723) - #10  
+- Ramón Sosa (273227) - #19
+- Luighi (268243) - #31
+- Allan (23175) - #40
+- Jhon Arias (280688) - #11
+
+## Extraction Log
+- **Tool sequence**: `browser_navigate` → `browser_vision(annotate=true)` per profile
+- **Screenshots saved**: `/opt/data/browser_screenshots/browser_screenshot_*.png`
+- **Total navigations**: ~40 (including revisits)
+- **Vision captures**: 17 successful profile photos
+
+## Recommendations for Future Runs
+1. Always re-extract IDs from `/elenco` index page before looping
+2. Verify each profile loads correct data before capturing
+3. Cross-reference jersey numbers to detect ID drift
+4. Flag profiles returning generic/error content
+5. Use `browser_snapshot` to extract structured text if vision fails

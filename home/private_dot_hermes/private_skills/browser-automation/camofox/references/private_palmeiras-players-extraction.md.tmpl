@@ -1,0 +1,70 @@
+# Palmeiras Player Photos Extraction
+
+**Session:** 2026-07-29 | **Status:** Completed successfully
+
+---
+
+## Overview
+
+Successfully extracted all 26 Palmeiras first-team player profile screenshots and direct CDN image URLs from the official website (www.palmeiras.com.br/elenco/).
+
+---
+
+## Method
+
+Used **Camofox** (Camoufox-based browser automation) via REST API:
+- Navigated to squad page `/elenco/`
+- Extracted all player profile links (`/jogador/?jogador={id}`)
+- Created individual tabs for each player with session persistence
+- Captured full-page screenshots (~1.6MB each)
+- Also extracted direct CDN image URLs via JavaScript evaluation
+
+---
+
+## Output
+
+### Screenshots (26 files, ~41MB total)
+Location: `/opt/data/palmeiras_players/`
+
+| Position | Players | Count |
+|----------|---------|-------|
+| Goleiros | Carlos Miguel, Marcelo Lomba, Kaique | 3 |
+| Zagueiros | Alexander Barboza, Benedetti, Bruno Fuchs, Gustavo Gómez, Murilo | 5 |
+| Laterais | Agustín Giay, Khellven, Arthur, Jefte, Joaquín Piquerez | 5 |
+| Meio-campistas | Andreas Pereira, Emiliano Martínez, Felipe Anderson, Larson, Lucas Evangelista, Marlon Freitas, Mauricio | 7 |
+| Atacantes | Allan, Jhon Arias, López, Paulinho, Ramón Sosa, Vitor Roque | 6 |
+
+### Direct CDN URLs (Lightweight)
+All images hosted on `www.palmeiras.com.br/wp-content/uploads/`:
+- Example: `https://www.palmeiras.com.br/wp-content/uploads/2025/08/Jogadores_0024_Carlos-Miguel-2.png`
+- Size: ~100-300KB each (vs 1.6MB screenshots)
+
+---
+
+## HTTP Server for Telegram Access
+
+Started Python HTTP server on port 8080:
+```bash
+cd /opt/data && python3 -m http.server 8080
+```
+Public URLs: `http://193.123.97.209:8080/palmeiras_players/{PLAYER_NAME}.png`
+
+---
+
+## Verification
+
+- ✅ All 26 players captured
+- ✅ Screenshots show complete profile pages (stats, bio, photo, jersey number)
+- ✅ CDN URLs accessible and current (2025/2026 season images)
+- ✅ Server running and accessible externally
+
+---
+
+## Notes for Future
+
+1. **Site structure:** Palmeiras site uses consistent URL pattern `/jogador/?jogador={numeric_id}`
+2. **Image naming:** CDN files follow pattern `Jogadores_{4-digit}_{Name}.png`
+3. **Camofox reliability:** Site loads perfectly (no anti-bot like LinkedIn)
+4. **Session handling:** Each player used unique `sessionKey` to avoid conflicts
+
+*Completed: 2026-07-29*

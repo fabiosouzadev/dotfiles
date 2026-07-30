@@ -1,0 +1,87 @@
+---
+name: loop-engineering-web-extraction
+description: Loop through detail pages to extract structured data.
+category: research
+---
+
+# Loop Engineering Web Extraction
+
+When you need to collect data from a list of similar items on a website (e.g., player profiles, product listings), follow this loop‑based workflow to minimize manual effort and ensure completeness.
+
+## When to use
+
+- You have a listing page with links to individual detail pages.
+- Each detail page contains structured data you want to capture (text, images, tables).
+- The site requires navigation (clicks, scrolls) to load all items.
+- You want a repeatable, auditable process.
+
+## Step‑by‑step procedure
+
+1. **Load the listing page**  
+   ```bash
+   browser_navigate {"url": "https://example.com/list"}
+   ```
+
+2. **Load all items**  
+   - If the page loads more content on scroll, repeatedly call  
+     ```bash
+     browser_scroll {"direction": "down"}
+     ```  
+     until no new items appear (detect via change in image or element count).  
+   - Optionally, use `browser_get_images` to verify that new player photos appear.
+
+3. **Extract the list of item URLs**  
+   - Take a snapshot:  
+     ```bash
+     browser_snapshot {"full": true}
+     ```  
+   - From the snapshot, locate the elements that link to detail pages (look for `@eX` refs around player cards or buttons).  
+   - For each element, note its `href` attribute (you can read it via the snapshot's `url` field or by clicking and checking the URL).  
+   - Store the URLs in a temporary list (you can keep them in the agent's memory or write to a file).
+
+4. **Iterate over each URL**  
+   Initialize a loop counter or use the `todo` tool to track progress.  
+   For each URL:
+   - `browser_navigate {"url": "<player_url>"}`
+   - Wait for load (optional short `browser_scroll` or wait).  
+   - Capture a visual record:  
+     ```bash
+     browser_vision {"question": "Screenshot of player profile showing photo, name, position, stats", "annotate": true}
+     ```  
+   - Extract desired fields (name, position, jersey number, stats, birthdate, height) either from the vision description or by reading the snapshot text.  
+   - Optionally download the image URL directly from the snapshot's `img` entries.  
+   - Record the data in a structured format (Markdown table, JSON, or CSV).  
+   - Update the TODO list to mark the item as done.
+
+5. **Compile the final output**  
+   - After processing all items, combine the collected rows into a final Markdown table or document.  
+   - Include thumbnails or links to the captured screenshots if desired.  
+   - Verify counts match the expected number of items.
+
+## Tips & Pitfalls
+
+- **Dynamic loading**: Some sites load more items as you scroll. Scroll in small increments and wait a moment between scrolls to avoid missing elements.  
+- **Stale selectors**: If the site changes its class names, rely on textual patterns (e.g., "Jogador", "Position") rather than fixed refs.  
+- **Image capture**: Use `browser_vision` with `annotate:true` to get numbered overlays if you need to click specific UI elements (e.g., a "Download photo" button).  
+- **Error handling**: If a navigation fails, log the URL and continue; you can retry later.  
+- **Rate limiting**: Add a short pause (`browser_scroll` with a small amount or just wait) between requests to avoid overwhelming the server.  
+- **Data validation**: After the loop, count the entries and compare with the number shown on the listing page (often displayed in a header).
+
+## Example (Palmeiras elenco)
+
+See the session transcript for a concrete run:  
+- List URL: `https://www.palmeiras.com.br/elenco`  
+- Extracted 28 player URLs from the snapshot.  
+- Loop: visited each `?jogador=XXXX` page, captured vision screenshots, pulled name, position, jersey number, games, goals, height, birthdate.  
+- Built a Markdown table grouped by position (goalkeepers, defenders, midfielders, forwards).
+
+## Related skills
+
+- `computer_use` – for desktop‑level automation when browser tools aren't enough.  
+- `todo` – useful for tracking progress through long lists.  
+- `execute_code` – can be used to parse snapshots or transform collected data into CSV/JSON.
+
+## References
+
+- Hermes browser tool documentation: https://hermes-agent.nousresearch.com/docs/tools/browser/
+- TODO tool: https://hermes-agent.nousresearch.com/docs/tools/todo/

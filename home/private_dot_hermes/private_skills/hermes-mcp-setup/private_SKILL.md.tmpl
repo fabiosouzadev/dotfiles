@@ -1,0 +1,55 @@
+---
+name: hermes-mcp-setup
+description: Add, modify, or remove MCP servers in Hermes configuration.
+category: hermes-agent
+---
+
+## When to use
+When you need to add, modify, or remove MCP (Model Context Protocol) servers in Hermes configuration.
+
+## Steps
+1. Ensure you have access to the Hermes CLI (`hermes` command).
+2. To add a new MCP server:
+   ```
+   hermes config set mcp_servers.<NAME>.transport <TRANSPORT>
+   hermes config set mcp_servers.<NAME>.url <URL>
+   hermes config set mcp_servers.<NAME>.headers '{}'   # if needed
+   hermes config set mcp_servers.<NAME>.env.<KEY> '${ENV_VAR}'   # if using env vars
+   ```
+   Replace `<NAME>`, `<TRANSPORT>`, `<URL>`, `<KEY>`, `${ENV_VAR}` with appropriate values.
+3. To remove an MCP server:
+   ```
+   hermes config unset mcp_servers.<NAME>
+   ```
+4. After making changes, restart the Hermes gateway from the host:
+   ```bash
+   docker restart hermes
+   # or
+   docker compose -f /path/to/docker-compose.yml restart hermes
+   ```
+5. Verify the server is available by calling its tools via MCP, e.g.:
+   ```
+   mcp__<NAME>__<tool_name>
+   ```
+
+## Pitfalls
+- The Hermes gateway cannot be restarted from inside the container; you must restart it on the host.
+- Environment variables referenced in `${VAR}` must be present in the host's `.env` file (usually `/opt/data/.env`).
+- Some MCP servers require OAuth (e.g., Composio); you must connect accounts via the compositor dashboard before using tools.
+- For Composio specifically, set headers to include `x-consumer-api-key: ${COMPOSIO_API_KEY}` (e.g., `hermes config set mcp_servers.Composio.headers '{"x-consumer-api-key": "${COMPOSIO_API_KEY"}}'`).
+
+## Reference
+ - See `references/mcp-servers.md` for examples of common MCP servers (Notion, Composio, etc.). For Composio-specific notes, see the section below.
+
+## Composio-specific Notes
+ - Composio requires OAuth connections for most services (like Gmail, GitHub, etc.). You must connect accounts via the Composio dashboard (https://dashboard.composio.dev) before using the tools.
+ - If the MCP server tools are not available as Hermes tools (e.g., `mcp__Composio__*`), you can interact with the Composio MCP server directly via HTTP:
+   1. Obtain a session ID by calling the `initialize` method.
+   2. Use the session ID to call meta tools like `COMPOSIO_SEARCH_TOOLS`, `COMPOSIO_GET_TOOL_SCHEMAS`, `COMPOSIO_MANAGE_CONNECTIONS`, and `COMPOSIO_MULTI_EXECUTE_TOOL`.
+   3. Example flow to search Gmail:
+        a. Initialize session: POST to https://connect.composio.dev/mcp with initialize method.
+        b. List connections: use COMPOSIO_MANAGE_CONNECTIONS to list Gmail connections.
+        c. Search for tools: use COMPOSIO_SEARCH_TOOLS with use_case "search gmail messages".
+        d. Get tool schema: use COMPOSIO_GET_TOOL_SCHEMAS for the tool you want (e.g., GMAIL_FETCH_EMAILS).
+        e. Execute the tool: use COMPOSIO_MULTI_EXECUTE_TOOL with the tool slug and arguments.
+   4. See the session logs for examples of how we did this in the conversation.

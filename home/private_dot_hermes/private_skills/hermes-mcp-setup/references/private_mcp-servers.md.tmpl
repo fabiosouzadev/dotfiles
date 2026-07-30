@@ -1,0 +1,51 @@
+# MCP Server Examples
+
+## Notion MCP Server
+- Transport: stdio (default for npx)
+- Command: npx
+- Args: ['-y', '@notionhq/notion-mcp-server']
+- Env: NOTION_TOKEN: ${NOTION_API_KEY}
+- Hermes config:
+  ```yaml
+  mcp_servers:
+    Notion:
+      command: npx
+      args:
+        - -y
+        - '@notionhq/notion-mcp-server'
+      env:
+        NOTION_TOKEN: ${NOTION_API_KEY}
+  ```
+
+## Composio MCP Server
+- Transport: http
+- URL: https://connect.composio.dev/mcp
+- Headers: {} (no auth headers, OAuth handled automatically)
+- Hermes config:
+  ```yaml
+  mcp_servers:
+    Composio:
+      transport: http
+      url: https://connect.composio.dev/mcp
+      headers: '{}'
+  ```
+
+## Adding a custom stdio MCP server
+- Example: A hypothetical `my-mcp-server` package
+- Hermes config:
+  ```yaml
+  mcp_servers:
+    MyService:
+      command: npx
+      args:
+        - -y
+        - my-mcp-server
+      env:
+        API_KEY: ${MY_API_KEY}
+  ```
+
+## Removing an MCP server
+- Hermes config:
+  ```bash
+  hermes config unset mcp_servers.Notion
+  ```

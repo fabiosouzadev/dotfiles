@@ -1,0 +1,108 @@
+# Camofox API Endpoints — OpenAPI Summary
+
+**Source**: `GET http://camofox:9377/openapi.json` (v1.13.0)
+
+## System Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Detailed health with tab/session counts |
+| GET | `/` | Basic server liveness |
+| GET | `/metrics` | Prometheus metrics (if `PROMETHEUS_ENABLED=1`) |
+| POST | `/pressure/cleanup` | Memory-pressure cleanup (dry-run by default) |
+| POST | `/start` | Start browser (idempotent) |
+| POST | `/stop` | Stop browser (requires BearerAuth) |
+
+## Tab Management
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/tabs` | Create tab (`userId`, `sessionKey`, `url?`, `trace?`) |
+| GET | `/tabs` | List tabs (`userId?` query) |
+| DELETE | `/tabs/{tabId}` | Close tab (`userId` query) |
+| DELETE | `/tabs/group/{listItemId}` | Close all tabs in group (`userId` query) |
+| GET | `/tabs/{tabId}/stats` | Tab metadata (URL, tool calls, visited URLs, downloads, failures) |
+
+## Navigation
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/tabs/{tabId}/navigate` | Navigate to URL or macro (`userId`, `url`, `macro?`, `query?`, `sessionKey?`) |
+| POST | `/tabs/{tabId}/back` | Go back (`userId`) |
+| POST | `/tabs/{tabId}/forward` | Go forward (`userId`) |
+| POST | `/tabs/{tabId}/refresh` | Refresh page (`userId`) |
+
+## Interaction
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/tabs/{tabId}/click` | Click by `ref`, `selector`, or `coordinates` (`userId`, `doubleClick?`) |
+| POST | `/tabs/{tabId}/type` | Type text (`userId`, `text`, `ref?`, `selector?`, `clear?`, `submit?`) |
+| POST | `/tabs/{tabId}/press` | Press key (`userId`, `key`) |
+| POST | `/tabs/{tabId}/scroll` | Scroll (`userId`, `direction=up\|down`, `amount?`) |
+| POST | `/tabs/{tabId}/viewport` | Set viewport (`userId`, `width`, `height`) |
+| POST | `/tabs/{tabId}/wait` | Wait for selector (`userId`, `selector`, `timeout`) |
+
+## Content Extraction
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/tabs/{tabId}/snapshot` | Accessibility tree (`userId`, `format=text\|json`, `offset?`, `includeScreenshot?`) |
+| GET | `/tabs/{tabId}/links` | Extract links (`userId`) |
+| GET | `/tabs/{tabId}/images` | Extract images (`userId`) |
+| GET | `/tabs/{tabId}/downloads` | List downloads (`userId`) |
+| GET | `/tabs/{tabId}/screenshot` | Base64 PNG screenshot (`userId`) |
+| POST | `/tabs/{tabId}/evaluate` | Run JS (`userId`, `expression`) |
+| POST | `/tabs/{tabId}/extract` | Structured extraction via JSON Schema with `x-ref` hints (`userId`, `schema`) |
+
+## Session Management
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/sessions/{userId}/cookies` | Import cookies (`cookies[]` with name, value, domain, path, expires, httpOnly, secure, sameSite) — **BearerAuth required** |
+| GET | `/sessions/{userId}/traces` | List Playwright traces (`userId`) — **BearerAuth required** |
+| GET | `/sessions/{userId}/traces/{filename}` | Download trace zip — **BearerAuth required** |
+| DELETE | `/sessions/{userId}/traces/{filename}` | Delete trace — **BearerAuth required** |
+| DELETE | `/sessions/{userId}` | Destroy session (`userId`) |
+
+## Legacy (Deprecated)
+- `POST /tabs/open` → use `POST /tabs`
+- `POST /navigate` → use `POST /tabs/{tabId}/navigate`
+- `GET /snapshot` → use `GET /tabs/{tabId}/snapshot`
+- `POST /act` → use specific interaction endpoints
+
+## Authentication
+- **BearerAuth**: `Authorization: Bearer <CAMOFOX_API_KEY>` — required for cookie import, traces, `/stop`
+- **AccessKeyAuth**: `Authorization: Bearer <CAMOFOX_ACCESS_KEY>` — superkey, gates all routes except `/health`, cookie import, `/stop`
+
+## Common Patterns
+
+### Cookie Import (Netscape → Camofox)
+```json
+{
+  "cookies": [
+    {"name": "li_at", "value": "AQEDA...", "domain": "linkedin.com", "path": "/", "expires": 1800861663, "httpOnly": true, "secure": true, "sameSite": "Lax"}
+  ]
+}
+```
+**Key**: Strip leading dot from domain (`.linkedin.com` → `linkedin.com`)
+
+### Structured Extraction
+```json
+{
+  "schema": {
+    "type": "object",
+    "properties": {
+      "postAuthor": {"type": "string", "x-ref": "e3"},
+      "postText": {"type": "string", "x-ref": "e7"},
+      "postTime": {"type": "string", "x-ref": "e9"}
+    },
+    "required": ["postAuthor", "postText"]
+  }
+}
+```
+Call `GET /snapshot` first to populate ref table, then `POST /extract` with schema.
+
+### Error Codes
+- `400` — Bad request (missing fields, invalid schema)
+- `403` — Forbidden (invalid/missing Bearer token)
+- `404` — Tab/session not found
+- `409` — Conflict (tracing on existing session, page changed during click)
+- `422` — Extraction failed (required ref not found)
+- `429` — Tab limit reached
+- `500` — Internal error
+- `503` — Unhealthy/recovering

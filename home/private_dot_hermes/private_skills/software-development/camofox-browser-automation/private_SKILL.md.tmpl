@@ -1,0 +1,99 @@
+---
+name: camofox-browser-automation
+description: Automate browsers via Camofox (port 9377).
+category: software-development
+tags:
+  - browser-automation
+  - camofox
+  - anti-detection
+  - linkedin
+  - scraping
+---
+
+# Browser Automation with Camofox
+
+**Trigger**: Use when you need to automate browser tasks via Camofox (anti-detection browser on port 9377). Works for navigation, snapshots, clicks, extraction, and authenticated sessions via cookie import.
+
+## Quick Reference
+
+| Task | Endpoint | Key Params |
+|------|----------|------------|
+| Health check | `GET /health` | — |
+| Import cookies | `POST /sessions/{userId}/cookies` | `cookies[]` (name, value, domain, path, expires, httpOnly, secure, sameSite) |
+| Create tab | `POST /tabs` | `userId`, `sessionKey`, `url?` |
+| Navigate | `POST /tabs/{tabId}/navigate` | `userId`, `url` |
+| Snapshot | `GET /tabs/{tabId}/snapshot` | `userId`, `format=text\|json` |
+| Screenshot | `GET /tabs/{tabId}/screenshot` | `userId` |
+| Click | `POST /tabs/{tabId}/click` | `userId`, `ref\|selector` |
+| Type | `POST /tabs/{tabId}/type` | `userId`, `text`, `ref\|selector?` |
+| Wait | `POST /tabs/{tabId}/wait` | `userId`, `selector`, `timeout` |
+| Evaluate JS | `POST /tabs/{tabId}/evaluate` | `userId`, `expression` |
+| Extract | `POST /tabs/{tabId}/extract` | `userId`, `schema` (JSON Schema with `x-ref`) |
+| Close tab | `DELETE /tabs/{tabId}` | `userId` |
+| List tabs | `GET /tabs` | `userId` |
+
+**Auth**: All sensitive endpoints require `Authorization: Bearer <CAMOFOX_API_KEY>` (default: `4493c42748fb3e2607fb8da27ec66c442bfb3c7c57b0e8e40d693cd8d3607b6b`).
+
+## Proven Workflow: Authenticated Session
+
+```python
+# 1. Import cookies (Netscape -> Camofox format)
+cookies = parse_netscape_cookies('/path/cookies.txt')
+linkedin_cookies = [c for c in cookies if 'linkedin.com' in c['domain']]
+POST /sessions/{userId}/cookies with {"cookies": linkedin_cookies}
+
+# 2. Create tab with sessionKey for persistence
+tab = POST /tabs {"userId": "fabio", "sessionKey": "linkedin-feed", "url": "https://www.linkedin.com/feed/"}
+
+# 3. Wait for content (not just page load)
+POST /tabs/{tabId}/wait {"userId": "fabio", "selector": "[data-test-feed-urn], .feed-shared-update-v2", "timeout": 60000}
+
+# 4. Get accessibility snapshot for element refs
+snapshot = GET /tabs/{tabId}/snapshot?userId=fabio&format=text
+
+# 5. Extract structured data using refs from snapshot
+POST /tabs/{tabId}/extract {"userId": "fabio", "schema": {...}}
+```
+
+## Critical Pitfalls
+
+### LinkedIn Anti-Bot Protection (Major)
+**Symptoms**: Redirect loop on `/login` ("The page isn't redirecting properly"), blank/black screenshots (15KB vs 31KB for normal sites), empty snapshots (0 chars, 0 refs), HTML returns minimal error page (124 chars).
+
+**Root Cause**: LinkedIn detects headless automation even with valid cookies. Serves challenge pages that don't render in Camofox.
+
+**Workarounds** (limited success):
+- Use `userId="hermes"` (matches `CAMOFOX_USER_ID` env) instead of `"fabio"`
+- Navigate to `/` first, then `/feed/` after cookies set
+- Set realistic viewport: `POST /tabs/{tabId}/viewport {"width": 1920, "height": 1080}`
+- Add human-like delays (30-60s) between actions
+
+**Reality Check**: For LinkedIn specifically, consider alternatives:
+- LinkedIn Official API (partner approval required)
+- Specialized scrapers with advanced evasion (linkedin-scraper, PhantomBuster, Proxycurl)
+- Manual export + programmatic processing
+
+### Empty Snapshots / Black Screenshots
+**Diagnosis**: If `snapshot.totalChars === 0` and screenshot is ~15KB solid color:
+1. Check tab stats: `GET /tabs/{tabId}/stats?userId=X` -> `refsCount: 0`
+2. Evaluate JS: `document.documentElement.outerHTML.length` -> if ~124, it's an error page
+3. Try `wait` for specific content selectors before snapshot
+4. Verify cookies imported for correct `userId`
+
+### Cookie Import Format
+Camofox expects cookies **without leading dot** on domain:
+```json
+{"name": "li_at", "value": "...", "domain": "linkedin.com", "path": "/", "expires": 1234567890, "httpOnly": true, "secure": true, "sameSite": "Lax"}
+```
+NOT `.linkedin.com` (strip leading dot from Netscape format).
+
+### Session Persistence
+- Use consistent `sessionKey` for tab groups that share cookies
+- `userId` must match cookie import target
+- Default `userId` from env: `CAMOFOX_USER_ID=hermes`, `CAMOFOX_SESSION_KEY=hermes-session`
+
+## References
+
+- `references/linkedin-anti-bot.md` — Detailed LinkedIn blocking behavior and evidence
+- `references/api-endpoints.md` — Full OpenAPI spec summary
+- `references/cookie-format.md` — Netscape to Camofox conversion rules
