@@ -26,9 +26,9 @@ services:
     image: ghcr.io/jo-inc/camofox-browser:latest
     container_name: camofox
     restart: unless-stopped
-    ports:
-      # - 6080:6080
-      # - 5901:5900
+    #ports:
+    #  - 6080:6080
+    #  - 5901:5900
     expose:
       - 9377
     env_file: data/camofox/.env
