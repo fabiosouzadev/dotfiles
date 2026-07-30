@@ -237,9 +237,11 @@ mcp_servers:
     env:
       NOTION_TOKEN: ${NOTION_TOKEN}
   Composio:
-    transport: http
     url: https://connect.composio.dev/mcp
-    headers: '{ "x-consumer-api-key": ${COMPOSIO_API_KEY} }'
+    headers:
+      x-consumer-api-key: ${COMPOSIO_API_KEY}
+    connect_timeout: 60
+    timeout: 180
 
 # ── Security ──────────────────────────────────────────────────────────
 # Secret redaction is ON by default — strings that look like API keys,
