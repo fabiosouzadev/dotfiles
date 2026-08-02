@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""
+Score job against candidate profile.
+Uses LLM (via OmniRoute/OpenRouter) for intelligent scoring.
+"""
+
+import sys
+import json
+import os
+from pathlib import Path
+
+# Add scripts dir to path
+SCRIPTS_DIR = Path(__file__).parent
+sys.path.insert(0, str(SCRIPTS_DIR))
+
+from extract_content import extract_keywords, find_email_in_text
+
+# Configuração de scoring
+SCORING_CONFIG = {
+    "weights": {
+        "stack_match": 0.30,
+        "contract_remote": 0.25,
+        "seniority": 0.20,
+        "fintech": 0.15,
+        "ai_llm": 0.10
+    },
+    "thresholds": {
+        "auto_apply": 70,
+        "ask_user": 50,
+        "archive": 30
+    }
+}
+
+# Perfil do candidato (hardcoded)
+CANDIDATE_PROFILE = {
+    "name": "Fábio Souza",
+    "location": "Londrina/PR",
+    "contract_preference": "PJ/Freelance only",
+    "remote_preference": "100% remote (hybrid only Londrina)",
+    "seniority_order": ["Tech Lead", "Arquiteto", "Senior"],
+    "core_stack": ["Node.js/NestJS", "Java/Spring Boot", "Python/Django"],
+    "cloud": ["AWS", "GCP", "Azure", "Kubernetes"],
+    "domain_expertise": ["Fintech", "Payment Gateways", "PCI-DSS", "Microservices"],
+    "ai_expertise": ["LLMs", "Generative AI", "Langfuse", "Code Agents"],
+    "cv_path": "/opt/data/home/documents/curriculo_atualizado_ats.pdf",
+    "linkedin": "https://www.linkedin.com/in/fabiosouzadev/",
+    "email": "fabiovanderlei.developer@gmail.com"
+}
+
+
+def build_scoring_prompt(job_content: str) -> str:
+    """Constrói prompt para LLM fazer scoring."""
+    
+    profile = CANDIDATE_PROFILE
+    weights = SCORING_CONFIG["weights"]
+    
+    prompt = f"""Você é um especialista em triagem de vagas para um perfil Tech Lead/Arquiteto Sênior.
+
+## PERFIL DO CANDIDATO
+- **Nome**: {profile['name']}
+- **Localização**: {profile['location']}
+- **Contrato**: {profile['contract_preference']}
+- **Remoto**: {profile['remote_preference']}
+- **Senioridade (ordem de preferência)**: {', '.join(profile['seniority_order'])}
+- **Stack Core**: {', '.join(profile['core_stack'])}
+- **Cloud/Infra**: {', '.join(profile['cloud'])}
+- **Domínio**: {', '.join(profile['domain_expertise'])}
+- **IA**: {', '.join(profile['ai_expertise'])}
+
+## VAGA PARA ANALISAR
+{job_content[:8000]}
+
+## CRITÉRIOS DE SCORING (Pesos)
+1. **Stack Match (30%)**: Node.js/NestJS, Java/Spring Boot, Python/Django. ≥2 stacks = 30pts, 1 stack = 15pts
+2. **Contrato + Remoto (25%)**: PJ + 100% remoto = 25pts, PJ + híbrido Londrina = 20pts, CLT remoto = 10pts
+3. **Senioridade (20%)**: Tech Lead = 20pts, Arquiteto = 18pts, Sênior = 15pts, Pleno = 5pts
+4. **Fintech/Pagamentos/PCI-DSS (15%)**: Menção direta = 15pts, financeiro/banco = 10pts
+5. **IA/LLMs/Generative AI (10%)**: LLMs/Langfuse/agentes = 10pts, AI/ML genérico = 5pts
+
+## REGRAS RÍGIDAS (se violar, score = 0)
+- CLT presencial fora de Londrina
+- Júnior/Pleno sem menção de liderança técnica
+
+## SAÍDA OBRIGATÓRIA (JSON válido apenas)
+{{
+  "score": <0-100 inteiro>,
+  "details": {{
+    "stack_match": <0-30>,
+    "contract_remote": <0-25>,
+    "seniority": <0-20>,
+    "fintech": <0-15>,
+    "ai_llm": <0-10>
+  }},
+  "reasoning": "Explicação breve em português",
+  "matched_keywords": {{
+    "stack": [],
+    "cloud": [],
+    "domain": [],
+    "ai": [],
+    "seniority": "",
+    "contract": "",
+    "remote": false
+  }},
+  "email_found": null,
+  "red_flags": []
+}}
+"""
+    return prompt
+
+
+def score_job(job_content: str) -> dict:
+    """
+    Faz scoring da vaga.
+    Em produção, chama LLM via OmniRoute. Aqui retorna mock para desenvolvimento.
+    """
+    
+    keywords = extract_keywords(job_content)
+    email = find_email_in_text(job_content)
+    
+    # Scoring heurístico baseado em keywords
+    score = 0
+    details = {
+        "stack_match": 0,
+        "contract_remote": 0,
+        "seniority": 0,
+        "fintech": 0,
+        "ai_llm": 0
+    }
+    
+    # 1. Stack Match (30 pts)
+    core_stacks = ["node.js", "nestjs", "java", "spring boot", "python", "django"]
+    matched_stacks = [s for s in core_stacks if s in [k.lower() for k in keywords['stack']]]
+    if len(matched_stacks) >= 2:
+        details["stack_match"] = 30
+    elif len(matched_stacks) == 1:
+        details["stack_match"] = 15
+    
+    # 2. Contrato + Remoto (25 pts)
+    if keywords['contract'] == 'pj' and keywords['remote']:
+        details["contract_remote"] = 25
+    elif keywords['contract'] == 'pj' and not keywords['remote']:
+        details["contract_remote"] = 20  # Híbrido (assumir Londrina se não especificado)
+    elif keywords['contract'] == 'clt' and keywords['remote']:
+        details["contract_remote"] = 10
+    
+    # 3. Senioridade (20 pts)
+    if keywords['seniority'] == 'tech_lead':
+        details["seniority"] = 20
+    elif keywords['seniority'] == 'architect':
+        details["seniority"] = 18
+    elif keywords['seniority'] == 'senior':
+        details["seniority"] = 15
+    elif keywords['seniority'] == 'pleno':
+        details["seniority"] = 5
+    
+    # 4. Fintech (15 pts)
+    if keywords['domain']:
+        details["fintech"] = 15
+    elif any(x in job_content.lower() for x in ['banco', 'banking', 'financeiro', 'finance']):
+        details["fintech"] = 10
+    
+    # 5. IA/LLMs (10 pts)
+    if keywords['ai']:
+        details["ai_llm"] = 10
+    elif any(x in job_content.lower() for x in ['ai', 'ml', 'machine learning', 'inteligência artificial']):
+        details["ai_llm"] = 5
+    
+    # Penalidades
+    red_flags = []
+    if keywords['contract'] == 'clt' and not keywords['remote']:
+        if 'londrina' not in job_content.lower():
+            red_flags.append("CLT presencial fora de Londrina")
+            score = 0  # Hard requirement
+    
+    if keywords['seniority'] in ['junior', 'pleno'] and keywords['seniority'] not in ['tech_lead', 'architect']:
+        red_flags.append("Júnior/Pleno sem liderança")
+        # Não zera, mas penaliza
+    
+    score = sum(details.values())
+    
+    # Bonus por empresa conhecida, salário público, recrutador direto
+    # (implementar depois se necessário)
+    
+    return {
+        "score": min(score, 100),
+        "details": details,
+        "reasoning": f"Stack: {matched_stacks}, Contrato: {keywords['contract']}, Remoto: {keywords['remote']}, Senioridade: {keywords['seniority']}, Fintech: {bool(keywords['domain'])}, IA: {bool(keywords['ai'])}",
+        "matched_keywords": keywords,
+        "email_found": email,
+        "red_flags": red_flags
+    }
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        # Ler conteúdo de arquivo ou stdin
+        if sys.argv[1] == '-':
+            content = sys.stdin.read()
+        else:
+            with open(sys.argv[1], 'r') as f:
+                content = f.read()
+        result = score_job(content)
+        print(json.dumps(result, ensure_ascii=False, indent=2))

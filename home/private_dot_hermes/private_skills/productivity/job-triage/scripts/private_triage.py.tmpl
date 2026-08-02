@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+"""
+Job Triage Main Script
+Receives a job URL, extracts content, scores against profile, takes action.
+"""
+
+import sys
+import os
+import json
+import subprocess
+from pathlib import Path
+
+# Add skill directory to path
+SKILL_DIR = Path(__file__).parent.parent
+SCRIPTS_DIR = Path(__file__).parent
+sys.path.insert(0, str(SCRIPTS_DIR))
+
+from extract_content import extract_job_content, extract_keywords, find_email_in_text
+from score_vaga import score_job, CANDIDATE_PROFILE
+
+def run_shell_script(script_name: str, args: list) -> tuple[bool, str]:
+    """Executa script shell e retorna (sucesso, output)."""
+    script_path = SCRIPTS_DIR / script_name
+    if not script_path.exists():
+        return False, f"Script não encontrado: {script_path}"
+    
+    cmd = [str(script_path)] + args
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120, env={**os.environ})
+        return result.returncode == 0, result.stdout + result.stderr
+    except subprocess.TimeoutExpired:
+        return False, "Timeout"
+    except Exception as e:
+        return False, str(e)
+
+def send_application_email(job_data: dict, email: str) -> bool:
+    """Envia candidatura via script shell send-application.sh."""
+    title = job_data.get('title', 'Vaga')
+    company = job_data.get('company', 'Empresa')
+    url = job_data.get('url', '')
+    score = job_data.get('score', 0)
+    cv_path = CANDIDATE_PROFILE['cv_path']
+    linkedin = CANDIDATE_PROFILE['linkedin']
+    
+    success, output = run_shell_script("send-application.sh", [
+        email, title, company, url, str(score), cv_path, linkedin
+    ])
+    print(output)
+    return success
+
+def create_notion_card(job_data: dict, status: str, etapa: str) -> bool:
+    """Cria card no Notion via script shell create-notion-card.sh."""
+    # Preparar JSON para o script
+    json_data = json.dumps(job_data, ensure_ascii=False)
+    success, output = run_shell_script("create-notion-card.sh", [json_data, status, etapa])
+    print(output)
+    return success
+
+def send_telegram_card(job_data: dict, action: str) -> bool:
+    """Envia card visual para Telegram (placeholder - implementar depois)."""
+    # TODO: Implementar telegram_card.py ou chamar API do Telegram
+    # Por enquanto, apenas loga o card
+    title = job_data.get('title', 'Vaga')
+    company = job_data.get('company', 'Empresa')
+    score = job_data.get('score', 0)
+    url = job_data.get('url', '')
+    email = job_data.get('email', 'Não encontrado')
+    
+    card = f"""🎯 **Triagem de Vaga** ({action})
+**{title}** — {company}
+📊 Score: **{score}/100**
+🔗 {url}
+📧 {email}
+"""
+    print("📱 [TELEGRAM CARD]")
+    print(card)
+    # Salvar para envio manual via MEDIA:
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False, prefix='job_card_') as f:
+        f.write(card)
+        print(f"   Card salvo em: {f.name}")
+    return True
+
+def main():
+    if len(sys.argv) < 2:
+        print("Uso: triage.py <job_url>")
+        sys.exit(1)
+    
+    job_url = sys.argv[1]
+    print(f"🔍 Analisando vaga: {job_url}")
+    
+    # 1. Extrair conteúdo da vaga
+    print("📄 Extraindo conteúdo...")
+    job_data = extract_job_content(job_url)
+    
+    if not job_data or not job_data.get('content'):
+        print("❌ Falha ao extrair conteúdo da vaga")
+        # Tentar usar URL como conteúdo bruto para scoring heurístico
+        job_data = {'url': job_url, 'content': job_url, 'source': 'url_only'}
+    
+    # Enriquecer com keywords e email
+    keywords = extract_keywords(job_data.get('content', ''))
+    job_data['keywords'] = keywords
+    job_data['email'] = find_email_in_text(job_data.get('content', ''))
+    job_data['tags'] = keywords.get('stack', []) + keywords.get('cloud', []) + keywords.get('domain', []) + keywords.get('ai', [])
+    job_data['modalidade'] = []
+    if keywords.get('contract') == 'pj':
+        job_data['modalidade'].append('PJ')
+    if keywords.get('remote'):
+        job_data['modalidade'].append('Remoto')
+    elif keywords.get('contract') == 'clt':
+        job_data['modalidade'].append('CLT')
+    job_data['title'] = job_data.get('title', 'Vaga do LinkedIn')
+    job_data['company'] = job_data.get('company', 'Empresa não identificada')
+    
+    print(f"✅ Conteúdo processado ({len(job_data.get('content', ''))} chars)")
+    
+    # 2. Scoring
+    print("🧮 Calculando score...")
+    score_result = score_job(job_data.get('content', ''))
+    score = score_result['score']
+    details = score_result['details']
+    
+    print(f"📊 Score: {score}/100")
+    print(f"   Detalhes: {json.dumps(details, ensure_ascii=False, indent=2)}")
+    
+    # 3. Decisão baseada no score
+    job_data['score'] = score
+    job_data['score_details'] = details
+    job_data['url'] = job_url
+    
+    if score >= 70:
+        # Alta prioridade - tentar auto-candidatura
+        print("🎯 Score alto (≥70) - tentando candidatura automática...")
+        
+        email = job_data.get('email')
+        if email:
+            print(f"📧 Email encontrado: {email}")
+            success = send_application_email(job_data, email)
+            if success:
+                print("✅ Candidatura enviada com sucesso!")
+                create_notion_card(job_data, status="Enviado", etapa="Candidatura enviada")
+            else:
+                print("⚠️ Falha no envio - criando card Notion para ação manual")
+                create_notion_card(job_data, status="Pra enviar", etapa="Preparar candidatura")
+        else:
+            print("📭 Sem email na descrição - criando card Notion para candidatura manual")
+            create_notion_card(job_data, status="Pra enviar", etapa="Preparar candidatura")
+        
+        send_telegram_card(job_data, action="auto_applied" if email else "needs_manual")
+        
+    elif score >= 50:
+        # Média prioridade - Notion + Telegram para decisão
+        print("🤔 Score médio (50-69) - criando card para análise")
+        create_notion_card(job_data, status="Aguardando retorno", etapa="Aguardando análise")
+        send_telegram_card(job_data, action="review_needed")
+        
+    else:
+        # Baixa prioridade - apenas log/arquivar
+        print(f"📉 Score baixo ({score}) - arquivando")
+        create_notion_card(job_data, status="Não aderente", etapa="Não aderente")
+
+if __name__ == "__main__":
+    main()
