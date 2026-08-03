@@ -79,8 +79,8 @@ features:
 
 # 3. DIRECTORY PATHS (consolidated for templates)
 dirs:
-  local: "{{ .chezmoi.homeDir }}/.local"
-  bin: "{{ .chezmoi.homeDir }}/.local/bin"
+  local: "\{\{ .chezmoi.homeDir \}\}/.local"
+  bin: "\{\{ .chezmoi.homeDir \}\}/.local/bin"
 
 # 4. CONSOLIDATED DATA OUTPUT (available as `.settings`, `.features`, `.dirs` in all templates)
 data:
@@ -154,22 +154,22 @@ Used by `run_onchange_after_605-clone-my-repos.sh.tmpl` to bootstrap workspaces.
 **Most powerful pattern in the repo**. Uses template logic to exclude entire directories per OS/profile:
 
 ```go
-{{- if not (.settings.osid | lower | contains "linux" ) }}
+\{\{- if not (.settings.osid | lower | contains "linux" ) \}\}
 .chezmoiscripts/linux/**
 .chezmoidata/linux/**
 .mozilla/**
 .config/systemd/**
-{{- end }}
+\{\{- end \}\}
 
-{{- if .settings.vps }}
+\{\{- if .settings.vps \}\}
 # Window managers - not needed on VPS
 .chezmoiscripts/linux/run_once_before_216-install-wm.sh.tmpl
 # Fonts, drivers, virtualization, Nix, VPNs, desktop configs...
-{{- end }}
+\{\{- end \}\}
 
-{{- if (not .settings.vps) }}
+\{\{- if (not .settings.vps) \}\}
 .chezmoiscripts/vps/**
-{{- end }}
+\{\{- end \}\}
 ```
 
 **Result**: VPS gets minimal bootstrap (no WM, no fonts, no GUI apps). Work laptop gets Zup configs. Personal gets everything.
@@ -178,17 +178,17 @@ Used by `run_onchange_after_605-clone-my-repos.sh.tmpl` to bootstrap workspaces.
 
 | Template | Purpose | Usage |
 |----------|---------|-------|
-| `script_is_not_ephemeral` | Exit 0 if `.settings.ephemeral` | `{{ template "common/script_is_not_ephemeral" . }}` |
-| `script_is_not_headless` | Exit 0 if `.settings.headless` | `{{ template "common/script_is_not_headless" . }}` |
+| `script_is_not_ephemeral` | Exit 0 if `.settings.ephemeral` | `\{\{ template "common/script_is_not_ephemeral" . \}\}` |
+| `script_is_not_headless` | Exit 0 if `.settings.headless` | `\{\{ template "common/script_is_not_headless" . \}\}` |
 | `script_eval_mise` | `eval "$(mise activate bash)"` | Ensures mise shims in PATH |
 | `script_helper` | `info()`, `warn()`, `success()` functions | Consistent logging |
 | `script_validate_completions_path` | Creates `~/.local/share/zsh/site-functions/` | For completion generation |
 
 **Pattern**: All scripts start with:
 ```bash
-{{ template "common/script_is_not_ephemeral" . }}
-{{ template "common/script_eval_mise" . }}
-{{ template "common/script_helper" . }}
+\{\{ template "common/script_is_not_ephemeral" . \}\}
+\{\{ template "common/script_eval_mise" . \}\}
+\{\{ template "common/script_helper" . \}\}
 ```
 
 ---
@@ -216,23 +216,23 @@ run_onchange_after_XXX-*.sh.tmpl  # Re-runs when template changes (configs, cron
 ```bash
 #!/usr/bin/env bash
 
-{{ template "common/script_is_not_ephemeral" . }}
-{{ template "common/script_eval_mise" . }}
-{{ template "common/script_helper" . }}
+\{\{ template "common/script_is_not_ephemeral" . \}\}
+\{\{ template "common/script_eval_mise" . \}\}
+\{\{ template "common/script_helper" . \}\}
 
 info ">>>>>> 🤖 Installing AI Tools 🤖 <<<<<<<"
 
-{{- range .ai_tools.npm }}
-{{- $enabled := .features.ai.coding_assistants }}
-{{- if and $enabled (not .block_on_workplace) }}
-info "Installing {{ .name }} (NPM)"
-{{ .env | default "" }} npm install -g {{ .package }}
-{{- if .completions_cmd }}
-{{ template "common/script_validate_completions_path" $ }}
-{{ .completions_cmd }} > "$HOME/.local/share/zsh/site-functions/_{{ .name }}"
-{{- end }}
-{{- end }}
-{{- end }}
+\{\{- range .ai_tools.npm \}\}
+\{\{- $enabled := .features.ai.coding_assistants \}\}
+\{\{- if and $enabled (not .block_on_workplace) \}\}
+info "Installing \{\{ .name \}\} (NPM)"
+\{\{ .env | default "" \}\} npm install -g \{\{ .package \}\}
+\{\{- if .completions_cmd \}\}
+\{\{ template "common/script_validate_completions_path" $ \}\}
+\{\{ .completions_cmd \}\} > "$HOME/.local/share/zsh/site-functions/_\{\{ .name \}\}"
+\{\{- end \}\}
+\{\{- end \}\}
+\{\{- end \}\}
 
 success ">>> 🤖 AI Tools Installed 🤖"
 ```
@@ -446,12 +446,12 @@ ls -la home/.chezmoiexternals/
 | Pitfall | Symptom | Root Cause | Fix |
 |---------|---------|------------|-----|
 | **Script runs in CI** | `apt install` fails in GitHub Actions | Missing `script_is_not_ephemeral` guard | Add guard at top of script |
-| **GUI app installed on VPS** | i3/niri configs appear on server | Missing VPS filter in `.chezmoiignore.tmpl` | Add `{{- if .settings.vps }}` exclusions |
+| **GUI app installed on VPS** | i3/niri configs appear on server | Missing VPS filter in `.chezmoiignore.tmpl` | Add `\{\{- if .settings.vps \}\}` exclusions |
 | **Secret not decrypting** | `chezmoi apply` fails on private file | Age key mismatch (fork without re-encrypt) | Run `chezmoi re-add --encrypt` with new key |
 | **Template variable undefined** | `template: ...: nil pointer evaluating .settings.vps` | Variable not in `data:` output of `.chezmoi.yaml.tmpl` | Add to `$data` dict in template |
 | **Script runs twice** | Package installed, then re-installed on `chezmoi apply` | Missing idempotency check in script | Add `command -v tool && exit 0` at start |
 | **Wrong profile on VPS** | Work configs applied to VPS | VPS detection heuristic failed | Set `CHEZMOI_VPS=true` env var explicitly |
-| **Completion not generated** | Zsh complains missing `_tool` completion | `script_validate_completions_path` not templated | Add `{{ template "common/script_validate_completions_path" $ }}` |
+| **Completion not generated** | Zsh complains missing `_tool` completion | `script_validate_completions_path` not templated | Add `\{\{ template "common/script_validate_completions_path" $ \}\}` |
 
 ---
 
