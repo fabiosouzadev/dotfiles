@@ -47,6 +47,69 @@ CANDIDATE_PROFILE = {
     "email": "fabiovanderlei.developer@gmail.com"
 }
 
+"""
+Função Ajustada com escapes
+"""
+
+# def build_scoring_prompt(job_content: str) -> str:
+#     """Constrói prompt para LLM fazer scoring."""
+    
+#     profile = CANDIDATE_PROFILE
+#     weights = SCORING_CONFIG["weights"]
+    
+#     prompt = f"""Você é um especialista em triagem de vagas para um perfil Tech Lead/Arquiteto Sênior.
+
+# ## PERFIL DO CANDIDATO
+# - **Nome**: {profile['name']}
+# - **Localização**: {profile['location']}
+# - **Contrato**: {profile['contract_preference']}
+# - **Remoto**: {profile['remote_preference']}
+# - **Senioridade (ordem de preferência)**: {', '.join(profile['seniority_order'])}
+# - **Stack Core**: {', '.join(profile['core_stack'])}
+# - **Cloud/Infra**: {', '.join(profile['cloud'])}
+# - **Domínio**: {', '.join(profile['domain_expertise'])}
+# - **IA**: {', '.join(profile['ai_expertise'])}
+
+# ## VAGA PARA ANALISAR
+# {job_content[:8000]}
+
+# ## CRITÉRIOS DE SCORING (Pesos)
+# 1. **Stack Match (30%)**: Node.js/NestJS, Java/Spring Boot, Python/Django. ≥2 stacks = 30pts, 1 stack = 15pts
+# 2. **Contrato + Remoto (25%)**: PJ + 100% remoto = 25pts, PJ + híbrido Londrina = 20pts, CLT remoto = 10pts
+# 3. **Senioridade (20%)**: Tech Lead = 20pts, Arquiteto = 18pts, Sênior = 15pts, Pleno = 5pts
+# 4. **Fintech/Pagamentos/PCI-DSS (15%)**: Menção direta = 15pts, financeiro/banco = 10pts
+# 5. **IA/LLMs/Generative AI (10%)**: LLMs/Langfuse/agentes = 10pts, AI/ML genérico = 5pts
+
+# ## REGRAS RÍGIDAS (se violar, score = 0)
+# - CLT presencial fora de Londrina
+# - Júnior/Pleno sem menção de liderança técnica
+
+# ## SAÍDA OBRIGATÓRIA (JSON válido apenas)
+# {{ "{{" }}
+#   "score": <0-100 inteiro>,
+#   "details": {{ "{{" }}
+#     "stack_match": <0-30>,
+#     "contract_remote": <0-25>,
+#     "seniority": <0-20>,
+#     "fintech": <0-15>,
+#     "ai_llm": <0-10>
+#   {{ "}}" }},
+#   "reasoning": "Explicação breve em português",
+#   "matched_keywords": {{ "{{" }}
+#     "stack": [],
+#     "cloud": [],
+#     "domain": [],
+#     "ai": [],
+#     "seniority": "",
+#     "contract": "",
+#     "remote": false
+#   {{ "}}" }},
+#   "email_found": null,
+#   "red_flags": []
+# {{ "}}" }}
+# """
+#     return prompt
+
 
 def build_scoring_prompt(job_content: str) -> str:
     """Constrói prompt para LLM fazer scoring."""
