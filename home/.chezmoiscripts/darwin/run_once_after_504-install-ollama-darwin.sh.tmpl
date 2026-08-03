@@ -4,11 +4,11 @@
 {{- template "darwin/script_darwin_only" . -}}
 {{ template "common/script_is_not_ephemeral" . }}
 
-{{- if .features.ai.ollama.install }}
+{{- if .features.ollama.install }}
 
 info ">>> 🐑 Installing Ollama on macOS 🐑"
 
-{{- if eq .features.ai.ollama.version "latest" }}
+{{- if eq .features.ollama.version "latest" }}
 OLLAMA_VERSION=$(curl -s https://api.github.com/repos/ollama/ollama/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 {{- else }}
 OLLAMA_VERSION="{{ .features.ai.ollama.version }}"
