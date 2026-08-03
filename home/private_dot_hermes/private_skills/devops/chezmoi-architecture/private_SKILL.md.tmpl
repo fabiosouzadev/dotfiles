@@ -1,0 +1,518 @@
+---
+name: chezmoi-architecture
+description: "Analyze chezmoi dotfiles architecture for multi-OS setups."
+version: 1.0.0
+author: Hermes Agent
+license: MIT
+platforms: [linux, macos, windows]
+metadata:
+  hermes:
+    tags: [chezmoi, dotfiles, architecture, bootstrap, devops, templating, secrets]
+    category: devops
+requires_toolsets: [terminal, file]
+supersedes: []
+---
+
+# ChezMoi Architecture Skill
+
+**Trigger**: Use when you need to understand, explain, or debug a chezmoi-managed dotfiles repository — especially multi-profile, multi-OS setups with AI integration.
+
+**Goal**: Build permanent, reusable knowledge of chezmoi's architecture as applied in a real-world complex repo (like `fabiosouzadev/dotfiles`), enabling mentorship, troubleshooting, and evolution.
+
+---
+
+## 1. Core Concepts (Mental Model)
+
+### ChezMoi as a Pipeline
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌────────────────────┐     ┌─────────────────┐
+│  SOURCE STATE   │────▶│  TEMPLATE ENGINE │────▶│  EXECUTION LAYER   │────▶│  DESTINATION    │
+│  (home/)        │     │  (Go text/tmpl)  │     │  (scripts)         │     │  ($HOME)        │
+└─────────────────┘     └──────────────────┘     └────────────────────┘     └─────────────────┘
+        │                       │                       │                       │
+        ▼                       ▼                       ▼                       ▼
+  - .chezmoi.yaml.tmpl    - *.tmpl files         - run_once_before_*     - dotfiles
+  - .chezmoidata/         - .chezmoiignore.tmpl  - run_once_after_*      - .config/
+  - .chezmoiscripts/      - .chezmoitemplates/   - run_onchange_after_*  - .local/bin/
+  - .chezmoiexternals/    - encrypted_*.asc      - guards (ephemeral,    - systemd/
+  - private_*/            - data merging         - headless)             - secrets
+```
+
+**Key Insight**: ChezMoi is **not** a file copier. It's a **data-driven template engine with an ordered execution layer** that happens to write files to `$HOME`.
+
+### The Three Layers
+
+| Layer | Responsibility | Key Files |
+|-------|----------------|-----------|
+| **Data** | Declare *what* varies per machine/profile | `.chezmoi.yaml.tmpl`, `.chezmoidata/**`, `repos.json` |
+| **Template** | Transform data → destination files | `home/**/*.tmpl`, `.chezmoiignore.tmpl`, `.chezmoitemplates/**` |
+| **Execution** | Perform side-effects (install, configure, start services) | `.chezmoiscripts/**/*.tmpl` |
+
+---
+
+## 2. Data Layer Deep Dive
+
+### `.chezmoi.yaml.tmpl` — The Brain
+
+This single template **generates the final `chezmoi.yaml` config** AND **defines all variables available to every other template**. It runs first, before anything else.
+
+#### Critical Sections
+
+```yaml
+# 1. ENVIRONMENT DETECTING (runs at template time)
+$ci := or (eq (env "CI") "true") (env "GITHUB_ACTIONS" | not | not) ...
+$ephemeral := or $ci $codespaces $devContainer $gitpod $replit
+$headless := or (not $interactiveTTY) (not $guiAvailable) $wsl $inContainer $sshSession $termux
+$isVps := ... # hostname "instance-*", user "ubuntu", SSH, no GUI
+$profile := env "CHEZMOI_PROFILE" | default ($ismanaged | ternary "work" "personal")
+
+# 2. FEATURE FLAGS (hierarchical, overridden by data files)
+features:
+  ai:
+    coding_assistants: true
+    hermes:
+      dashboard:
+        enabled: true
+        port: 9119
+        domain: "hermes.fabiosouzadev.duckdns.org"
+
+# 3. DIRECTORY PATHS (consolidated for templates)
+dirs:
+  local: "{{ .chezmoi.homeDir }}/.local"
+  bin: "{{ .chezmoi.homeDir }}/.local/bin"
+
+# 4. CONSOLIDATED DATA OUTPUT (available as `.settings`, `.features`, `.dirs` in all templates)
+data:
+  settings: { vps: $isVps, ephemeral: $ephemeral, headless: $headless, profile: $profile, ... }
+  features: $features
+  dirs: $dirs
+```
+
+#### Variables Available Everywhere
+
+| Namespace | Contains | Example |
+|-----------|----------|---------|
+| `.settings` | Environment detection results | `.settings.vps`, `.settings.headless`, `.settings.profile` |
+| `.features` | Feature flags hierarchy | `.features.ai.hermes.dashboard.enabled` |
+| `.dirs` | Computed paths | `.dirs.bin`, `.dirs.workspaces.zup` |
+| `.chezmoi` | Built-in chezmoi vars | `.chezmoi.os`, `.chezmoi.hostname`, `.chezmoi.username` |
+
+### `.chezmoidata/` — Platform-Specific Data
+
+```
+.chezmoidata/
+├── darwin/           # macOS packages, configs
+├── linux/            # Linux distro packages (apt, pacman)
+├── windows/          # Windows packages (winget, scoop)
+├── termux/           # Android/Termux packages
+├── vps/              # VPS-specific features (features.yaml)
+├── ai_tools.yaml     # AI tools definitions (npm + curl installers)
+├── omniroute.yaml    # OmniRoute config
+├── ollama.yaml       # Ollama models
+├── idea.yaml         # IntelliJ IDEA versions
+└── repos.json        # Git repos to clone (personal/work/other)
+```
+
+**Pattern**: Data is **declarative YAML**, logic lives in scripts. This enables:
+- Easy auditing (what packages per OS?)
+- CI validation (schema check YAML)
+- Platform-specific overrides without template logic
+
+### `repos.json` — Workspace Declaration
+
+```json
+{
+  "personal": [{"repo": "git@github.com:user/repo.git", "path": "my-project"}],
+  "work": {
+    "workplaces": {
+      "Zup": [{"repo": "git@gitlab.zup.com.br:team/project.git", "path": "project"}]
+    }
+  },
+  "other": [{"repo": "https://github.com/other/repo.git", "path": "forks/other"}]
+}
+```
+
+Used by `run_onchange_after_605-clone-my-repos.sh.tmpl` to bootstrap workspaces.
+
+---
+
+## 3. Template Layer Deep Dive
+
+### File Types & Prefixes
+
+| Prefix | Meaning | Example |
+|--------|---------|---------|
+| `dot_` | Becomes `.$NAME` in `$HOME` | `dot_zshrc.tmpl` → `~/.zshrc` |
+| `private_` | Encrypted with `age` (chezmoi managed) | `private_dot_ssh/` → `~/.ssh/` (decrypted) |
+| `encrypted_*` | Legacy GPG encryption (sourced in Zsh) | `encrypted_300-ai-api-keys.zsh.asc` |
+| `.chezmoi*` | ChezMoi config files | `.chezmoi.yaml.tmpl`, `.chezmoiignore.tmpl` |
+| `*` (no prefix) | Literal copy (if not template) | `README.md` |
+
+### `.chezmoiignore.tmpl` — Conditional Exclusion
+
+**Most powerful pattern in the repo**. Uses template logic to exclude entire directories per OS/profile:
+
+```go
+{{- if not (.settings.osid | lower | contains "linux" ) }}
+.chezmoiscripts/linux/**
+.chezmoidata/linux/**
+.mozilla/**
+.config/systemd/**
+{{- end }}
+
+{{- if .settings.vps }}
+# Window managers - not needed on VPS
+.chezmoiscripts/linux/run_once_before_216-install-wm.sh.tmpl
+# Fonts, drivers, virtualization, Nix, VPNs, desktop configs...
+{{- end }}
+
+{{- if (not .settings.vps) }}
+.chezmoiscripts/vps/**
+{{- end }}
+```
+
+**Result**: VPS gets minimal bootstrap (no WM, no fonts, no GUI apps). Work laptop gets Zup configs. Personal gets everything.
+
+### `.chezmoitemplates/common/` — Reusable Guards
+
+| Template | Purpose | Usage |
+|----------|---------|-------|
+| `script_is_not_ephemeral` | Exit 0 if `.settings.ephemeral` | `{{ template "common/script_is_not_ephemeral" . }}` |
+| `script_is_not_headless` | Exit 0 if `.settings.headless` | `{{ template "common/script_is_not_headless" . }}` |
+| `script_eval_mise` | `eval "$(mise activate bash)"` | Ensures mise shims in PATH |
+| `script_helper` | `info()`, `warn()`, `success()` functions | Consistent logging |
+| `script_validate_completions_path` | Creates `~/.local/share/zsh/site-functions/` | For completion generation |
+
+**Pattern**: All scripts start with:
+```bash
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "common/script_eval_mise" . }}
+{{ template "common/script_helper" . }}
+```
+
+---
+
+## 4. Execution Layer — Script Lifecycle
+
+### Naming Convention = Execution Order
+
+```
+run_once_before_XXX-*.sh.tmpl     # Pre-install (drivers, kernels, repos) — runs ONCE
+run_once_after_XXX-*.sh.tmpl      # Post-install (tools, configs) — runs ONCE
+run_onchange_after_XXX-*.sh.tmpl  # Re-runs when template changes (configs, cron jobs)
+```
+
+**Numeric prefixes control order**:
+- `100-199`: System prep (kernels, drivers, package repos)
+- `200-299`: Desktop/WL config (WM, bluetooth, keyboard, Xorg)
+- `300-399`: Language runtimes (Nix, asdf, mise)
+- `400-499`: Editors/IDEs
+- `500-599`: CLI tools & AI (mise, lazygit, glab, hermes, omniroute, coding-orchestrator)
+- `600+`: Onchange (repo cloning, cron deployment, sync)
+
+### Script Anatomy (Template)
+
+```bash
+#!/usr/bin/env bash
+
+{{ template "common/script_is_not_ephemeral" . }}
+{{ template "common/script_eval_mise" . }}
+{{ template "common/script_helper" . }}
+
+info ">>>>>> 🤖 Installing AI Tools 🤖 <<<<<<<"
+
+{{- range .ai_tools.npm }}
+{{- $enabled := .features.ai.coding_assistants }}
+{{- if and $enabled (not .block_on_workplace) }}
+info "Installing {{ .name }} (NPM)"
+{{ .env | default "" }} npm install -g {{ .package }}
+{{- if .completions_cmd }}
+{{ template "common/script_validate_completions_path" $ }}
+{{ .completions_cmd }} > "$HOME/.local/share/zsh/site-functions/_{{ .name }}"
+{{- end }}
+{{- end }}
+{{- end }}
+
+success ">>> 🤖 AI Tools Installed 🤖"
+```
+
+### Guards = Idempotency + Safety
+
+| Guard | Checks | Exits 0 if |
+|-------|--------|------------|
+| `script_is_not_ephemeral` | `.settings.ephemeral` | Running in CI/Codespaces/DevContainer |
+| `script_is_not_headless` | `.settings.headless` | No GUI, no TTY, SSH, container, WSL, Termux |
+
+**Why this matters**: Same script runs on laptop (interactive, GUI) AND VPS (headless, SSH) AND CI (ephemeral) — guards prevent:
+- Installing window managers on VPS
+- Running interactive prompts in CI
+- Starting GUI apps in SSH session
+
+---
+
+## 5. Multi-Profile Architecture
+
+### Profile Detection Logic (in `.chezmoi.yaml.tmpl`)
+
+```go
+// 1. Explicit override
+$profile := env "CHEZMOI_PROFILE"
+
+// 2. Workplace detection (hostname contains Zup identifier)
+$ismanaged := ($hostLower | contains "zwpe0f96cn")
+$profile = ($ismanaged | ternary "work" "personal")
+
+// 3. VPS auto-detection (Oracle Cloud ARM64)
+$isVps := or
+  (env "CHEZMOI_VPS" | not | not)
+  ($hostLower | contains "vps")
+  ($hostLower | contains "vnic")
+  (hasPrefix "instance-" $hostLower)
+  (and (eq .chezmoi.os "linux") (eq .chezmoi.username "ubuntu") $sshSession (not $guiAvailable))
+
+if $isVps { $profile = "vps" }
+```
+
+### Profile → Feature Matrix
+
+| Feature | personal | work (Zup) | vps (Oracle) |
+|---------|----------|------------|--------------|
+| Window managers (i3, niri) | ✅ | ✅ | ❌ |
+| Fonts, drivers, virtualization | ✅ | ✅ | ❌ |
+| Ollama (local LLM) | ✅ | ✅ | ❌ |
+| Tailscale VPN | ✅ | ✅ | ✅ (primary) |
+| Dockge (Docker UI) | ❌ | ❌ | ✅ |
+| Caddy reverse proxy | ❌ | ❌ | ✅ |
+| Hermes Dashboard | ❌ | ❌ | ✅ (subdomain) |
+| OmniRoute Dashboard | ❌ | ❌ | ✅ (subdomain) |
+| Coding Orchestrator (nightly) | ❌ | ❌ | ✅ |
+| Zup-specific configs (bob, VPN Instivo) | ❌ | ✅ | ❌ |
+| `sudo` available | ✅ | ❌ (managed) | ✅ |
+
+---
+
+## 6. Secret Management
+
+### Two Systems Coexist
+
+| System | Use Case | Files |
+|--------|----------|-------|
+| **age (chezmoi native)** | Modern, primary | `private_dot_ssh/`, `private_dot_hermes/`, `private_dot_config/private_systemd/`, `.chezmoi.yaml.tmpl` (recipient) |
+| **GPG (legacy)** | Encrypted Zsh snippets | `dot_zshrc.d/encrypted_*.zsh.asc` |
+
+### Age Configuration (in `.chezmoi.yaml.tmpl`)
+
+```yaml
+encryption: gpg  # chezmoi uses gpg CLI to call age
+
+gpg:
+  recipient: E691C031009FB1DAA3A25125212D516F623C5747
+  args: [--quiet]
+```
+
+**Identity file**: `~/.config/chezmoi/key.txt` (age private key)
+
+### Adding a New Secret
+
+```bash
+# 1. Place plaintext file in source
+chezmoi add --encrypt ~/.ssh/id_ed25519
+
+# 2. ChezMoi encrypts with age (using recipient pubkey)
+# 3. Stores in source as private_dot_ssh/id_ed25519 (encrypted)
+# 4. On apply: decrypts → ~/.ssh/id_ed25519 (600 perms)
+```
+
+### Fork Safety (Critical)
+
+> **NEVER fork this repo without rotating the age key.**
+
+```bash
+# On new machine / fork:
+age-keygen -o ~/.config/chezmoi/key.txt
+# Update recipient in .chezmoi.yaml.tmpl
+# Re-encrypt all secrets:
+chezmoi re-add --encrypt ~/.ssh/id_ed25519 ~/.config/chezmoi/key.txt ...
+```
+
+---
+
+## 7. AI Integration Architecture
+
+### Three Pillars (All VPS-Only)
+
+| Component | Role | Port | Domain | Auth |
+|-----------|------|------|--------|------|
+| **Hermes** | Personal assistant, skills, memory, cron | 9119 | `hermes.fabiosouzadev.duckdns.org` | Basic Auth |
+| **OmniRoute** | AI gateway (local/remote models) | 20128 | `omniroute.fabiosouzadev.duckdns.org` | Password (env) |
+| **Coding Orchestrator** | Autonomous coding agents (nightly) | — | — | — |
+
+### Bootstrap Flow (VPS)
+
+```
+chezmoi apply
+    │
+    ├─▶ run_once_after_530-install-caddy.sh.tmpl     # Reverse proxy
+    ├─▶ run_once_after_532-install-camofox.sh.tmpl   # Browser automation
+    ├─▶ run_once_after_535-install-hermes-dashboard.sh.tmpl
+    ├─▶ run_once_after_540-install-coding-orchestrator.sh.tmpl
+    ├─▶ run_once_after_531-install-agentmemory.sh.tmpl
+    └─▶ run_onchange_after_610-deploy-hermes-cron-jobs.sh.tmpl  # Cron jobs
+```
+
+### Coding Orchestrator (Nightly, 02:00 UTC)
+
+- **Triggers**: GitHub label `coding-agent`, Telegram mention, webhook, cron
+- **Agents**: Aider (default via OmniRoute), Claude Code, Codex, Gemini, OpenCode
+- **Isolation**: Git worktrees (`~/worktrees/task-<id>`)
+- **Budget**: $5/night total, $2/task max
+- **Delivery**: Telegram, Notion, GitHub PR comments
+
+---
+
+## 8. Step-by-Step: Analyzing a New ChezMoi Repo
+
+### Phase 1: Orientation (5 min)
+
+```bash
+# 1. Find source directory
+cat .chezmoiroot          # Usually "home" or "."
+
+# 2. Read the brain
+cat home/.chezmoi.yaml.tmpl | head -200
+
+# 3. List structure
+find home -type f -name "*.tmpl" | sort
+```
+
+### Phase 2: Data Flow Mapping (15 min)
+
+```bash
+# 1. Environment detection variables
+grep -n "ephemeral\|headless\|vps\|profile" home/.chezmoi.yaml.tmpl
+
+# 2. Feature flags
+grep -n "features:" home/.chezmoi.yaml.tmpl -A 50
+
+# 3. Data files
+ls -la home/.chezmoidata/
+cat home/.chezmoidata/ai_tools.yaml
+```
+
+### Phase 3: Script Inventory (10 min)
+
+```bash
+# 1. List all scripts with order
+find home/.chezmoiscripts -name "*.tmpl" | sort -V
+
+# 2. Check guards usage
+grep -r "script_is_not_ephemeral\|script_is_not_headless" home/.chezmoiscripts/
+
+# 3. Identify onchange scripts (re-run on config change)
+find home/.chezmoiscripts -name "run_onchange_*"
+```
+
+### Phase 4: Template Patterns (10 min)
+
+```bash
+# 1. Ignore patterns (what's excluded where)
+cat home/.chezmoiignore.tmpl
+
+# 2. Common templates (guards, helpers)
+ls -la home/.chezmoitemplates/common/
+
+# 3. Encrypted files
+find home -name "private_*" -o -name "encrypted_*"
+```
+
+### Phase 5: Secret & Profile Audit (5 min)
+
+```bash
+# 1. Age recipient
+grep "recipient:" home/.chezmoi.yaml.tmpl
+
+# 2. Profile detection logic
+grep -n "profile\|ismanaged\|isVps\|workplace" home/.chezmoi.yaml.tmpl
+
+# 3. External deps
+ls -la home/.chezmoiexternals/
+```
+
+---
+
+## 9. Common Pitfalls & Solutions
+
+| Pitfall | Symptom | Root Cause | Fix |
+|---------|---------|------------|-----|
+| **Script runs in CI** | `apt install` fails in GitHub Actions | Missing `script_is_not_ephemeral` guard | Add guard at top of script |
+| **GUI app installed on VPS** | i3/niri configs appear on server | Missing VPS filter in `.chezmoiignore.tmpl` | Add `{{- if .settings.vps }}` exclusions |
+| **Secret not decrypting** | `chezmoi apply` fails on private file | Age key mismatch (fork without re-encrypt) | Run `chezmoi re-add --encrypt` with new key |
+| **Template variable undefined** | `template: ...: nil pointer evaluating .settings.vps` | Variable not in `data:` output of `.chezmoi.yaml.tmpl` | Add to `$data` dict in template |
+| **Script runs twice** | Package installed, then re-installed on `chezmoi apply` | Missing idempotency check in script | Add `command -v tool && exit 0` at start |
+| **Wrong profile on VPS** | Work configs applied to VPS | VPS detection heuristic failed | Set `CHEZMOI_VPS=true` env var explicitly |
+| **Completion not generated** | Zsh complains missing `_tool` completion | `script_validate_completions_path` not templated | Add `{{ template "common/script_validate_completions_path" $ }}` |
+
+---
+
+## 10. Verification Checklist
+
+After analyzing a chezmoi repo, confirm:
+
+- [ ] **Source dir identified** (`.chezmoiroot` exists and points to correct dir)
+- [ ] **Environment detection understood** (ephemeral, headless, vps, profile logic clear)
+- [ ] **Feature flags mapped** (hierarchy, defaults, overrides per profile)
+- [ ] **Script inventory complete** (all `run_once_before/after`, `run_onchange_after` listed with order)
+- [ ] **Guards present** on every script that shouldn't run in CI/headless/VPS
+- [ ] **Ignore patterns correct** (OS-specific, VPS-specific, profile-specific exclusions)
+- [ ] **Secret strategy clear** (age recipient, GPG legacy, private_* vs encrypted_*)
+- [ ] **Data separation clean** (`.chezmoidata/` has platform data, no logic)
+- [ ] **Template composition DRY** (common guards/helpers reused, not copied)
+- [ ] **Documentation matches reality** (README, ARCHITECTURE.md, CONFIGURATION.md current)
+
+---
+
+## 11. Teaching This to Others
+
+### 5-Minute Mental Model
+
+> "ChezMoi = **Data** (what varies) + **Templates** (how it varies) + **Scripts** (side-effects). The magic is `.chezmoi.yaml.tmpl` — it runs first, detects everything, and feeds variables to all other templates. Scripts are ordered by filename prefix. Guards prevent wrong-environment execution. Secrets use age encryption."
+
+### 30-Minute Hands-On
+
+1. **Show**: `chezmoi init --apply fabiosouzadev` on clean VM
+2. **Trace**: `chezmoi execute-template home/.chezmoi.yaml.tmpl | head -100`
+3. **Edit**: Add a feature flag → watch it propagate to scripts
+4. **Break**: Remove a guard → see script run in wrong env
+5. **Fix**: Add secret → `chezmoi add --encrypt` → verify decrypt on apply
+
+---
+
+## 12. Related Skills
+
+| Skill | Relationship |
+|-------|--------------|
+| `chezmoi-template-patterns` | Deep dive on Go templates, functions, composition |
+| `chezmoi-environment-detection` | Advanced detection: WSL GUI, container heuristics, cloud IDEs |
+| `chezmoi-secret-management` | Age key rotation, GPG migration, fork safety, CI secrets |
+| `chezmoi-script-lifecycle` | Script ordering, idempotency patterns, testing with bats |
+| `chezmoi-multi-profile` | Adding profiles, feature flag design, workplace detection |
+| `chezmoi-ignore-patterns` | Advanced conditional exclusion, performance optimization |
+| `dotfiles-ai-integration` | Hermes/OmniRoute/Coding Orchestrator specifics |
+| `dotfiles-vps-bootstrap` | Oracle Cloud ARM64 specifics: Dockge, Caddy, Tailscale, DuckDNS |
+
+---
+
+## 13. References
+
+- **Repo analyzed**: `https://github.com/fabiosouzadev/dotfiles` (893 commits, active)
+- **ChezMoi docs**: `https://www.chezmoi.io/user-guide/`, `https://www.chezmoi.io/reference/`
+- **Key files**:
+  - `home/.chezmoi.yaml.tmpl` (280 lines, detection + features + data)
+  - `home/.chezmoiignore.tmpl` (conditional exclusions)
+  - `home/.chezmoiscripts/unix/run_once_after_590-install-ai-tools.sh.tmpl` (template pattern)
+  - `docs/ARCHITECTURE.md`, `docs/CONFIGURATION.md`, `docs/HERMES-BACKUP.md`
+
+---
+
+*Generated via Loop Engineering Mode — Phase 4: Skill Creation. Validated against live repo analysis (FASE 1-3 complete).*
