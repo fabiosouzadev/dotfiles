@@ -110,6 +110,16 @@ display:
   background_process_notifications: all
 dashboard:
   theme: cyberpunk
+  show_token_analytics: false
+  oauth:
+    client_id: ''
+    portal_url: ''
+  basic_auth:
+    username: ${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
+    password_hash: ${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
+    secret: ${HERMES_DASHBOARD_BASIC_AUTH_SECRET}
+    session_ttl_seconds: 0
+  public_url: ''
 tts:
   provider: kittentts
   use_gateway: false
