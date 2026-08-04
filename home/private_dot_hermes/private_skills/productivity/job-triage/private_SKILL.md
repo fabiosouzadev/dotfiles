@@ -1,7 +1,7 @@
 ---
 name: job-triage
-description: "Use when user sends job links: scores, auto-applies, Notion."
-version: 1.1.0
+description: "Use when user sends job links: scores, auto-applies, Notion. Company extraction P1-P5, status auto-mapping by score+email."
+version: 1.3.0
 author: fabiosouzadev
 license: MIT
 platforms: [linux]
@@ -71,8 +71,8 @@ Database ID: `b45a134b-ad3b-83c5-a4e8-07d467d825ba` (Kanban "Job Process")
 | Link Vaga | Rich Text | URL original |
 | Descrição | Rich Text | Texto extraído da vaga |
 | Modalidade | Multi-select | PJ, CLT, Cooperado, Remoto |
-| Etapa Atual | Select | Preparar candidatura, Aguardando retorno, Entrevista agendada, Em processo, Finalizado, Cadastro pendente, Aguardando análise, Entrevista realizada, Recebido/em análise, Candidatura enviada, Entrevista com Hunting, Sem email, Análise necessária, Arquivado |
-| Status Geral | Select | Não aderente, Pra enviar, Enviado, Em processo, Finalizado, Aguardando retorno, Sem contato, Revisar manual |
+| **Etapa Atual** | **Select** | **Preparar candidatura, Aguardando retorno, Entrevista agendada, Em processo, Finalizado, Cadastro pendente, Aguardando análise, Entrevista realizada, Recebido/em análise, Candidatura enviada, Entrevista com Hunting, Sem email, Análise necessária, Arquivado** |
+| **Respondeu?** | **Checkbox** | **Marcar ✅ quando empresa responder → automação nativa move para "Aguardando retorno"** |
 | Tags | Multi-select | Stack tags (Node.js, NestJS, Java, Spring Boot, Python, AWS, AI, etc.) |
 | Score | Number | 0-100 (calculado) |
 | Data Candidatura | Date | Quando aplicou |
@@ -80,15 +80,32 @@ Database ID: `b45a134b-ad3b-83c5-a4e8-07d467d825ba` (Kanban "Job Process")
 | CV Enviado | Checkbox | Se currículo foi anexado |
 | Anotações Etapa | Rich Text | Logs, motivos, observações |
 
+> **Nota:** Campo `Status Geral` removido (v1.3.0) — usava apenas `Etapa Atual` como fonte única da verdade.
+
+## Auto-mapping Etapa Atual (por score + email)
+
+| Score | Tem Email? | Etapa Inicial | Próxima Ação |
+|-------|------------|---------------|--------------|
+| ≥ 70 | ✅ Sim | **Aguardando retorno** | Auto-candidatura → aguardar resposta |
+| ≥ 70 | ❌ Não | **Sem email** | Buscar contato manual |
+| 40-69 | ✅ Sim | **Análise necessária** | Você move para "Preparar Candidatura" se autorizar |
+| 40-69 | ❌ Não | **Análise necessária** | Buscar contato / ignorar / arquivar |
+| < 40 | — | **Arquivado** | Ignorar |
+
+> **Fluxo auto (≥70):** Triagem → Aguardando retorno → Entrevista Técnica → Entrevista Gestor → Proposta → Contratado
+> **Fluxo manual (40-69):** Triagem → Análise necessária → [Você move para "Preparar Candidatura"] → Cron job envia email → Aguardando retorno → ...
+> **Cron job adicional:** Pega cards "Respondeu?" = true → move para "Em processo"
+
 ## Integrações
 
-### Email (Python smtplib — primary)
+## Email Template (Python smtplib)
 
 Script `scripts/send-application.sh` usa **Python smtplib direto** com MIME correto:
 - `multipart/mixed` > `multipart/alternative` (text/plain + text/html) + attachment
 - From: "Fábio Souza" <fabiovanderlei.developer@gmail.com>
 - Anexo: CV PDF obrigatório
 - Body: HTML (negrito, links clicáveis) + text/plain fallback
+- **Pretensão salarial: R$ 15.000,00 (PJ)** — incluída automaticamente no corpo
 
 > **Fallback**: `templates/email-application.mml` para Himalaya se smtplib falhar.
 
@@ -107,12 +124,13 @@ Script `scripts/send-application.sh` usa **Python smtplib direto** com MIME corr
 ```
 skills/productivity/job-triage/
 ├── SKILL.md
-├── references/
+references/
 │   ├── scoring-rules.md       # Regras detalhadas de pontuação
 │   ├── notion-schema.md       # Schema completo da database
 │   ├── cv-profile.md          # Perfil extraído do CV
-│   └── linkedin-scraping-lessons.md  # Lições: scraping, MIME, score thresholds
-├── scripts/
+│   ├── linkedin-scraping-lessons.md  # Lições: scraping, MIME, score thresholds
+│   ├── company-extraction.md       # Prioridades de extração de empresa (P1-P5)
+│   └── notion-status-mapping.md    # Status/Etapa auto-mapping por score+email
 │   ├── triage.py              # Script principal: recebe URL → score → ação
 │   ├── extract-content.py     # Extrai texto de URL (web_extract + Camofox fallback)
 │   ├── score-vaga.py          # LLM scoring com pesos configuráveis
@@ -166,10 +184,24 @@ CAMOFOX_API_KEY=xxx
     - Status/Etapa calculados automaticamente pelo score + presença de email
     - 22 cards existentes atualizados em lote via script Python (`update_notion_cards.py`)
 
-12. **Notion API v2025-09-03: Database ID vs Data Source ID** — Para queries usar `data_source_id` (`b45a134b-ad3b-83c5-a4e8-07d467d825ba`); para criar páginas usar `database_id` (`cb9a134b-ad3b-8306-8d52-81ed264d3f5b`). Ambos no mesmo objeto database.
+12. **Extração de empresa (v1.2.0)** — Prioridades implementadas no `triage.py`:
+    - **P1**: Padrões explícitos (`Empresa:`, `Company:`, `A X é uma Ytech`)
+    - **P2**: `@usuario` (não domínios de email) — `Postado por X`
+    - **P3**: Domínio do email (`@empresa.com.br` → `Empresa`) — remove TLDs, aceita hífens, rejeita pontos/subdomínios pessoais
+    - **P4**: Domínios "nus" no texto (`ats.landor.com.br` → `Landor`) — regex `\b([a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+\.(com\.br|com|br|org|...))\b`
+    - **P5**: Primeira palavra capitalizada relevante (não tech terms)
+
+13. **Regex "Postado por" corrigida** — Antes capturava tudo até fim da linha (incluía email). Agora: `r'(?i)post(?:ado)?\s+por[:@]\s*([^\n@]+?)(?:\s+[-–—|:]|\s+https?://|$)'` para parar antes de separadores, URLs ou fim de linha.
+
+14. **Cleanup em massa (v1.2.0)** — 41 cards antigos arquivados, 5 duplicatas removidas. Database limpa com 15 cards ativos (8 enviados/sem contato, 4 revisar manual, 3 não aderentes).
+
+15. **Status "Enviado" forçado para score < 70** — O script `create-notion-card.sh` agora aceita `STATUS_PARAM`/`ETAPA_PARAM` via env vars para sobrescrever o cálculo automático (usado quando usuário força candidatura).
 
 ## Próximos Passos (Roadmap)
 
+- [x] Simplificar para apenas `Etapa Atual` (removido `Status Geral`)
+- [x] Adicionar checkbox `Respondeu?` + automação nativa Notion
+- [x] Atualizar `triage.py` e `create-notion-card.sh` para usar apenas `Etapa Atual`
 - [ ] Implementar `scripts/triage.py` completo (orquestra extração → scoring → ação)
 - [ ] Adicionar suporte a múltiplos CVs (perfil backend, fullstack, architect)
 - [ ] Cron job diário: varrer feed LinkedIn via Camofox → triagem automática

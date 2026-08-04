@@ -66,6 +66,7 @@ BODY_HTML=$(cat <<HTMLEOF
     <p><strong>Meu LinkedIn:</strong> <a href="https://www.linkedin.com/in/fabiosouzadev/">https://www.linkedin.com/in/fabiosouzadev/</a></p>
     <p><strong>CV em anexo</strong> para sua avaliação.</p>
     <p>Disponível para <strong>PJ 100% remoto</strong> (base em Londrina/PR).</p>
+    <p><strong>Pretensão salarial: R$ 15.000,00 (PJ)</strong></p>
     <p>Agradeço a oportunidade e fico à disposição para conversar.</p>
     <div class="signature">
         <p><strong>Fábio Souza</strong></p>
@@ -98,6 +99,8 @@ Meu LinkedIn: https://www.linkedin.com/in/fabiosouzadev/
 CV em anexo para sua avaliação.
 
 Disponível para PJ 100% remoto (base em Londrina/PR).
+
+Pretensão salarial: R$ 15.000,00 (PJ)
 
 Agradeço a oportunidade e fico à disposição para conversar.
 
@@ -161,6 +164,7 @@ body_html = f"""<!DOCTYPE html>
     <p><strong>Meu LinkedIn:</strong> <a href="https://www.linkedin.com/in/fabiosouzadev/">https://www.linkedin.com/in/fabiosouzadev/</a></p>
     <p><strong>CV em anexo</strong> para sua avaliação.</p>
     <p>Disponível para <strong>PJ 100% remoto</strong> (base em Londrina/PR).</p>
+    <p><strong>Pretensão salarial: R$ 15.000,00 (PJ)</strong></p>
     <p>Agradeço a oportunidade e fico à disposição para conversar.</p>
     <div class="signature">
         <p><strong>Fábio Souza</strong></p>
@@ -190,6 +194,8 @@ Meu LinkedIn: https://www.linkedin.com/in/fabiosouzadev/
 CV em anexo para sua avaliação.
 
 Disponível para PJ 100% remoto (base em Londrina/PR).
+
+Pretensão salarial: R$ 15.000,00 (PJ)
 
 Agradeço a oportunidade e fico à disposição para conversar.
 

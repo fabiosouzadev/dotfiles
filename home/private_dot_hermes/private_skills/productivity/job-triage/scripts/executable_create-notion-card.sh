@@ -4,21 +4,20 @@
 
 set -euo pipefail
 
-# Uso: create-notion-card.sh <json_data> <status> <etapa>
+# Uso: create-notion-card.sh <json_data> <etapa>
 # json_data: JSON string com dados da vaga
 
 JSON_DATA="${1:-}"
-STATUS="${2:-}"
-ETAPA="${3:-}"
+ETAPA="${2:-}"
 
 if [[ -z "$JSON_DATA" ]]; then
-    echo "Uso: $0 '<json_data>' [status] [etapa]"
+    echo "Uso: $0 '<json_data>' [etapa]"
     exit 1
 fi
 
 # Config
 NOTION_API_KEY="${NOTION_API_KEY:-}"
-DATABASE_ID="cb9a134b-ad3b-8306-8d52-81ed264d3f5b"  # Database ID do Notion (Job Process)
+DATABASE_ID="cb9a134b-ad3b-8306-8d52-81ed264d3f5b"  # Database ID do Notion (Job Process) - CORRETO
 
 if [[ -z "$NOTION_API_KEY" ]]; then
     echo "❌ NOTION_API_KEY não definido no ambiente"
@@ -27,7 +26,7 @@ fi
 
 # Usar Python para extrair campos do JSON e formatar para Notion
 EXTRACTED=$(python3 -c "
-import json, sys, re
+import json, sys, re, os
 data = json.loads(sys.argv[1])
 
 # Campos básicos
@@ -37,61 +36,25 @@ content = data.get('content', data.get('descricao', data.get('Descrição', ''))
 score = data.get('score', 0)
 email = data.get('email', data.get('Email', ''))
 tags = data.get('tags', data.get('Tags', ['tech']))
+
 # Extrair empresa - prioridade para campo já calculado pelo triage.py
 empresa = data.get('company', data.get('empresa', data.get('Empresa', '')))
-if not empresa and content:
-    # Tentar extrair empresa do domínio do email
-    email_match = re.search(r'@([\w.-]+)', content)
-    if email_match:
-        domain = email_match.group(1)
-        # Remover TLDs comuns
-        domain = re.sub(r'\.(com|br|org|net|io|co|me|ai|gov|edu)(\.(br|com|org))?$', '', domain)
-        if domain and len(domain) > 2:
-            empresa = domain.capitalize()
-    
-    # Se não achou no email, tentar padrões no texto
-    if not empresa:
-        patterns = [
-            r'(?i)empresa[:\\s]+([^\\n]+)',
-            r'(?i)company[:\\s]+([^\\n]+)',
-            r'(?i)post(?:ado)?[:\\s]+([^\\n]+)',
-            r'(?i)autor[:\\s]+([^\\n]+)',
-            # @usuario mas NÃO domínios de email
-            r'@(\\w+)(?![.\\w]*\\.(com|br|org|net|io|co|me|ai))',
-        ]
-        for pat in patterns:
-            m = re.search(pat, content)
-            if m:
-                empresa = m.group(1).strip()
-                break
 
-# Se ainda não tem, usar primeira palavra relevante
-if not empresa and content:
-    lines = content.strip().split('\n')
-    for line in lines[:5]:
-        line = line.strip()
-        if line and not line.startswith(('🔥', '🚀', 'VAGA:', 'Teste', 'Oportunidade')):
-            words = line.split()
-            for w in words[:3]:
-                if w[0].isupper() and len(w) > 2:
-                    empresa = w
-                    break
-            if empresa:
-                break
-
-# Determinar status e etapa baseado no score e email
-if score >= 70 and email and email != 'null':
-    status_calc = 'Enviado'
-    etapa_calc = 'Aguardando retorno'
-elif score >= 70 and (not email or email == 'null'):
-    status_calc = 'Sem contato'
-    etapa_calc = 'Sem email'
-elif score >= 40:
-    status_calc = 'Revisar manual'
-    etapa_calc = 'Análise necessária'
+# Etapa: usar parâmetro se passado, senão calcular
+etapa_param = os.environ.get('ETAPA_PARAM', '')
+if etapa_param:
+    etapa_calc = etapa_param
+elif '${ETAPA}':
+    etapa_calc = '${ETAPA}'
 else:
-    status_calc = 'Não aderente'
-    etapa_calc = 'Arquivado'
+    if score >= 70 and email and email != 'null':
+        etapa_calc = 'Aguardando retorno'
+    elif score >= 70 and (not email or email == 'null'):
+        etapa_calc = 'Sem email'
+    elif score >= 40:
+        etapa_calc = 'Análise necessária'
+    else:
+        etapa_calc = 'Arquivado'
 
 # Modalidade
 modalidade = data.get('modalidade', data.get('Modalidade', ['PJ','Remoto']))
@@ -116,13 +79,10 @@ print(url)
 print(content)
 print(json.dumps(mod_objs))
 print(etapa_calc)
-print(status_calc)
 print(json.dumps(tags_objs))
 print('')
 print(canal)
 print(anotacoes)
-print(status_calc)
-print(etapa_calc)
 " "$JSON_DATA")
 
 TITLE_RAW=$(echo "$EXTRACTED" | sed -n '1p')
@@ -131,17 +91,10 @@ URL_VAGA=$(echo "$EXTRACTED" | sed -n '3p')
 DESCRICAO=$(echo "$EXTRACTED" | sed -n '4p')
 MODALIDADE_ARRAY=$(echo "$EXTRACTED" | sed -n '5p')
 ETAPA_VAL=$(echo "$EXTRACTED" | sed -n '6p')
-STATUS_VAL=$(echo "$EXTRACTED" | sed -n '7p')
-TAGS_ARRAY=$(echo "$EXTRACTED" | sed -n '8p')
-DATA_CANDIDATURA=$(echo "$EXTRACTED" | sed -n '9p')
-CANAL_ENVIO_ARRAY=$(echo "$EXTRACTED" | sed -n '10p')
-ANOTACOES=$(echo "$EXTRACTED" | sed -n '11p')
-STATUS_VAL_FINAL=$(echo "$EXTRACTED" | sed -n '12p')
-ETAPA_VAL_FINAL=$(echo "$EXTRACTED" | sed -n '13p')
-
-# Usar os valores calculados (sobrescreve os passados como parâmetro)
-STATUS_VAL="$STATUS_VAL_FINAL"
-ETAPA_VAL="$ETAPA_VAL_FINAL"
+TAGS_ARRAY=$(echo "$EXTRACTED" | sed -n '7p')
+DATA_CANDIDATURA=$(echo "$EXTRACTED" | sed -n '8p')
+CANAL_ENVIO_ARRAY=$(echo "$EXTRACTED" | sed -n '9p')
+ANOTACOES=$(echo "$EXTRACTED" | sed -n '10p')
 
 # Título melhorado: "Empresa - Cargo (Score)"
 SCORE=$(echo "$JSON_DATA" | python3 -c "import json, sys; print(json.load(sys.stdin).get('score', 0))")
@@ -170,7 +123,6 @@ PAYLOAD=$(cat <<EOF
     "Descrição": { "rich_text": [{ "text": { "content": "$DESC_TRUNC" } }] },
     "Modalidade": { "multi_select": $MODALIDADE_ARRAY },
     "Etapa Atual": { "select": { "name": "$ETAPA_VAL" } },
-    "Status Geral": { "select": { "name": "$STATUS_VAL" } },
     "Tags": { "multi_select": $TAGS_ARRAY },
     "Data Candidatura": { "date": { "start": "$DATA_CANDIDATURA" } },
     "Canal Envio": { "multi_select": $CANAL_ENVIO_ARRAY },
@@ -195,7 +147,7 @@ if [[ -n "$PAGE_ID" ]]; then
     echo "✅ Card criado com sucesso!"
     echo "   ID: $PAGE_ID"
     echo "   URL: $PAGE_URL"
-    echo "   Status: $STATUS_VAL | Etapa: $ETAPA_VAL"
+    echo "   Etapa: $ETAPA_VAL"
     exit 0
 else
     echo "❌ Falha ao criar card no Notion"

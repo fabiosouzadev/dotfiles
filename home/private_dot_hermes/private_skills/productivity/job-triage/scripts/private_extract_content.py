@@ -134,7 +134,7 @@ def extract_keywords(text: str) -> dict:
         keywords['seniority'] = 'junior'
     
     # Contract
-    if any(x in text_lower for x in ['pj', 'pessoa jurídica', 'freelance', 'freelancer', 'contrato']):
+    if any(x in text_lower for x in ['pj', 'pessoa jurídica', 'freelance', 'freelancer', 'contrato', 'pessoa juridica', 'prestador', 'autônomo', 'autonomo']):
         keywords['contract'] = 'pj'
     elif any(x in text_lower for x in ['clt', 'carteira assinada', 'efetivo']):
         keywords['contract'] = 'clt'
@@ -142,7 +142,7 @@ def extract_keywords(text: str) -> dict:
         keywords['contract'] = 'cooperado'
     
     # Remote
-    if any(x in text_lower for x in ['100% remoto', '100% remote', 'full remote', 'totalmente remoto', 'home office']):
+    if any(x in text_lower for x in ['100% remoto', '100% remote', 'full remote', 'totalmente remoto', 'home office', '100 % remoto', 'remoto', 'remote']):
         keywords['remote'] = True
     elif any(x in text_lower for x in ['híbrido', 'hibrido', 'hybrid', 'presencial', 'onsite']):
         keywords['remote'] = False
