@@ -14,6 +14,7 @@ services:
       - 9119 # dashboard (only reached when HERMES_DASHBOARD=1)
     volumes:
       - /home/ubuntu/.hermes:/opt/data
+      - /home/ubuntu/.camofox:/opt/data/home/.camofox
     environment:
       - PUID=1001
       - PGID=1001
@@ -27,7 +28,6 @@ services:
         limits:
           memory: 4G
           cpus: "2.0"
-
   ### CAMOFOX ####
   camofox:
     image: ghcr.io/jo-inc/camofox-browser:latest
