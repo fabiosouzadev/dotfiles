@@ -85,17 +85,17 @@ Função Ajustada com escapes
 # - Júnior/Pleno sem menção de liderança técnica
 
 # ## SAÍDA OBRIGATÓRIA (JSON válido apenas)
-# {{ "{{" }}
+# {{
 #   "score": <0-100 inteiro>,
-#   "details": {{ "{{" }}
+#   "details": {{
 #     "stack_match": <0-30>,
 #     "contract_remote": <0-25>,
 #     "seniority": <0-20>,
 #     "fintech": <0-15>,
 #     "ai_llm": <0-10>
-#   {{ "}}" }},
+#   }},
 #   "reasoning": "Explicação breve em português",
-#   "matched_keywords": {{ "{{" }}
+#   "matched_keywords": {{
 #     "stack": [],
 #     "cloud": [],
 #     "domain": [],
@@ -103,10 +103,10 @@ Função Ajustada com escapes
 #     "seniority": "",
 #     "contract": "",
 #     "remote": false
-#   {{ "}}" }},
+#   }},
 #   "email_found": null,
 #   "red_flags": []
-# {{ "}}" }}
+# }}
 # """
 #     return prompt
 
@@ -145,17 +145,17 @@ def build_scoring_prompt(job_content: str) -> str:
 - Júnior/Pleno sem menção de liderança técnica
 
 ## SAÍDA OBRIGATÓRIA (JSON válido apenas)
-{{ "{{" }}
+{{
   "score": <0-100 inteiro>,
-  "details": {{ "{{" }}
+  "details": {{
     "stack_match": <0-30>,
     "contract_remote": <0-25>,
     "seniority": <0-20>,
     "fintech": <0-15>,
     "ai_llm": <0-10>
-  {{ "}}" }},
+  }},
   "reasoning": "Explicação breve em português",
-  "matched_keywords": {{ "{{" }}
+  "matched_keywords": {{
     "stack": [],
     "cloud": [],
     "domain": [],
@@ -163,10 +163,10 @@ def build_scoring_prompt(job_content: str) -> str:
     "seniority": "",
     "contract": "",
     "remote": false
-  {{ "}}" }},
+  }},
   "email_found": null,
   "red_flags": []
-{{ "}}" }}
+}}
 """
     return prompt
 

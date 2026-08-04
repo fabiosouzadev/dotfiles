@@ -8,6 +8,7 @@ import sys
 import os
 import json
 import subprocess
+import re
 from pathlib import Path
 
 # Add skill directory to path
@@ -17,6 +18,66 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 from extract_content import extract_job_content, extract_keywords, find_email_in_text
 from score_vaga import score_job, CANDIDATE_PROFILE
+
+
+def extract_company_from_content(content: str, url: str) -> str:
+    """Tenta extrair nome da empresa do conteúdo da vaga ou URL."""
+    if not content:
+        return "Empresa não identificada"
+    
+    # PRIORIDADE 1: Padrões explícitos de empresa no texto
+    # Ex: "A Hanzo é uma foodtech...", "Empresa: X", "Company: Y"
+    company_patterns = [
+        r'(?i)a\s+(\w+)\s+é\s+uma\s+\w+tech',  # "A Hanzo é uma foodtech"
+        r'(?i)empresa[:\s]+([^\n]+)',
+        r'(?i)company[:\s]+([^\n]+)',
+        r'(?i)contratante[:\s]+([^\n]+)',
+        r'(?i)hiring\s+(?:company|for)[:\s]+([^\n]+)',
+        r'(?i)post(?:ado)?\s+por[:\s]+([^\n]+)',  # "Postado por X" - último recurso
+        r'(?i)autor[:\s]+([^\n]+)',
+    ]
+    for pat in company_patterns:
+        m = re.search(pat, content)
+        if m:
+            candidate = m.group(1).strip()
+            # Filtrar nomes que parecem de pessoas (duas OU TRÊS palavras capitalizadas)
+            # Ex: "Catarina Ugolini", "Andréa B", "Julia Argueiro", "Carla Ferreira"
+            if not re.match(r'^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2}$', candidate):
+                return candidate
+    
+    # PRIORIDADE 2: @usuario mas NÃO domínios de email
+    at_match = re.search(r'@(\w+)(?![.\w]*\.(com|br|org|net|io|co|me|ai|gov|edu))', content)
+    if at_match:
+        return at_match.group(1).capitalize()
+    
+    # PRIORIDADE 3: Tentar extrair do domínio do email
+    email_match = re.search(r'@([\w.-]+)', content)
+    if email_match:
+        domain = email_match.group(1)
+        domain = re.sub(r'\.(com|br|org|net|io|co|me|ai|gov|edu)(\.(br|com|org))?$', '', domain)
+        if domain and len(domain) > 2:
+            # Verificar se não parece nome de pessoa (ex: primeiro.ultimo, primeiro_ultimo)
+            # Mas aceitar domínios válidos de empresa (letras, números, hífens)
+            if not re.search(r'[\._]', domain) and re.match(r'^[a-zA-Z0-9-]+$', domain):
+                return domain.capitalize()
+    
+    # PRIORIDADE 4: Primeira palavra capitalizada relevante (não tech terms)
+    tech_terms = {'Node.js', 'Java', 'Python', 'React', 'Spring', 'Boot', 'Django', 'NestJS', 'AWS', 'GCP', 'Azure', 'Kubernetes', 'Docker', 'Kafka', 'PostgreSQL', 'MongoDB', 'TypeScript', 'JavaScript', 'Go', 'Rust', 'CLT', 'PJ', 'Remoto', 'Híbrido', 'Presencial', 'Sênior', 'Senior', 'Tech', 'Lead', 'Arquiteto', 'Fullstack', 'Backend', 'Frontend', 'Pleno', 'Júnior', 'Junior', 'Estágio', 'Estagio', 'Vaga', 'Oportunidade', 'Olá', 'Estou', 'Buscando', 'Engenheiro', 'Engenheira', 'Engenheiroa', 'Desenvolvedor', 'Desenvolvedora', 'Sistemas', 'Distribuídos', 'Microserviços', 'Pipeline', 'Dados', 'Mensageria', 'Bancos', 'Relacionais', 'Analíticos', 'Escala', 'Concorrência', 'Latência', 'Resiliência', 'Mentoria', 'Hands-on', 'IoT', 'IAoT', 'Confidencial', 'São', 'Paulo', 'Segunda', 'Sexta', 'Horários', 'Modalidade', 'Sede', 'Quantidade', 'Requisitos', 'Experiência', 'Comprovada', 'Domínio', 'Vivência', 'Resolvendo', 'Problemas', 'Capacidade', 'Análise', 'Comunicação', 'Técnica', 'Responsabilidades', 'Evoluir', 'Plataforma', 'Core', 'Desenvolver', 'Revisar', 'Código', 'Caminhos', 'Críticos', 'Performance', 'Definir', 'Padrões', 'Arquitetura', 'Observabilidade', 'Mentorar', 'Produto', 'DevOps', 'Atuar', 'Incident', 'Response', 'Contínua', 'Interessados', 'Enviem', 'Palavra', 'Através', 'Link', 'Software', 'Full', 'Stack', 'Senior', 'Sênior', 'Anos', 'Experiência', 'Inglês', 'Fluente', 'Negociável', 'Enviar', 'CV', 'Para', 'Postado', 'Por', 'Mês', 'Milhões', 'Transações', 'Ano', 'Liderança', 'Cross-squad', 'Mentoria', 'Profiling', 'Tuning', 'Cache', 'Distribuído', 'Foodtech', 'Própria', 'CRM', 'Fidelização', 'Pedidos', 'Digitais', 'Processando', 'Integrações', 'Reais', 'Pagamento', 'Delivery', 'WhatsApp', 'Fidelidade', 'Não', 'Sistema', 'Brinquedo', 'Alta', 'Disponibilidade', 'Baixa', 'Evolução', 'Contínua', 'Verdade', 'Arquitetura', 'Monolítica', 'Modular', 'Greenfield', 'Fácil', 'Iniciativas', 'Voz', 'Decisões', 'Troubleshooting', 'Produção', 'Não', 'Só', 'Teoria', 'Diferenciais', 'Fazem', 'Diferença', 'SaaS', 'SLO', 'Kinesis', 'Uso', 'Dia', 'Copilot', 'Claude', 'Code', 'Cursor', 'Foodtech', 'Plataforma', 'CRM', 'Fidelização', 'Pedidos', 'Digitais', 'Processando', 'Milhões', 'Transações', 'Integrações', 'Reais', 'Pagamento', 'Delivery', 'WhatsApp', 'Fidelidade', 'Não', 'Sistema', 'Brinquedo', 'Alta', 'Disponibilidade', 'Baixa', 'Latência', 'Evolução', 'Contínua', 'Verdade', 'Arquitetura', 'Monolítica', 'Modular', 'Greenfield', 'Fácil', 'Engenharia', 'Iniciativas', 'Cross-squad', 'Voz', 'Decisões', 'Problemas', 'Reais', 'Performance', 'Concorrência', 'Escala', 'Profiling', 'GC', 'Tuning', 'Cache', 'Distribuído', 'Mentoria', 'Outros', 'Cultura', 'Code', 'Review', 'Importa', 'Pedimos', 'Vivência', 'Sistemas', 'Resilientes', 'Bagagem', 'Troubleshooting', 'Produção', 'Não', 'Só', 'Teoria', 'Diferenciais', 'Fazem', 'Diferença', 'SaaS', 'SLO', 'Kubernetes', 'Docker', 'Kafka', 'Kinesis', 'Uso', 'Dia', 'Copilot', 'Claude', 'Code', 'Cursor', 'Internacional', 'Principal', 'Full', 'Stack', 'E-commerce', 'ERP', 'Shopify', 'Arquitetura', 'Microserviços', 'Cloud', 'CI/CD', 'Candidatura', 'Via', 'Link', 'Notion', 'Comentários', 'Postado', 'Por', 'Tech', 'Lead', 'React', 'Node.js', 'TypeScript', 'Kafka', 'AWS', 'GCP', 'Azure'}
+    
+    lines = content.strip().split('\n')
+    for line in lines[:15]:
+        line = line.strip()
+        if line and not line.startswith(('🔥', '🚀', 'VAGA:', 'Teste', 'Oportunidade', 'Olá', 'Estou', 'Buscando')):
+            words = line.split()
+            for w in words[:4]:
+                # Limpar pontuação
+                w_clean = re.sub(r'[^\w\s.-]', '', w)
+                if w_clean and w_clean[0].isupper() and len(w_clean) > 2 and w_clean not in tech_terms:
+                    # Se for duas palavras capitalizadas, pode ser nome de pessoa - evitar
+                    if ' ' not in w_clean:
+                        return w_clean
+    
+    return "Empresa não identificada"
 
 def run_shell_script(script_name: str, args: list) -> tuple[bool, str]:
     """Executa script shell e retorna (sucesso, output)."""
@@ -37,6 +98,9 @@ def send_application_email(job_data: dict, email: str) -> bool:
     """Envia candidatura via script shell send-application.sh."""
     title = job_data.get('title', 'Vaga')
     company = job_data.get('company', 'Empresa')
+    # Se empresa for genérica, tentar extrair do conteúdo
+    if company in ['Empresa não identificada', 'Empresa', '']:
+        company = extract_company_from_content(job_data.get('content', ''), job_data.get('url', ''))
     url = job_data.get('url', '')
     score = job_data.get('score', 0)
     cv_path = CANDIDATE_PROFILE['cv_path']
@@ -111,9 +175,12 @@ def main():
     elif keywords.get('contract') == 'clt':
         job_data['modalidade'].append('CLT')
     job_data['title'] = job_data.get('title', 'Vaga do LinkedIn')
-    job_data['company'] = job_data.get('company', 'Empresa não identificada')
+    
+    # Extrair empresa ANTES de usar no Notion/email
+    job_data['company'] = extract_company_from_content(job_data.get('content', ''), job_data.get('url', ''))
     
     print(f"✅ Conteúdo processado ({len(job_data.get('content', ''))} chars)")
+    print(f"🏢 Empresa identificada: {job_data['company']}")
     
     # 2. Scoring
     print("🧮 Calculando score...")

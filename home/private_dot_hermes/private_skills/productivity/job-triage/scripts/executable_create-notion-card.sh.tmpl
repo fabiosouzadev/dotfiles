@@ -37,24 +37,33 @@ content = data.get('content', data.get('descricao', data.get('Descrição', ''))
 score = data.get('score', 0)
 email = data.get('email', data.get('Email', ''))
 tags = data.get('tags', data.get('Tags', ['tech']))
-# Extrair empresa do conteúdo/descrição
-empresa = data.get('empresa', data.get('Empresa', ''))
+# Extrair empresa - prioridade para campo já calculado pelo triage.py
+empresa = data.get('company', data.get('empresa', data.get('Empresa', '')))
 if not empresa and content:
-    # Tentar extrair empresa do texto
-    # Padrões comuns: 'Empresa:', 'Company:', '@empresa', 'post: Nome', 'Post: Nome', 'Postado por:'
-    patterns = [
-        r'(?i)empresa[:\s]+([^\n]+)',
-        r'(?i)company[:\s]+([^\n]+)',
-        r'(?i)post(?:ado)?[:\s]+([^\n]+)',
-        r'(?i)autor[:\s]+([^\n]+)',
-        # @usuario mas NÃO domínios de email (excluir se tem .com, .br, etc depois)
-        r'@(\w+)(?![.\w]*\.(com|br|org|net|io|co|me|ai))',
-    ]
-    for pat in patterns:
-        m = re.search(pat, content)
-        if m:
-            empresa = m.group(1).strip()
-            break
+    # Tentar extrair empresa do domínio do email
+    email_match = re.search(r'@([\w.-]+)', content)
+    if email_match:
+        domain = email_match.group(1)
+        # Remover TLDs comuns
+        domain = re.sub(r'\.(com|br|org|net|io|co|me|ai|gov|edu)(\.(br|com|org))?$', '', domain)
+        if domain and len(domain) > 2:
+            empresa = domain.capitalize()
+    
+    # Se não achou no email, tentar padrões no texto
+    if not empresa:
+        patterns = [
+            r'(?i)empresa[:\\s]+([^\\n]+)',
+            r'(?i)company[:\\s]+([^\\n]+)',
+            r'(?i)post(?:ado)?[:\\s]+([^\\n]+)',
+            r'(?i)autor[:\\s]+([^\\n]+)',
+            # @usuario mas NÃO domínios de email
+            r'@(\\w+)(?![.\\w]*\\.(com|br|org|net|io|co|me|ai))',
+        ]
+        for pat in patterns:
+            m = re.search(pat, content)
+            if m:
+                empresa = m.group(1).strip()
+                break
 
 # Se ainda não tem, usar primeira palavra relevante
 if not empresa and content:
