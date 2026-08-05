@@ -253,47 +253,54 @@ def get_page_property_value(prop):
 def extract_job_data_from_page(page):
     """Extract job data from Notion page properties"""
     props = page.get("properties", {})
-    
+
     # Extract basic properties
     title_prop = props.get("Name", {})
     title = get_page_property_value(title_prop) or "Vaga sem título"
-    
+
     empresa_prop = props.get("Empresa", {})
     empresa = get_page_property_value(empresa_prop) or ""
-    
+
     url_prop = props.get("Link Vaga", {})
     url = get_page_property_value(url_prop) or ""
-    
+
     desc_prop = props.get("Descrição", {})
     content = get_page_property_value(desc_prop) or ""
-    
-    score_prop = props.get("Score", {})
-    score = get_page_property_value(score_prop) or 0
-    
-    email_prop = props.get("Email", {})  # Assuming there's an Email field
-    email = get_page_property_value(email_prop) or ""
-    
-    # If no Email field, try to extract from description
-    if not email and content:
-        import re
-        email_pattern = r'\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b'
-        matches = re.findall(email_pattern, content)
-        filtered = [m for m in matches if not any(x in m.lower() for x in ['noreply', 'no-reply', 'support', 'help', 'info@', 'contact@', 'admin@'])]
-        email = filtered[0] if filtered else (matches[0] if matches else "")
-    
+
+    # Score: try to extract from "Anotações Etapa" text (format: "Triagem automática - score XX")
+    anotacoes_prop = props.get("Anotações Etapa", {})
+    anotacoes = get_page_property_value(anotacoes_prop) or ""
+    score = 0
+    import re
+    score_match = re.search(r'score\s+(\d+)', anotacoes, re.IGNORECASE)
+    if score_match:
+        score = int(score_match.group(1))
+
+    # Email: extract from description or link vaga content
+    email = ""
+    for text_source in [content, url]:
+        if text_source:
+            email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+            matches = re.findall(email_pattern, text_source)
+            # Filter out common non-personal emails
+            filtered = [m for m in matches if not any(x in m.lower() for x in ['noreply', 'no-reply', 'support', 'help', 'info@', 'contact@', 'admin@', 'recruitment@', 'hr@', 'jobs@', 'careers@', 'talent@', 'hiring@'])]
+            email = filtered[0] if filtered else (matches[0] if matches else "")
+            if email:
+                break
+
     responded_prop = props.get("Respondeu?", {})
     responded = get_page_property_value(responded_prop) or False
-    
+
     etapa_prop = props.get("Etapa Atual", {})
     etapa_atual = get_page_property_value(etapa_prop) or ""
-    
+
     return {
         "id": page.get("id"),
         "title": title,
         "company": empresa,
         "url": url,
         "content": content,
-        "score": int(score) if score else 0,
+        "score": score,
         "email": email,
         "responded": bool(responded),
         "etapa_atual": etapa_atual

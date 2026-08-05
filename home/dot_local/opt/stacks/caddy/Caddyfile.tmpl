@@ -29,14 +29,6 @@ http://:9119 {
     reverse_proxy hermes:9119
 }
 
-http://:9377 {
-    import common
-    reverse_proxy camofox:9377 {
-        health_uri /health
-	health_interval 10s 
-    }
-}
-
 http://:20128 {
     import common
 
