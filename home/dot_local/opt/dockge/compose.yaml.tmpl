@@ -17,3 +17,5 @@ services:
       # Tell Dockge where to find the stacks
       - DOCKGE_STACKS_DIR={{ .chezmoi.homeDir }}/.local/opt/stacks
       - DOCKGE_ENABLE_CONSOLE=true
+      - PUID={{ .chezmoi.uid }} # Set the stack file/dir ownership to this user
+      - PGID={{ .chezmoi.gid }} # Set the stack file/dir ownership to this group

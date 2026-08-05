@@ -18,8 +18,8 @@ services:
       - /home/ubuntu/.camofox/cookies:/opt/data/home/.camofox/cookies:ro
       - /home/ubuntu/.camofox/traces:/opt/data/home/.camofox/traces:rw
     environment:
-      - PUID=1001
-      - PGID=1001
+      - PUID={{ .chezmoi.uid }}
+      - PGID={{ .chezmoi.gid }}
       - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
       - CAMOFOX_URL=http://camofox:9377
       - HERMES_DASHBOARD=1
@@ -35,7 +35,7 @@ services:
     image: ghcr.io/jo-inc/camofox-browser:latest
     container_name: camofox
     restart: unless-stopped
-    user: 1001:1001
+    user: {{ .chezmoi.uid }}:{{ .chezmoi.gid }}
     ports:
       #  - 6080:6080
       #  - 5901:5900
@@ -69,8 +69,8 @@ services:
       - VNC_BIND=0.0.0.0
       - VNC_RESOLUTION=1920x1080
       - MAX_OLD_SPACE_SIZE=2048
-      - PUID=1001
-      - PGID=1001
+      - PUID={{ .chezmoi.uid }}
+      - PGID={{ .chezmoi.gid }}
     volumes:
       - /home/ubuntu/.camofox/profiles:/home/node/.camofox/profiles:rw # RW - ESSENCIAL!
       - /home/ubuntu/.camofox/cookies:/home/node/.camofox/cookies:ro
