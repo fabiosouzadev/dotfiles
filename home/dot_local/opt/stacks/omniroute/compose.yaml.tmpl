@@ -21,6 +21,7 @@ services:
       # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
+      - REDIS_URL=redis://redis:6379
     expose:
       - "20128"
       - "20129"
@@ -34,13 +35,13 @@ services:
         - CMD
         - node
         - healthcheck.mjs
-      interval: 30s
+      interval: 360s
       timeout: 5s
       retries: 3
       start_period: 15s
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 2
   # ── Redis (Rate Limiter Backend) ──────────────────────────────────
   redis:
     image: redis:7-alpine
@@ -49,6 +50,8 @@ services:
     volumes:
       - redis-data:/data
     command: redis-server --save 60 1 --loglevel warning
+    expose:
+      - 6379
     healthcheck:
       test:
         - CMD
