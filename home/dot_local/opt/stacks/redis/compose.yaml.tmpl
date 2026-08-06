@@ -1,0 +1,30 @@
+services:
+  redis:
+    image: redis:8.6.5-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --save 60 1
+      --appendonly yes
+      --loglevel warning
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --databases 16
+    volumes:
+      - /home/ubuntu/redis/data:/data
+    ports:
+      - 127.0.0.1:6379:6379 # Apenas loopback!
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - edge
+networks:
+  edge:
+    external: true
