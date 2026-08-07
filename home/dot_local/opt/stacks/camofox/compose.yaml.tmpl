@@ -3,10 +3,9 @@ services:
     image: ghcr.io/jo-inc/camofox-browser:latest
     container_name: camofox
     restart: unless-stopped
-    ports:
-      - 6080:6080
-      # - 5901:5900
-      - 127.0.0.1:9377:9377
+    # ports: [ "6080:6080", "5901:5900"]
+    expose:
+      - "9377"
     env_file: .env
     environment:
       - PUID=1001
@@ -33,11 +32,11 @@ services:
       # - CAMOFOX_SNAPSHOT_MAX_ELEMENTS=200 # limite de elementos no snapshot
 
       # === OPCIONAL: Telemetry (desative se quiser) ===
-      - CAMOFOX_CRASH_REPORT_ENABLED=true
-      - ENABLE_VNC=1
-      - VNC_BIND=0.0.0.0
-      - VNC_RESOLUTION=1920x1080
-      - MAX_OLD_SPACE_SIZE=2048
+      # - CAMOFOX_CRASH_REPORT_ENABLED=true
+      # - ENABLE_VNC=1
+      # - VNC_BIND=0.0.0.0
+      # - VNC_RESOLUTION=1920x1080
+      # - MAX_OLD_SPACE_SIZE=2048
       # - DISPLAY=:109 # Forçando o display que o Xvfb está usando
 
     volumes:
