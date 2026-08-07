@@ -3,15 +3,12 @@ services:
     image: nousresearch/hermes-agent:latest
     container_name: hermes
     restart: unless-stopped
-    depends_on:
-      camofox:
-        condition: service_healthy
     command:
       - gateway
       - run
     expose:
-      - 8642 # gateway API
-      - 9119 # dashboard (only reached when HERMES_DASHBOARD=1)
+      - 127.0.0.1:8642 # gateway API
+      - 127.0.0.1:9119 # dashboard (only reached when HERMES_DASHBOARD=1)
     volumes:
       - /home/ubuntu/.hermes:/opt/data
       - /home/ubuntu/.camofox/profiles:/opt/data/home/.camofox/profiles:rw # RW!
@@ -30,75 +27,6 @@ services:
         limits:
           memory: 4G
           cpus: "2.0"
-  ### CAMOFOX ####
-  camofox:
-    image: ghcr.io/jo-inc/camofox-browser:latest
-    container_name: camofox
-    restart: unless-stopped
-    # user: 1001:1001
-    ports:
-      - 6080:6080
-      - 5901:5900
-      - 9377:9377
-    env_file: data/camofox/.env
-    environment:
-      - CAMOFOX_BIND_HOST=0.0.0.0
-      # === Diretórios persistidos (mapeados nos volumes abaixo) ===
-      - CAMOFOX_COOKIES_DIR=/home/node/.camofox/cookies
-      - CAMOFOX_PROFILE_DIR=/home/node/.camofox/profiles
-      - CAMOFOX_TRACES_DIR=/home/node/.camofox/traces
-      #
-      #
-      # === OPCIONAL: Proxy residencial (descomente e preencha se tiver) ===
-      # - PROXY_HOST=seu-proxy.residencial.com
-      # - PROXY_PORT=8080
-      # - PROXY_USERNAME=seu_usuario
-      # - PROXY_PASSWORD=sua_senha
-      #
-      # Para backconnect (rotating sticky sessions - ex: Bright Data, Oxylabs):
-      # - PROXY_STRATEGY=backconnect
-      # - PROXY_BACKCONNECT_HOST=gate.provider.com
-      # - PROXY_BACKCONNECT_PORT=7000
-
-      # === OPCIONAL: Configurações de performance ===
-      # - CAMOFOX_IDLE_TIMEOUT_MS=300000 # 5 min idle -> fecha browser (economiza RAM)
-      # - CAMOFOX_MAX_CONCURRENT_TABS=10 # limite de abas simultâneas
-      # - CAMOFOX_SNAPSHOT_MAX_ELEMENTS=200 # limite de elementos no snapshot
-      # === OPCIONAL: Telemetry (desative se quiser) ===
-      - CAMOFOX_CRASH_REPORT_ENABLED=true
-      - ENABLE_VNC=1
-      - VNC_BIND=0.0.0.0
-      - VNC_RESOLUTION=1920x1080
-      - MAX_OLD_SPACE_SIZE=2048
-      # - PUID=1001
-      # - PGID=1001
-    volumes:
-      - /home/ubuntu/.camofox/profiles:/home/node/.camofox/profiles:rw # RW - ESSENCIAL!
-      - /home/ubuntu/.camofox/cookies:/home/node/.camofox/cookies:ro
-      - /home/ubuntu/.camofox/traces:/home/node/.camofox/traces:rw
-    networks:
-      - edge
-    shm_size: 2g # necessário para Firefox/Camoufox
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 3G
-    # Healthcheck para monitoramento
-    healthcheck:
-      test:
-        - CMD
-        - curl
-        - -f
-        - http://localhost:9377/health
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 networks:
   edge:
     external: true

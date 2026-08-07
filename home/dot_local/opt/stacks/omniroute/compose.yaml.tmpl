@@ -1,14 +1,18 @@
 services:
   omniroute:
     container_name: omniroute
-    image: diegosouzapw/omniroute:latest
+    build:
+      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.49
+      target: runner-web
+      args:
+        OMNIROUTE_BASE_PATH: ${OMNIROUTE_BASE_PATH:-}
+    image: omniroute:v3.8.49-web
     restart: unless-stopped
     stop_grace_period: 40s
-    depends_on:
-      redis:
-        condition: service_healthy
     env_file: .env
     environment:
+      - NODE_ENV=production
+      - PORT=20128
       - DASHBOARD_PORT=20128
       - API_PORT=20129
       - LIVE_WS_PORT=20132
@@ -17,55 +21,41 @@ services:
       - API_HOST=0.0.0.0
       - HOSTNAME=0.0.0.0
       - DATA_DIR=/app/data
+      - REDIS_URL=redis://redis:6379/0
+      - NODE_OPTIONS=--max-old-space-size=2048
       # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       # - NEXT_PUBLIC_BASE_URL=https://your-domain.com
       # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
-      - REDIS_URL=redis://redis:6379
     expose:
       - "20128"
       - "20129"
       - "20132"
     volumes:
       - omniroute-data:/app/data
-    networks:
-      - edge
     healthcheck:
       test:
         - CMD
         - node
         - healthcheck.mjs
-      interval: 360s
+      interval: 30s
       timeout: 5s
       retries: 3
       start_period: 15s
-    #deploy:
-    #  mode: replicated
-    #  replicas: 3
-  # ── Redis (Rate Limiter Backend) ──────────────────────────────────
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    restart: unless-stopped
-    volumes:
-      - redis-data:/data
-    command: redis-server --save 60 1 --loglevel warning
-    ports:
-      - 6379:6379
     networks:
       - edge
-    healthcheck:
-      test:
-        - CMD
-        - redis-cli
-        - ping
-      interval: 10s
-      timeout: 5s
-      retries: 3
 volumes:
   omniroute-data: null
-  redis-data: null
 networks:
   edge:
     external: true
+
+# Opcional: Qdrant (profile memory) - adicione se precisar
+# qdrant:
+#   image: qdrant/qdrant:v1.12.4
+#   container_name: omniroute-qdrant
+#   restart: unless-stopped
+#   ports: ["6333:6333", "6334:6334"]
+#   volumes: [/home/ubuntu/omniroute/qdrant:/qdrant/storage]
+#   networks: [edge]
