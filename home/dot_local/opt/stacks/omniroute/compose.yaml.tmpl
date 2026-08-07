@@ -10,6 +10,8 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
+      - PUID=1001
+      - PGID=1001
       - NODE_ENV=production
       - PORT=20128
       - DASHBOARD_PORT=20128
@@ -29,20 +31,18 @@ services:
       - "20129"
       - "20132"
     volumes:
-      - {{ .chezmoi.homeDir }}/.local/share/apps/omniroute:/app/data
-#    healthcheck:
-#      test:
-#        - CMD
-#        - node
-#        - healthcheck.mjs
-#      interval: 30s
-#      timeout: 5s
-#      retries: 3
-#      start_period: 15s
+      - /home/ubuntu/.local/share/apps/omniroute:/app/data
+    #    healthcheck:
+    #      test:
+    #        - CMD
+    #        - node
+    #        - healthcheck.mjs
+    #      interval: 30s
+    #      timeout: 5s
+    #      retries: 3
+    #      start_period: 15s
     networks:
       - edge
-volumes:
-  omniroute-data: null
 networks:
   edge:
     external: true

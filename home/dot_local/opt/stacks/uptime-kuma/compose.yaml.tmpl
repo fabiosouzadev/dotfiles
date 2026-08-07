@@ -1,12 +1,13 @@
 services:
   uptime-kuma:
     image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
     restart: unless-stopped
     volumes:
-      - {{ .chezmoi.homeDir }}/.local/share/apps/update-kuma:/app/data
+      - /home/ubuntu/.local/share/apps/uptime-kuma:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - 127.0.0.1:3001:3001
+      - 3001:3001
     networks:
       - edge
 networks:
