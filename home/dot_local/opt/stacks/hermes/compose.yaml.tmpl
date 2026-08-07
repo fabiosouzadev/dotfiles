@@ -7,8 +7,8 @@ services:
       - gateway
       - run
     expose:
-      - 127.0.0.1:8642 # gateway API
-      - 127.0.0.1:9119 # dashboard (only reached when HERMES_DASHBOARD=1)
+      - 8642 # gateway API
+      - 9119 # dashboard (only reached when HERMES_DASHBOARD=1)
     volumes:
       - /home/ubuntu/.hermes:/opt/data
       - /home/ubuntu/.camofox/profiles:/opt/data/home/.camofox/profiles:rw # RW!

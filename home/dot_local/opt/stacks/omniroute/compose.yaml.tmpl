@@ -8,7 +8,6 @@ services:
         OMNIROUTE_BASE_PATH: ${OMNIROUTE_BASE_PATH:-}
     image: omniroute:v3.8.49-web
     restart: unless-stopped
-    stop_grace_period: 40s
     env_file: .env
     environment:
       - NODE_ENV=production
@@ -16,10 +15,7 @@ services:
       - DASHBOARD_PORT=20128
       - API_PORT=20129
       - LIVE_WS_PORT=20132
-      - LIVE_WS_HOST=0.0.0.0
-      - LIVE_WS_ALLOWED_ORIGINS=http://localhost:20128,http://127.0.0.1:20128
       - API_HOST=0.0.0.0
-      - HOSTNAME=0.0.0.0
       - DATA_DIR=/app/data
       - REDIS_URL=redis://redis:6379/0
       - NODE_OPTIONS=--max-old-space-size=2048
@@ -34,15 +30,15 @@ services:
       - "20132"
     volumes:
       - omniroute-data:/app/data
-    healthcheck:
-      test:
-        - CMD
-        - node
-        - healthcheck.mjs
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+#    healthcheck:
+#      test:
+#        - CMD
+#        - node
+#        - healthcheck.mjs
+#      interval: 30s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 15s
     networks:
       - edge
 volumes:
