@@ -10,8 +10,8 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      - PUID=1001
-      - PGID=1001
+      - PUID={{ .chezmoi.uid }}
+      - PGID={{ .chezmoi.gid }}
       - NODE_ENV=production
       - PORT=20128
       - DASHBOARD_PORT=20128
@@ -31,7 +31,7 @@ services:
       - "20129"
       - "20132"
     volumes:
-      - /home/ubuntu/.local/share/apps/omniroute:/app/data
+      - {{ .chezmoi.homeDir }}/.local/share/apps/omniroute:/app/data
     #    healthcheck:
     #      test:
     #        - CMD
