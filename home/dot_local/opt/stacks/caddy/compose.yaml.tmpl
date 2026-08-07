@@ -45,13 +45,11 @@ services:
       - 20132:20132 #omniroute WebSocket / Streaming
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - {{ .chezmoi.homeDir }}/.local/share/apps/caddy/data:/data
+      - {{ .chezmoi.homeDir }}/.local/share/apps/caddy/config:/config
     networks:
       - edge
-volumes:
-  caddy_data: null
-  caddy_config: null
+
 networks:
   edge:
     external: true

@@ -10,13 +10,13 @@ services:
       - 8642 # gateway API
       - 9119 # dashboard (only reached when HERMES_DASHBOARD=1)
     volumes:
-      - /home/ubuntu/.hermes:/opt/data
-      - /home/ubuntu/.camofox/profiles:/opt/data/home/.camofox/profiles:rw # RW!
-      - /home/ubuntu/.camofox/cookies:/opt/data/home/.camofox/cookies:ro
-      - /home/ubuntu/.camofox/traces:/opt/data/home/.camofox/traces:rw
+      - {{ .chezmoi.homeDir }}/.local/share/apps/hermes:/opt/data
+      - {{ .chezmoi.homeDir }}/.local/share/apps/camofox/profiles:/opt/data/home/.camofox/profiles:rw # RW!
+      - {{ .chezmoi.homeDir }}/.local/share/apps/camofox/cookies:/opt/data/home/.camofox/cookies:ro
+      - {{ .chezmoi.homeDir }}/.local/share/apps/camofox/traces:/opt/data/home/.camofox/traces:rw
     environment:
-      - PUID=1001
-      - PGID=1001
+      - PUID={{ .chezmoi.uid }}
+      - PGID={{ .chezmoi.gid }}
       - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
       - CAMOFOX_URL=http://camofox:9377
       - HERMES_DASHBOARD=1
