@@ -4,32 +4,26 @@ services:
     build:
       context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.49
       target: runner-web
-      args:
-        OMNIROUTE_BASE_PATH: ${OMNIROUTE_BASE_PATH:-}
     image: omniroute:v3.8.49-web
     restart: unless-stopped
+    stop_grace_period: 40s
     env_file: .env
     environment:
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
       - NODE_ENV=production
-      - PORT=20128
       - DASHBOARD_PORT=20128
       - API_PORT=20129
       - LIVE_WS_PORT=20132
-      - API_HOST=0.0.0.0
+      - LIVE_WS_ALLOWED_ORIGINS=http://localhost:20128,http://127.0.0.1:20128
       - DATA_DIR=/app/data
       - REDIS_URL=redis://redis:6379/0
-      - NODE_OPTIONS=--max-old-space-size=2048
       # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       # - NEXT_PUBLIC_BASE_URL=https://your-domain.com
       # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
-      - AUTH_COOKIE_SECURE=true
-    expose:
-      - "20128"
-      - "20129"
-      - "20132"
+      - OMNIROUTE_MEMORY_MB=2048
+    expose: ["20128", "20129", "20132"]
     volumes:
       - {{ .chezmoi.homeDir }}/.local/share/apps/omniroute:/app/data
     #    healthcheck:
