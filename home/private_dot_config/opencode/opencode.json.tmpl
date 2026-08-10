@@ -9,7 +9,7 @@
   "plugin": [
     "opencode-wakatime"
   ],
-  "model": "omniroute/omniroute/work",
+  "model": "omniroute/code",
   "provider": {
     "omniroute": {
       "npm": "@ai-sdk/openai-compatible",
@@ -19,8 +19,11 @@
         "apiKey": "{{ include $omniroute_key | decrypt | trim }}"
       },
       "models": {
-        "omniroute/work": {
-          "name": "omniroute/work"
+        "omniroute/code": {
+          "name": "code"
+        },
+        "omniroute/reasoning": {
+          "name": "reasoning"
         },
       }
     }
