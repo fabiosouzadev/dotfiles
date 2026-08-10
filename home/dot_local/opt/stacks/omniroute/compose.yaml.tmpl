@@ -12,34 +12,23 @@ services:
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
       - NODE_ENV=production
-      - DASHBOARD_PORT=20128
-      - API_PORT=20129
-      - LIVE_WS_PORT=20132
-      - LIVE_WS_ALLOWED_ORIGINS=http://localhost:20128,http://127.0.0.1:20128
-      - API_HOST=0.0.0.0
-      - HOSTNAME=0.0.0.0
-      - DATA_DIR=/app/data
-      - REDIS_URL=redis://redis:6379/0
-      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
-      # - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Internal server-to-server URL for scheduled jobs / self-fetches.
-      - BASE_URL=http://omniroute:20128
-      - AUTH_COOKIE_SECURE=true
-      - OMNIROUTE_MEMORY_MB=2048
     expose: ["20128", "20129", "20132"]
     volumes:
-      - {{ .chezmoi.homeDir }}/.local/share/apps/omniroute:/app/data
-    #    healthcheck:
-    #      test:
-    #        - CMD
-    #        - node
-    #        - healthcheck.mjs
-    #      interval: 30s
-    #      timeout: 5s
-    #      retries: 3
-    #      start_period: 15s
+      - omniroute-data:/app/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - healthcheck.mjs
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks:
       - edge
+
+volumes:
+  omniroute-data:      
 networks:
   edge:
     external: true
