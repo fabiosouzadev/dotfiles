@@ -42,6 +42,7 @@ services:
       - 9119:9119 #hermes dashboard
       - 20128:20128 #omniroute dashboard
       - 20129:20129 #omniroute api
+      - 20132:20132 #omniroute WebSocket / Streaming
     volumes:
       - {{ .chezmoi.homeDir }}/.local/share/apps/caddy/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
