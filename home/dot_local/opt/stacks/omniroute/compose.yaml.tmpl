@@ -12,7 +12,19 @@ services:
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
       - NODE_ENV=production
-    expose: ["20128", "20129", "20132"]
+      - DATA_DIR=/app/data
+      # - OMNIROUTE_BASE_PATH=${OMNIROUTE_BASE_PATH:-}
+      - PORT=20128
+      - DASHBOARD_PORT=20128
+      - API_PORT=20129
+      - API_HOST=0.0.0.0
+      - LIVE_WS_PORT=20132
+      - LIVE_WS_HOST=0.0.0.0
+      - LIVE_WS_ALLOWED_ORIGINS=http://localhost:20128,http://127.0.0.1:20128
+      - REDIS_URL=redis://redis:6379/0
+      - NODE_OPTIONS=--max-old-space-size=2048
+      - BASE_URL=http://omniroute:20128
+    ports: ["20128", "20129", "20132"]
     volumes:
       - omniroute-data:/app/data
     healthcheck:
