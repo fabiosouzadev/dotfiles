@@ -4,6 +4,9 @@ services:
     build:
       context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.49
       target: runner-web
+      args:
+        OMNIROUTE_USE_TURBOPACK: 1
+        OMNIROUTE_BUILD_MEMORY_MB: 4096
     image: omniroute:v3.8.49-web
     restart: unless-stopped
     stop_grace_period: 40s
@@ -11,20 +14,23 @@ services:
     environment:
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
+      - APP_LOG_LEVEL=debug
       - NODE_ENV=production
       - DATA_DIR=/app/data
-      # - OMNIROUTE_BASE_PATH=${OMNIROUTE_BASE_PATH:-}
-      - PORT=20128
+      - OMNIROUTE_BASE_PATH=${OMNIROUTE_BASE_PATH:-}
       - DASHBOARD_PORT=20128
       - API_PORT=20129
-      - API_HOST=0.0.0.0
+      - API_HOST=0.0.0.0 
       - LIVE_WS_PORT=20132
-      - LIVE_WS_HOST=0.0.0.0
-      - LIVE_WS_ALLOWED_ORIGINS=http://localhost:20128,http://127.0.0.1:20128
+      # - LIVE_WS_HOST=0.0.0.0
       - REDIS_URL=redis://redis:6379/0
-      - NODE_OPTIONS=--max-old-space-size=2048
+      - OMNIROUTE_MEMORY_MB=2048
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
+      # - NEXT_PUBLIC_BASE_URL=https://your-domain.com
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
-    ports: ["20128", "20129", "20132"]
+      # - AUTH_COOKIE_SECURE=true # se https
+    expose: ["20128", "20129", "20132"]
     volumes:
       - omniroute-data:/app/data
     healthcheck:
