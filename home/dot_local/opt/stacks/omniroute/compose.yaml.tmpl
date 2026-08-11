@@ -24,7 +24,10 @@ services:
       - LIVE_WS_PORT=20132
       # - LIVE_WS_HOST=0.0.0.0
       - REDIS_URL=redis://redis:6379/0
-      - OMNIROUTE_MEMORY_MB=2048
+      - OMNIROUTE_MEMORY_MB=512
+      - REQUIRE_API_KEY=true
+      - ALLOW_API_KEY_REVEAL=true
+      - BASE_URL=http://omniroute:20128
       # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       # - NEXT_PUBLIC_BASE_URL=https://your-domain.com
       # Internal server-to-server URL for scheduled jobs / self-fetches.
@@ -50,12 +53,3 @@ volumes:
 networks:
   edge:
     external: true
-
-# Opcional: Qdrant (profile memory) - adicione se precisar
-# qdrant:
-#   image: qdrant/qdrant:v1.12.4
-#   container_name: omniroute-qdrant
-#   restart: unless-stopped
-#   ports: ["6333:6333", "6334:6334"]
-#   volumes: [/home/ubuntu/omniroute/qdrant:/qdrant/storage]
-#   networks: [edge]
