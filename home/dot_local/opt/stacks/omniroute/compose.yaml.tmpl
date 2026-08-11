@@ -17,7 +17,6 @@ services:
       - APP_LOG_LEVEL=debug
       - NODE_ENV=production
       - DATA_DIR=/app/data
-      - OMNIROUTE_BASE_PATH=${OMNIROUTE_BASE_PATH:-}
       - DASHBOARD_PORT=20128
       - API_PORT=20129
       - API_HOST=0.0.0.0 
@@ -28,12 +27,6 @@ services:
       - OMNIROUTE_MEMORY_MB=512
       - REQUIRE_API_KEY=true
       - ALLOW_API_KEY_REVEAL=true
-      - BASE_URL=http://omniroute:20128
-      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
-      # - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Internal server-to-server URL for scheduled jobs / self-fetches.
-      - BASE_URL=http://omniroute:20128
-      # - AUTH_COOKIE_SECURE=true # se https
     expose: ["20128", "20129", "20132"]
     volumes:
       - omniroute-data:/app/data
