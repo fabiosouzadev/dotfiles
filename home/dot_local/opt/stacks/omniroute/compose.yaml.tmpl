@@ -12,14 +12,14 @@ services:
     stop_grace_period: 40s
     env_file: .env
     environment:
-      - PUID={{ .chezmoi.uid }}
-      - PGID={{ .chezmoi.gid }}
+      - PUID=1001
+      - PGID=1001
       - APP_LOG_LEVEL=debug
       - NODE_ENV=production
       - DATA_DIR=/app/data
       - DASHBOARD_PORT=20128
       - API_PORT=20129
-      - API_HOST=0.0.0.0 
+      - API_HOST=0.0.0.0
       - LIVE_WS_PORT=20132
       - LIVE_WS_HOST=0.0.0.0
       - LIVE_WS_ALLOWED_ORIGINS=http://localhost:20128,http://127.0.0.1:20128,http://193.123.97.209:20128
@@ -27,7 +27,10 @@ services:
       - OMNIROUTE_MEMORY_MB=512
       - REQUIRE_API_KEY=true
       - ALLOW_API_KEY_REVEAL=true
-    expose: ["20128", "20129", "20132"]
+    expose:
+      - "20128"
+      - "20129"
+      - "20132"
     volumes:
       - omniroute-data:/app/data
     healthcheck:
@@ -41,9 +44,8 @@ services:
       start_period: 15s
     networks:
       - edge
-
 volumes:
-  omniroute-data:      
+  omniroute-data: null
 networks:
   edge:
     external: true
