@@ -8,8 +8,8 @@ services:
       - "9377"
     env_file: .env
     environment:
-      - PUID=1001
-      - PGID=1001
+      - PUID={{ .chezmoi.uid }}
+      - PGID={{ .chezmoi.gid }}
       - CAMOFOX_BIND_HOST=0.0.0.0
       # === Diretórios persistidos (mapeados nos volumes abaixo) ===
       - CAMOFOX_COOKIES_DIR=/home/node/.camofox/cookies

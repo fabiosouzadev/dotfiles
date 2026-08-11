@@ -12,8 +12,8 @@ services:
     stop_grace_period: 40s
     env_file: .env
     environment:
-      - PUID=1001
-      - PGID=1001
+      - PUID={{ .chezmoi.uid }}
+      - PGID={{ .chezmoi.gid }}
       - APP_LOG_LEVEL=debug
       - NODE_ENV=production
       - DATA_DIR=/app/data
@@ -27,6 +27,8 @@ services:
       - REQUIRE_API_KEY=true
       - ALLOW_API_KEY_REVEAL=true
       - LIVE_WS_ALLOWED_HOSTS=localhost,omniroute,193.123.97.209
+      - QUOTA_STORE_DRIVER=redis # sqlite | redis
+      - QUOTA_STORE_REDIS_URL=redis://redis:6379 #(apenas quando driver=redis)
     expose:
       - "20128"
       - "20129"
