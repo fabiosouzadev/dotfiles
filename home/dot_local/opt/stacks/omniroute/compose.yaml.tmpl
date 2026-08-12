@@ -29,6 +29,7 @@ services:
       - LIVE_WS_ALLOWED_HOSTS=localhost,omniroute,193.123.97.209
       - QUOTA_STORE_DRIVER=redis # sqlite | redis
       - QUOTA_STORE_REDIS_URL=redis://redis:6379/0 #(apenas quando driver=redis)
+      - OMNIROUTE_PUBLIC_BASE_URL=http://193.123.97.209:20128
     expose:
       - "20128"
       - "20129"
