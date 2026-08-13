@@ -43,8 +43,8 @@ services:
       - CONTEXT_WINDOW_RECONCILE_INTERVAL=21600
       - ARENA_ELO_SYNC_INTERVAL=21600
       #RAM
-      - OMNIROUTE_MEMORY_MB=1536
-      - NODE_OPTIONS=--max-old-space-size=1536
+      - OMNIROUTE_MEMORY_MB=2048
+      - NODE_OPTIONS=--max-old-space-size=2048
       #Rate limit
       - RATE_LIMIT_MAX_WAIT_MS=20000 #15000
     expose:
