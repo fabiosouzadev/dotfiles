@@ -12,7 +12,20 @@
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "omniroute/code",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "omniroute/agents"
   },
-  "theme": "dark",
+  "permissions": {
+    "allow": [
+      "Bash(npx gsd-core *)",
+      "Read(.planning/*)",
+      "Write(.planning/*)",
+      "Read(STATE.md)",
+      "Write(STATE.md)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(.secrets)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
@@ -189,5 +202,7 @@
       "Read(.env.*)",
       "Read(.secrets)"
     ]
-  }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark"
 }
