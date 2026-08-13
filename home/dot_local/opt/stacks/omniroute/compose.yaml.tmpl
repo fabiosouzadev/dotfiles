@@ -12,23 +12,36 @@ services:
     stop_grace_period: 40s
     env_file: .env
     environment:
+      # Enviroment
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
       - APP_LOG_LEVEL=debug
       - NODE_ENV=production
+      # Configs
       - DATA_DIR=/app/data
       - DASHBOARD_PORT=20128
       - API_PORT=20129
       - API_HOST=0.0.0.0
       - LIVE_WS_PORT=20132
       - LIVE_WS_HOST=0.0.0.0
-      - REDIS_URL=redis://redis:6379/0
+      - LIVE_WS_ALLOWED_HOSTS=localhost,omniroute,193.123.97.209
+      - OMNIROUTE_PUBLIC_BASE_URL=http://193.123.97.209:20128
+      # Security
       - REQUIRE_API_KEY=true
       - ALLOW_API_KEY_REVEAL=true
-      - LIVE_WS_ALLOWED_HOSTS=localhost,omniroute,193.123.97.209
+      # Redis
+      - REDIS_URL=redis://redis:6379/0
       - QUOTA_STORE_DRIVER=redis # sqlite | redis
       - QUOTA_STORE_REDIS_URL=redis://redis:6379/0 #(apenas quando driver=redis)
-      - OMNIROUTE_PUBLIC_BASE_URL=http://193.123.97.209:20128
+      #Price Sync
+      - PRICING_SYNC_ENABLED=true
+      - PRICING_SYNC_SOURCES=litellm
+      - PRICING_SYNC_INTERVAL=43200
+      # Models dev sync
+      - MODELS_DEV_SYNC_ENABLED=true
+      - MODELS_DEV_SYNC_INTERVAL=43200
+      - CONTEXT_WINDOW_RECONCILE_INTERVAL=43200
+      #RAM
       - OMNIROUTE_MEMORY_MB=1536
       - NODE_OPTIONS=--max-old-space-size=1536
     expose:
