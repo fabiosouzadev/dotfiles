@@ -45,6 +45,8 @@ services:
       #RAM
       - OMNIROUTE_MEMORY_MB=1536
       - NODE_OPTIONS=--max-old-space-size=1536
+      #Rate limit
+      - RATE_LIMIT_MAX_WAIT_MS=100000
     expose:
       - "20128"
       - "20129"
