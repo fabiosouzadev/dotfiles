@@ -3,9 +3,6 @@ services:
     build:
       context: .                # diretório onde estão docker‑compose.yml e Dockerfile
       dockerfile: ./Dockerfile
-      args:
-        OMNIROUTE_USE_TURBOPACK: 1
-        OMNIROUTE_BUILD_MEMORY_MB: 4096
     image: omniroute:v3.8.49-web-qoder
     restart: unless-stopped
     stop_grace_period: 40s
@@ -32,18 +29,20 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - QUOTA_STORE_DRIVER=redis # sqlite | redis
       - QUOTA_STORE_REDIS_URL=redis://redis:6379/0 #(apenas quando driver=redis)
-      #Price Sync
-      - PRICING_SYNC_ENABLED=true
-      - PRICING_SYNC_SOURCES=litellm
-      - PRICING_SYNC_INTERVAL=21600
-      # Models dev sync
-      - MODELS_DEV_SYNC_ENABLED=true
-      - MODELS_DEV_SYNC_INTERVAL=21600
-      - CONTEXT_WINDOW_RECONCILE_INTERVAL=21600
-      - ARENA_ELO_SYNC_INTERVAL=21600
-      #RAM
-      - OMNIROUTE_MEMORY_MB=2048
-      - NODE_OPTIONS=--max-old-space-size=2048
+      #### Price Sync
+      #- PRICING_SYNC_ENABLED=true
+      #- PRICING_SYNC_SOURCES=litellm
+      #- PRICING_SYNC_INTERVAL=21600
+      #### Models dev sync
+      #- MODELS_DEV_SYNC_ENABLED=true
+      #- MODELS_DEV_SYNC_INTERVAL=21600
+      #- CONTEXT_WINDOW_RECONCILE_INTERVAL=21600
+      #### ARENA SYNC
+      #- ARENA_ELO_SYNC_INTERVAL=21600
+      - ARENA_ELO_SYNC_ENABLED=false #Erro nesta versão
+      #### RAM
+      - OMNIROUTE_MEMORY_MB=1024
+      - NODE_OPTIONS=--max-old-space-size=1024
       #Rate limit
       - RATE_LIMIT_MAX_WAIT_MS=35000 #15000
       #Healthcheck
