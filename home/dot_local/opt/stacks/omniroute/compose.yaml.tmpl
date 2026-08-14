@@ -1,13 +1,13 @@
 services:
   omniroute:
-    container_name: omniroute
     build:
-      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.49
+      context: .
+      dockerfile: ./Dockerfile
       target: runner-web
       args:
         OMNIROUTE_USE_TURBOPACK: 1
         OMNIROUTE_BUILD_MEMORY_MB: 4096
-    image: omniroute:v3.8.49-web
+    image: omniroute:v3.8.49-web-qoder
     restart: unless-stopped
     stop_grace_period: 40s
     env_file: .env
@@ -43,10 +43,10 @@ services:
       - CONTEXT_WINDOW_RECONCILE_INTERVAL=21600
       - ARENA_ELO_SYNC_INTERVAL=21600
       #RAM
-      - OMNIROUTE_MEMORY_MB=1024
-      - NODE_OPTIONS=--max-old-space-size=1024
+      - OMNIROUTE_MEMORY_MB=2048
+      - NODE_OPTIONS=--max-old-space-size=2048
       #Rate limit
-      - RATE_LIMIT_MAX_WAIT_MS=30000 #15000
+      - RATE_LIMIT_MAX_WAIT_MS=35000 #15000
     expose:
       - "20128"
       - "20129"
