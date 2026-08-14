@@ -1,7 +1,7 @@
 services:
   omniroute:
     build:
-      context: .
+      context: .                # diretório onde estão docker‑compose.yml e Dockerfile
       dockerfile: ./Dockerfile
       target: runner-web
       args:
