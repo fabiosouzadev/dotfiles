@@ -46,6 +46,9 @@ services:
       - NODE_OPTIONS=--max-old-space-size=2048
       #Rate limit
       - RATE_LIMIT_MAX_WAIT_MS=35000 #15000
+      #Healthcheck
+      - PROXY_HEALTH_INTERVAL_MS=3600000
+      - OMNIROUTE_BUDGET_RESET_JOB_INTERVAL_MS=3600000
     expose:
       - "20128"
       - "20129"
