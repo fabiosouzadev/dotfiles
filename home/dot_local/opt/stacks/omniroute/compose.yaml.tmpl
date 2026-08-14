@@ -3,7 +3,6 @@ services:
     build:
       context: .                # diretório onde estão docker‑compose.yml e Dockerfile
       dockerfile: ./Dockerfile
-      target: runner-web
       args:
         OMNIROUTE_USE_TURBOPACK: 1
         OMNIROUTE_BUILD_MEMORY_MB: 4096
