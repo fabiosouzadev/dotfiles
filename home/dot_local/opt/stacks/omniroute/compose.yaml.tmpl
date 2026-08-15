@@ -30,12 +30,12 @@ services:
       - QUOTA_STORE_DRIVER=redis # sqlite | redis
       - QUOTA_STORE_REDIS_URL=redis://redis:6379/0 #(apenas quando driver=redis)
       # qdrant
+      - QDRANT_ENABLED=true
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       - QDRANT_GRPC_PORT=6334
-      # QDRANT_API_KEY=
       - QDRANT_COLLECTION=omniroute-memory
-      - QDRANT_EMBEDDING_MODEL=text-embedding-3-small
+      - QDRANT_EMBEDDING_MODEL=openrouter/nvidia/nemotron-3-embed-1b:free
       - QDRANT_VECTOR_SIZE=1536
       - QDRANT_HNSW_EF_CONSTRUCT=128
       #### Price Sync
@@ -43,7 +43,7 @@ services:
       #- PRICING_SYNC_SOURCES=litellm
       #- PRICING_SYNC_INTERVAL=21600
       #### Models dev sync
-      #- MODELS_DEV_SYNC_ENABLED=true
+      - MODELS_DEV_SYNC_ENABLED=false
       #- MODELS_DEV_SYNC_INTERVAL=21600
       #- CONTEXT_WINDOW_RECONCILE_INTERVAL=21600
       #### ARENA SYNC
