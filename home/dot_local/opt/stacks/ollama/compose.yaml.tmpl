@@ -1,0 +1,19 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - edge
+
+volumes:
+  ollama_data: null
+networks:
+  edge:
+    external: true
