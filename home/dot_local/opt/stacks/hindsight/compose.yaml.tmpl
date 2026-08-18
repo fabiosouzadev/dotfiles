@@ -62,12 +62,18 @@ services:
       - HINDSIGHT_API_LLM_MODEL=openrouter/nvidia/nemotron-3-embed-1b:free
       - HINDSIGHT_API_LLM_BASE_URL=http://omniroute:20129/v1
 
-      - HINDSIGHT_API_LLM_MAX_CONCURRENT= 4
+      - HINDSIGHT_API_LLM_MAX_CONCURRENT=4
       - HINDSIGHT_API_LLM_MAX_RETRIES=3
-      - HINDSIGHT_API_LLM_TIMEOUT= 120
+      - HINDSIGHT_API_LLM_TIMEOUT=120
 
       # Important for structured memory extraction
       - HINDSIGHT_API_LLM_STRICT_SCHEMA=true
+
+      # --------------------------------------------------
+      # MCP
+      # --------------------------------------------------
+      - HINDSIGHT_API_MCP_ENABLED=true
+      - HINDSIGHT_API_TENANT_API_KEY=${HINDSIGHT_API_TENANT_API_KEY}
 
       # --------------------------------------------------
       # Observations / consolidation
@@ -80,10 +86,7 @@ services:
 
     ports:
       - "9999:9999"
-
-    volumes:
-      - {{ .chezmoi.homeDir }}/.local/share/apps/hindsight:/home/hindsight/.pg0
-
+    
     networks:
       - hindsight
       - edge
