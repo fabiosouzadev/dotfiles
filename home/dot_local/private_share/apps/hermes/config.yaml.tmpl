@@ -81,7 +81,7 @@ tool_loop_guardrails:
 compression:
   enabled: true
   progress_notices: false
-  threshold: 0.9
+  threshold: 0.5
   target_ratio: 0.3
   protect_last_n: 10
   min_tail_user_messages: 1
@@ -134,9 +134,10 @@ memory:
   user_profile_enabled: true
   memory_char_limit: 2200
   user_char_limit: 1375
-  provider: mem0
+  provider: hindsight
   nudge_interval: 10
   flush_min_turns: 6
+  write_approval: true
 delegation:
   max_iterations: 50
 skills:
