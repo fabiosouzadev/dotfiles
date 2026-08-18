@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${HINDSIGHT_POSTGRES_PASSWORD}
 
     volumes:
-      - {{ .chezmoi.homeDir }}/.local/share/apps/postgres:/var/lib/postgresql/data
+      - {{ .chezmoi.homeDir }}/.local/share/apps/hindsight/postgres/data:/var/lib/postgresql/data
 
     healthcheck:
       test:
@@ -49,8 +49,7 @@ services:
       # --------------------------------------------------
       # PostgreSQL
       # --------------------------------------------------
-      - HINDSIGHT_API_DATABASE_URL: >-
-        postgresql://hindsight:${HINDSIGHT_POSTGRES_PASSWORD}@postgres:5432/hindsight
+      - HINDSIGHT_API_DATABASE_URL: postgresql://hindsight:${HINDSIGHT_POSTGRES_PASSWORD}@postgres:5432/hindsight
       - HINDSIGHT_API_VECTOR_EXTENSION: pgvector
 
       # --------------------------------------------------
