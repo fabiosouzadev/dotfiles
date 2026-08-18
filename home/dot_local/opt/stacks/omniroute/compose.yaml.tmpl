@@ -4,6 +4,8 @@ services:
       context: .                # diretório onde estão docker‑compose.yml e Dockerfile
       dockerfile: ./Dockerfile
     image: omniroute:v3.8.49-web-qoder
+    deploy:
+      replicas: 2
     restart: unless-stopped
     stop_grace_period: 40s
     env_file: .env
@@ -40,24 +42,24 @@ services:
       - QDRANT_VECTOR_SIZE=1536
       - QDRANT_HNSW_EF_CONSTRUCT=128
       #### Price Sync
-      #- PRICING_SYNC_ENABLED=true
-      #- PRICING_SYNC_SOURCES=litellm
-      #- PRICING_SYNC_INTERVAL=21600
+      - PRICING_SYNC_ENABLED=true
+      - PRICING_SYNC_SOURCES=litellm
+      - PRICING_SYNC_INTERVAL=43200
       #### Models dev sync
-      - MODELS_DEV_SYNC_ENABLED=false
-      #- MODELS_DEV_SYNC_INTERVAL=21600
-      #- CONTEXT_WINDOW_RECONCILE_INTERVAL=21600
+      - MODELS_DEV_SYNC_ENABLED=true
+      - MODELS_DEV_SYNC_INTERVAL=43200
+      - CONTEXT_WINDOW_RECONCILE_INTERVAL=43200
       #### ARENA SYNC
-      #- ARENA_ELO_SYNC_INTERVAL=21600
+      - ARENA_ELO_SYNC_INTERVAL=43200
       - ARENA_ELO_SYNC_ENABLED=false #Erro nesta versão
       #### RAM
-      - OMNIROUTE_MEMORY_MB=1024
-      - NODE_OPTIONS=--max-old-space-size=1024
+      - OMNIROUTE_MEMORY_MB=2048
+      - NODE_OPTIONS=--max-old-space-size=2048
       #Rate limit
-      - RATE_LIMIT_MAX_WAIT_MS=35000 #15000
+      # - RATE_LIMIT_MAX_WAIT_MS=35000 #15000
       #Healthcheck
-      - PROXY_HEALTH_INTERVAL_MS=3600000
-      - OMNIROUTE_DISABLE_CREDENTIAL_HEALTH_CHECK=true
+      - PROXY_HEALTH_INTERVAL_MS=10800000
+      - OMNIROUTE_DISABLE_CREDENTIAL_HEALTH_CHECK=false
     expose:
       - "20128"
       - "20129"
