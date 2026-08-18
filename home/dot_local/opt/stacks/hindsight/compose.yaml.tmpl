@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${HINDSIGHT_POSTGRES_PASSWORD}
 
     volumes:
-      - {{ .chezmoi.homeDir }}/.local/share/apps/hindsight/postgres/data:/var/lib/postgresql/data
+      - {{ .chezmoi.homeDir }}/.local/share/apps/postgres-hindsight:/var/lib/postgresql/data
 
     healthcheck:
       test:
@@ -38,6 +38,8 @@ services:
       # --------------------------------------------------
       # Server
       # --------------------------------------------------
+      - PUID={{ .chezmoi.uid }}
+      - PGID={{ .chezmoi.gid }}
       - HINDSIGHT_API_HOST=0.0.0.0
       - HINDSIGHT_API_PORT=8888
       - HINDSIGHT_API_LOG_LEVEL=info
@@ -78,6 +80,9 @@ services:
 
     ports:
       - "9999:9999"
+
+    volumes:
+      - {{ .chezmoi.homeDir }}/.local/share/apps/hindsight:/home/hindsight/.pg0
 
     networks:
       - hindsight
