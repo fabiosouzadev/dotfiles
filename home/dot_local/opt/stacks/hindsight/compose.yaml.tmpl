@@ -1,7 +1,7 @@
 services:
-  postgres:
+  postgres-hindsight:
     image: pgvector/pgvector:pg17
-    container_name: postgres
+    container_name: postgres-hindsight
     restart: unless-stopped
     env_file: .env
     environment:
@@ -48,7 +48,7 @@ services:
       # --------------------------------------------------
       # PostgreSQL
       # --------------------------------------------------
-      - HINDSIGHT_API_DATABASE_URL=postgresql://hindsight:${HINDSIGHT_POSTGRES_PASSWORD}@postgres:5432/hindsight
+      - HINDSIGHT_API_DATABASE_URL=postgresql://hindsight:${HINDSIGHT_POSTGRES_PASSWORD}@postgres-hindsight:5432/hindsight
       - HINDSIGHT_API_VECTOR_EXTENSION=pgvector
 
       # --------------------------------------------------
