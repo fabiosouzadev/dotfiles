@@ -38,41 +38,40 @@ services:
       # --------------------------------------------------
       # Server
       # --------------------------------------------------
-
-      - HINDSIGHT_API_HOST: 0.0.0.0
-      - HINDSIGHT_API_PORT: 8888
-      - HINDSIGHT_API_LOG_LEVEL: info
-      - HINDSIGHT_API_LOG_FORMAT: json
-      - HINDSIGHT_API_WORKER_ENABLED: "true"
-      - HINDSIGHT_API_WORKER_ID: hindsight-prod
+      - HINDSIGHT_API_HOST=0.0.0.0
+      - HINDSIGHT_API_PORT=8888
+      - HINDSIGHT_API_LOG_LEVEL=info
+      - HINDSIGHT_API_LOG_FORMAT=json
+      - HINDSIGHT_API_WORKER_ENABLED="true"
+      - HINDSIGHT_API_WORKER_ID=hindsight-prod
 
       # --------------------------------------------------
       # PostgreSQL
       # --------------------------------------------------
-      - HINDSIGHT_API_DATABASE_URL: postgresql://hindsight:${HINDSIGHT_POSTGRES_PASSWORD}@postgres:5432/hindsight
-      - HINDSIGHT_API_VECTOR_EXTENSION: pgvector
+      - HINDSIGHT_API_DATABASE_URL=postgresql://hindsight:${HINDSIGHT_POSTGRES_PASSWORD}@postgres:5432/hindsight
+      - HINDSIGHT_API_VECTOR_EXTENSION=pgvector
 
       # --------------------------------------------------
       # LLM
       # --------------------------------------------------
 
-      - HINDSIGHT_API_LLM_PROVIDER: openai
-      - HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_LLM_API_KEY}
-      - HINDSIGHT_API_LLM_MODEL: openrouter/nvidia/nemotron-3-embed-1b:free
-      - HINDSIGHT_API_LLM_BASE_URL: http://omniroute:20129/v1
+      - HINDSIGHT_API_LLM_PROVIDER=openai
+      - HINDSIGHT_API_LLM_API_KEY=${HINDSIGHT_LLM_API_KEY}
+      - HINDSIGHT_API_LLM_MODEL=openrouter/nvidia/nemotron-3-embed-1b:free
+      - HINDSIGHT_API_LLM_BASE_URL=http://omniroute:20129/v1
 
-      - HINDSIGHT_API_LLM_MAX_CONCURRENT: 4
-      - HINDSIGHT_API_LLM_MAX_RETRIES: 3
-      - HINDSIGHT_API_LLM_TIMEOUT: 120
+      - HINDSIGHT_API_LLM_MAX_CONCURRENT= 4
+      - HINDSIGHT_API_LLM_MAX_RETRIES=3
+      - HINDSIGHT_API_LLM_TIMEOUT= 120
 
       # Important for structured memory extraction
-      - HINDSIGHT_API_LLM_STRICT_SCHEMA: "true"
+      - HINDSIGHT_API_LLM_STRICT_SCHEMA=true
 
       # --------------------------------------------------
       # Observations / consolidation
       # --------------------------------------------------
 
-      - HINDSIGHT_API_AUDIT_LOG_ENABLED: "true"
+      - HINDSIGHT_API_AUDIT_LOG_ENABLED=true
 
     expose:
       - "8888"
