@@ -1,7 +1,7 @@
 services:
-  postgres-hindsight:
+  postgres:
     image: pgvector/pgvector:pg17
-    container_name: postgres-hindsight
+    container_name: postgres
     restart: unless-stopped
     env_file: .env
     environment:
@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
 
     depends_on:
-      postgres-hindsight:
+      postgres:
         condition: service_healthy
 
     env_file: .env
