@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
 
     depends_on:
-      postgres:
+      postgres-hindsight:
         condition: service_healthy
 
     env_file: .env
