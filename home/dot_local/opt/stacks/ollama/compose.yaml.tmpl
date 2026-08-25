@@ -3,11 +3,7 @@ services:
     image: ollama/ollama:latest
     container_name: ollama
     restart: unless-stopped
-    command:
-      - ollama
-      - serve
-      - --auth-required
-      - --api-key $OLLAMA_API_KEY
+    command: ["ollama", "serve", "--api-key", "${OLLAMA_API_KEY}"]
     env_file: .env
     expose:
       - "11434"
