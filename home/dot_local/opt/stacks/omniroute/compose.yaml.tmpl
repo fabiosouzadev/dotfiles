@@ -1,9 +1,12 @@
 services:
   omniroute:
     build:
-      context: .                # diretório onde estão docker‑compose.yml e Dockerfile
-      dockerfile: ./Dockerfile
-    image: omniroute:v3.8.49-web-qoder
+      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.50
+      target: runner-web
+      args:
+        OMNIROUTE_USE_TURBOPACK: 1
+        OMNIROUTE_BUILD_MEMORY_MB: 4096
+    image: omniroute:v3.8.50-web
     deploy:
       replicas: 1
     restart: unless-stopped
