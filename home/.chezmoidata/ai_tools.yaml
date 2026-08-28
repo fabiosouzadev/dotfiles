@@ -44,6 +44,10 @@ ai_tools:
     - name: gsd-core
       package: "@opengsd/gsd-core@latest --force --all --global"
       feature_flag: spec_tools
+    - name: hindsight-coding-agent
+      package: "@vectorize-io/hindsight-coding-agents install all"
+      feature_flag: coding_assistants
+
   curl:
     - name: aider
       url: "https://aider.chat/install.sh"

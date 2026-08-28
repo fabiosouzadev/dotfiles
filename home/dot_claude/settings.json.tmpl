@@ -6,10 +6,10 @@
   "env": {
     "ANTHROPIC_BASE_URL": "http://193.123.97.209:20129/v1",
     "ANTHROPIC_AUTH_TOKEN": "{{ include $omniroute_key | decrypt | trim }}",
-    "ANTHROPIC_MODEL": "omniroute/code",
-    "ANTHROPIC_SMALL_FAST_MODEL": "omniroute/code",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "omniroute/code",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "omniroute/code",
+    "ANTHROPIC_MODEL": "omnirouter/unorouter-coding",
+    "ANTHROPIC_SMALL_FAST_MODEL": "omnirouter/unorouter-coding",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "omnirouter/unorouter-coding",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "omnirouter/unorouter-coding",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "omniroute/agents"
   },
   "permissions": {
@@ -41,6 +41,15 @@
           {
             "type": "command",
             "command": "bash \"/home/fabio.souza/.claude/hooks/gsd-session-state.sh\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/fabio.souza/.hindsight/coding-agents/dist/claude-sessionstart-hook.js\"",
+            "timeout": 30
           }
         ]
       }
@@ -159,6 +168,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/fabio.souza/.hindsight/coding-agents/dist/claude-stop-hook.js\"",
+            "timeout": 60
+          }
+        ]
       }
     ],
     "PreCompact": [
@@ -183,6 +201,17 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/fabio.souza/.hindsight/coding-agents/dist/claude-hook.js\"",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -204,5 +233,6 @@
     ]
   },
   "skipDangerousModePermissionPrompt": true,
-  "theme": "dark"
+  "theme": "dark",
+  "model": "opus"
 }

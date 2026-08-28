@@ -176,3 +176,8 @@ config_file = "/home/fabio.souza/.codex/agents/gsd-user-profiler.toml"
 [agents.gsd-verifier]
 description = "Verifies phase goal achievement through goal-backward analysis. Checks codebase delivers what phase promised, not just that tasks completed. Creates VERIFICATION.md report."
 config_file = "/home/fabio.souza/.codex/agents/gsd-verifier.toml"
+
+[mcp_servers.hindsight]
+command = "node"
+args = ["/home/fabio.souza/.hindsight/coding-agents/dist/mcp-server.js"]
+env = { HINDSIGHT_MCP_HARNESS = "codex" }
