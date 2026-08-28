@@ -5,7 +5,7 @@ services:
       dockerfile: ./Dockerfile
     image: omniroute:v3.8.49-web-qoder
     deploy:
-      replicas: 2
+      replicas: 1
     restart: unless-stopped
     stop_grace_period: 40s
     env_file: .env
