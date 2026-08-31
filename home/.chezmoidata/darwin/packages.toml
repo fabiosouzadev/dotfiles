@@ -98,6 +98,10 @@ id   = 1153157709
 name = "Xcode"
 id   = 497799835
 
+[[packages.homebrew.mas]]
+name = "Memory Diag"
+id   = "748212890"
+
 
 [packages]
 macports = [
