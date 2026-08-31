@@ -3,14 +3,14 @@ model:
   {{/*  provider: custom                */ -}}
   {{/*  base_url: ${OMNIROUTE_BASE_URL} */ -}}
   {{/*  api_key: ${OMNIROUTE_API_KEY}   */ -}}
-  default: upstage/solar-pro4:free
+  default: tencent/hy3:free
   provider: nous
   base_url: https://inference-api.nousresearch.com/v1
 agent:
   max_turns: 150
   verify_on_stop: false
   verbose: false
-  reasoning_effort: medium
+  reasoning_effort: high
   personalities:
     helpful: You are a helpful, friendly AI assistant.
     concise: You are a concise assistant. Keep responses brief and to the point.
