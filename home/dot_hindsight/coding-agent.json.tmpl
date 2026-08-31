@@ -4,5 +4,8 @@
   "serverMode": "self-hosted",
   "apiUrl": "http://193.123.97.209:8888",
   "apiToken": "{{ include $hindsight_key | decrypt | trim }}",
-  "bankId": "personal-ai"
+  "bankId": "personal-ai",
+  "retainTags": ["project:{gitProject}"],
+  "retainMetadata": { "repo": "{gitProject}" },
+  "reflectTimeoutMs": 330000
 }
