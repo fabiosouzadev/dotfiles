@@ -156,8 +156,9 @@ approvals:
   mode: smart
   destructive_slash_confirm: false
 command_allowlist:
-  - execute_code
   - script execution via -e/-c flag
+  - command parser limit or malformed executable payload
+  - execute_code
 code_execution:
   timeout: 300
   max_tool_calls: 50
