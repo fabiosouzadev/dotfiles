@@ -13,6 +13,11 @@ model:
   provider: nous
   default: upstage/solar-pro4:free
   base_url: https://inference-api.nousresearch.com/v1
+fallback_providers:
+  - provider: custom
+    model: omniroute/agents
+    base_url: ${OMNIROUTE_BASE_URL}
+    api_key: ${OMNIROUTE_API_KEY}
 agent:
   max_turns: 150
   verify_on_stop: false
@@ -242,11 +247,6 @@ custom_providers:
     base_url: ${OMNIROUTE_BASE_URL}
     key_env: ${OMNIROUTE_API_KEY}
     model: omniroute/agents
-fallback_providers:
-  - provider: Omniroute
-    model: omniroute/agents
-    base_url: ${OMNIROUTE_BASE_URL}
-    key_env: ${OMNIROUTE_API_KEY}
 known_plugin_toolsets:
   cli:
     - spotify
