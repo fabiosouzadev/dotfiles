@@ -1,23 +1,25 @@
 model:
-  {{/* default: omniroute/agents        */ -}}
-  {{/* provider: custom                */ -}}
-  {{/* base_url: ${OMNIROUTE_BASE_URL} */ -}}
-  {{/* api_key: ${OMNIROUTE_API_KEY}   */ -}}
-  
+  {{/* provider: nous                    */ -}}
+  {{/* default: upstage/solar-pro4:free  */ -}}
   {{/* default: upstage/solar-pro4:free */ -}}
   {{/* default: meituan/longcat-2.0:free */ -}}
   {{/* default: stepfun/step-3.7-flash:free */ -}}
   {{/* default: inclusionai/ling-3.0-flash-fin:free */ -}}
   {{/* default: poolside/laguna-s-2.1:free */ -}}
   {{/* default: poolside/laguna-xs-2.1:free */ -}}
-  provider: nous
-  default: upstage/solar-pro4:free
-  base_url: https://inference-api.nousresearch.com/v1
+  {{/* base_url: https://inference-api.nousresearch.com/v1 */ -}}
+  default: omniroute/agents
+  provider: custom
+  base_url: ${OMNIROUTE_BASE_URL}
+  api_key: ${OMNIROUTE_API_KEY}
 fallback_providers:
-  - provider: custom
+  {{/* - provider: custom
     model: omniroute/agents
     base_url: ${OMNIROUTE_BASE_URL}
-    api_key: ${OMNIROUTE_API_KEY}
+    api_key: ${OMNIROUTE_API_KEY} */ -}}
+  - provider: custom
+    model: meituan/longcat-2.0:free
+    base_url: https://inference-api.nousresearch.com/v1
 agent:
   max_turns: 150
   verify_on_stop: false
