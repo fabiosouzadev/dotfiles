@@ -8,8 +8,8 @@ model:
   {{/* default: poolside/laguna-s-2.1:free */ -}}
   {{/* default: poolside/laguna-xs-2.1:free */ -}}
   {{/* base_url: https://inference-api.nousresearch.com/v1 */ -}}
-  default: omniroute/agents
   provider: custom
+  default: omniroute/agents
   base_url: ${OMNIROUTE_BASE_URL}
   api_key: ${OMNIROUTE_API_KEY}
 fallback_providers:
@@ -17,9 +17,8 @@ fallback_providers:
     model: omniroute/agents
     base_url: ${OMNIROUTE_BASE_URL}
     api_key: ${OMNIROUTE_API_KEY} */ -}}
-  - provider: custom
+  - provider: nous
     model: meituan/longcat-2.0:free
-    base_url: https://inference-api.nousresearch.com/v1
 agent:
   max_turns: 150
   verify_on_stop: false
