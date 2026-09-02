@@ -15,6 +15,9 @@ env_key                         = "OMNIROUTE_API_KEY"
 requires_openai_auth            = false
 wire_api                        = "responses"
 
+[features]
+hooks = true
+
 [mcp_servers.hindsight]
 command                         = "node"
 args                            = ["/home/fabio.souza/.hindsight/coding-agents/dist/mcp-server.js"]

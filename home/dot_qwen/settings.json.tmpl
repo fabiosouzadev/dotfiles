@@ -4,7 +4,7 @@
       "selectedType": "qwen-oauth"
     }
   },
-  "$version": 2,
+  "$version": 4,
   "ui": {
     "theme": "GitHub"
   },
@@ -26,6 +26,15 @@
           {
             "type": "command",
             "command": "bash \"/home/fabio.souza/.qwen/hooks/gsd-session-state.sh\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/fabio.souza/.hindsight/coding-agents/dist/qwen-sessionstart-hook.js\"",
+            "timeout": 30000
           }
         ]
       }
@@ -144,6 +153,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/fabio.souza/.hindsight/coding-agents/dist/qwen-stop-hook.js\"",
+            "timeout": 60000
+          }
+        ]
       }
     ],
     "PreCompact": [
@@ -156,6 +174,28 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/home/fabio.souza/.hindsight/coding-agents/dist/qwen-hook.js\"",
+            "timeout": 30000
+          }
+        ]
+      }
     ]
+  },
+  "mcpServers": {
+    "hindsight": {
+      "command": "node",
+      "args": [
+        "/home/fabio.souza/.hindsight/coding-agents/dist/mcp-server.js"
+      ],
+      "env": {
+        "HINDSIGHT_MCP_HARNESS": "qwen-code"
+      }
+    }
   }
 }
