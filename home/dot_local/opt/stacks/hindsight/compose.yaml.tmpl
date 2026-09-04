@@ -40,9 +40,10 @@ services:
       # --------------------------------------------------
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
+      - HINDSIGHT_LOG_LEVEL=debug
       - HINDSIGHT_API_HOST=0.0.0.0
       - HINDSIGHT_API_PORT=8888
-      - HINDSIGHT_API_LOG_LEVEL=info
+      - HINDSIGHT_API_LOG_LEVEL=debug
       - HINDSIGHT_API_LOG_FORMAT=json
       - HINDSIGHT_API_WORKER_ENABLED="true"
       - HINDSIGHT_API_WORKER_ID=hindsight-prod

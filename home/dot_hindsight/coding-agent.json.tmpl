@@ -4,8 +4,22 @@
   "serverMode": "self-hosted",
   "apiUrl": "http://193.123.97.209:8888",
   "apiToken": "{{ include $hindsight_key | decrypt | trim }}",
-  "bankId": "personal-ai",
-  "retainTags": ["project:{gitProject}"],
-  "retainMetadata": { "repo": "{gitProject}" },
-  "reflectTimeoutMs": 330000
+  "bankId": "coding-ai",
+  "retainTags": ["project:{gitProject}", "agent:coding"],
+  "retainMetadata": {
+    "repo": "{gitProject}",
+    "harness": "{harness}",
+    "source": "coding-agent"
+  },
+  "retainDefaultStrategy": "document",
+  "reflectTimeoutMs": 330000,
+  "autoRetain": true,
+  "autoRecall": true,
+  "retainEveryNTurns": 1,
+  "memoryMode": "hybrid",
+  "recallBudget": "mid",
+  "recallMaxTokens": 2500,
+  "recallTypes": ["observation", "world", "experience"],
+  "timeout": 120,
+  "idleTimeout": 300
 }
