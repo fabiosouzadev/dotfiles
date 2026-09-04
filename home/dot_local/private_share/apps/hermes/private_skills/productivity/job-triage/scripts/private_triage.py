@@ -239,16 +239,18 @@ def main():
     print(f"📊 Score: {score}/100")
     print(f"   Detalhes: {json.dumps(details, ensure_ascii=False, indent=2)}")
 
-    # Determinar etapa baseado no score e email (usar apenas Etapa Atual)
+    # Determinar etapa baseado no score e email (usar apenas Status Atual - NOT PROP "Etapa Atual")
+    # Valores canônicos (2026-09-03): Ação manual - Headhunter substitui 'Sem email';
+    # Análise pendente substitui 'Análise necessária'; Rejeitada - Fit insuficiente substitui 'Arquivado'
     email = job_data.get('email')
     if score >= 70 and email and email != 'null':
         etapa = 'Aguardando retorno'
     elif score >= 70 and (not email or email == 'null'):
-        etapa = 'Sem email'
+        etapa = 'Ação manual - Headhunter'
     elif score >= 40:
-        etapa = 'Análise necessária'
+        etapa = 'Análise pendente'
     else:
-        etapa = 'Arquivado'
+        etapa = 'Rejeitada - Fit insuficiente'
 
     # 3. Decisão baseada no score
     job_data['score'] = score
@@ -268,23 +270,23 @@ def main():
                 create_notion_card(job_data, etapa="Aguardando retorno")
             else:
                 print("⚠️ Falha no envio - criando card Notion para ação manual")
-                create_notion_card(job_data, etapa="Preparar candidatura")
+                create_notion_card(job_data, etapa="Ação manual - Headhunter")
         else:
             print("📭 Sem email na descrição - criando card Notion para candidatura manual")
-            create_notion_card(job_data, etapa="Preparar candidatura")
+            create_notion_card(job_data, etapa="Ação manual - Headhunter")
 
         send_telegram_card(job_data, action="auto_applied" if email else "needs_manual")
 
     elif score >= 40:
         # Média prioridade - Notion + Telegram para decisão
         print("🤔 Score médio (40-69) - criando card para análise")
-        create_notion_card(job_data, etapa="Análise necessária")
+        create_notion_card(job_data, etapa="Análise pendente")
         send_telegram_card(job_data, action="review_needed")
 
     else:
         # Baixa prioridade - apenas log/arquivar
         print(f"📉 Score baixo ({score}) - arquivando")
-        create_notion_card(job_data, etapa="Arquivado")
+        create_notion_card(job_data, etapa="Rejeitada - Fit insuficiente")
 
 
 if __name__ == "__main__":

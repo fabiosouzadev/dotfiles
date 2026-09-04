@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Cron job for Job Triage System:
-1. Auto-apply for cards in "Preparar Candidatura" stage
+1. Auto-apply for cards in "Ação manual - Headhunter" stage
 2. Process responded cards (move to "Em processo")
+Etapa Atual removido em 2026-09-03 - substituído por Status Atual.
 """
 
 import os
@@ -26,7 +27,7 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 # Configuration
 NOTION_API_KEY = os.environ.get("NOTION_API_KEY") or os.environ.get("NOTION_TOKEN")
-DATABASE_ID = "b45a134b-ad3b-83c5-a4e8-07d467d825ba"  # From context
+DATABASE_ID = "b45a134b-ad3b-83c5-a4e8-07d467d825ba"  # Data source ID
 NOTION_VERSION = "2025-09-03"
 GMAIL_USER = "fabiovanderlei.developer@gmail.com"
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
@@ -185,13 +186,13 @@ Fábio Souza
     msg["Subject"] = subject
     msg["From"] = formataddr(("Fábio Souza", GMAIL_USER))
     msg["To"] = email
-
+    
     # Alternative part (text + html)
     alt = MIMEMultipart("alternative")
     alt.attach(MIMEText(body_text, "plain", "utf-8"))
     alt.attach(MIMEText(body_html, "html", "utf-8"))
     msg.attach(alt)
-
+    
     # Attachment
     try:
         with open(CV_PATH, "rb") as f:
@@ -201,7 +202,7 @@ Fábio Souza
     except Exception as e:
         print(f"❌ Failed to attach CV: {e}")
         return False
-
+    
     # Send
     context = ssl.create_default_context()
     try:
@@ -291,8 +292,9 @@ def extract_job_data_from_page(page):
     responded_prop = props.get("Respondeu?", {})
     responded = get_page_property_value(responded_prop) or False
 
-    etapa_prop = props.get("Etapa Atual", {})
-    etapa_atual = get_page_property_value(etapa_prop) or ""
+    # Status Atual (novo property - Etapa Atual removido 2026-09-03)
+    status_prop = props.get("Status Atual", {})
+    status_atual = get_page_property_value(status_prop) or ""
 
     return {
         "id": page.get("id"),
@@ -303,7 +305,7 @@ def extract_job_data_from_page(page):
         "score": score,
         "email": email,
         "responded": bool(responded),
-        "etapa_atual": etapa_atual
+        "status_atual": status_atual
     }
 
 def main():
@@ -318,19 +320,19 @@ def main():
         print("❌ GMAIL_APP_PASSWORD not set")
         return 1
     
-    # Task 1: Auto-apply for cards in "Preparar candidatura" stage
-    print("\n📋 TASK 1: Processing 'Preparar candidatura' cards")
-    prepar_candidatura_filter = [
+    # Task 1: Auto-apply for cards in "Ação manual - Headhunter" stage
+    print("\n📋 TASK 1: Processing 'Ação manual - Headhunter' cards")
+    headhunter_filter = [
         {
-            "property": "Etapa Atual",
+            "property": "Status Atual",
             "select": {
-                "equals": "Preparar candidatura"
+                "equals": "Ação manual - Headhunter"
             }
         }
     ]
     
-    prepar_pages = query_notion_pages(prepar_candidatura_filter)
-    print(f"Found {len(prepar_pages)} cards in 'Preparar candidatura' stage")
+    prepar_pages = query_notion_pages(headhunter_filter)
+    print(f"Found {len(prepar_pages)} cards in 'Ação manual - Headhunter' stage")
     
     auto_applied_count = 0
     no_email_count = 0
@@ -346,7 +348,7 @@ def main():
             if send_application_email(job_data):
                 # Update Notion page
                 update_properties = {
-                    "Etapa Atual": {"select": {"name": "Aguardando retorno"}},
+                    "Status Atual": {"select": {"name": "Aguardando retorno"}},
                     "Data Candidatura": {"date": {"start": datetime.now().strftime("%Y-%m-%d")}},
                     "Canal Envio": {"multi_select": [{"name": "Email"}]},
                     "CV Enviado": {"checkbox": True},
@@ -360,17 +362,17 @@ def main():
                     print("❌ Failed to update page")
             else:
                 print("❌ Failed to send email")
-                # Update to Sem email? No, keep in Preparar Candidatura for manual retry
+                # Keep in Ação manual - Headhunter for manual retry
         else:
             print("📭 No email found")
-            # Update to Sem email
+            # Update to Ação manual - Headhunter (canonical value; was 'Sem email')
             update_properties = {
-                "Etapa Atual": {"select": {"name": "Sem email"}},
+                "Status Atual": {"select": {"name": "Ação manual - Headhunter"}},
                 "Anotações Etapa": {"rich_text": [{"text": {"content": f"Sem email para candidatura auto em {datetime.now().isoformat()}"}}]}
             }
             result = update_notion_page(page_id, update_properties)
             if result:
-                print("✅ Page updated to 'Sem email'")
+                print("✅ Page updated to 'Ação manual - Headhunter'")
                 no_email_count += 1
             else:
                 print("❌ Failed to update page")
@@ -385,7 +387,7 @@ def main():
             }
         },
         {
-            "property": "Etapa Atual",
+            "property": "Status Atual",
             "select": {
                 "does_not_equal": "Em processo"
             }
@@ -407,7 +409,7 @@ def main():
             }
         },
         {
-            "property": "Etapa Atual",
+            "property": "Status Atual",
             "select": {
                 "does_not_equal": "Em processo"
             }
@@ -426,7 +428,7 @@ def main():
         
         # Update Notion page
         update_properties = {
-            "Etapa Atual": {"select": {"name": "Em processo"}},
+            "Status Atual": {"select": {"name": "Em processo"}},
             "Respondeu?": {"checkbox": False},
             "Anotações Etapa": {"rich_text": [{"text": {"content": f"Resposta detectada - movido para Em processo em {datetime.now().isoformat()}"}}]}
         }
@@ -440,7 +442,7 @@ def main():
     # Summary
     print("\n📊 SUMMARY")
     print(f"   Auto-applied: {auto_applied_count}")
-    print(f"   Moved to 'Sem email': {no_email_count}")
+    print(f"   Moved to 'Ação manual - Headhunter': {no_email_count}")
     print(f"   Processed responses: {processed_count}")
     print("✅ Cron job completed")
     
