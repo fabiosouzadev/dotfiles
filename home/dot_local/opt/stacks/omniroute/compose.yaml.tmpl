@@ -7,6 +7,7 @@ services:
         OMNIROUTE_USE_TURBOPACK: 1
         OMNIROUTE_BUILD_MEMORY_MB: 4096
     image: omniroute:v3.8.50-web
+    container_name: omniroute
     deploy:
       replicas: 1
     restart: unless-stopped
