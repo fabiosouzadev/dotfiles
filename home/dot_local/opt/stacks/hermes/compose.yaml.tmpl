@@ -11,9 +11,6 @@ services:
       - 9119 # dashboard (only reached when HERMES_DASHBOARD=1)
     volumes:
       - {{ .chezmoi.homeDir }}/.local/share/apps/hermes:/opt/data
-      - {{ .chezmoi.homeDir }}/.local/share/apps/camofox/profiles:/opt/data/home/.camofox/profiles:rw
-      - {{ .chezmoi.homeDir }}/.local/share/apps/camofox/cookies:/opt/data/home/.camofox/cookies:ro
-      - {{ .chezmoi.homeDir }}/.local/share/apps/camofox/traces:/opt/data/home/.camofox/traces:rw
     environment:
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
