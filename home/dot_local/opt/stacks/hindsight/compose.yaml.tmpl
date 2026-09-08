@@ -21,7 +21,7 @@ services:
       retries: 10
       start_period: 20s
     networks:
-      - hindsight
+      - hindsight-network
 
 
   hindsight:
@@ -60,7 +60,7 @@ services:
 
       - HINDSIGHT_API_LLM_PROVIDER=openai
       - HINDSIGHT_API_LLM_API_KEY=${HINDSIGHT_LLM_API_KEY}
-      - HINDSIGHT_API_LLM_MODEL=nvidia/nemotron-3-super-120b-a12b
+      - HINDSIGHT_API_LLM_MODEL=nvidia/nemotron-3-ultra-550b-a55b
       - HINDSIGHT_API_LLM_BASE_URL=http://omniroute:20129/v1
 
       - HINDSIGHT_API_LLM_MAX_CONCURRENT=4
