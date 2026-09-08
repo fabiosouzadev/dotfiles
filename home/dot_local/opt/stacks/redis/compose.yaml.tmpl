@@ -24,9 +24,6 @@ services:
       retries: 3
     networks:
       - redis-network
-    # Ajuste de recursos e sysctl para o overcommit
-    # Observação: vm.overcommit_memory não pode ser alterado via docker-compose
-    # diretamente, mas podemos mitigar o problema e garantir segurança.
 
 volumes:
   redis-data:
