@@ -1,6 +1,6 @@
 services:
   postgres-hindsight:
-    image: pgvector/pgvector:pg17
+    image: pgvector/pgvector:pg18
     container_name: postgres-hindsight
     restart: unless-stopped
     env_file: .env
@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${HINDSIGHT_POSTGRES_PASSWORD}
 
     volumes:
-      - {{ .chezmoi.homeDir }}/.local/share/apps/postgres-hindsight:/var/lib/postgresql/data
+      - hindsight_pg_data:/var/lib/postgresql/18/docker
 
     healthcheck:
       test:
@@ -18,14 +18,15 @@ services:
         - pg_isready -U hindsight -d hindsight
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 20s
+      retries: 5
+      start_period: 10s
+    
     networks:
       - hindsight-network
 
 
   hindsight:
-    image: ghcr.io/vectorize-io/hindsight:0.9.1
+    image: ghcr.io/vectorize-io/hindsight:0.9.2
     container_name: hindsight
     restart: unless-stopped
 
@@ -43,14 +44,11 @@ services:
       - HINDSIGHT_LOG_LEVEL=debug
       - HINDSIGHT_API_HOST=0.0.0.0
       - HINDSIGHT_API_PORT=8888
-      - HINDSIGHT_API_LOG_LEVEL=debug
-      - HINDSIGHT_API_LOG_FORMAT=json
-      - HINDSIGHT_API_WORKER_ENABLED="true"
-      - HINDSIGHT_API_WORKER_ID=hindsight-prod
 
       # --------------------------------------------------
       # PostgreSQL
       # --------------------------------------------------
+      - HINDSIGHT_API_DATABASE_BACKEND: postgresql
       - HINDSIGHT_API_DATABASE_URL=postgresql://hindsight:${HINDSIGHT_POSTGRES_PASSWORD}@postgres-hindsight:5432/hindsight
       - HINDSIGHT_API_VECTOR_EXTENSION=pgvector
 
@@ -63,27 +61,76 @@ services:
       - HINDSIGHT_API_LLM_MODEL=nvidia/nemotron-3-ultra-550b-a55b
       - HINDSIGHT_API_LLM_BASE_URL=http://omniroute:20129/v1
 
-      - HINDSIGHT_API_LLM_MAX_CONCURRENT=4
-      - HINDSIGHT_API_LLM_MAX_RETRIES=3
-      - HINDSIGHT_API_LLM_TIMEOUT=120
+      # - HINDSIGHT_API_LLM_MAX_CONCURRENT=4
+      # - HINDSIGHT_API_LLM_MAX_RETRIES=3
+      # - HINDSIGHT_API_LLM_TIMEOUT=120
 
       # Important for structured memory extraction
-      - HINDSIGHT_API_LLM_STRICT_SCHEMA=true
+      # - HINDSIGHT_API_LLM_STRICT_SCHEMA=true
 
       # --------------------------------------------------
       # MCP
       # --------------------------------------------------
       - HINDSIGHT_API_MCP_ENABLED=true
       - HINDSIGHT_API_TENANT_API_KEY=${HINDSIGHT_API_TENANT_API_KEY}
+      - HINDSIGHT_MCP_AUTH_TOKEN=${HINDSIGHT_API_TENANT_API_KEY}
+      - HINDSIGHT_API_MCP_STATELESS: "true"
+      - HINDSIGHT_API_MCP_INSTRUCTIONS: >
+        You are connected to a centralized persistent memory
+        system used by Fabio's AI agents.
+
+        PERSONAL memory contains durable user preferences,
+        working style, technical preferences and long-term context.
+
+        PROJECT memory contains shared engineering knowledge,
+        architectural decisions, project context, discoveries,
+        lessons learned and implementation knowledge.
+
+        HERMES memory contains Hermes-specific workflows,
+        agent behavior, skills and operational knowledge.
+
+        Use project:<name> tags for project-specific memories.
+
+        Prefer recalling relevant memories before complex tasks.
+
+        Store only durable and reusable knowledge.
+
+        Never store passwords, API keys, access tokens,
+        private keys, credentials, cookies or secrets.
+
+        Do not store transient conversational noise.
+
+      # ----------------------------------------------------
+      # Worker
+      # ----------------------------------------------------
+
+      HINDSIGHT_API_WORKER_ID: hindsight-vps-01
 
       # --------------------------------------------------
       # Observations / consolidation
       # --------------------------------------------------
-
+      - HINDSIGHT_API_LOG_LEVEL=debug
+      # - HINDSIGHT_API_LOG_FORMAT=json
       - HINDSIGHT_API_AUDIT_LOG_ENABLED=true
 
     #expose:
     #  - "8888"
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:8888/health || exit 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    security_opt:
+      - no-new-privileges:true
+
+    shm_size: 1g
 
     ports:
       - "8888:8888"
@@ -93,9 +140,13 @@ services:
       - hindsight-network
       - edge-network
 
+volumes:
+  hindsight_pg_data:
+    name: hindsight_pg_data
 
 networks:
   hindsight-network:
     name: hindsight
+
   edge-network:
     external: true
