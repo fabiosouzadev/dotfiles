@@ -48,7 +48,7 @@ services:
       # --------------------------------------------------
       # PostgreSQL
       # --------------------------------------------------
-      - HINDSIGHT_API_DATABASE_BACKEND: postgresql
+      - HINDSIGHT_API_DATABASE_BACKEND=postgresql
       - HINDSIGHT_API_DATABASE_URL=postgresql://hindsight:${HINDSIGHT_POSTGRES_PASSWORD}@postgres-hindsight:5432/hindsight
       - HINDSIGHT_API_VECTOR_EXTENSION=pgvector
 
@@ -104,7 +104,7 @@ services:
       # Worker
       # ----------------------------------------------------
 
-      HINDSIGHT_API_WORKER_ID: hindsight-vps-01
+      - HINDSIGHT_API_WORKER_ID=hindsight-vps
 
       # --------------------------------------------------
       # Observations / consolidation
