@@ -90,12 +90,12 @@ services:
       - "9999:9999"
     
     networks:
-      - hindsight
-      - edge
+      - hindsight-network
+      - edge-network
 
 
 networks:
-  hindsight:
+  hindsight-network:
     name: hindsight
-  edge:
+  edge-network:
     external: true

@@ -9,9 +9,9 @@ services:
     volumes:
       - ollama_data:/root/.ollama
     networks:
-      - edge
+      - ollama-network
 volumes:
   ollama_data: null
 networks:
-  edge:
-    external: true
+  ollama-network:
+    name: ollama-network

@@ -81,9 +81,19 @@ services:
       retries: 3
       start_period: 15s
     networks:
-      - edge
+      - qdrant-network
+      - edge-network
+      - ollama-network
+      - redis-network
+
 volumes:
   omniroute-data: null
 networks:
-  edge:
+  edge-network:
+    external: true
+  qdrant-network:
+    external: true
+  ollama-network:
+    external: true
+  redis-network
     external: true

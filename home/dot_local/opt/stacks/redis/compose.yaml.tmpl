@@ -19,9 +19,10 @@ services:
       timeout: 3s
       retries: 3
     networks:
-      - edge
+      - redis-network
 volumes:
   redis-data: null
+
 networks:
-  edge:
-    external: true
+  redis-network:
+    name: redis-network

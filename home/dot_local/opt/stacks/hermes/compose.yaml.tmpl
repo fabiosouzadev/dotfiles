@@ -18,7 +18,9 @@ services:
       - CAMOFOX_URL=http://camofox:9377
       - HERMES_DASHBOARD=1
     networks:
-      - edge
+      - edge-network
+      - hindsight-network
+      - ollama-network
     shm_size: 1g  
     deploy:
       resources:
@@ -26,5 +28,10 @@ services:
           memory: 4G
           cpus: "2.0"
 networks:
-  edge:
+  hindsight-network:
     external: true
+  ollama-network:
+    external: true
+  edge-network:
+    external: true
+  

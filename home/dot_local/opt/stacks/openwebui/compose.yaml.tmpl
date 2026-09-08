@@ -10,9 +10,14 @@ services:
     volumes:
       - openwebui_data:/app/backend/data
     networks:
-      - edge
+      - ollama-network
+      - edge-network
+
 volumes:
   openwebui_data: null
+
 networks:
-  edge:
+  ollama-network:
+    external: true
+  edge-network:
     external: true

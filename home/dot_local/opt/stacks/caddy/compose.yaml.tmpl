@@ -48,11 +48,11 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     networks:
-      - edge
+      - edge-network
 
 volumes:
   caddy_data: null
   caddy_config: null
 networks:
-  edge:
+  edge-network:
     external: true

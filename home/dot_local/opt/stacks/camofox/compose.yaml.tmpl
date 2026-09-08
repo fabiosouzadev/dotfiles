@@ -43,8 +43,7 @@ services:
       - /home/ubuntu/.local/share/apps/camofox/profiles:/home/node/.camofox/profiles:rw # RW - ESSENCIAL!
       - /home/ubuntu/.local/share/apps/camofox/cookies:/home/node/.camofox/cookies:ro
       - /home/ubuntu/.local/share/apps/camofox/traces:/home/node/.camofox/traces:rw
-    networks:
-      - edge
+    
     shm_size: 2g # necessário para Firefox/Camoufox
     ulimits:
       nofile:
@@ -66,6 +65,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - camofox-network
+      - edge-network
+
 networks:
-  edge:
+  camofox-network:
+    name: hindsight
+  edge-network:
     external: true
