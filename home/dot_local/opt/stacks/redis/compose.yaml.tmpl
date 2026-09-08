@@ -4,25 +4,34 @@ services:
     container_name: redis
     restart: unless-stopped
     command: >
-      redis-server --save 60 1 --appendonly yes --loglevel warning --maxmemory
-      512mb --maxmemory-policy allkeys-lru --databases 16
+      redis-server
+      --save 60 1
+      --appendonly yes
+      --loglevel warning
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --databases 16
+      --protected-mode yes
+      --bind 127.0.0.1
     volumes:
       - redis-data:/data
     expose:
       - "6379"
     healthcheck:
-      test:
-        - CMD
-        - redis-cli
-        - ping
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
       retries: 3
     networks:
       - redis-network
+    # Ajuste de recursos e sysctl para o overcommit
+    # Observação: vm.overcommit_memory não pode ser alterado via docker-compose
+    # diretamente, mas podemos mitigar o problema e garantir segurança.
+
 volumes:
-  redis-data: null
+  redis-data:
 
 networks:
   redis-network:
+    driver: bridge
     name: redis-network
