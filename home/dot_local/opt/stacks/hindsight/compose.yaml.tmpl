@@ -33,8 +33,7 @@ services:
       - no-new-privileges:true
 
     networks:
-      # - hindsight-internal-network
-      - hindsight-network
+      - hindsight-internal-network
 
 
   # ============================================================
@@ -69,7 +68,7 @@ services:
       HINDSIGHT_API_WORKER_ID: hindsight-vps
 
       # Enable the built-in API key authentication
-      #HINDSIGHT_API_TENANT_API_KEY: ${HINDSIGHT_API_TENANT_API_KEY}
+      HINDSIGHT_API_TENANT_API_KEY: ${HINDSIGHT_API_TENANT_API_KEY}
 
 
       # --------------------------------------------------------
@@ -92,9 +91,9 @@ services:
       # OmniRoute exposes an OpenAI-compatible endpoint.
       HINDSIGHT_API_LLM_PROVIDER: openai
 
-      HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_LLM_API_KEY}
+      # HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_LLM_API_KEY}
 
-      HINDSIGHT_API_LLM_MODEL: nvidia/nemotron-3-ultra-550b-a55b
+      HINDSIGHT_API_LLM_MODEL: nvidia/nemotron-3-super-120b-a12b
 
       HINDSIGHT_API_LLM_BASE_URL: http://omniroute:20129/v1
 
@@ -259,7 +258,7 @@ services:
     # ==========================================================
 
     networks:
-      # - hindsight-internal-network
+      - hindsight-internal-network
       - hindsight-network
       - edge-network
 
@@ -279,8 +278,8 @@ volumes:
 
 networks:
 
-  #hindsight-internal-network:
-  #  name: hindsight-internal-network
+  hindsight-internal-network:
+    name: hindsight-internal-network
 
   hindsight-network:
     name: hindsight-network
