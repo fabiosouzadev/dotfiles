@@ -83,7 +83,6 @@ services:
     networks:
       - qdrant-network
       - edge-network
-      - ollama-network
       - redis-network
 
 volumes:
@@ -92,8 +91,6 @@ networks:
   edge-network:
     external: true
   qdrant-network:
-    external: true
-  ollama-network:
     external: true
   redis-network:
     external: true
