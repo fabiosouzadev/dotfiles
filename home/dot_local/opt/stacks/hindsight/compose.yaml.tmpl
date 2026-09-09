@@ -33,7 +33,8 @@ services:
       - no-new-privileges:true
 
     networks:
-      - hindsight-internal-network
+      # - hindsight-internal-network
+      - hindsight-network
 
 
   # ============================================================
@@ -258,7 +259,7 @@ services:
     # ==========================================================
 
     networks:
-      - hindsight-internal-network
+      # - hindsight-internal-network
       - hindsight-network
       - edge-network
 
@@ -278,8 +279,8 @@ volumes:
 
 networks:
 
-  hindsight-internal-network:
-    name: hindsight-internal-network
+  #hindsight-internal-network:
+  #  name: hindsight-internal-network
 
   hindsight-network:
     name: hindsight-network
