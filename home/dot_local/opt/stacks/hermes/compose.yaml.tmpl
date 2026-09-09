@@ -20,6 +20,7 @@ services:
     networks:
       - edge-network
       - hindsight-network
+      - camofox-network
     shm_size: 1g  
     deploy:
       resources:
@@ -27,8 +28,11 @@ services:
           memory: 4G
           cpus: "2.0"
 networks:
+  camofox-network:
+    external: true
   hindsight-network:
     external: true
   edge-network:
     external: true
+  
   
