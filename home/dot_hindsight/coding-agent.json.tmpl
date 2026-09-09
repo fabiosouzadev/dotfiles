@@ -4,12 +4,12 @@
   "serverMode": "self-hosted",
   "apiUrl": "http://193.123.97.209:8888",
   "apiToken": "{{ include $hindsight_key | decrypt | trim }}",
-  "bankId": "coding-ai",
+  "bankId": "projects-bank",
   "retainTags": ["project:{gitProject}", "agent:coding"],
   "retainMetadata": {
     "repo": "{gitProject}",
     "harness": "{harness}",
-    "source": "coding-agent"
+    "source": "agent:coding"
   },
   "retainDefaultStrategy": "document",
   "reflectTimeoutMs": 330000,
