@@ -1,27 +1,16 @@
 {
   "mode": "local_external",
-  "timeout": 120,
-  "idle_timeout": 300,
-  "retain_tags": "",
-  "observation_scopes": "per_tag",
-  "retain_source": "",
-  "retain_user_prefix": "User",
-  "retain_assistant_prefix": "Assistant",
-  "retain_default_strategy": "document",
-  "banks": {
-    "hermes": {
-      "bankId": "personal-ai",
-      "budget": "mid",
-      "enabled": true
-    }
-  },
   "api_url": "http://hindsight:8888",
-  "bank_id": "personal-ai",
+  "bank_id": "hermes-bank",
   "recall_budget": "mid",
-  "recall_types": ["observation", "world", "experience"],
+  "memory_mode": "hybrid",
   "auto_retain": true,
   "auto_recall": true,
-  "retain_every_n_turns": 1,
-  "memory_mode": "hybrid",
-  "recall_max_tokens": 1500
+  "retain_async": true,
+  "retain_context": "Hermes Agent interaction with Fabio",
+  "retain_tags": [
+    "agent:hermes",
+    "scope:hermes"
+  ],
+  "retain_source": "hermes-agent"
 }

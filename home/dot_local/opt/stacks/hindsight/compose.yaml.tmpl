@@ -131,40 +131,26 @@ services:
         retain,recall,reflect
 
       HINDSIGHT_API_MCP_INSTRUCTIONS: >-
-        You are connected to a centralized persistent memory system
-        used by Fabio's AI agents.
+        You are connected to Fabio's centralized persistent memory system.
 
-        Memory banks have distinct responsibilities.
+        Memory banks:
+        - personal: durable user context, preferences, goals and long-term constraints.
+        - projects: shared engineering knowledge, architecture decisions, project conventions,
+          technical discoveries and reusable implementation knowledge.
+        - hermes: Hermes Agent-specific workflows, skills, operational knowledge and
+          Loop Engineering knowledge.
 
-        PERSONAL:
-        durable user preferences, professional context,
-        engineering philosophy, communication preferences,
-        long-term goals and stable workflow preferences.
-
-        PROJECTS:
-        shared engineering knowledge, project architecture,
-        architectural decisions, implementation discoveries,
-        constraints, lessons learned and project-specific context.
-
-        HERMES:
-        Hermes-specific workflows, skills, agent behavior,
-        Loop Engineering practices and operational knowledge.
-
-        Use project:<name> tags for project-specific memories.
-
-        Prefer recalling relevant memories before complex tasks.
-
-        Store only durable and reusable knowledge.
-
-        Never store passwords, API keys, access tokens,
-        private keys, credentials, cookies or other secrets.
-
-        Do not store transient conversational noise.
-
-        When uncertain whether information belongs in personal,
-        projects or hermes memory, prefer the narrowest appropriate
-        scope rather than duplicating the information.
-
+        Memory rules:
+        - Prefer durable knowledge over transient conversation details.
+        - Prefer explicit user statements over inference.
+        - Use project:<name> tags for project-specific memories.
+        - Use scope:personal for personal memories.
+        - Use scope:project for engineering/project memories.
+        - Do not store secrets, credentials, API keys, access tokens, cookies or private keys.
+        - Before retaining information, determine whether it will remain useful after the
+          current task is finished.
+        - Before making architectural decisions, recall relevant existing project knowledge.
+        - Use reflect when synthesizing knowledge across multiple memories.
 
       # --------------------------------------------------------
       # Retain
@@ -185,11 +171,10 @@ services:
 
       HINDSIGHT_API_RETAIN_MISSION: >-
         Prioritize durable, reusable and meaningful information.
-        Deprioritize temporary conversational noise,
-        transient task details and secrets.
+        Deprioritize temporary conversational noise and transient task details.
         Prefer explicit user statements over weak inference.
-        Never retain passwords, API keys, access tokens,
-        private keys, credentials or cookies.
+        Never retain passwords, API keys, access tokens, private keys,
+        credentials or cookies.
 
 
       # Default extraction mode.
