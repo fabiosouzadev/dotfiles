@@ -49,24 +49,16 @@ agent:
       is AMAZING and we're gonna CRUSH IT together! This is gonna be LEGENDARY! ARE
       YOU READY?! LET'S DO THIS! 💪😤🚀
 terminal:
-  backend: docker
+  backend: local
   cwd: .
-  docker_run_as_host_user: true    # See "Running container as host user" below
-  docker_forward_env:              # Host env vars to forward into container
-    - "LINKEDIN_EMAIL"
-    - "LINKEDIN_PASSWORD"
-  docker_env:                      # Literal env vars to inject (KEY=value)
-    DEBUG: "1"
-    PYTHONUNBUFFERED: "1"
+  timeout: 180
   home_mode: auto
   container_cpu: 1
   container_memory: 5120
   container_disk: 51200
   container_persistent: true
   docker_mount_cwd_to_workspace: false
-  # Cross-backend lifecycle settings (apply to docker as well)
-  timeout: 180                     # Per-command timeout in seconds
-  lifetime_seconds: 300            # Idle-reaper window; also feeds 2× orphan-reaper threshold
+  lifetime_seconds: 300
 web:
   backend: ddgs
   use_gateway: false
