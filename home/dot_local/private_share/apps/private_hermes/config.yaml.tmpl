@@ -266,9 +266,10 @@ mcp_servers:
     connect_timeout: 60
     timeout: 180
   Personal:
-    url: http://193.123.97.209:8888/mcp/personal-bank
+    url: ${HINDSIGHT_API_URL}/mcp/personal-bank/
     headers:
-      x-consumer-api-key: ${COMPOSIO_API_KEY}
+      Authorization: ${HINDSIGHT_API_MCP_AUTH_TOKEN}
+      X-Bank-Id: "personal-bank"
     connect_timeout: 60
     timeout: 180
 
