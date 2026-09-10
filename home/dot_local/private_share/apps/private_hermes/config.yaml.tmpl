@@ -51,7 +51,7 @@ agent:
 terminal:
   backend: docker
   cwd: .
-  docker_run_as_host_user: false   # See "Running container as host user" below
+  docker_run_as_host_user: true    # See "Running container as host user" below
   docker_forward_env:              # Host env vars to forward into container
     - "LINKEDIN_EMAIL"
     - "LINKEDIN_PASSWORD"
