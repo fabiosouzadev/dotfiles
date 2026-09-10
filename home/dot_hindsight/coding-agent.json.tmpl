@@ -1,25 +1,44 @@
 {{- $hindsight_key := joinPath .chezmoi.sourceDir "dot_keys" "encrypted_hindsight-key.txt.asc" -}}
-
 {
   "serverMode": "self-hosted",
   "apiUrl": "http://193.123.97.209:8888",
   "apiToken": "{{ include $hindsight_key | decrypt | trim }}",
-  "bankId": "projects-bank",
-  "retainTags": ["project:{gitProject}", "agent:coding"],
+  "dynamicBankId": true,
+  "bankIdTemplate": "coding-agent::{gitProject}",
+
+  "retainTags": [
+    "source:coding-agent"
+  ],
+
   "retainMetadata": {
-    "repo": "{gitProject}",
-    "harness": "{harness}",
-    "source": "coding-agent"
+    "memory_system": "hindsight",
+    "integration": "coding-agents"
   },
-  "retainDefaultStrategy": "document",
-  "reflectTimeoutMs": 330000,
-  "autoRetain": true,
-  "autoRecall": true,
-  "retainEveryNTurns": 1,
-  "memoryMode": "hybrid",
-  "recallBudget": "mid",
-  "recallMaxTokens": 2500,
-  "recallTypes": ["observation", "world", "experience"],
-  "timeout": 120,
-  "idleTimeout": 300
+
+  "manageBankConfig": true,
+
+  "observationScopes": "shared",
+
+  "autoReflect": true,
+
+  "reflectBudget": "high",
+
+  "pageRefreshEveryTurns": 10,
+  "pageTriggerType": "cron",
+  "pageTriggerCron": "0 3 * * *",
+
+  "autoSeed": true,
+  "seedLimit": 300,
+
+  "codebaseSurvey": true,
+  "surveyModel": "haiku",
+  "surveyBudgetUsd": 2,
+  "surveyRefreshCommits": 20,
+
+  "retainSessions": true,
+
+  "maxParallelRetains": 5,
+
+  "autoUpdate": true,
+  "logLevel": "debug"
 }
