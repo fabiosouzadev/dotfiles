@@ -1,8 +1,10 @@
 model:
-  provider: custom
-  default: omniroute/agentic
-  base_url: ${OMNIROUTE_BASE_URL}
-  api_key: ${OMNIROUTE_API_KEY}
+  {{- /* provider: custom */}}
+  {{- /* default: omniroute/agentic */}}
+  {{- /* base_url: ${OMNIROUTE_BASE_URL} */}}
+  {{- /* api_key: ${OMNIROUTE_API_KEY} */}}
+  provider: openrouter
+  default: thinkingmachines/inkling-small:free
 database:
   journal_mode: wal
 agent:
@@ -298,8 +300,8 @@ mcp_servers:
 #
 # For custom OpenAI-compatible endpoints, add base_url and key_env.
 #
-fallback_model:
-  provider: nous
-  model: meituan/longcat-2.0:free
+fallback_providers:
+  - provider: nous
+    model: meituan/longcat-2.0:free
 approvals:
   destructive_slash_confirm: false
