@@ -44,7 +44,7 @@ services:
       - QDRANT_COLLECTION=omniroute-memory
       - QDRANT_EMBEDDING_MODEL=cohere/embed-v4.0
       - QDRANT_VECTOR_SIZE=1536
-      - QDRANT_HNSW_EF_CONSTRUCT=128
+      - QDRANT_HNSW_EF_CONSTRUCT=256
       - QDRANT_API_KEY=${QDRANT_API_KEY}
       #### Price Sync
       - PRICING_SYNC_ENABLED=true
