@@ -42,9 +42,9 @@ services:
       - QDRANT_PORT=6333
       - QDRANT_GRPC_PORT=6334
       - QDRANT_COLLECTION=omniroute-memory
-      - QDRANT_EMBEDDING_MODEL=openrouter/nvidia/nemotron-3-embed-1b:free
-      - QDRANT_VECTOR_SIZE=1536
-      - QDRANT_HNSW_EF_CONSTRUCT=128
+      - QDRANT_EMBEDDING_MODEL=mistral/mistral-embed
+      - QDRANT_VECTOR_SIZE=1024
+      - QDRANT_HNSW_EF_CONSTRUCT=100
       - QDRANT_API_KEY=${QDRANT_API_KEY}
       #### Price Sync
       - PRICING_SYNC_ENABLED=true
