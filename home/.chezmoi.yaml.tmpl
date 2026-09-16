@@ -148,7 +148,6 @@ Headless:
 
 
 {{- /* Config Dirs */ -}}
-
 {{- $dirs := dict
   "local"  ((joinPath .chezmoi.homeDir ".local") | replace "\\" "/")
   "src"    ((joinPath .chezmoi.homeDir ".local" "src") | replace "\\" "/")
@@ -181,10 +180,10 @@ Headless:
   "kernels"        (dict "install" false)
   "rtl8821ce"      (dict "install" $dell3530)
 
-  "i3"       (dict "enabled" (not $isVps))
-  "niri"     (dict "enabled" (not $isVps))
+  "i3"             (dict "enabled" (not $isVps))
+  "niri"           (dict "enabled" (not $isVps))
 
-  "ollama" (dict
+  "ollama"         (dict
     "install"      (not $isVps)
     "mode"         $ollamaMode
   )

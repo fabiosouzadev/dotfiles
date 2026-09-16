@@ -73,12 +73,37 @@ Library/LaunchAgents/**
 .chezmoiscripts/linux/run_once_before_224-compile-tmux.tmpl
 
 # Desktop configs
-home/private_dot_config/i3/
-home/private_dot_config/niri/
-home/private_dot_config/greenclip.toml
+.config/i3/*
+.config/niri/*
+.config/greenclip.toml
 
 {{- end }}
 
 {{- if (not .settings.vps) }}
 .chezmoiscripts/vps/**
+{{- end }}
+
+
+
+{{- /* Omarchy - Excluir tudo inicialmente */ -}}
+{{- if (.settings.hostname | contains "omarchy") }}
+.aws/*
+.bashrc
+.chezmoiscripts/*
+.claude/*
+.claude-code-router/*
+.coderabbit/*
+.config/*
+.codex/*
+.hindsight/*
+.keys/*
+.local/*
+.m2/*
+.qwen/*
+.screenlayout/*
+.mozzila/*
+.zprofile
+.zshrc
+.zshrc.d/*
+.wakatime.cfg.tmpl
 {{- end }}
