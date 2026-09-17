@@ -40,11 +40,11 @@
 [gpg]
     program = {{ .gpg.program }}
 
-[credential]
+{{- /* [credential]
 	helper = "gh auth git-credential"
+/*- }}
 
 {{- /* USER CONFIG */}}
-
 {{ if eq .settings.workplace "Zup" -}}
 [include]
 	path = ~/.config/git/config.zup.inc
