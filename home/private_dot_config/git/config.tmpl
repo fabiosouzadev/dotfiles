@@ -1,4 +1,51 @@
-{{- if eq .settings.workplace "Zup" -}}
+# See https://git-scm.com/docs/git-config
+
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+[init]
+	defaultBranch = main
+[core]
+	editor = nvim
+[color]
+	ui = true
+[pull]
+	rebase = true 			 # Rebase (instead of merge) on pull
+[push]
+	autoSetupRemote = true   # Automatically set upstream branch on push
+[fetch]
+	prune  = true
+	rebase = true
+[rebase]
+	autoStash = true	
+[diff]
+	algorithm = histogram    # Clearer diffs on moved/edited lines
+	colorMoved = plain       # Highlight moved blocks in diffs
+	mnemonicPrefix = true    # More intuitive refs in diff output
+[commit]
+    gpgsign = true
+	verbose = true           # Include diff comment in commit message template
+[column]
+	ui = auto 			     # Output in columns when possible
+[branch]
+	sort = -committerdate    # Sort branches by most recent commit first
+[tag]
+	gpgSign = true
+	sort = -version:refname  # Sort version numbers as you would expect
+[rerere]
+	enabled = true           # Record and reuse conflict resolutions
+	autoupdate = true        # Apply stored conflict resolutions automatically
+[gpg]
+    program = {{ .gpg.program }}
+
+[credential]
+	helper = "gh auth git-credential"
+
+{{- /* USER CONFIG */}}
+
+{{ if eq .settings.workplace "Zup" -}}
 [include]
 	path = ~/.config/git/config.zup.inc
 
@@ -17,54 +64,3 @@
 [include]
 	path = ~/.config/git/config.personal.inc
 {{- end }}
-
-[commit]
-    gpgsign = true
-
-[tag]
-    gpgSign = true
-
-[gpg]
-    program = {{ .gpg.program }}
-
-[color]
-	ui = true
-
-[init]
-    defaultBranch = main
-
-[core]
-	editor = nvim
-	pager  = delta
-
-[interactive]
-	diffFilter = delta --color-only
-
-[include]
-	path = "~/.config/git/themes/catppuccin.gitconfig"
-
-[delta]
-	features = "catppuccin-mocha"
-	line-numbers = true
-	navigate = true
-	side-by-side = true
-	dark = true
-
-[fetch]
-	prune  = true
-	rebase = true
-
-[pull]
-	rebase = true
-
-[push]
-	autoSetupRemote = true
-
-[rebase]
-	autoStash = true
-
-[credential]
-	helper = "gh auth git-credential"
-
-[diff]
-	colorMoved = "zebra"
