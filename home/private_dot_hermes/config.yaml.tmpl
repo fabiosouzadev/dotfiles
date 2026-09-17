@@ -1,7 +1,30 @@
 model:
-  default: inclusionai/ling-3.0-flash-sante:free
-  provider: nous
-  base_url: https://inference-api.nousresearch.com/v1
+  {{/* ---------------------------------------------------- */ -}}
+  {{/* ---------------------------------------------------- */ -}}
+  {{/* provider: nous                                       */ -}}
+  {{/* default: inclusionai/ling-3.0-flash-sante:free       */ -}}
+  {{/* default: upstage/solar-pro4:free                     */ -}}
+  {{/* default: meituan/longcat-2.0:free                    */ -}}
+  {{/* default: stepfun/step-3.7-flash:free                 */ -}}
+  {{/* default: inclusionai/ling-3.0-flash-fin:free         */ -}}
+  {{/* default: poolside/laguna-s-2.1:free                  */ -}}
+  {{/* default: poolside/laguna-xs-2.1:free                 */ -}}
+  {{/* base_url: https://inference-api.nousresearch.com/v1  */ -}}
+  {{/* -----------------------------------------------------*/ -}}
+  {{/* provider: openrouter                                 */ -}}
+  {{/* default: thinkingmachines/inkling-small:free         */ -}}
+  {{/* base_url: ${OMNIROUTE_BASE_URL}                      */ -}}
+  {{/* api_key: ${OMNIROUTE_API_KEY}                        */ -}}
+  {{/* -----------------------------------------------------*/ -}}
+  {{/* provider: custom                                     */ -}}
+  {{/* default: omniroute/agentic                           */ -}}
+  {{/* base_url: ${OMNIROUTE_BASE_URL}                      */ -}}
+  {{/* api_key: ${OMNIROUTE_API_KEY}                        */ -}}
+  {{/* -----------------------------------------------------*/ -}}
+  provider: custom
+  default: omniroute/agents
+  base_url: ${OMNIROUTE_BASE_URL}
+  api_key: ${OMNIROUTE_API_KEY}
 database:
   journal_mode: wal
 agent:
@@ -101,6 +124,18 @@ display:
   long_running_notifications: true
   busy_ack_detail: true
   background_process_notifications: all
+dashboard:
+  theme: cyberpunk
+  show_token_analytics: false
+  oauth:
+    client_id: ''
+    portal_url: ''
+  basic_auth:
+    username: ${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
+    password_hash: ${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
+    secret: ${HERMES_DASHBOARD_BASIC_AUTH_SECRET}
+    session_ttl_seconds: 0
+  public_url: ''
 stt:
   enabled: true
   language: en
@@ -111,11 +146,13 @@ stt:
     language: ''
 memory:
   memory_enabled: true
+  provider: hindsight
   user_profile_enabled: true
   memory_char_limit: 2200
   user_char_limit: 1375
   nudge_interval: 10
   flush_min_turns: 6
+  write_approval: true
 delegation:
   max_iterations: 50
 skills:
@@ -196,6 +233,54 @@ known_plugin_toolsets:
     - spotify
   cli:
     - spotify
+custom_providers:
+  - name: Omniroute
+    base_url: ${OMNIROUTE_BASE_URL}
+    key_env: ${OMNIROUTE_API_KEY}
+    model: omniroute/agents
+platforms:
+  telegram:
+    reactions: true
+    extra:
+      status_indicator: true
+      status_online: 🟢 Online
+      status_offline: 🔴 Offline
+      ignore_root_dm: true
+      disable_link_previews: true
+      dm_topics:
+        - chat_id: 644615401
+          topics:
+            - name: General
+              thread_id: 14874
+            - name: Productivity
+              thread_id: 14876
+            - name: Software Engineering
+              thread_id: 14878
+            - name: Job Search
+              thread_id: 14880
+            - name: Studies
+              thread_id: 14882
+    enabled: true
+mcp_servers:
+  Notion:
+    command: npx
+    args:
+      - -y
+      - '@notionhq/notion-mcp-server'
+    env:
+      NOTION_TOKEN: ${NOTION_TOKEN}
+  Composio:
+    url: https://connect.composio.dev/mcp
+    headers:
+      x-consumer-api-key: ${COMPOSIO_API_KEY}
+    connect_timeout: 60
+    timeout: 180
+  Personal:
+    url: ${HINDSIGHT_API_URL}/mcp/personal-bank/
+    headers:
+      Authorization: ${HINDSIGHT_API_MCP_AUTH_TOKEN}
+      X-Bank-Id: "personal-bank"
+
 
 # ── Security ──────────────────────────────────────────────────────────
 # Secret redaction is ON by default — strings that look like API keys,
@@ -234,3 +319,10 @@ known_plugin_toolsets:
 # fallback_model:
 #   provider: openrouter
 #   model: anthropic/claude-sonnet-4
+fallback_providers:
+  {{/* - provider: custom                 */ -}}
+  {{/*  model: omniroute/agents           */ -}}
+  {{/*  base_url: ${OMNIROUTE_BASE_URL}   */ -}}
+  {{/*  api_key: ${OMNIROUTE_API_KEY}     */ -}}
+  - provider: nous
+    model: inclusionai/ling-3.0-flash-sante:free
