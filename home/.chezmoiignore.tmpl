@@ -87,23 +87,22 @@ Library/LaunchAgents/**
 
 {{- /* Omarchy - Excluir tudo inicialmente */ -}}
 {{- if (.settings.hostname | contains "omarchy") }}
-.aws/*
+.aws/**
 .bashrc
-.chezmoiscripts/*
-.claude/*
-.claude-code-router/*
-.coderabbit/*
-.config/*
-.codex/*
-.hindsight/*
-.keys/*
-.local/*
-.m2/*
-.qwen/*
-.screenlayout/*
-.mozzila/*
+.chezmoiscripts/**
+.claude/**
+.claude-code-router/**
+.coderabbit/**
+.config/**
+.codex/**
+.hindsight/**
+.local/**
+.m2/**
+.qwen/**
+.screenlayout/**
+.mozilla/**
 .zprofile
 .zshrc
-.zshrc.d/*
-.wakatime.cfg.tmpl
+.zshrc.d/**
+.zup-worker/**
 {{- end }}
