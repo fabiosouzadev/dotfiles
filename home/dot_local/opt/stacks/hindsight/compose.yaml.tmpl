@@ -135,22 +135,31 @@ services:
 
         Memory banks:
         - personal: durable user context, preferences, goals and long-term constraints.
-        - projects: shared engineering knowledge, architecture decisions, project conventions,
-          technical discoveries and reusable implementation knowledge.
+        - coding-agent::{gitProject}: shared engineering knowledge for the current Git project,
+          including architecture decisions, project conventions, technical discoveries,
+          domain rules and reusable implementation knowledge.
         - hermes: Hermes Agent-specific workflows, skills, operational knowledge and
           Loop Engineering knowledge.
 
+        Memory architecture:
+        - Use personal for durable user-level context that applies across projects.
+        - Use coding-agent::{gitProject} for project-specific engineering knowledge.
+        - Use hermes for Hermes Agent-specific operational knowledge and workflows.
+        - The project Memory Bank is the primary isolation boundary for project knowledge.
+        - Tags and metadata should classify and provide provenance, not replace Memory Bank isolation.
+
         Memory rules:
-        - Prefer durable knowledge over transient conversation details.
+        - Prefer durable, reusable and validated knowledge over transient conversation details.
         - Prefer explicit user statements over inference.
-        - Use project:<name> tags for project-specific memories.
-        - Use scope:personal for personal memories.
-        - Use scope:project for engineering/project memories.
-        - Do not store secrets, credentials, API keys, access tokens, cookies or private keys.
         - Before retaining information, determine whether it will remain useful after the
           current task is finished.
-        - Before making architectural decisions, recall relevant existing project knowledge.
+        - Before making architectural decisions, recall relevant existing knowledge from
+          the current project's Memory Bank.
+        - Use retain for durable discoveries, decisions, conventions and reusable knowledge.
+        - Use recall to retrieve relevant existing knowledge before acting.
         - Use reflect when synthesizing knowledge across multiple memories.
+        - Avoid storing temporary task progress, conversational noise, duplicated information
+          or speculative conclusions that have not been validated.
 
       # --------------------------------------------------------
       # Retain
@@ -170,12 +179,25 @@ services:
       # project and Hermes memories.
 
       HINDSIGHT_API_RETAIN_MISSION: >-
-        Prioritize durable, reusable and meaningful information.
-        Deprioritize temporary conversational noise and transient task details.
-        Prefer explicit user statements over weak inference.
-        Never retain passwords, API keys, access tokens, private keys,
-        credentials or cookies.
+        Prioritize durable, reusable, validated and meaningful information.
 
+        Retain information that improves future engineering work, including:
+        - architecture and design decisions;
+        - project conventions and constraints;
+        - domain rules and important business knowledge;
+        - reusable implementation patterns;
+        - technical discoveries and debugging findings;
+        - dependencies, integrations and operational knowledge;
+        - validated lessons learned.
+
+        Deprioritize temporary conversational noise, task progress, duplicated information
+        and transient implementation details.
+
+        Prefer explicit user statements and validated facts over weak inference.
+
+        Store project-specific knowledge in the current coding-agent::{gitProject} Memory Bank,
+        personal knowledge in the personal Memory Bank, and Hermes-specific knowledge in the
+        hermes Memory Bank.
 
       # Default extraction mode.
       #
