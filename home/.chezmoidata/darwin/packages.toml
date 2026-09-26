@@ -15,7 +15,8 @@ tap = [
 brew = [
     'lazygit',
     'lazyjournal',
-    'atuin'
+    'atuin',
+    'mpv'
 ]
 
 cask = [
