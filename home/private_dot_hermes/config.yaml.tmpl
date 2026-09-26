@@ -21,10 +21,8 @@ model:
   {{/* base_url: ${OMNIROUTE_BASE_URL}                      */ -}}
   {{/* api_key: ${OMNIROUTE_API_KEY}                        */ -}}
   {{/* -----------------------------------------------------*/ -}}
-  provider: custom
-  default: omniroute/openrouter-testing
-  base_url: ${OMNIROUTE_BASE_URL}
-  api_key: ${OMNIROUTE_API_KEY}
+  provider: openrouter
+  default: qwen/qwen3.8-27b:free
 database:
   journal_mode: wal
 agent:
