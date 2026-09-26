@@ -13,16 +13,16 @@ model:
   {{/* -----------------------------------------------------*/ -}}
   {{/* provider: openrouter                                 */ -}}
   {{/* default: thinkingmachines/inkling-small:free         */ -}}
-  {{/* base_url: ${OMNIROUTE_BASE_URL}                      */ -}}
-  {{/* api_key: ${OMNIROUTE_API_KEY}                        */ -}}
   {{/* -----------------------------------------------------*/ -}}
   {{/* provider: custom                                     */ -}}
   {{/* default: omniroute/agentic                           */ -}}
   {{/* base_url: ${OMNIROUTE_BASE_URL}                      */ -}}
   {{/* api_key: ${OMNIROUTE_API_KEY}                        */ -}}
   {{/* -----------------------------------------------------*/ -}}
-  provider: openrouter
-  default: qwen/qwen3.8-27b:free
+  provider: custom
+  default: omniroute/agentic
+  base_url: ${OMNIROUTE_BASE_URL}
+  api_key: ${OMNIROUTE_API_KEY}
 database:
   journal_mode: wal
 agent:
