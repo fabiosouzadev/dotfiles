@@ -7,10 +7,13 @@
 
 info ">>>>>> 🤖 Installing AI Tools 🤖 <<<<<<<"
 
+{{- $chezmoi := .chezmoi -}}
+
 {{- /* Install NPM tools */ -}}
 {{ range .ai_tools.npm }}
 {{- $featureEnabled := false -}}
-{{- if eq .feature_flag "coding_assistants" }}{{ $featureEnabled = $.features.ai.coding_assistants }}{{- end -}}
+{{- if eq .feature_flag "harness" }}{{ $featureEnabled = $.features.ai.harness }}{{- end -}}
+{{- if eq .feature_flag "harness_tools" }}{{ $featureEnabled = $.features.ai.harness_tools }}{{- end -}}
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
 {{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled := and (not $.settings.vps ) ($.features.ai.multiplexer) }}{{- end -}}
 {{- $blocked := false -}}
@@ -30,7 +33,8 @@ info ">>>> Installing {{ .name }} (NPM) <<<"
 {{- /* Install CURL tools */ -}}
 {{ range .ai_tools.curl }}
 {{- $featureEnabled := false -}}
-{{- if eq .feature_flag "coding_assistants" }}{{ $featureEnabled = $.features.ai.coding_assistants }}{{- end -}}
+{{- if eq .feature_flag "harness" }}{{ $featureEnabled = $.features.ai.harness }}{{- end -}}
+{{- if eq .feature_flag "harness_tools" }}{{ $featureEnabled = $.features.ai.harness_tools }}{{- end -}}
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
 {{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled = $.features.ai.multiplexer }}{{- end -}}
 {{- if eq .feature_flag "composio.install" }}{{ $featureEnabled := and (not $.settings.vps ) ($.features.hermes.enabled) ($.features.hermes.composio.enabled) }}{{- end -}}
@@ -41,7 +45,25 @@ info ">>>> Installing {{ .name }} (NPM) <<<"
 info ">>>> Installing {{ .name }} (Curl) <<<<<<"
 {{ if hasKey . "env" }}{{ .env }} {{ end }}curl -fsSL {{ .url }} | {{ .shell }}
 {{- end }}
+{{- end }}
 
+{{- /* Install Github tools */ -}}
+{{ range .ai_tools.github }}
+{{- $featureEnabled := false -}}
+{{- if eq .feature_flag "harness" }}{{ $featureEnabled = $.features.ai.harness }}{{- end -}}
+{{- if eq .feature_flag "harness_tools" }}{{ $featureEnabled = $.features.ai.harness_tools }}{{- end -}}
+{{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
+{{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled = $.features.ai.multiplexer }}{{- end -}}
+{{- if eq .feature_flag "composio.install" }}{{ $featureEnabled := and (not $.settings.vps ) ($.features.hermes.enabled) ($.features.hermes.composio.enabled) }}{{- end -}}
+{{- $blocked := false -}}
+{{- if and (hasKey . "block_on_workplace") (eq .block_on_workplace $.settings.workplace) }}{{ $blocked = true }}{{- end -}}
+
+{{ if and $featureEnabled (not $blocked) }}
+info ">>>> Installing {{ .name }} (Github 🐙) <<<<<<"
+{{- $path := (joinPath $chezmoi.homeDir ".local" "src" .name) }}
+[ ! -d {{ $path }} ] || rm -rf {{ $path }}
+{{ if hasKey . "env" }}{{ .env }} {{ end }}git clone {{ .url }} {{ $path }}
+{{- end }}
 {{- end }}
 
 success ">>> 🤖 AI Tools Installed 🤖"

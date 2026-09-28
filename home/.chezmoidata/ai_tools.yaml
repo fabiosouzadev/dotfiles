@@ -1,41 +1,39 @@
 features:
-  ai: 
+  ai:
     coding_assistants: true
+    harness:           true
+    harness_tools:     true
     spec_tools:        true
-    gsd:               true
     multiplexer:       true
 
 ai_tools:
   npm:
     - name: opencode
       package: "opencode-ai"
-      feature_flag: coding_assistants
+      feature_flag: harness
       completions_cmd: "opencode completion"
     - name: copilot
       package: "@github/copilot@prerelease"
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: qwen-code
       package: "@qwen-code/qwen-code"
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: kilocode
       package: "@kilocode/cli"
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: amp
       package: "@sourcegraph/amp@latest"
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: codex
       package: "@openai/codex@latest"
-      feature_flag: coding_assistants
+      feature_flag: harness
       completions_cmd: "codex completion zsh"
-    - name: gemini
-      package: "@google/gemini-cli@preview"
-      feature_flag: coding_assistants
     - name: openclaude
       package: "@gitlawb/openclaude@latest"
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: freebuff
       package: "freebuff"
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: openspec
       package: "@fission-ai/openspec@latest"
       feature_flag: spec_tools
@@ -46,31 +44,31 @@ ai_tools:
       feature_flag: spec_tools
     - name: hindsight-coding-agent
       package: "@vectorize-io/hindsight-coding-agents install all"
-      feature_flag: coding_assistants
+      feature_flag: harness_tools
 
   curl:
     - name: aider
       url: "https://aider.chat/install.sh"
       shell: sh
       env: "NO_MODIFY_PATH=1"
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: claude
       url: "https://claude.ai/install.sh"
       shell: bash
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: kiro
       url: "https://cli.kiro.dev/install"
       shell: bash
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: bobibm
       url: "https://bob.ibm.com/download/bobshell.sh"
       shell: bash
-      feature_flag: coding_assistants
+      feature_flag: harness
       block_on_workplace: Zup
     - name: kimchi
       url: "https://github.com/getkimchi/kimchi/releases/latest/download/install.sh"
       shell: bash
-      feature_flag: coding_assistants
+      feature_flag: harness
     - name: beads
       url: "https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh"
       shell: bash
@@ -83,3 +81,12 @@ ai_tools:
       url: "https://composio.dev/install"
       shell: bash
       feature_flag: composio.install
+    - name: antigravity cli
+      url: "https://antigravity.google/cli/install.sh"
+      shell: zsh
+      feature_flag: harness
+
+  github:
+    - name: deepseek-harness
+      url: "https://github.com/deepseek-ai/deepseek-harness"
+      feature_flag: harness

@@ -15,7 +15,8 @@ tap = [
 brew = [
     'lazygit',
     'lazyjournal',
-    'atuin'
+    'atuin',
+    'mpv'
 ]
 
 cask = [
@@ -126,13 +127,12 @@ macports = [
     'wget',
     'htop',
     'btop',
-    #'podman',   
-    #'podman-compose',
-    #'lima',
-    #'colima',
-    #'k9s',
+    'podman',   
+    'podman-compose',
+    'lima',
+    'colima',
+    'k9s',
     'grep',
     'atuin',
-    #'tailscale',
-    'mpv'
+    'tailscale'
 ]
