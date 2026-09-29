@@ -61,8 +61,12 @@ info ">>>> Installing {{ .name }} (Curl) <<<<<<"
 {{ if and $featureEnabled (not $blocked) }}
 info ">>>> Installing {{ .name }} (Github 🐙) <<<<<<"
 {{- $path := (joinPath $chezmoi.homeDir ".local" "src" .name) }}
-[ ! -d {{ $path }} ] || rm -rf {{ $path }}
-{{ if hasKey . "env" }}{{ .env }} {{ end }}git clone {{ .url }} {{ $path }}
+if [ ! -d {{ $path }} ]; then
+    {{ if hasKey . "env" }}{{ .env }} {{ end }}git clone {{ .url }} {{ $path }}
+else
+    cd {{ $path }}
+    git pull origin
+fi
 {{- end }}
 {{- end }}
 

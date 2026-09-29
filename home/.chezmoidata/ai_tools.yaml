@@ -58,7 +58,7 @@ ai_tools:
       feature_flag: harness
     - name: kiro
       url: "https://cli.kiro.dev/install"
-      shell: bash
+      shell: bash -s -- "-f" 
       feature_flag: harness
     - name: bobibm
       url: "https://bob.ibm.com/download/bobshell.sh"
@@ -84,6 +84,10 @@ ai_tools:
     - name: antigravity cli
       url: "https://antigravity.google/cli/install.sh"
       shell: zsh
+      feature_flag: harness
+    - name: pi
+      url: "https://pi.dev/install.sh"
+      shell: sh
       feature_flag: harness
 
   github:
