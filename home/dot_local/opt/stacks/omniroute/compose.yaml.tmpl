@@ -89,7 +89,7 @@ services:
       - qdrant-network
       - edge-network
       - redis-network
-      - chatgpt-web-codex-net
+      - chatgpt-web-codex-network
 
 
   chatgpt-web-codex-browser:
@@ -102,11 +102,8 @@ services:
     volumes:
       - chatgpt-web-codex-browser-prod-data:/browser-profile
     networks:
-      # SECURITY (#13679): dedicated network for the unauthenticated-by-default
-      # CDP proxy sidecar (docker/chatgpt-web-codex-browser/cdp-proxy.mjs) —
-      # shared only with omniroute-web, not with redis/qdrant/bifrost/cliproxyapi/
-      # codex-app-server or any other sibling on the implicit default network.
-      chatgpt-web-codex-net: {}
+      - chatgpt-web-codex-network
+    
 
 volumes:
   omniroute-data: null
@@ -117,3 +114,8 @@ networks:
     external: true
   redis-network:
     external: true
+  # SECURITY (#13679): dedicated network for the unauthenticated-by-default
+  # CDP proxy sidecar (docker/chatgpt-web-codex-browser/cdp-proxy.mjs) —
+  # shared only with omniroute-web, not with redis/qdrant/bifrost/cliproxyapi/
+  # codex-app-server or any other sibling on the implicit default network.
+  chatgpt-web-codex-network: {}
