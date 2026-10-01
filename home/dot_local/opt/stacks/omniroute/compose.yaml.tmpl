@@ -97,8 +97,11 @@ services:
       context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
       dockerfile: docker/chatgpt-web-codex-browser/Dockerfile
     image: omniroute:chatgpt-web-codex-browser
+    env_file: .env
     restart: unless-stopped
     shm_size: "2gb"
+    environment:
+      CDP_PROXY_TOKEN: ${CDP_PROXY_TOKEN}
     volumes:
       - chatgpt-web-codex-browser-data:/browser-profile
     networks:
