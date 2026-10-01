@@ -1,17 +1,20 @@
 services:
   omniroute:
     build:
-      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.50
+      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
       target: runner-web
       args:
         OMNIROUTE_USE_TURBOPACK: 1
-        OMNIROUTE_BUILD_MEMORY_MB: 4096
-    image: omniroute:v3.8.50-web
+        OMNIROUTE_BUILD_MEMORY_MB: 6144
+    image: omniroute:v3.8.51-web
     container_name: omniroute
     deploy:
       replicas: 1
     restart: unless-stopped
     stop_grace_period: 40s
+    depends_on:
+      chatgpt-web-codex-browser:
+        condition: service_started
     env_file: .env
     environment:
       # Enviroment
@@ -23,12 +26,13 @@ services:
       - DATA_DIR=/app/data
       - DASHBOARD_PORT=20128
       - API_PORT=20129
-      - API_HOST=0.0.0.0
+      - API_HOST=127.0.0.1
       - LIVE_WS_PORT=20132
-      - LIVE_WS_HOST=0.0.0.0
-      - LIVE_WS_ALLOWED_HOSTS=localhost,omniroute,193.123.97.209
+      - LIVE_WS_HOST=127.0.0.1
+      - LIVE_WS_ALLOWED_HOSTS=localhost,omniroute,127.0.0.1,193.123.97.209
       - OMNIROUTE_PUBLIC_BASE_URL=http://193.123.97.209:20128
       - NEXT_PUBLIC_BASE_URL=http://193.123.97.209:20128
+      - CHATGPT_WEB_CODEX_CDP_URL=http://chatgpt-web-codex-browser:9223
       # Security
       - REQUIRE_API_KEY=true
       - ALLOW_API_KEY_REVEAL=true
@@ -85,6 +89,24 @@ services:
       - qdrant-network
       - edge-network
       - redis-network
+      - chatgpt-web-codex-net
+
+
+  chatgpt-web-codex-browser:
+    build:
+      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
+      dockerfile: docker/chatgpt-web-codex-browser/Dockerfile
+    image: omniroute:chatgpt-web-codex-browser
+    restart: unless-stopped
+    shm_size: "2gb"
+    volumes:
+      - chatgpt-web-codex-browser-prod-data:/browser-profile
+    networks:
+      # SECURITY (#13679): dedicated network for the unauthenticated-by-default
+      # CDP proxy sidecar (docker/chatgpt-web-codex-browser/cdp-proxy.mjs) —
+      # shared only with omniroute-web, not with redis/qdrant/bifrost/cliproxyapi/
+      # codex-app-server or any other sibling on the implicit default network.
+      chatgpt-web-codex-net: {}
 
 volumes:
   omniroute-data: null
