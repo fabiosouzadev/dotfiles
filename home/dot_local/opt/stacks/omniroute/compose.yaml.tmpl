@@ -26,9 +26,9 @@ services:
       - DATA_DIR=/app/data
       - DASHBOARD_PORT=20128
       - API_PORT=20129
-      - API_HOST=127.0.0.1
+      - API_HOST=0.0.0.0
       - LIVE_WS_PORT=20132
-      - LIVE_WS_HOST=127.0.0.1
+      - LIVE_WS_HOST=0.0.0.0
       - LIVE_WS_ALLOWED_HOSTS=localhost,omniroute,127.0.0.1,193.123.97.209
       - OMNIROUTE_PUBLIC_BASE_URL=http://193.123.97.209:20128
       - NEXT_PUBLIC_BASE_URL=http://193.123.97.209:20128
