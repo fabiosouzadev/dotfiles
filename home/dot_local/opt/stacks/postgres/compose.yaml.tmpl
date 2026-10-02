@@ -1,0 +1,56 @@
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg18
+    container_name: postgres
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      # Credenciais do Admin principal
+      POSTGRES_DB: admin
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+
+      # Variáveis que serão lidas dentro do script init-databases.sh:
+      HINDSIGHT_POSTGRES_PASSWORD: ${HINDSIGHT_POSTGRES_PASSWORD}
+      SYNAPSE_POSTGRES_PASSWORD: ${SYNAPSE_POSTGRES_PASSW
+
+    volumes:
+      - shared_pg_data:/var/lib/postgresql/data
+      - ./init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U hindsight -d hindsight
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - postgres-network
+
+# ==============================================================
+# Volumes
+# ==============================================================
+
+volumes:
+  hindsight_pg_data:
+    name: hindsight_pg_data
+
+
+# ==============================================================
+# Networks
+# ==============================================================
+
+networks:
+  postgres-network: {}
+  edge-network:
+    external: true

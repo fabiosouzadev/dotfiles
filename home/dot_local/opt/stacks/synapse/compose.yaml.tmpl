@@ -1,0 +1,40 @@
+services:
+  synapse:
+    image: ghcr.io/element-hq/synapse:latest
+    container_name: synapse
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      SYNAPSE_SERVER_NAME: 193.123.97.209
+      SYNAPSE_REPORT_STATS: "no"
+      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+    expose:
+      - "8008"
+    volumes:
+      - ./data:/data
+    
+    # Healthcheck para monitoramento
+    healthcheck:
+      test: ["CMD", "curl", "-fSs", "http://localhost:8008/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    
+    security_opt:
+      - no-new-privileges:true
+    
+    networks:
+      - synapse-network
+      - postgres-network
+      - edge-network
+
+
+networks:
+  synapse-network: {}
+
+  postgres-network:
+    external: true
+  
+  edge-network:
+    external: true
