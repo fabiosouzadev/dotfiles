@@ -19,7 +19,7 @@ services:
       SYNAPSE_POSTGRES_PASSWORD: ${SYNAPSE_POSTGRES_PASSWORD}
 
     volumes:
-      - shared_pg_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
       - ./init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
 
     healthcheck:
@@ -41,9 +41,9 @@ services:
 # Volumes
 # ==============================================================
 
+
 volumes:
-  hindsight_pg_data:
-    name: hindsight_pg_data
+  postgres_data: null
 
 
 # ==============================================================
