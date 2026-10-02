@@ -19,7 +19,7 @@ services:
       SYNAPSE_POSTGRES_PASSWORD: ${SYNAPSE_POSTGRES_PASSWORD}
 
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
       - ./init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
 
     healthcheck:
