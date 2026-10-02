@@ -2,17 +2,13 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-    -- 1. Criar usuário e banco do Hindsight usando variáveis de ambiente
+    -- 1. Criar usuário e banco do Hindsight
     CREATE USER hindsight WITH PASSWORD '${HINDSIGHT_POSTGRES_PASSWORD}';
     CREATE DATABASE hindsight OWNER hindsight;
     GRANT ALL PRIVILEGES ON DATABASE hindsight TO hindsight;
 
-    -- 2. Criar usuário e banco do Synapse usando variáveis de ambiente
+    -- 2. Criar usuário e banco do Synapse (com o collation C correto na criação)
     CREATE USER synapse WITH PASSWORD '${SYNAPSE_POSTGRES_PASSWORD}';
-    CREATE DATABASE synapse OWNER synapse;
-
-    -- 3. Configurações de collation para o Synapse
-    ALTER DATABASE synapse SET LC_COLLATE TO 'C';
-    ALTER DATABASE synapse SET LC_CTYPE TO 'C';
+    CREATE DATABASE synapse WITH OWNER synapse LC_COLLATE = 'C' LC_CTYPE = 'C';
     GRANT ALL PRIVILEGES ON DATABASE synapse TO synapse;
 EOSQL
