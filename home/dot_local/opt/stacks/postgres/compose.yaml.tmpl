@@ -51,6 +51,8 @@ volumes:
 # ==============================================================
 
 networks:
-  postgres-network: {}
+  postgres-network:
+    driver: bridge
+    name: postgres-network
   edge-network:
     external: true

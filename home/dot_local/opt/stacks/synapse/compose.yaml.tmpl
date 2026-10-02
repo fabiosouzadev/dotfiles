@@ -31,7 +31,9 @@ services:
 
 
 networks:
-  synapse-network: {}
+  synapse-network:
+    driver: bridge
+    name: synapse-network
 
   postgres-network:
     external: true

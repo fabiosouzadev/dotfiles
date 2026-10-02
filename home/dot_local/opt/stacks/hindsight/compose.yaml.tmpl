@@ -230,7 +230,9 @@ services:
 # ==============================================================
 
 networks:
-  hindsight-network: {}
+  hindsight-network:
+    driver: bridge
+    name: hindsight-network
   
   postgres-network:
     external: true
