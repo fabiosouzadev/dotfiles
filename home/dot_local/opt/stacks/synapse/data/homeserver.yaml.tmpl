@@ -1,5 +1,25 @@
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+#
+# For more information on how to configure Synapse, including a complete accounting of
+# each option, go to docs/usage/configuration/config_documentation.md or
+# https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 {{ $envFile := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_dot_env.asc" -}}
-server_name: 193.123.97.209
+server_name: "193.123.97.209"
+pid_file: /data/homeserver.pid
+listeners:
+  - port: 8008
+    resources:
+    - compress: false
+      names:
+      - client
+      - federation
+    tls: false
+    type: http
+    x_forwarded: true
 database:
   name: psycopg2
   args:
@@ -10,4 +30,12 @@ database:
     port: 5432
     cp_min: 5
     cp_max: 10
-
+log_config: "/data/193.123.97.209.log.config"
+media_store_path: /data/media_store
+registration_shared_secret: "VlchL~MfeoG8m0TCzQCZarkt6y-Lpt&^eGkjhOcvOncc#gyynt"
+report_stats: true
+macaroon_secret_key: "oXCN=MGKK3e;fd_:v2UU;B61rkYbLR~B7UDyu655#s@F8N1G4M"
+form_secret: "pmBmtLqi0#7-;ol;W_QdJk-y@TBP*7*Ja+d&eFKJ#XR#tG,2d&"
+signing_key_path: "/data/193.123.97.209.signing.key"
+trusted_key_servers:
+  - server_name: "matrix.org"
