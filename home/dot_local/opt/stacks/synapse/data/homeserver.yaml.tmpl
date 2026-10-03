@@ -1,4 +1,5 @@
 {{ $envFile := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_dot_env.asc" -}}
+server_name: 193.123.97.209
 database:
   name: psycopg2
   args:
@@ -9,3 +10,4 @@ database:
     port: 5432
     cp_min: 5
     cp_max: 10
+
