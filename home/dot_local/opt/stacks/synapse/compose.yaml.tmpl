@@ -3,19 +3,9 @@ services:
     image: ghcr.io/element-hq/synapse:sha-63dc0cb
     container_name: synapse
     restart: unless-stopped
-    env_file: .env
     environment:
-      # Sobrescreve as configurações de banco via variáveis de ambiente
       SYNAPSE_SERVER_NAME: 193.123.97.209
       SYNAPSE_REPORT_STATS: "no"
-      SYNAPSE_CONFIG_DATABASE_NAME: "psycopg2"
-      SYNAPSE_CONFIG_DATABASE_ARGS_USER: "synapse"
-      SYNAPSE_CONFIG_DATABASE_ARGS_PASSWORD: "${SYNAPSE_POSTGRES_PASSWORD}"
-      SYNAPSE_CONFIG_DATABASE_ARGS_DATABASE: "synapse"
-      SYNAPSE_CONFIG_DATABASE_ARGS_HOST: "postgres"
-      SYNAPSE_CONFIG_DATABASE_ARGS_PORT: "5432"
-      SYNAPSE_CONFIG_DATABASE_ARGS_CP_MIN: "5"
-      SYNAPSE_CONFIG_DATABASE_ARGS_CP_MAX: "10"
     expose:
       - "8008"
     volumes:
@@ -37,7 +27,9 @@ services:
       - postgres-network
       - edge-network
 
-
+volumes:
+  postgres_data: null
+  
 networks:
   synapse-network:
     driver: bridge

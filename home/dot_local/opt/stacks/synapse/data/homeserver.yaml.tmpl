@@ -1,0 +1,11 @@
+{{ $envFile := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_dot_env.asc" -}}
+database:
+  name: psycopg2
+  args:
+    user: synapse
+    password: {{ include $envFile | decrypt | trim }}
+    database: synapse
+    host: postgres
+    port: 5432
+    cp_min: 5
+    cp_max: 10

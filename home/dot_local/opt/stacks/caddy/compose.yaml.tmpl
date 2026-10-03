@@ -44,7 +44,7 @@ services:
       - 20129:20129 #omniroute api
       - 20132:20132 #omniroute WebSocket / Streaming
     volumes:
-      - {{ .chezmoi.homeDir }}/.local/share/apps/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
     networks:
