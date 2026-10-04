@@ -14,18 +14,12 @@
     }
 }
 
-{{/* http://:8008 {
+matrixfabiosouzadev.duckdns.org {
     import common
-    reverse_proxy synapse:8008 {
-        transport http {
-            read_timeout 300s
-            write_timeout 300s
-        }
-    }
-} */}}
+    reverse_proxy synapse:8008
+}
 
-
-matrixfabiosouzadev.duckdns.org, http://:8008 {
+http://:8008 {
     import common
     reverse_proxy synapse:8008
 }
