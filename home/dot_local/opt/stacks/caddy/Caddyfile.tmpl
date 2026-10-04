@@ -27,15 +27,9 @@
 
 matrixfabiosouzadev.duckdns.org, http://:8008 {
     import common
-    reverse_proxy synapse:8008
+    reverse_proxy /_matrix/*         synapse:8008
+    reverse_proxy /_synapse/client/* synapse:8008
 }
-
-# matrix.example.com {
-#   import common
-#   reverse_proxy /_matrix/* localhost:8008
-#   reverse_proxy /_synapse/client/* localhost:8008
-# }
-
 
 http://:8642 {
     import common
