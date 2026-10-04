@@ -4,7 +4,9 @@ services:
     container_name: synapse
     restart: unless-stopped
     environment:
-      SYNAPSE_SERVER_NAME: 193.123.97.209
+      PUID: {{ .chezmoi.uid }}
+      PGID: {{ .chezmoi.gid }}
+      SYNAPSE_SERVER_NAME: "matrixfabiosouzadev.duckdns.org"
       SYNAPSE_REPORT_STATS: "no"
     expose:
       - "8008"
