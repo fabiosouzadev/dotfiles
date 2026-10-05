@@ -3,10 +3,8 @@ services:
     image: ghcr.io/open-webui/open-webui:latest
     container_name: openwebui
     restart: unless-stopped
-    ports:
-      - 8080:8080
-    environment:
-      - OLLAMA_BASE_URL=http://ollama:11434
+    expose:
+      - "8080"
     volumes:
       - openwebui_data:/app/backend/data
     networks:
@@ -16,5 +14,7 @@ volumes:
   openwebui_data: null
 
 networks:
+  omniroute-network:
+    external: true
   edge-network:
     external: true

@@ -90,6 +90,7 @@ services:
       - edge-network
       - redis-network
       - chatgpt-web-codex-network
+      - omniroute-network
 
 
   chatgpt-web-codex-browser:
@@ -110,6 +111,8 @@ services:
 volumes:
   chatgpt-web-codex-browser-data: null
 networks:
+  omniroute-network:
+    name: omniroute-network
   # SECURITY (#13679): dedicated network for the unauthenticated-by-default
   # CDP proxy sidecar (docker/chatgpt-web-codex-browser/cdp-proxy.mjs) —
   # shared only with omniroute-web, not with redis/qdrant/bifrost/cliproxyapi/

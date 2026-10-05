@@ -19,6 +19,10 @@ matrixfabiosouzadev.duckdns.org, http://:8008 {
     reverse_proxy synapse:8008
 }
 
+chat-fabiosouzadev.duckdns.org, http://:8084 {
+    import common
+    reverse_proxy openwebui:8080
+}
 
 http://:8642 {
     import common
