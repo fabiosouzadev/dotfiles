@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-OMNIROUTE_DIR="${OMNIROUTE_HOME:-${DATA_DIR:-${HOME}/.omniroute}}"
+OMNIROUTE_DIR="${OMNIROUTE_HOME:-${DATA_DIR:-${HOME}/.local/opt/stacks/omniroute/data}}"
 DB_FILE="${OMNIROUTE_DIR}/storage.sqlite"
 SYNC_DIR="${OMNIROUTE_DIR}/sync"
 MANIFEST_FILE="${SYNC_DIR}/manifest.json"
