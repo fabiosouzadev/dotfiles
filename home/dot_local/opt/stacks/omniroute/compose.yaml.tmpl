@@ -4,6 +4,7 @@ services:
       context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
       target: runner-web
       args:
+        OMNIROUTE_BASE_PATH: ${OMNIROUTE_BASE_PATH:-}
         OMNIROUTE_USE_TURBOPACK: 1
         OMNIROUTE_BUILD_MEMORY_MB: 6144
     image: omniroute:v3.8.51-web
