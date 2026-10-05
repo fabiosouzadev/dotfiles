@@ -1,14 +1,14 @@
 services:
   omniroute:
-    # build:
-    #   context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
-    #   target: runner-web
-    #   args:
-    #     OMNIROUTE_BASE_PATH: ${OMNIROUTE_BASE_PATH:-}
-    #     OMNIROUTE_USE_TURBOPACK: 1
-    #     OMNIROUTE_BUILD_MEMORY_MB: 6144
-    #     OMNIROUTE_BUILD_WORKERS: 2
-    image: diegosouzapw/omniroute:3.8.49-web
+    build:
+      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
+      target: runner-web
+      args:
+        OMNIROUTE_BASE_PATH: ${OMNIROUTE_BASE_PATH:-}
+        OMNIROUTE_USE_TURBOPACK: 1
+        OMNIROUTE_BUILD_MEMORY_MB: 6144
+        OMNIROUTE_BUILD_WORKERS: 2
+    image: omniroute:3.8.51-web
     container_name: omniroute
     deploy:
       replicas: 1
