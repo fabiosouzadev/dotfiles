@@ -18,6 +18,8 @@ services:
     env_file: .env
     environment:
       # Enviroment
+      - PUID={{ .chezmoi.uid }}
+      - PGID={{ .chezmoi.gid }}
       - APP_LOG_LEVEL=debug
       - NODE_ENV=production
       # Configs
@@ -72,6 +74,8 @@ services:
       - "20128"
       - "20129"
       - "20132"
+    # user: "${UID}:${GID}" # Força o container a rodar com o mesmo ID do usuário do host
+    user: {{ .chezmoi.uid }}:{{ .chezmoi.gid }}
     volumes:
       - ./data:/app/data
     healthcheck:
