@@ -2,6 +2,43 @@
 # OmniRoute Configuration/State Sync Tool
 # Sincroniza o estado essencial do OmniRoute via Chezmoi, criptografado com age.
 # Modelo sustentável: config pequena + secrets + export seletivo de SQLite + manifest.
+#
+# OmniRoute Configuration/State Sync Tool
+#
+# Modelo de backup:
+#
+#   OmniRoute runtime
+#        │
+#        ├── storage.sqlite          NÃO versionado
+#        ├── storage.sqlite-wal      NÃO versionado
+#        ├── storage.sqlite-shm      NÃO versionado
+#        ├── call_logs/              NÃO versionado
+#        ├── logs/                   NÃO versionado
+#        └── cache/                  NÃO versionado
+#
+#   Configuração semântica
+#        │
+#        └── config.sql              → Chezmoi + age
+#
+#   Secrets/config
+#        │
+#        └── .env                    → Chezmoi + age
+#
+# Comandos:
+#
+#   export : Gera config.sql + manifest
+#   push   : Exporta e adiciona arquivos pequenos ao Chezmoi criptografado
+#   pull   : Restaura configuração com parada segura do OmniRoute
+#   status : Mostra estado do backup/runtime
+#   doctor : Procura blobs proibidos/perigosos no Chezmoi
+#
+# Importante:
+#
+#   Este não é um backup full do OmniRoute.
+#
+#   É um backup de configuração/estado semântico.
+#
+#   Histórico de chamadas, logs, cache e runtime não são restaurados.
 
 set -euo pipefail
 
@@ -12,6 +49,19 @@ MANIFEST_FILE="${SYNC_DIR}/manifest.json"
 CONFIG_SQL_FILE="${OMNIROUTE_DIR}/config.sql"
 BACKUP_NOTE_FILE="${SYNC_DIR}/backup-note.txt"
 
+# Nome do container Docker.
+CONTAINER_NAME="${OMNIROUTE_CONTAINER:-omniroute}"
+
+# Backup temporário criado antes de qualquer restore.
+RESTORE_BACKUP_FILE="${DB_FILE}.pre-restore"
+
+# Arquivo temporário usado durante export.
+EXPORT_TEMP_DB=""
+
+# Tempo máximo aguardando healthcheck.
+HEALTH_TIMEOUT_SECONDS="${OMNIROUTE_HEALTH_TIMEOUT:-120}"
+
+# Arquivos que serão materializados no Chezmoi como conteúdo criptografado.
 ENCRYPTED_FILES=(
   .env
   config.sql
@@ -19,6 +69,7 @@ ENCRYPTED_FILES=(
   sync/backup-note.txt
 )
 
+# Arquivos que jamais devem aparecer no Chezmoi.
 FORBIDDEN_SOURCE_PATTERNS=(
   'private_dot_omniroute/private_backup.tar.gz'
   'private_dot_omniroute/encrypted_backup.tar.gz.asc'
@@ -31,6 +82,73 @@ FORBIDDEN_SOURCE_PATTERNS=(
   'private_dot_omniroute/private_cache'
 )
 
+###############################################################################
+# TABELAS DE CONFIGURAÇÃO
+###############################################################################
+
+SEMANTIC_TABLES=(
+  # Core routing/providers/API access
+  provider_connections
+  provider_nodes
+  combos
+  model_combo_mappings
+  api_keys
+  upstream_proxy_config
+
+  # Dashboard/settings/secrets
+  key_value
+
+  # Compression
+  compression_combos
+  compression_combo_assignments
+
+  # Limits
+  api_key_token_limits
+  account_key_limits
+  provider_key_limits
+
+  # Domains/fallbacks
+  domain_budgets
+  domain_fallback_chains
+
+  # Groups
+  key_groups
+  key_group_members
+  group_model_permissions
+
+  # Quotas
+  quota_groups
+  quota_pools
+  quota_pool_connections
+  quota_allocations
+
+  # Proxy
+  proxy_registry
+  proxy_assignments
+
+  # Integrations
+  relay_tokens
+  webhooks
+  plugins
+  middleware_hooks
+
+  # Agents
+  cloud_agent_credentials
+  agent_bridge_mappings
+  agent_bridge_bypass
+  agent_bridge_state
+  skills
+  api_key_context_sources
+
+  # Tiers
+  tier_config
+  tier_assignments
+)
+
+###############################################################################
+# UTILITÁRIOS
+###############################################################################
+
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "❌ Comando obrigatório não encontrado: $1"
@@ -42,244 +160,1169 @@ source_root() {
   chezmoi source-path 2>/dev/null | sed 's#/home$##'
 }
 
+container_exists() {
+  docker inspect "$CONTAINER_NAME" >/dev/null 2>&1
+}
+
+container_running() {
+  docker inspect \
+    --format '{{.State.Running}}' \
+    "$CONTAINER_NAME" 2>/dev/null |
+    grep -q '^true$'
+}
+
+container_health_status() {
+  docker inspect \
+    --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' \
+    "$CONTAINER_NAME" 2>/dev/null ||
+    echo "missing"
+}
+
+container_healthy() {
+  [[ "$(container_health_status)" == "healthy" ]]
+}
+
+wait_for_health() {
+  local elapsed=0
+  local status
+
+  echo "⏳ Aguardando OmniRoute ficar saudável..."
+
+  while [ "$elapsed" -lt "$HEALTH_TIMEOUT_SECONDS" ]; do
+    status="$(container_health_status)"
+
+    case "$status" in
+      healthy)
+        echo "✅ OmniRoute está saudável."
+        return 0
+        ;;
+
+      unhealthy)
+        echo "❌ OmniRoute reportou healthcheck: unhealthy"
+        return 1
+        ;;
+
+      starting|none)
+        sleep 5
+        elapsed=$((elapsed + 5))
+        ;;
+    esac
+  done
+
+  echo "❌ OmniRoute não ficou saudável em ${HEALTH_TIMEOUT_SECONDS}s."
+  echo ""
+  echo "Últimos logs:"
+  docker logs --tail 100 "$CONTAINER_NAME" 2>&1 || true
+
+  return 1
+}
+
 print_usage() {
-  echo "Uso: omniroute-sync {push|pull|status|doctor|export}"
-  echo "  export : Gera manifest e SQL seletivo do OmniRoute"
-  echo "  push   : Exporta e adiciona arquivos pequenos ao chezmoi criptografado"
-  echo "  pull   : Restaura/importa estado seletivo depois de chezmoi apply"
-  echo "  status : Verifica estado local e arquivos de sincronização"
-  echo "  doctor : Valida se o chezmoi não contém blobs proibidos"
+  cat <<EOF
+
+Uso:
+
+  omniroute-sync {export|push|pull|status|doctor}
+
+Comandos:
+
+  export
+      Gera config.sql e manifest.json.
+
+  push
+      Executa export e adiciona arquivos pequenos ao
+      Chezmoi usando criptografia age.
+
+  pull
+      Restaura config.sql com segurança.
+      O OmniRoute será parado durante o restore.
+
+  status
+      Mostra estado do banco, arquivos e container.
+
+  doctor
+      Verifica se blobs proibidos foram adicionados
+      ao source do Chezmoi.
+
+Variáveis opcionais:
+
+  OMNIROUTE_HOME
+  DATA_DIR
+  OMNIROUTE_CONTAINER
+  OMNIROUTE_HEALTH_TIMEOUT
+
+Exemplo:
+
+  OMNIROUTE_CONTAINER=omniroute omniroute-sync pull
+
+EOF
 }
 
-export_manifest() {
-  require_cmd python3
-  mkdir -p "$SYNC_DIR"
-  python3 - <<PY
-import json, os, sqlite3, subprocess, time
-from pathlib import Path
-root = Path(os.path.expanduser(${OMNIROUTE_DIR@Q}))
-sync = Path(os.path.expanduser(${SYNC_DIR@Q}))
+###############################################################################
+# VALIDAÇÃO DO AMBIENTE
+###############################################################################
 
-def size(path):
-    p=root/path
-    if not p.exists(): return None
-    if p.is_file(): return p.stat().st_size
-    total=0; files=0
-    for f in p.rglob('*'):
-        if f.is_file():
-            files += 1; total += f.stat().st_size
-    return {'files': files, 'bytes': total}
+check_db_files() {
+  if [ ! -d "$OMNIROUTE_DIR" ]; then
+    echo "❌ Diretório do OmniRoute não encontrado:"
+    echo "   $OMNIROUTE_DIR"
+    return 1
+  fi
 
-manifest={
-    'created_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-    'source_host': os.uname().nodename,
-    'omniroute_dir': str(root),
-    'backup_model': 'chezmoi plaintext config template + encrypted secrets/small state + selective SQL; not full db/log backup',
-    'included_files': ['.env','config.sql','sync/manifest.json','sync/backup-note.txt'],
-    'semantic_tables': [
-        'provider_connections', 'provider_nodes', 'combos', 'model_combo_mappings',
-        'api_keys', 'upstream_proxy_config', 'key_value',
-        'compression_combos', 'compression_combo_assignments',
-        'api_key_token_limits', 'account_key_limits', 'provider_key_limits',
-        'domain_budgets', 'domain_fallback_chains',
-        'key_groups', 'key_group_members', 'group_model_permissions',
-        'quota_groups', 'quota_pools', 'quota_pool_connections', 'quota_allocations',
-        'proxy_registry', 'proxy_assignments', 'relay_tokens', 'webhooks',
-        'plugins', 'middleware_hooks', 'cloud_agent_credentials',
-        'agent_bridge_mappings', 'agent_bridge_bypass', 'agent_bridge_state',
-        'skills', 'api_key_context_sources', 'tier_config', 'tier_assignments'
-    ],
-    'sizes': {k: size(Path(k)) for k in ['.env','config.sql','storage.sqlite','call_logs','db_backups','server']},
-    'excluded_by_design': [
-        'storage.sqlite raw history/runtime state',
-        'storage.sqlite-wal', 'storage.sqlite-shm',
-        'call_logs/', 'db_backups/', 'logs/', 'cache/', 'server/.pid',
-        'any tarball-monolithic backup'
-    ]
+  if [ ! -f "$DB_FILE" ]; then
+    echo "❌ Banco de dados não encontrado:"
+    echo "   $DB_FILE"
+    return 1
+  fi
+
+  if [ ! -r "$DB_FILE" ]; then
+    echo "❌ Banco de dados não é legível:"
+    echo "   $DB_FILE"
+    return 1
+  fi
+
+  if [ ! -w "$OMNIROUTE_DIR" ]; then
+    echo "❌ Diretório do banco não é gravável:"
+    echo "   $OMNIROUTE_DIR"
+    return 1
+  fi
+
+  return 0
 }
-(sync/'manifest.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
-(sync/'backup-note.txt').write_text('OmniRoute backup model: config + secrets in chezmoi, database exported selectively via SQL.\n')
-PY
+
+###############################################################################
+# SQLITE
+###############################################################################
+
+checkpoint_database() {
+  require_cmd sqlite3
+
+  echo "🧹 Executando SQLite WAL checkpoint..."
+
+  local result
+
+  result="$(
+    sqlite3 "$DB_FILE" \
+      'PRAGMA wal_checkpoint(TRUNCATE);' 2>&1
+  )"
+
+  echo "  $result"
+}
+
+integrity_check() {
+  require_cmd sqlite3
+
+  echo "🔎 Executando SQLite integrity_check..."
+
+  local result
+
+  result="$(
+    sqlite3 "$DB_FILE" \
+      'PRAGMA integrity_check;' 2>&1
+  )"
+
+  if [ "$result" != "ok" ]; then
+    echo "❌ SQLite integrity_check falhou:"
+    echo "$result"
+    return 1
+  fi
+
+  echo "✓ SQLite integrity_check: OK"
+}
+
+###############################################################################
+# EXPORT
+###############################################################################
+
+cleanup_export_temp_db() {
+  if [ -n "${EXPORT_TEMP_DB:-}" ] &&
+     [ -f "$EXPORT_TEMP_DB" ]; then
+
+    rm -f "$EXPORT_TEMP_DB"
+
+    EXPORT_TEMP_DB=""
+  fi
 }
 
 export_config_sql() {
   require_cmd python3
-  mkdir -p "$SYNC_DIR"
-  python3 - <<PY
-import os, sqlite3, time
-from pathlib import Path
-root = Path(os.path.expanduser(${OMNIROUTE_DIR@Q}))
-out = Path(os.path.expanduser(${CONFIG_SQL_FILE@Q}))
-tables = [
-    # Core routing/providers/API access
-    'provider_connections', 'provider_nodes', 'combos', 'model_combo_mappings',
-    'api_keys', 'upstream_proxy_config',
 
-    # Admin/dashboard/settings/secrets stored in the DB (includes dashboard password)
+  mkdir -p "$SYNC_DIR"
+
+  chmod 700 "$SYNC_DIR" 2>/dev/null || true
+
+  cleanup_export_temp_db
+
+  EXPORT_TEMP_DB="$(
+    mktemp "$SYNC_DIR/.storage.sqlite.export.XXXXXX"
+  )"
+
+  chmod 600 "$EXPORT_TEMP_DB"
+
+  echo "📸 Criando snapshot consistente do SQLite..."
+
+  python3 - "$DB_FILE" "$EXPORT_TEMP_DB" <<'PY'
+import sqlite3
+import sys
+
+source_path = sys.argv[1]
+target_path = sys.argv[2]
+
+source = sqlite3.connect(source_path)
+target = sqlite3.connect(target_path)
+
+try:
+    source.backup(target)
+    target.commit()
+finally:
+    target.close()
+    source.close()
+PY
+
+  echo "✓ Snapshot SQLite criado."
+
+  python3 - "$EXPORT_TEMP_DB" "$CONFIG_SQL_FILE" <<'PY'
+import sqlite3
+import sys
+import time
+
+db_path = sys.argv[1]
+out_path = sys.argv[2]
+
+tables = [
+    'provider_connections',
+    'provider_nodes',
+    'combos',
+    'model_combo_mappings',
+    'api_keys',
+    'upstream_proxy_config',
+
     'key_value',
 
-    # Optional semantic configuration tables. Empty tables are harmless; if populated later,
-    # they will be restored. Runtime/history/cache tables stay intentionally excluded.
-    'compression_combos', 'compression_combo_assignments',
-    'api_key_token_limits', 'account_key_limits', 'provider_key_limits',
-    'domain_budgets', 'domain_fallback_chains',
-    'key_groups', 'key_group_members', 'group_model_permissions',
-    'quota_groups', 'quota_pools', 'quota_pool_connections', 'quota_allocations',
-    'proxy_registry', 'proxy_assignments',
-    'relay_tokens', 'webhooks',
-    'plugins', 'middleware_hooks',
-    'cloud_agent_credentials', 'agent_bridge_mappings', 'agent_bridge_bypass', 'agent_bridge_state',
-    'skills', 'api_key_context_sources',
-    'tier_config', 'tier_assignments',
+    'compression_combos',
+    'compression_combo_assignments',
+
+    'api_key_token_limits',
+    'account_key_limits',
+    'provider_key_limits',
+
+    'domain_budgets',
+    'domain_fallback_chains',
+
+    'key_groups',
+    'key_group_members',
+    'group_model_permissions',
+
+    'quota_groups',
+    'quota_pools',
+    'quota_pool_connections',
+    'quota_allocations',
+
+    'proxy_registry',
+    'proxy_assignments',
+
+    'relay_tokens',
+    'webhooks',
+
+    'plugins',
+    'middleware_hooks',
+
+    'cloud_agent_credentials',
+    'agent_bridge_mappings',
+    'agent_bridge_bypass',
+    'agent_bridge_state',
+
+    'skills',
+    'api_key_context_sources',
+
+    'tier_config',
+    'tier_assignments',
 ]
+
 delete_order = list(reversed(tables))
 
-def q_ident(name): return '"' + name.replace('"', '""') + '"'
+
+def q_ident(name):
+    return '"' + name.replace('"', '""') + '"'
+
+
 def q_value(value):
-    if value is None: return 'NULL'
-    if isinstance(value, bool): return '1' if value else '0'
-    if isinstance(value, int): return str(value)
-    if isinstance(value, float): return repr(value)
-    if isinstance(value, bytes): return "X'" + value.hex() + "'"
+    if value is None:
+        return 'NULL'
+
+    if isinstance(value, bool):
+        return '1' if value else '0'
+
+    if isinstance(value, int):
+        return str(value)
+
+    if isinstance(value, float):
+        return repr(value)
+
+    if isinstance(value, bytes):
+        return "X'" + value.hex() + "'"
+
     return "'" + str(value).replace("'", "''") + "'"
 
-con = sqlite3.connect(root / 'storage.sqlite')
-cur = con.cursor()
-existing = {row[0] for row in cur.execute("select name from sqlite_master where type='table'")}
-lines = [
-    '-- OmniRoute config export',
-    f"-- Exported at: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}",
-    '-- Generated by omniroute-sync; intentionally excludes logs/call logs/runtime state.',
-    'PRAGMA foreign_keys=OFF;',
-    'BEGIN TRANSACTION;'
-]
-for table in delete_order:
-    if table in existing:
-        lines.append(f'DELETE FROM {q_ident(table)};')
-for table in tables:
-    if table not in existing:
-        continue
-    rows = cur.execute(f'SELECT * FROM {q_ident(table)}').fetchall()
-    cols = [desc[0] for desc in cur.description]
-    col_sql = ', '.join(q_ident(c) for c in cols)
-    for row in rows:
-        values_sql = ', '.join(q_value(v) for v in row)
-        lines.append(f'INSERT OR REPLACE INTO {q_ident(table)} ({col_sql}) VALUES ({values_sql});')
-lines.append('COMMIT;')
-out.write_text('\n'.join(lines) + '\n')
-con.close()
+
+con = sqlite3.connect(db_path)
+
+try:
+    cur = con.cursor()
+
+    existing = {
+        row[0]
+        for row in cur.execute(
+            "SELECT name "
+            "FROM sqlite_master "
+            "WHERE type='table'"
+        )
+    }
+
+    lines = [
+        '-- OmniRoute config export',
+        f"-- Exported at: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}",
+        '-- Generated by omniroute-sync.',
+        '-- This is a selective configuration export.',
+        '-- Runtime/history/logs/cache are intentionally excluded.',
+        'PRAGMA foreign_keys=OFF;',
+        'BEGIN TRANSACTION;',
+    ]
+
+    # Remove existing semantic configuration during restore.
+    for table in delete_order:
+        if table in existing:
+            lines.append(
+                f'DELETE FROM {q_ident(table)};'
+            )
+
+    # Export rows.
+    for table in tables:
+        if table not in existing:
+            continue
+
+        rows = cur.execute(
+            f'SELECT * FROM {q_ident(table)}'
+        ).fetchall()
+
+        columns = [
+            description[0]
+            for description in cur.description
+        ]
+
+        column_sql = ', '.join(
+            q_ident(column)
+            for column in columns
+        )
+
+        for row in rows:
+            values_sql = ', '.join(
+                q_value(value)
+                for value in row
+            )
+
+            lines.append(
+                f'INSERT OR REPLACE INTO {q_ident(table)} '
+                f'({column_sql}) VALUES ({values_sql});'
+            )
+
+    lines.append('COMMIT;')
+
+    with open(out_path, 'w', encoding='utf-8') as fh:
+        fh.write('\n'.join(lines))
+        fh.write('\n')
+
+finally:
+    con.close()
 PY
+
+  chmod 600 "$CONFIG_SQL_FILE"
+
+  cleanup_export_temp_db
+
+  echo "✓ Configuração SQL exportada:"
+  echo "  $CONFIG_SQL_FILE"
+}
+
+export_manifest() {
+  require_cmd python3
+
+  mkdir -p "$SYNC_DIR"
+
+  python3 - "$OMNIROUTE_DIR" "$SYNC_DIR" "$CONFIG_SQL_FILE" <<'PY'
+import hashlib
+import json
+import os
+import sys
+import time
+from pathlib import Path
+
+root = Path(os.path.expanduser(sys.argv[1]))
+sync = Path(os.path.expanduser(sys.argv[2]))
+config_sql = Path(os.path.expanduser(sys.argv[3]))
+
+
+def size(path):
+    path = root / path
+
+    if not path.exists():
+        return None
+
+    if path.is_file():
+        return path.stat().st_size
+
+    total = 0
+    files = 0
+
+    for file in path.rglob('*'):
+        if file.is_file():
+            files += 1
+            total += file.stat().st_size
+
+    return {
+        'files': files,
+        'bytes': total,
+    }
+
+
+def sha256(path):
+    if not path.exists():
+        return None
+
+    digest = hashlib.sha256()
+
+    with open(path, 'rb') as fh:
+        for chunk in iter(
+            lambda: fh.read(1024 * 1024),
+            b''
+        ):
+            digest.update(chunk)
+
+    return digest.hexdigest()
+
+
+manifest = {
+    'created_utc': time.strftime(
+        '%Y-%m-%dT%H:%M:%SZ',
+        time.gmtime()
+    ),
+
+    'source_host': os.uname().nodename,
+
+    'omniroute_dir': str(root),
+
+    'backup_model': (
+        'encrypted configuration + secrets via chezmoi/age '
+        '+ selective semantic SQLite SQL export; '
+        'not a full runtime/database backup'
+    ),
+
+    'included_files': [
+        '.env',
+        'config.sql',
+        'sync/manifest.json',
+        'sync/backup-note.txt',
+    ],
+
+    'config_sql': {
+        'sha256': sha256(config_sql),
+        'size_bytes': (
+            config_sql.stat().st_size
+            if config_sql.exists()
+            else None
+        ),
+    },
+
+    'semantic_tables': [
+        'provider_connections',
+        'provider_nodes',
+        'combos',
+        'model_combo_mappings',
+        'api_keys',
+        'upstream_proxy_config',
+        'key_value',
+        'compression_combos',
+        'compression_combo_assignments',
+        'api_key_token_limits',
+        'account_key_limits',
+        'provider_key_limits',
+        'domain_budgets',
+        'domain_fallback_chains',
+        'key_groups',
+        'key_group_members',
+        'group_model_permissions',
+        'quota_groups',
+        'quota_pools',
+        'quota_pool_connections',
+        'quota_allocations',
+        'proxy_registry',
+        'proxy_assignments',
+        'relay_tokens',
+        'webhooks',
+        'plugins',
+        'middleware_hooks',
+        'cloud_agent_credentials',
+        'agent_bridge_mappings',
+        'agent_bridge_bypass',
+        'agent_bridge_state',
+        'skills',
+        'api_key_context_sources',
+        'tier_config',
+        'tier_assignments',
+    ],
+
+    'sizes': {
+        name: size(name)
+        for name in [
+            '.env',
+            'config.sql',
+            'storage.sqlite',
+            'call_logs',
+            'db_backups',
+            'server',
+        ]
+    },
+
+    'excluded_by_design': [
+        'storage.sqlite raw runtime state',
+        'storage.sqlite-wal',
+        'storage.sqlite-shm',
+        'call_logs/',
+        'db_backups/',
+        'logs/',
+        'cache/',
+        'server/.pid',
+        'monolithic tarball backups',
+    ],
+}
+
+(sync / 'manifest.json').write_text(
+    json.dumps(
+        manifest,
+        indent=2,
+        ensure_ascii=False,
+    ) + '\n',
+    encoding='utf-8',
+)
+
+(sync / 'backup-note.txt').write_text(
+    'OmniRoute backup model:\n'
+    '- Configuration and secrets are stored encrypted through Chezmoi/age.\n'
+    '- Semantic SQLite configuration is exported to config.sql.\n'
+    '- Runtime database history, logs, cache and WAL state are intentionally excluded.\n'
+    '- Restore must be performed through omniroute-sync pull.\n',
+    encoding='utf-8',
+)
+PY
+
+  chmod 600 "$MANIFEST_FILE" "$BACKUP_NOTE_FILE"
+
+  echo "✓ Manifest gerado:"
+  echo "  $MANIFEST_FILE"
 }
 
 run_export() {
   echo "📦 Exportando estado seletivo do OmniRoute..."
-  if [ ! -f "$DB_FILE" ]; then
-    echo "❌ Banco de dados não encontrado em $DB_FILE"
-    exit 1
-  fi
+  echo ""
+
+  check_db_files
+
   export_config_sql
   export_manifest
-  chmod 700 "$SYNC_DIR" 2>/dev/null || true
-  chmod 600 "$SYNC_DIR"/* 2>/dev/null || true
-  echo "✓ Gerado: $CONFIG_SQL_FILE"
-  echo "✓ Gerado: $MANIFEST_FILE"
+
+  echo ""
+  echo "✓ Export concluído."
 }
+
+###############################################################################
+# CHEZMOI
+###############################################################################
 
 add_existing_files() {
   require_cmd chezmoi
-  echo "🔐 Adicionando arquivos pequenos ao Chezmoi com criptografia..."
+
+  echo "🔐 Adicionando arquivos ao Chezmoi com criptografia..."
+
   for rel in "${ENCRYPTED_FILES[@]}"; do
-    path="$OMNIROUTE_DIR/$rel"
+    local path="$OMNIROUTE_DIR/$rel"
+
     if [ -f "$path" ]; then
       chezmoi add --encrypt "$path"
-      echo "  + $rel"
+
+      echo "  ✓ $rel"
+    else
+      echo "  ⚠️ $rel não encontrado; ignorando."
     fi
   done
 }
+
+###############################################################################
+# DOCTOR
+###############################################################################
 
 run_doctor() {
   require_cmd chezmoi
+
   local src
+
   src="$(source_root)"
+
   if [ -z "$src" ] || [ ! -d "$src" ]; then
-    echo "⚠️  Não consegui localizar o source do chezmoi"
+    echo "⚠️ Não consegui localizar o source do Chezmoi."
     return 1
   fi
+
   echo "🩺 OmniRoute sync doctor"
-  echo "Chezmoi source: $src"
+  echo ""
+  echo "Chezmoi source:"
+  echo "  $src"
+  echo ""
+
   local failed=0
+
+  echo "Verificando arquivos proibidos..."
+
   for pat in "${FORBIDDEN_SOURCE_PATTERNS[@]}"; do
     if [ -e "$src/home/$pat" ]; then
-      echo "❌ Proibido encontrado: home/$pat"
+      echo "❌ Proibido encontrado:"
+      echo "   home/$pat"
+
       failed=1
     fi
   done
-  while IFS= read -r f; do
-    [ -z "$f" ] && continue
-    size=$(stat -c%s "$f" 2>/dev/null || echo 0)
-    if [ "$size" -gt 1048576 ]; then
-      case "$f" in
-        *.asc) echo "ℹ️  Arquivo criptografado >1MB: ${f#$src/} ($size bytes) — verifique se é intencional" ;;
-        *) echo "❌ Arquivo plaintext >1MB no chezmoi: ${f#$src/} ($size bytes)"; failed=1 ;;
-      esac
-    fi
-  done < <(find "$src/home/private_dot_omniroute" -type f 2>/dev/null || true)
-  if [ "$failed" -eq 0 ]; then
-    echo "✅ Nenhum blob proibido/plaintext perigoso encontrado"
+
+  local private_dir="$src/home/private_dot_omniroute"
+
+  if [ -d "$private_dir" ]; then
+    echo ""
+    echo "Verificando arquivos grandes..."
+
+    while IFS= read -r file; do
+      [ -z "$file" ] && continue
+
+      local file_size
+
+      file_size="$(
+        stat -c%s "$file" 2>/dev/null || echo 0
+      )"
+
+      if [ "$file_size" -gt 1048576 ]; then
+
+        case "$file" in
+
+          *.asc)
+            echo "ℹ️ Criptografado >1MB:"
+            echo "   ${file#$src/} ($file_size bytes)"
+            ;;
+
+          *)
+            echo "❌ Arquivo plaintext >1MB:"
+            echo "   ${file#$src/} ($file_size bytes)"
+
+            failed=1
+            ;;
+
+        esac
+      fi
+
+    done < <(
+      find "$private_dir" \
+        -type f \
+        2>/dev/null || true
+    )
   fi
-  return "$failed"
+
+  echo ""
+
+  if [ "$failed" -eq 0 ]; then
+    echo "✅ Doctor: nenhum problema encontrado."
+    return 0
+  fi
+
+  echo "❌ Doctor encontrou problemas."
+  return 1
 }
 
-case "${1:-}" in
-  export)
-    run_export
-    ;;
-  push)
-    run_export
-    add_existing_files
-    run_doctor
-    echo "✓ Pronto. Agora rode: cd ~/.local/share/chezmoi && git status && git add . && git commit -m \"backup: update OmniRoute sync\" && git push"
-    ;;
-  pull)
-    require_cmd sqlite3
-    echo "📥 Restaurando estado seletivo do OmniRoute..."
-    echo "⚠️  Pressupõe que você já rodou 'chezmoi apply' para materializar os arquivos criptografados."
-    if [ -f "$CONFIG_SQL_FILE" ] && [ -f "$DB_FILE" ]; then
-      sqlite3 "$DB_FILE" < "$CONFIG_SQL_FILE"
-      echo "✓ Configuração semântica importada de $CONFIG_SQL_FILE"
-    else
-      echo "ℹ️  Import pulado (arquivo SQL ou banco ausente)"
-    fi
-    echo "✓ Arquivos de configuração/secrets já são restaurados pelo chezmoi apply"
-    echo "🔄 Próximos passos recomendados: omniroute-restart && omniroute-health"
-    ;;
-  status)
-    echo "🔍 OmniRoute Sync Status"
-    echo "--------------------------"
-    echo "Data dir:  $OMNIROUTE_DIR"
-    [ -d "$OMNIROUTE_DIR" ] && echo "✅ Data dir: Present" || echo "❌ Data dir: Missing"
-    echo "---"
-    for rel in .env config.sql storage.sqlite storage.sqlite-wal storage.sqlite-shm call_logs db_backups sync/manifest.json sync/backup-note.txt; do
-      if [ -e "$OMNIROUTE_DIR/$rel" ]; then
-        ls -ld "$OMNIROUTE_DIR/$rel" 2>/dev/null | awk -v r="$rel" '{print "✅ " r ": " $5}'
-      else
-        echo "⚠️  $rel: Missing"
-      fi
-    done
-    if [ -f "$MANIFEST_FILE" ]; then
-      echo "   Manifest timestamp: $(python3 - "$MANIFEST_FILE" <<'PY' 2>/dev/null || echo unknown
-import json, sys
-with open(sys.argv[1], encoding='utf-8') as fh:
-    print(json.load(fh).get('created_utc', 'unknown'))
-PY
-)"
-    fi
-    ;;
-  doctor)
-    run_doctor
-    ;;
-  *)
-    print_usage
+###############################################################################
+# RESTORE
+###############################################################################
+
+backup_current_database() {
+  require_cmd sqlite3
+
+  echo "💾 Criando backup pré-restore..."
+
+  rm -f "$RESTORE_BACKUP_FILE"
+
+  #
+  # Neste ponto o container deve estar parado.
+  #
+  # Primeiro consolidamos WAL/SHM.
+  #
+  checkpoint_database
+
+  #
+  # Agora o banco deve estar em estado consistente para cópia.
+  #
+  cp -a "$DB_FILE" "$RESTORE_BACKUP_FILE"
+
+  chmod 600 "$RESTORE_BACKUP_FILE" 2>/dev/null || true
+
+  echo "✓ Backup pré-restore criado:"
+  echo "  $RESTORE_BACKUP_FILE"
+}
+
+restore_previous_database() {
+  if [ ! -f "$RESTORE_BACKUP_FILE" ]; then
+    echo "⚠️ Backup pré-restore não encontrado."
+    return 1
+  fi
+
+  echo "↩️ Restaurando banco anterior..."
+
+  rm -f "$DB_FILE"
+
+  cp -a "$RESTORE_BACKUP_FILE" "$DB_FILE"
+
+  chmod 600 "$DB_FILE" 2>/dev/null || true
+
+  rm -f \
+    "${DB_FILE}-wal" \
+    "${DB_FILE}-shm"
+
+  echo "✓ Banco anterior restaurado."
+}
+
+remove_restore_backup() {
+  rm -f "$RESTORE_BACKUP_FILE"
+}
+
+run_pull() {
+  require_cmd sqlite3
+  require_cmd docker
+
+  echo "📥 OmniRoute selective restore"
+  echo "========================================"
+  echo ""
+
+  #
+  # Valida arquivos.
+  #
+
+  if [ ! -f "$CONFIG_SQL_FILE" ]; then
+    echo "❌ Config SQL não encontrado:"
+    echo "   $CONFIG_SQL_FILE"
     exit 1
+  fi
+
+  if [ ! -f "$DB_FILE" ]; then
+    echo "❌ Banco não encontrado:"
+    echo "   $DB_FILE"
+    exit 1
+  fi
+
+  #
+  # Valida container.
+  #
+
+  if ! container_exists; then
+    echo "❌ Container não encontrado:"
+    echo "   $CONTAINER_NAME"
+    exit 1
+  fi
+
+  #
+  # Guarda o estado original.
+  #
+
+  local was_running=false
+
+  if container_running; then
+    was_running=true
+  fi
+
+  echo "Estado atual:"
+  echo "  Container: $CONTAINER_NAME"
+  echo "  Running:   $was_running"
+  echo "  Database:  $DB_FILE"
+  echo ""
+
+  #
+  # Segurança:
+  #
+  # Nunca restaurar enquanto OmniRoute estiver usando SQLite.
+  #
+
+  if [ "$was_running" = true ]; then
+    echo "⏹️ Parando OmniRoute..."
+
+    if ! docker stop "$CONTAINER_NAME" >/dev/null; then
+      echo "❌ Não foi possível parar o container."
+      exit 1
+    fi
+
+    echo "✓ OmniRoute parado."
+  else
+    echo "ℹ️ OmniRoute já estava parado."
+  fi
+
+  #
+  # A partir daqui o container está parado.
+  #
+
+  local restore_success=false
+
+  echo ""
+  echo "🔐 Preparando restore..."
+  echo ""
+
+  #
+  # Backup do estado atual.
+  #
+
+  if ! backup_current_database; then
+    echo "❌ Não foi possível criar backup pré-restore."
+
+    if [ "$was_running" = true ]; then
+      docker start "$CONTAINER_NAME" >/dev/null || true
+    fi
+
+    exit 1
+  fi
+
+  #
+  # Restore.
+  #
+
+  echo ""
+  echo "🗄️ Importando configuração..."
+
+  if ! sqlite3 "$DB_FILE" < "$CONFIG_SQL_FILE"; then
+
+    echo ""
+    echo "❌ Falha durante importação SQL."
+
+    restore_previous_database || true
+
+    if [ "$was_running" = true ]; then
+      echo "▶️ Reiniciando OmniRoute com banco anterior..."
+      docker start "$CONTAINER_NAME" >/dev/null || true
+    fi
+
+    exit 1
+  fi
+
+  echo "✓ SQL importado."
+
+  #
+  # Integridade.
+  #
+
+  echo ""
+
+  if ! integrity_check; then
+
+    echo ""
+    echo "❌ Banco inválido após restore."
+
+    restore_previous_database || true
+
+    if [ "$was_running" = true ]; then
+      echo "▶️ Reiniciando OmniRoute com banco anterior..."
+      docker start "$CONTAINER_NAME" >/dev/null || true
+    fi
+
+    exit 1
+  fi
+
+  #
+  # O restore foi validado.
+  #
+  # Como o OmniRoute está parado, podemos remover WAL/SHM
+  # eventualmente deixados pelo estado anterior.
+  #
+
+  rm -f \
+    "${DB_FILE}-wal" \
+    "${DB_FILE}-shm"
+
+  echo "✓ Estado WAL/SHM anterior removido."
+
+  #
+  # Backup pré-restore não é mais necessário.
+  #
+
+  remove_restore_backup
+
+  restore_success=true
+
+  #
+  # Reinicia somente se estava rodando antes.
+  #
+
+  if [ "$was_running" = true ]; then
+
+    echo ""
+    echo "▶️ Iniciando OmniRoute..."
+
+    if ! docker start "$CONTAINER_NAME" >/dev/null; then
+
+      echo "❌ Falha ao iniciar OmniRoute."
+
+      echo ""
+      echo "Logs:"
+      docker logs --tail 100 "$CONTAINER_NAME" 2>&1 || true
+
+      exit 1
+    fi
+
+    if ! wait_for_health; then
+      echo ""
+      echo "❌ OmniRoute iniciou, mas não ficou saudável."
+
+      echo ""
+      echo "Logs:"
+      docker logs --tail 100 "$CONTAINER_NAME" 2>&1 || true
+
+      exit 1
+    fi
+
+  else
+
+    echo ""
+    echo "ℹ️ OmniRoute continuará parado porque já estava parado."
+
+  fi
+
+  #
+  # Resultado final.
+  #
+
+  echo ""
+  echo "=========================================="
+  echo "✅ Restore concluído com sucesso"
+  echo "=========================================="
+  echo ""
+  echo "Configuração restaurada de:"
+  echo "  $CONFIG_SQL_FILE"
+  echo ""
+
+  if [ "$restore_success" = true ]; then
+    echo "Banco validado:"
+    echo "  PRAGMA integrity_check = OK"
+  fi
+}
+
+###############################################################################
+# STATUS
+###############################################################################
+
+run_status() {
+  require_cmd docker
+
+  echo "🔍 OmniRoute Sync Status"
+  echo "========================================"
+
+  echo ""
+  echo "Data directory:"
+  echo "  $OMNIROUTE_DIR"
+
+  if [ -d "$OMNIROUTE_DIR" ]; then
+    echo "  ✅ Present"
+  else
+    echo "  ❌ Missing"
+  fi
+
+  echo ""
+  echo "Container:"
+
+  if ! container_exists; then
+    echo "  ❌ $CONTAINER_NAME: Missing"
+
+  elif container_running; then
+
+    echo "  ✅ $CONTAINER_NAME: Running"
+    echo "  Health: $(container_health_status)"
+
+  else
+
+    echo "  ⏸️ $CONTAINER_NAME: Stopped"
+
+  fi
+
+  echo ""
+  echo "Database:"
+
+  if [ -f "$DB_FILE" ]; then
+
+    echo "  ✅ storage.sqlite"
+
+    stat -c \
+      '     owner=%U:%G mode=%a size=%s bytes' \
+      "$DB_FILE" 2>/dev/null || true
+
+  else
+
+    echo "  ❌ storage.sqlite: Missing"
+
+  fi
+
+  echo ""
+  echo "SQLite auxiliary files:"
+
+  for file in \
+    "$DB_FILE-wal" \
+    "$DB_FILE-shm"
+  do
+
+    if [ -f "$file" ]; then
+      echo "  ⚠️ $(basename "$file"): present"
+    else
+      echo "  ✓ $(basename "$file"): absent"
+    fi
+
+  done
+
+  echo ""
+  echo "Backup files:"
+
+  if [ -f "$RESTORE_BACKUP_FILE" ]; then
+    echo "  ⚠️ pre-restore backup:"
+    echo "     $RESTORE_BACKUP_FILE"
+  else
+    echo "  ✓ No pending pre-restore backup"
+  fi
+
+  echo ""
+  echo "Sync files:"
+
+  for rel in \
+    .env \
+    config.sql \
+    sync/manifest.json \
+    sync/backup-note.txt
+  do
+
+    local file="$OMNIROUTE_DIR/$rel"
+
+    if [ -f "$file" ]; then
+
+      local size
+
+      size="$(
+        du -sh "$file" 2>/dev/null |
+        awk '{print $1}'
+      )"
+
+      echo "  ✅ $rel ($size)"
+
+    else
+
+      echo "  ⚠️ $rel: Missing"
+
+    fi
+
+  done
+
+  if [ -f "$MANIFEST_FILE" ]; then
+
+    echo ""
+    echo "Manifest:"
+
+    python3 - "$MANIFEST_FILE" <<'PY' 2>/dev/null || true
+import json
+import sys
+
+with open(
+    sys.argv[1],
+    encoding='utf-8'
+) as fh:
+
+    manifest = json.load(fh)
+
+print(
+    "  created_utc:",
+    manifest.get('created_utc', 'unknown')
+)
+
+config = manifest.get('config_sql', {})
+
+print(
+    "  config.sql sha256:",
+    config.get('sha256', 'unknown')
+)
+PY
+
+  fi
+}
+
+###############################################################################
+# MAIN
+###############################################################################
+
+case "${1:-}" in
+
+  export)
+
+    run_export
+
     ;;
+
+  push)
+
+    run_export
+
+    echo ""
+
+    add_existing_files
+
+    echo ""
+
+    run_doctor
+
+    echo ""
+    echo "=========================================="
+    echo "✓ Backup preparado no Chezmoi"
+    echo "=========================================="
+    echo ""
+    echo "Agora revise:"
+    echo ""
+    echo "  cd ~/.local/share/chezmoi"
+    echo "  git status"
+    echo ""
+    echo "Depois:"
+    echo ""
+    echo "  git add ."
+    echo '  git commit -m "backup: update OmniRoute sync"'
+    echo "  git push"
+    echo ""
+
+    ;;
+
+  pull)
+
+    run_pull
+
+    ;;
+
+  status)
+
+    run_status
+
+    ;;
+
+  doctor)
+
+    run_doctor
+
+    ;;
+
+  *)
+
+    print_usage
+
+    exit 1
+
+    ;;
+
 esac
