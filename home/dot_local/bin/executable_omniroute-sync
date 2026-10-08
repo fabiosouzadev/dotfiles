@@ -64,9 +64,9 @@ HEALTH_TIMEOUT_SECONDS="${OMNIROUTE_HEALTH_TIMEOUT:-120}"
 # Arquivos que serão materializados no Chezmoi como conteúdo criptografado.
 ENCRYPTED_FILES=(
   .env
-  config.sql
-  sync/manifest.json
-  sync/backup-note.txt
+  restore/config.sql
+  restore/sync/manifest.json
+  restore/sync/backup-note.txt
 )
 
 # Arquivos que jamais devem aparecer no Chezmoi.
