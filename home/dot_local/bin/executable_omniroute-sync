@@ -1569,13 +1569,10 @@ run_status() {
   done
 
   if [ -f "$MANIFEST_FILE" ]; then
-    echo ""
-    echo "Manifest:"
+  echo ""
+  echo "Manifest:"
 
-    python3 \
-      "$MANIFEST_FILE" \
-      <<'PY' 2>/dev/null ||
-true
+  python3 - "$MANIFEST_FILE" <<'PY' 2>/dev/null || true
 import json
 import sys
 
