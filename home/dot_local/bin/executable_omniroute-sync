@@ -42,12 +42,12 @@
 
 set -euo pipefail
 
-OMNIROUTE_DIR="${OMNIROUTE_HOME:-${DATA_DIR:-${HOME}/.local/opt/stacks/omniroute/data}}"
-DB_FILE="${OMNIROUTE_DIR}/storage.sqlite"
-SYNC_DIR="${OMNIROUTE_DIR}/sync"
-MANIFEST_FILE="${SYNC_DIR}/manifest.json"
-CONFIG_SQL_FILE="${OMNIROUTE_DIR}/config.sql"
+OMNIROUTE_DIR="${OMNIROUTE_HOME:-${DATA_DIR:-${HOME}/.local/opt/stacks/omniroute}}"
+DB_FILE="${OMNIROUTE_DIR}/data/storage.sqlite"
+CONFIG_SQL_FILE="${OMNIROUTE_DIR}/restore/config.sql"
+SYNC_DIR="${OMNIROUTE_DIR}/restore/sync"
 BACKUP_NOTE_FILE="${SYNC_DIR}/backup-note.txt"
+MANIFEST_FILE="${SYNC_DIR}/manifest.json"
 
 # Nome do container Docker.
 CONTAINER_NAME="${OMNIROUTE_CONTAINER:-omniroute}"
