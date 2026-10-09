@@ -39,6 +39,11 @@ http://:9119 {
     reverse_proxy hermes:9119
 }
 
+http://:9999 {
+    import common
+    reverse_proxy hindsight:9999
+}
+
 http://:20128 {
     import common
 
