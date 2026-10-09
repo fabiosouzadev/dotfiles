@@ -10,7 +10,7 @@ services:
       - 8642 # gateway API
       - 9119 # dashboard (only reached when HERMES_DASHBOARD=1)
     volumes:
-      - /data:/opt/data
+      - {{ .chezmoi.homeDir }}/.local/opt/stacks/hermes/data:/opt/data
     environment:
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
