@@ -10,7 +10,7 @@
 # each option, go to docs/usage/configuration/config_documentation.md or
 # https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 {{ $envFile := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_dot_env.asc" -}}
-server_name: "matrixfabiosouzadev.duckdns.org"
+server_name: "matrix-fabiosouzadev.duckdns.org"
 pid_file: /data/homeserver.pid
 listeners:
   - port: 8008
@@ -32,12 +32,15 @@ database:
     port: 5432
     cp_min: 5
     cp_max: 10
-log_config: "/data/matrixfabiosouzadev.duckdns.org.log.config"
+log_config: "/data/matrix-fabiosouzadev.duckdns.org.log.config"
 media_store_path: /data/media_store
-registration_shared_secret: "R8qkhK-aX=KbDI;dP4,sZQZtEVh;V:3^IG.zI.M8z*I*lP4Ca-"
+registration_shared_secret: "u^p=vhir.eTpEh25YLX5iIgY2,&EoGYrDcujZh.KNh~5&^Lihh"
 report_stats: false
-macaroon_secret_key: "cfxr5nD&E.G*iir+@Cje@*wpq472Dr;63XV1:q7hvAAoQlns&p"
-form_secret: "pbJ_PEiM#wU#vmWi:8_;x.b42jIY25PfW~Q7arg70NYIo0y9uK"
-signing_key_path: "/data/matrixfabiosouzadev.duckdns.org.signing.key"
+macaroon_secret_key: "2NT;Av2of-d;H1O&WMgz49:svZ7xx,yHpkC&Tu#8lLgMV=goh3"
+form_secret: "D;*x&&;*c:jT2qq7HrDVbh=e=jWPlDbNMAt0ilPf0~QxAb9TeX"
+signing_key_path: "/data/matrix-fabiosouzadev.duckdns.org.signing.key"
 trusted_key_servers:
   - server_name: "matrix.org"
+
+
+# vim:ft=yaml
