@@ -1,13 +1,12 @@
 services:
   synapse:
-    image: ghcr.io/element-hq/synapse:sha-63dc0cb
+    image: ghcr.io/element-hq/synapse:sha-5e78aad
     container_name: synapse
     restart: unless-stopped
     environment:
-      PUID: {{ .chezmoi.uid }}
-      PGID: {{ .chezmoi.gid }}
       SYNAPSE_SERVER_NAME: "matrix-fabiosouzadev.duckdns.org"
       SYNAPSE_REPORT_STATS: "no"
+      TZ: "America/New_York"
     expose:
       - "8008"
     volumes:

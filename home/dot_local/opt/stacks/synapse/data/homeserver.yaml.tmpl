@@ -9,8 +9,18 @@
 # For more information on how to configure Synapse, including a complete accounting of
 # each option, go to docs/usage/configuration/config_documentation.md or
 # https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
-{{ $envFile := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_dot_env.asc" -}}
+
+# See Configuration: https://oneuptime.com/blog/post/2026-02-08-how-to-run-matrix-synapse-in-docker-for-chat/view
+
+{{ $postgresKey := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_postgres-key.txt.asc" -}}
+{{ $registrationSecretKey := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_registration-shared-secret-key.txt.asc" -}}
+{{ $macaroonSecretKey := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_macaroon-secret-key.txt.asc" -}}
+{{ $formSecretKey := joinPath .chezmoi.sourceDir "dot_local" "opt" "stacks" "synapse" "encrypted_form-secret-key.txt.asc" -}}
+# Server identity
 server_name: "matrix-fabiosouzadev.duckdns.org"
+public_baseurl: "https://matrix-fabiosouzadev.duckdns.org/"
+
+# Listeners
 pid_file: /data/homeserver.pid
 listeners:
   - port: 8008
@@ -22,25 +32,46 @@ listeners:
     tls: false
     type: http
     x_forwarded: true
+
+# Database (PostgreSQL recommended)
 database:
   name: psycopg2
   args:
     user: synapse
-    password: {{ include $envFile | decrypt | trim }}
+    password: {{ include $postgresKey | decrypt | trim }}
     database: synapse
     host: postgres
     port: 5432
     cp_min: 5
     cp_max: 10
+
+# Logging configuration
 log_config: "/data/matrix-fabiosouzadev.duckdns.org.log.config"
+
+# Media storage
 media_store_path: /data/media_store
-registration_shared_secret: "u^p=vhir.eTpEh25YLX5iIgY2,&EoGYrDcujZh.KNh~5&^Lihh"
+max_upload_size: 50M
+
+# Registration settings
+enable_registration: true
+# enable_registration: false
+# enable_registration_without_verification: false
+
+registration_shared_secret: {{ include $registrationSecretKey | decrypt | trim }}
 report_stats: false
-macaroon_secret_key: "2NT;Av2of-d;H1O&WMgz49:svZ7xx,yHpkC&Tu#8lLgMV=goh3"
-form_secret: "D;*x&&;*c:jT2qq7HrDVbh=e=jWPlDbNMAt0ilPf0~QxAb9TeX"
+macaroon_secret_key: {{ include $macaroonSecretKey | decrypt | trim }}
+form_secret: {{ include $formSecretKey | decrypt | trim }}"
 signing_key_path: "/data/matrix-fabiosouzadev.duckdns.org.signing.key"
 trusted_key_servers:
   - server_name: "matrix.org"
+
+# URL previews
+url_preview_enabled: true
+url_preview_ip_range_blacklist:
+  - '127.0.0.0/8'
+  - '10.0.0.0/8'
+  - '172.16.0.0/12'
+  - '192.168.0.0/16'
 
 
 # vim:ft=yaml
