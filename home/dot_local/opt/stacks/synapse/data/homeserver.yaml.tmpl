@@ -57,7 +57,7 @@ max_upload_size: 50M
 # enable_registration: false
 # enable_registration_without_verification: false
 
-registration_shared_secret: {{ include $registrationSecretKey | decrypt | trim }}
+# registration_shared_secret: {{ include $registrationSecretKey | decrypt | trim }}
 report_stats: false
 macaroon_secret_key: {{ include $macaroonSecretKey | decrypt | trim }}
 form_secret: {{ include $formSecretKey | decrypt | trim }}
