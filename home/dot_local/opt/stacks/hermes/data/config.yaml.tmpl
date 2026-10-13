@@ -269,20 +269,16 @@ platforms:
       name: '!xIU12TSUbTgKCcEwKaHGYrnAfq28kgc-raLw-vvxNjo'
       user_id: '@fabio:matrix-fabiosouzadev.duckdns.org'
 mcp_servers:
-  Notion:
-    command: npx
-    args:
-      - -y
-      - '@notionhq/notion-mcp-server'
-    env:
-      NOTION_TOKEN: ${NOTION_TOKEN}
-  Composio:
+  notion:
+    url: "https://mcp.notion.com/mcp"
+    auth: oauth
+  composio:
     url: https://connect.composio.dev/mcp
     headers:
       x-consumer-api-key: ${COMPOSIO_API_KEY}
     connect_timeout: 60
     timeout: 180
-  Personal:
+  personal:
     url: ${HINDSIGHT_API_URL}/mcp/personal-bank/
     headers:
       Authorization: ${HINDSIGHT_API_MCP_AUTH_TOKEN}
