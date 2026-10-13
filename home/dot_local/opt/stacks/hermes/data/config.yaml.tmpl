@@ -287,6 +287,10 @@ mcp_servers:
     headers:
       Authorization: ${HINDSIGHT_API_MCP_AUTH_TOKEN}
       X-Bank-Id: personal-bank
+  Buildin:
+    url: https://mcp.buildin.ai/message?token=${BUILDIN_TOKEN}
+    connect_timeout: 60
+    timeout: 180
 
 
 # ── Security ──────────────────────────────────────────────────────────
