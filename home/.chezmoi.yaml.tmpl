@@ -46,6 +46,35 @@ Headless:
 {{- end -}}
 {{- $hostLower := $hostname | lower -}}
 
+{{- /* Managed vs personal (sua heurística) */ -}}
+{{- $profile := env "CHEZMOI_PROFILE" -}}
+{{- if not $profile -}}
+{{-   $profile = ternary "work" "personal") -}}
+{{- end -}}
+
+{{- $ismanaged := or ($hostLower | contains "zwpe0f96cn") ($hostLower | contains "AQUI_MAQUINA_ITAU") -}}
+{{- if $ismanaged -}}
+{{-   $profile = "work"}}
+{{-   $workplace := ternary "Zup" "Itau" ($hostLower | contains "zwpe0f96cn") -}}
+{{- end -}}
+
+{{- /* VPS Profile Detection (Auto-detect Oracle VPS) */ -}}
+{{- $isVps := false -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{- /* Oracle Cloud: hostname starts with "instance-" */ -}}
+{{-   $hostnameInstance := hasPrefix "instance-" $hostLower -}}
+{{-   $isVps = or
+        (env "CHEZMOI_VPS" | not | not)
+        ($hostLower | contains "vps")
+        ($hostLower | contains "vnic")
+        $hostnameInstance
+        (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.username "ubuntu") $sshSession (not $guiAvailable))
+-}}
+{{- end -}}
+{{- if $isVps -}}
+{{-   $profile = "vps" -}}
+{{- end -}}
+
 {{- /* WSL detection */ -}}
 {{- $wsl := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 
@@ -108,32 +137,6 @@ Headless:
 {{- /* Interativo: tem TTY e não é considerado headless */ -}}
 {{- $interactive := and $interactiveTTY (not $headless) -}}
 
-{{- /* Managed vs personal (sua heurística) */ -}}
-{{- $ismanaged := ($hostLower | contains "zwpe0f96cn") -}}
-{{- $profile := env "CHEZMOI_PROFILE" -}}
-{{- if not $profile -}}
-{{-   $profile = ($ismanaged | ternary "work" "personal") -}}
-{{- end -}}
-
-{{- /* VPS Profile Detection (Auto-detect Oracle VPS) */ -}}
-{{- $isVps := false -}}
-{{- if eq .chezmoi.os "linux" -}}
-{{- /* Oracle Cloud: hostname starts with "instance-" */ -}}
-{{-   $hostnameInstance := hasPrefix "instance-" $hostLower -}}
-{{-   $isVps = or
-        (env "CHEZMOI_VPS" | not | not)
-        ($hostLower | contains "vps")
-        ($hostLower | contains "vnic")
-        $hostnameInstance
-        (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.username "ubuntu") $sshSession (not $guiAvailable))
--}}
-{{- end -}}
-{{- if $isVps -}}
-{{-   $profile = "vps" -}}
-{{- end -}}
-
-{{- /* Workplace detection */ -}}
-{{- $workplace := ternary "Zup" "none" (eq $profile "work") -}}
 
 {{- /* OS id (distro) */ -}}
 {{- $osID := .chezmoi.os -}}
