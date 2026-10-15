@@ -49,30 +49,14 @@ Headless:
 {{- /* Managed vs personal (sua heurística) */ -}}
 {{- $profile := env "CHEZMOI_PROFILE" -}}
 {{- if not $profile -}}
-{{-   $profile = ternary "work" "personal") -}}
+{{-   $profile = "personal" -}}
 {{- end -}}
 
+{{- $workplace := "" -}}
 {{- $ismanaged := or ($hostLower | contains "zwpe0f96cn") ($hostLower | contains "AQUI_MAQUINA_ITAU") -}}
 {{- if $ismanaged -}}
 {{-   $profile = "work"}}
 {{-   $workplace := ternary "Zup" "Itau" ($hostLower | contains "zwpe0f96cn") -}}
-{{- end -}}
-
-{{- /* VPS Profile Detection (Auto-detect Oracle VPS) */ -}}
-{{- $isVps := false -}}
-{{- if eq .chezmoi.os "linux" -}}
-{{- /* Oracle Cloud: hostname starts with "instance-" */ -}}
-{{-   $hostnameInstance := hasPrefix "instance-" $hostLower -}}
-{{-   $isVps = or
-        (env "CHEZMOI_VPS" | not | not)
-        ($hostLower | contains "vps")
-        ($hostLower | contains "vnic")
-        $hostnameInstance
-        (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.username "ubuntu") $sshSession (not $guiAvailable))
--}}
-{{- end -}}
-{{- if $isVps -}}
-{{-   $profile = "vps" -}}
 {{- end -}}
 
 {{- /* WSL detection */ -}}
@@ -124,6 +108,23 @@ Headless:
       - else -> DISPLAY/WAYLAND presence
 */ -}}
 {{- $guiAvailable := ternary true (ternary false (ternary true (ternary (and $displaySet ($wslGuiProbe | not | not)) $displaySet $wsl) (eq .chezmoi.os "darwin")) $forceHeadless) $forceGUI -}}
+
+{{- /* VPS Profile Detection (Auto-detect Oracle VPS) */ -}}
+{{- $isVps := false -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{- /* Oracle Cloud: hostname starts with "instance-" */ -}}
+{{-   $hostnameInstance := hasPrefix "instance-" $hostLower -}}
+{{-   $isVps = or
+        (env "CHEZMOI_VPS" | not | not)
+        ($hostLower | contains "vps")
+        ($hostLower | contains "vnic")
+        $hostnameInstance
+        (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.username "ubuntu") $sshSession (not $guiAvailable))
+-}}
+{{- end -}}
+{{- if $isVps -}}
+{{-   $profile = "vps" -}}
+{{- end -}}
 
 {{- /* Mobile Termux */ -}}
 {{- $termux := (env "TERMUX_VERSION" | not | not) -}}
