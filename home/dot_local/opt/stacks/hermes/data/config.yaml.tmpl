@@ -276,8 +276,12 @@ mcp_servers:
     url: https://connect.composio.dev/mcp
     headers:
       x-consumer-api-key: ${COMPOSIO_API_KEY}
-    connect_timeout: 60
-    timeout: 180
+  anytype:
+    command: "npx", 
+    args: ["-y", "@anyproto/anytype-mcp"],
+    env: {
+      OPENAPI_MCP_HEADERS: "{\"Authorization\":\"Bearer ${ANYTYPE_API_MCP_AUTH_TOKEN}\", \"Anytype-Version\":\"2025-11-08\"}"
+    }
   personal:
     url: ${HINDSIGHT_API_URL}/mcp/personal-bank/
     headers:
