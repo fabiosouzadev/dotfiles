@@ -279,9 +279,9 @@ mcp_servers:
   anytype:
     command: "npx", 
     args: ["-y", "@anyproto/anytype-mcp"],
-    env: {
+    env:
       OPENAPI_MCP_HEADERS: "{\"Authorization\":\"Bearer ${ANYTYPE_API_MCP_AUTH_TOKEN}\", \"Anytype-Version\":\"2025-11-08\"}"
-    }
+    
   personal:
     url: ${HINDSIGHT_API_URL}/mcp/personal-bank/
     headers:
