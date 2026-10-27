@@ -278,16 +278,19 @@ mcp_servers:
       x-consumer-api-key: ${COMPOSIO_API_KEY}
     connect_timeout: 60
     timeout: 180
+{{- /*
   anytype:
     command: npx
     args:
       - "-y"
       - "@anyproto/anytype-mcp"
     headers:
-      Authorization: ${ANYTYPE_API_MCP_AUTH_TOKEN}
-      Anytype-Version: "2025-11-08"
-    {{- /* env:
-      OPENAPI_MCP_HEADERS: "{\"Authorization\":\"Bearer ${ANYTYPE_API_MCP_AUTH_TOKEN}\", \"Anytype-Version\":\"2025-11-08\"}" */}}
+        Authorization: ${ANYTYPE_API_MCP_AUTH_TOKEN}
+        Anytype-Version: "2025-11-08"
+  
+    env:
+      OPENAPI_MCP_HEADERS: "{\"Authorization\":\"Bearer ${ANYTYPE_API_MCP_AUTH_TOKEN}\", \"Anytype-Version\":\"2025-11-08\"}"
+*/}}
   personal:
     url: ${HINDSIGHT_API_URL}/mcp/personal-bank/
     headers:
