@@ -19,10 +19,8 @@ model:
   {{/* base_url: ${OMNIROUTE_BASE_URL}                      */ -}}
   {{/* api_key: ${OMNIROUTE_API_KEY}                        */ -}}
   {{/* -----------------------------------------------------*/ -}}
-  provider: custom
-  default: agentic
-  base_url: ${OMNIROUTE_BASE_URL}
-  api_key: ${OMNIROUTE_API_KEY}
+  provider: openrouter                                 
+  default: thinkingmachines/inkling-small:free
 database:
   journal_mode: wal
 agent:

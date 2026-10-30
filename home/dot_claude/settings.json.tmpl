@@ -234,5 +234,34 @@
     ]
   },
   "skipDangerousModePermissionPrompt": true,
-  "theme": "dark"
+  "theme": "dark",
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: fabiosouzadev (GitHub account; repo fabiosouzadev/dotfiles, personal scope - no org signal)",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: not queryable via gh - treat as possibly public; scope pushes and commits as for a public repo until confirmed private",
+      "**Internal sharing / snippet hosting**: None configured - treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**Default / protected branches**: default branch main per repo facts; rulesets and classic protected branches not queryable via gh",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured - ordinary developer machine with open internet, no declared egress allow-list or sealed container",
+      "**Host containment**: None configured - ordinary developer machine or CI runner with open internet",
+      "**Source control**: trusted repo /Users/fabiosouzadev/.local/share/chezmoi and remote github.com:fabiosouzadev/dotfiles.git only; no additional orgs configured",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: home/dot_aws/encrypted_private_credentials.asc (age-encrypted credentials) and age-encrypted secrets tracked in the dotfiles repo - audience: repo owner only; never clear into a possibly-public remote",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries prod or production as a whole word or name segment (hyphen/underscore/dot-delimited; e.g. matches prod-db, not producer)",
+      "**Protected deployment namespaces / environments**: None configured - fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries prod or production as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development",
+      "**Trusted repo**: /Users/fabiosouzadev/.local/share/chezmoi (working directory) with remote github.com:fabiosouzadev/dotfiles.git; visibility unverified so treat as possibly public - only this repo's own work is OK to push, and secrets or sensitive data are never cleared by visibility",
+      "**Org-specific CLIs**: None configured",
+      "**Home-dir routines**: git, chezmoi, gpg, age, ssh under /Users/fabiosouzadev per shell history"
+    ]
+  }
 }
