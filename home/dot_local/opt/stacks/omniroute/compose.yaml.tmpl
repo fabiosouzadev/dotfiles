@@ -1,6 +1,6 @@
 services:
   omniroute:
-    image: omniroute:3.8.51-web
+    image: omniroute:3.8.52-web
     container_name: omniroute
     deploy:
       replicas: 1
@@ -86,23 +86,23 @@ services:
       - omniroute-network
 
 
-  chatgpt-web-codex-browser:
-    build:
-      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
-      dockerfile: docker/chatgpt-web-codex-browser/Dockerfile
-    image: omniroute:chatgpt-web-codex-browser
-    env_file: .env
-    restart: unless-stopped
-    shm_size: "2gb"
-    environment:
-      CDP_PROXY_TOKEN: ${CDP_PROXY_TOKEN}
-    volumes:
-      - chatgpt-web-codex-browser-data:/browser-profile
-    networks:
-      - chatgpt-web-codex-network
+  # chatgpt-web-codex-browser:
+  #   build:
+  #     context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
+  #     dockerfile: docker/chatgpt-web-codex-browser/Dockerfile
+  #   image: omniroute:chatgpt-web-codex-browser
+  #   env_file: .env
+  #   restart: unless-stopped
+  #   shm_size: "2gb"
+  #   environment:
+  #     CDP_PROXY_TOKEN: ${CDP_PROXY_TOKEN}
+  #   volumes:
+  #     - chatgpt-web-codex-browser-data:/browser-profile
+  #   networks:
+  #     - chatgpt-web-codex-network
 
-volumes:
-  chatgpt-web-codex-browser-data: null
+# volumes:
+#   chatgpt-web-codex-browser-data: null
 networks:
   omniroute-network:
     name: omniroute-network
@@ -110,8 +110,8 @@ networks:
   # CDP proxy sidecar (docker/chatgpt-web-codex-browser/cdp-proxy.mjs) —
   # shared only with omniroute-web, not with redis/qdrant/bifrost/cliproxyapi/
   # codex-app-server or any other sibling on the implicit default network.
-  chatgpt-web-codex-network:
-    name: chatgpt-web-codex-network
+  # chatgpt-web-codex-network:
+  #   name: chatgpt-web-codex-network
   edge-network:
     external: true
   qdrant-network:
