@@ -1,13 +1,5 @@
 services:
   omniroute:
-    build:
-      context: https://github.com/diegosouzapw/OmniRoute.git#release/v3.8.51
-      target: runner-web
-      args:
-        OMNIROUTE_BASE_PATH: ${OMNIROUTE_BASE_PATH:-}
-        OMNIROUTE_USE_TURBOPACK: 1
-        OMNIROUTE_BUILD_MEMORY_MB: 6144
-        OMNIROUTE_BUILD_WORKERS: 2
     image: omniroute:3.8.51-web
     container_name: omniroute
     deploy:
@@ -63,8 +55,8 @@ services:
       - ARENA_ELO_SYNC_INTERVAL=43200
       - ARENA_ELO_SYNC_ENABLED=false #Erro nesta versão
       #### RAM
-      - OMNIROUTE_MEMORY_MB=2048
-      - NODE_OPTIONS=--max-old-space-size=2048
+      - OMNIROUTE_MEMORY_MB=8192
+      - NODE_OPTIONS=--max-old-space-size=8192
       #Rate limit
       - RATE_LIMIT_MAX_WAIT_MS=600000 #15000
       #Healthcheck
