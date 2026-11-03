@@ -6,9 +6,9 @@ services:
       replicas: 1
     restart: unless-stopped
     stop_grace_period: 40s
-    depends_on:
-      chatgpt-web-codex-browser:
-        condition: service_started
+    # depends_on:
+    #   chatgpt-web-codex-browser:
+    #     condition: service_started
     env_file: .env
     environment:
       # Enviroment
