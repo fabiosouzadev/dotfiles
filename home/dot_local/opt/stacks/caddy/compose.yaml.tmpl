@@ -37,15 +37,16 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 443:443/udp # HTTP/3 support
+      - 443:443/udp       # HTTP/3 support
+      - 6333:6333         #qdrant
       - 8008:8008
-      - 8084:8084   #openwebui 
-      - 8642:8642 #hermes gateway
-      - 9119:9119 #hermes dashboard
-      - 9999:9999 #hindsight dashboard
-      - 20128:20128 #omniroute dashboard
-      - 20129:20129 #omniroute api
-      - 20132:20132 #omniroute WebSocket / Streaming
+      - 8084:8084         #openwebui 
+      - 8642:8642         #hermes gateway
+      - 9119:9119         #hermes dashboard
+      - 9999:9999         #hindsight dashboard
+      - 20128:20128       #omniroute dashboard
+      - 20129:20129       #omniroute api
+      - 20132:20132       #omniroute WebSocket / Streaming
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
