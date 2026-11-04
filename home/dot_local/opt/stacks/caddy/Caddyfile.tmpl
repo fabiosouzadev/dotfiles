@@ -14,6 +14,11 @@
     }
 }
 
+dockage-fabiosouzadev.duckdns.org,http://:5001 {
+    import common
+    reverse_proxy dockage:5001
+}
+
 http://:6333 {
     import common
     reverse_proxy qdrant:6333
@@ -39,10 +44,6 @@ http://:8642 {
     }
 }
 
-http://:5001 {
-    import common
-    reverse_proxy dockage:5001
-}
 
 http://:9119 {
     import common
