@@ -25,9 +25,3 @@ services:
       - DOCKGE_ENABLE_CONSOLE=true
       - PUID={{ .chezmoi.uid }} # Set the stack file/dir ownership to this user
       - PGID={{ .chezmoi.gid }} # Set the stack file/dir ownership to this group
-    networks:
-      - edge-network
-
-networks:
-  edge-network:
-    external: true

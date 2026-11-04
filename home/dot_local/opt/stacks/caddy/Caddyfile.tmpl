@@ -19,11 +19,6 @@ monitoring-fabiosouzadev.duckdns.org, http://:3001 {
     reverse_proxy uptime-kuma:3001
 }
 
-dockage-fabiosouzadev.duckdns.org, http://:5001 {
-    import common
-    reverse_proxy dockage:5001
-}
-
 http://:6333 {
     import common
     reverse_proxy qdrant:6333
