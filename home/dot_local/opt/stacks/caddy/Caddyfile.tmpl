@@ -39,6 +39,11 @@ http://:8642 {
     }
 }
 
+http://:5001 {
+    import common
+    reverse_proxy dockage:5001
+}
+
 http://:9119 {
     import common
     reverse_proxy hermes:9119
