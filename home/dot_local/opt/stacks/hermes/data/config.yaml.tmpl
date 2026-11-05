@@ -291,6 +291,10 @@ mcp_servers:
     env:
       OPENAPI_MCP_HEADERS: "{\"Authorization\":\"Bearer ${ANYTYPE_API_MCP_AUTH_TOKEN}\", \"Anytype-Version\":\"2025-11-08\"}"
 */}}
+  craft:
+    url: https://mcp.craft.do/links/KWi6Lpc541l/mcp
+    password: ${CRAFT_PASSWORD}
+  
   personal:
     url: ${HINDSIGHT_API_URL}/mcp/personal-bank/
     headers:
