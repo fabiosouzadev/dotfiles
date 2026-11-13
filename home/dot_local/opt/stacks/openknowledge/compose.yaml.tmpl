@@ -13,14 +13,10 @@ services:
       - OK_EXTERNAL_URL=https://notes-fabiosouzadev.duckdns.org
       - TZ=America/Sao_Paulo
     volumes:
-      - openknowledge-data:/data
+      - ./my-knowledge:/data
     networks:
       - openknowledge-network
       - edge-network
-
-volumes:
-  openknowledge-data:
-    name: openknowledge-data
 
 networks:
   openknowledge-network:
