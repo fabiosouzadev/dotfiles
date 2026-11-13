@@ -6,8 +6,5 @@
 set -eu
 if [ ! -d /data/.ok ]; then
   echo "[entrypoint] /data is not initialized. Running ok init --no-mcp --no-skills"
-  git remote add origin https://codeberg.org/fabiosouzadev/my-knowledge.git
-  exec /bin/bash < /dev/null
-else
-  exec ok start
 if
+exec ok start
