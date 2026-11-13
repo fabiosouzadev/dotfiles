@@ -3,7 +3,7 @@ services:
     build:
       context: .                # diretório onde estão docker‑compose.yml e Dockerfile
       dockerfile: ./Dockerfile
-      entrypoint: ./entrypoint.sh
+    entrypoint: ./entrypoint.sh
     image: openknowledge:latest
     container_name: openknowledge
     restart: unless-stopped
