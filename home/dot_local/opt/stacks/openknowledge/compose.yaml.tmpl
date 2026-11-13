@@ -1,7 +1,7 @@
 services:
   openknowledge:
     build:
-      context: .                # diretório onde estão docker‑compose.yml e Dockerfile
+      context: .
       dockerfile: ./Dockerfile
     image: openknowledge:latest
     container_name: openknowledge
@@ -19,7 +19,8 @@ services:
       - edge-network
 
 volumes:
-  openknowledge-data: null
+  openknowledge-data:
+    name: openknowledge-data
 
 networks:
   openknowledge-network:
