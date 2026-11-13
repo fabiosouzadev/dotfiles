@@ -281,6 +281,12 @@ mcp_servers:
     headers:
       Authorization: ${HINDSIGHT_API_MCP_AUTH_TOKEN}
       X-Bank-Id: personal-bank
+  openknowledge:
+    command: npx
+    args:
+      - "-y"
+      - "mcp-remote"
+      - "https://notes-fabiosouzadev.duckdns.org//mcp"
 
 # ── Security ──────────────────────────────────────────────────────────
 # Secret redaction is ON by default — strings that look like API keys,
