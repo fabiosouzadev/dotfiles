@@ -4,10 +4,10 @@
 # stdin is closed so `ok init` takes its non-TTY defaults and can never
 # hang on a prompt.
 set -eu
-if [ ! -d /data/.ok ]
-then
+if [ ! -d /data/.ok ]; then
   echo "[entrypoint] /data is not initialized. Running ok init --no-mcp --no-skills"
   git remote add origin https://codeberg.org/fabiosouzadev/my-knowledge.git
   # ok init --no-mcp --no-skills < /dev/null
-fi
+else
 exec ok start
+if
