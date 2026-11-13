@@ -273,9 +273,6 @@ mcp_servers:
     env:
       OPENAPI_MCP_HEADERS: "{\"Authorization\":\"Bearer ${ANYTYPE_API_MCP_AUTH_TOKEN}\", \"Anytype-Version\":\"2025-11-08\"}"
 */}}
-  craft:
-    url: https://mcp.craft.do/links/KWi6Lpc541l/mcp
-    password: ${CRAFT_PASSWORD}
   personal:
     url: ${HINDSIGHT_API_URL}/mcp/personal-bank/
     headers:
@@ -286,7 +283,7 @@ mcp_servers:
     args:
       - "-y"
       - "mcp-remote"
-      - "https://notes-fabiosouzadev.duckdns.org//mcp"
+      - "https://notes-fabiosouzadev.duckdns.org/mcp"
 
 # ── Security ──────────────────────────────────────────────────────────
 # Secret redaction is ON by default — strings that look like API keys,
