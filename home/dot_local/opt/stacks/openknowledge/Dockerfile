@@ -3,9 +3,11 @@ FROM node:24-slim
 # git is a hard boot requirement: the server runs a git preflight at boot
 # and the version-history subsystems shell out to the binary.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends git ca-certificates \
- && rm -rf /var/lib/apt/lists/*
-
+    && apt-get install -y --no-install-recommends \
+       git \
+       openssh-client \
+       ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 RUN npm install -g @inkeep/open-knowledge
 
 # PORT is the platform-injection contract: Railway/Fly/Cloud Run override
