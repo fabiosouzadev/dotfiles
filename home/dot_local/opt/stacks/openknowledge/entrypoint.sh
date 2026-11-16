@@ -74,6 +74,14 @@ fi
 # This is independent of the shell environment inherited by Git.
 git config --local core.sshCommand "ssh -F /root/.ssh/config"
 
+# Configure Git identity
+: "${GIT_USER_NAME:?GIT_USER_NAME is required}"
+: "${GIT_USER_EMAIL:?GIT_USER_EMAIL is required}"
+
+git config --local user.name "$GIT_USER_NAME"
+git config --local user.email "$GIT_USER_EMAIL"
+
+
 # Validate Git authentication before starting OpenKnowledge
 echo "[entrypoint] Testing Codeberg authentication..."
 
