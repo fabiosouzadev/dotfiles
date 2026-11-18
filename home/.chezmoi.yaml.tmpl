@@ -53,10 +53,10 @@ Headless:
 {{- end -}}
 
 {{- $workplace := "" -}}
-{{- $ismanaged := or ($hostLower | contains "zwpe0f96cn") ($hostLower | contains "AQUI_MAQUINA_ITAU") -}}
+{{- $ismanaged := or ($hostLower | contains "zwpe0f96cn") ($hostname | contains "FAB-iYLv5DDW6yY") -}}
 {{- if $ismanaged -}}
 {{-   $profile = "work"}}
-{{-   $workplace := ternary "Zup" "Itau" ($hostLower | contains "zwpe0f96cn") -}}
+{{-   $workplace = ternary "Zup" "Itau" ($hostLower | contains "zwpe0f96cn") -}}
 {{- end -}}
 
 {{- /* WSL detection */ -}}
