@@ -1,25 +1,49 @@
+
 services:
   openknowledge:
     build:
       context: .
       dockerfile: ./Dockerfile
+
     image: openknowledge:latest
     container_name: openknowledge
     restart: unless-stopped
+
     expose:
       - "8080"
+
     environment:
-      - OK_ALLOW_EXTERNAL=1
-      - OK_EXTERNAL_URL=https://notes-fabiosouzadev.duckdns.org
-      - TZ=America/Sao_Paulo
+      OK_ALLOW_EXTERNAL: "1"
+      OK_EXTERNAL_URL: "https://notes-fabiosouzadev.duckdns.org"
+      TZ: America/Sao_Paulo
+      GIT_USER_NAME: "Fabio Souza"
+      GIT_USER_EMAIL: "fabiosouzadev@noreply.codeberg.org"
+
     volumes:
-      - ./my-knowledge:/data
+      - openknowledge-data:/data
+
+    secrets:
+      - codeberg_deploy_key
+      - codeberg_known_hosts
+
     networks:
       - openknowledge-network
       - edge-network
 
+volumes:
+  openknowledge-data:
+    name: openknowledge-data
+
+secrets:
+  codeberg_deploy_key:
+    file: ./secrets/codeberg_openknowledge
+
+  codeberg_known_hosts:
+    file: ./secrets/codeberg_known_hosts
+
 networks:
   openknowledge-network:
     name: openknowledge-network
+
   edge-network:
     external: true
