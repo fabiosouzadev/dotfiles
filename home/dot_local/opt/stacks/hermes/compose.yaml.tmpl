@@ -11,7 +11,7 @@ services:
       - 9119 # dashboard (only reached when HERMES_DASHBOARD=1)
     volumes:
       - {{ .chezmoi.homeDir }}/.hermes:/opt/data
-      - {{ .chezmoi.homeDir }}/.camofox/cookies:  :ro
+      - {{ .chezmoi.homeDir }}/.camofox/cookies:ro
     environment:
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
