@@ -17,7 +17,6 @@ services:
       - PGID={{ .chezmoi.gid }}
       - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
       - CAMOFOX_URL=http://camofox:9377
-      - CAMOFOX_API_KEY=${CAMOFOX_API_KEY}
       - HERMES_DASHBOARD=1
     networks:
       - edge-network
