@@ -1,0 +1,2 @@
+# Local GSD installation (reinstall with: npx -y @opengsd/gsd-core@latest --claude --local)
+.claude/
