@@ -1,329 +1,197 @@
-# CONVENTIONS.md — Padrões de Código, Estilo e Padrões
+---
+last_mapped_commit: d1d1c1c967319d6aa2852d6caaee2123acced521
+last_mapped_at: 2026-11-23
+---
+# Coding Conventions
 
-> 🧠 **From Hindsight memory (codebase map)** — Documento gerado pelo mapeamento do codebase fabiosouzadev/dotfiles em 2026-09-17.
+**Analysis Date:** 2026-11-23
 
-## Convenções de Shell Script
+## Naming Patterns
 
-### Estrutura Universal
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-{{ template "common/script_helper" . }}
-{{ template "linux/script_linux_only" . }}     # SO guard
-{{ template "common/script_is_not_ephemeral" . }} # CI guard
-{{ template "workplace/script_is_not_zup" . }}    # Profile guard
-info ">>>>>> Título <<<<"
-# Lógica principal
-success "Sucesso"
-warn "Aviso"
-die "Erro"
+**Files:**
+- JavaScript hooks: lowercase with hyphens in hooks directory, e.g., `gsd-check-update.js`, `gsd-validate-commit.sh`
+- Library files: lowercase with hyphens in `hooks/lib/`, e.g., `config-read.js`, `git-cmd.js`
+- Shell scripts: snake_case with shebang for executables, e.g., `gsd-graphify-rebuild.sh`
+- Generated files: marked with `// GENERATED FILE — DO NOT EDIT BY HAND.` comment at top
+- Generated files indicate source of truth: `Source of truth: [path]`
+
+**Functions:**
+- camelCase for JavaScript functions: `exitCodeFor()`, `readConfigFileBounded()`, `renderDispatchIdentityMarker()`
+- arrow functions and regular function declarations used throughout
+- Helper functions prefixed with underscore where private scoping is needed
+- Exported functions clearly marked: `module.exports = { functionName, ... }`
+
+**Variables:**
+- camelCase for local variables and parameters: `cacheDir`, `globalConfigDir`, `cacheFile`
+- UPPERCASE_WITH_UNDERSCORES for constants: `CONFIG_MAX_BYTES`, `HOOK_ON_CRASH`, `EXIT_CODES`
+- UPPERCASE_WITH_UNDERSCORES for exported environment variables: `EXIT_HOOK_DENY`, `EXIT_USAGE`
+- Module-level `const` for frozen objects and Maps
+
+**Types:**
+- JSDoc annotations for function parameters and return types
+- Type annotations in comments: `@param {string} name`, `@returns {number}`
+- Frozen objects created with `Object.freeze()` for immutability: constants like `HOOK_ON_CRASH`
+- Maps used for lookup tables: `NAME_TO_CODE = new Map(...)`
+
+## Code Style
+
+**Formatting:**
+- 2-space indentation throughout JavaScript
+- Single quotes for strings in JS where shell escaping not involved
+- Double quotes in shell scripts for variable expansion
+- Files end with newline character
+- No trailing whitespace
+
+**Linting:**
+- ESLint suppressions with `// eslint-disable-next-line` when needed
+- Specific rule suppressions: `@typescript-eslint/no-require-imports`, `@typescript-eslint/unbound-method`
+- Explicit `'use strict';` at top of module scope in CommonJS files
+
+**Comments Style:**
+- `'use strict';` as first line in CommonJS modules
+- Module-level comments explaining purpose and constraints above function definitions
+- Inline comments explain non-obvious logic or reference tickets/ADRs
+- Comments marked with issue/ADR references: `#3582`, `ADR-3889 §4`, `epic #4630`
+- LOAD-BEARING and WHY comments highlight critical design decisions
+
+## Import Organization
+
+**Order:**
+1. Built-in Node.js modules: `const fs = require('fs');`, `const path = require('path');`
+2. Standard library: `const os = require('os');`
+3. Third-party packages: none typically used in hooks
+4. Relative imports: other modules in lib directory or parent
+
+**Path Aliases:**
+- Relative path imports: `require(path.join(__dirname, 'lib', 'config-read.js'))`
+- Relative path imports for parent directory: `require(path.join(__dirname, '..', '..', 'gsd-core', '...'))`
+- Computed require paths to handle module discovery: `require.main === module`
+
+**Module Declaration:**
+```javascript
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+
+// ... rest of code
+
+module.exports = { exportedName1, exportedName2 };
 ```
 
-### Funções Helpers (`script_helper`)
-- `info "msg"` — Log informativo
-- `success "msg"` — Log de sucesso (magenta)
-- `warn "msg"` — Log de aviso (stderr)
-- `die "msg"` — Log de erro e exit 1
-- `set -euo pipefail` — Strict mode
+## Error Handling
 
-### Guards por SO
-- `linux/script_linux_only` — `if not .chezmoi.os "linux" exit 0`
-- `linux/script_ubuntu_only` — Ubuntu only
-- `linux/script_arch_based_only` — Arch/EndeavourOS/CachyOS
-- `darwin/script_darwin_only` — macOS only
-- `windows/script_windows_only` — Windows only
+**Patterns:**
+- Try/catch blocks with explicit error handling for file operations
+- Errors transformed into structured objects with `.code` property: `Object.assign(new Error(msg), { code })`
+- Null returns for optional failures: `if (err && err.code === 'ENOENT' && !options?.required) return null;`
+- Throws for critical failures with detailed error message
+- Module-level trap handlers for cleanup: `trap 'rm -f "${FILE:-}"' EXIT`
+- Exit codes standardized via `exit-code-registry.js`: `exit "$EXIT_UNAVAILABLE"`
 
-### Guards por Perfil (Workplace)
-- `workplace/script_is_vps` — Skip unless VPS
-- `workplace/script_is_not_vps` — Skip if VPS
-- `workplace/script_is_zup` — Skip unless Zup
-- `workplace/script_is_not_zup` — Skip if Zup
-- `workplace/script_is_instivo` — Skip unless Instivo
+**Error Codes:**
+- File system errors checked: `ENOENT`, `EISDIR`, `ENXIO`, `EFBIG`
+- Validation errors with descriptive messages: throw on invalid input types
+- Exit codes from registry: `HOOK_DENY` (2), `USAGE` (64), `NO_INPUT` (66), `UNAVAILABLE` (69), `INTERNAL` (70), `DEGRADED` (80)
 
-### Guards por Ambiente
-- `common/script_is_not_ephemeral` — Skip if CI/cloud IDE (`.settings.ephemeral`)
-- `common/script_is_not_headless` — Skip if headless (`.settings.headless`)
-- `common/script_eval_mise` — Activate mise in shell
-- `common/script_helper` — Set + print functions
-- `common/script_validate_completions_path` — Ensure completion dirs exist
+**Fail-Safe Patterns:**
+- Background operations wrapped in try/catch that never crash main process
+- Hooks exit 0 on advisory failures, only exit 2 for security denials
+- Degraded mode: when a module is optional (build artifacts), code degrades gracefully
+- Pre-initialization of exit status variables: `CONFIG_STATUS=0` to prevent inherited environment values
 
-### Emojis e Mensagens
-- `🤖` AI/Tools
-- `🌐` Network/Web
-- `🐑` Ollama
-- `📝` Delta/formatters
-- `🧠` ZRAM/Swap
-- `⬇️` Downloads
-- `✅` Success
-- `❌` Errors/skip
-- `>>>` Progress indicators
+## Logging
 
-## Convenções de Zsh
+**Framework:** console methods in Node.js, stderr for diagnostics
 
-### Modularização
-- ZDOTDIR=$HOME, sourcing de `.zshrc.d/*.zsh`
-- Numeração controla ordem de carregamento
-- Modelines: `# vim: filetype=bash`
+**Patterns:**
+- Structured JSON logging for hook outcomes: `process.stdout.write(JSON.stringify(...))`
+- Diagnostic messages to stderr: `console.error()` or `>&2` in shell
+- Node.js Date.now() for timestamps: `new Date().toISOString()`
+- JSON output for hook protocol compliance
 
-### Alias Pattern
-```zsh
-alias -- name=value  # consistente com --
-alias -- bat=batcat # condicional por SO via template
-alias -- work='cd ~/Workspaces/Work/Zup'
-```
+## Comments
 
-### Pattern de Módulo Zsh
-1. **099** — Env vars base (EDITOR, GPG_TTY, DISPLAY, PATH)
-2. **100** — Zinit installer
-3. **101** — Zinit plugins + Starship + eza
-4. **102-104** — Histórico, FZF, Keybindings
-5. **190** — Zsh vi mode
-6. **200-201** — Aliases gerais + git aliases
-7. **300-312** — Ferramentas específicas
-8. **504** — Zup env
-9. **604-606** — AI tools
-10. **999** — Autoload + compinit
+**When to Comment:**
+- Explain WHY non-obvious code exists, especially security/performance considerations
+- Reference issue numbers and ADR sections: `#3582`, `ADR-3889 §3`
+- Add comments when code handles platform-specific quirks (Windows vs POSIX)
+- Document constraints and load-bearing design decisions
 
-## Convenções TOML
-
-### Chezmoi Externals (`.chezmoiexternals/`)
-```toml
-[".config/app/path"]
-type = "archive" | "git-repo" | "file"
-url = "https://..."
-exact = true/false
-stripComponents = N
-refreshPeriod = "168h"
-include/exclude = ["pattern"]
-```
-
-### Feature Flags em `.chezmoi.yaml.tmpl`
-```toml
-features = {
-  ai.hermes.enabled = true
-  ai.hermes.dashboard.port = 9119
-  ai.hermes.dashboard.isolated = true
-  ai.coding_orchestrator.install = true
-  ai.coding_orchestrator.cron_schedule = "0 2 * * *"
-  ai.coding_orchestrator.nightly_budget_usd = 5
-  ai.coding_orchestrator.per_task_budget_usd = 2
-  ollama.install = true
-  ollama.mode = "user"
-  i3.enabled = true
-  niri.enabled = true
-  sudo.enabled = true/false
-  systemd.enabled = true/false
-  kernels.install = false
-  rtl8821ce.install = false
-  dockge.install = true
-  hermes.agentmemory.enabled = true
-  hermes.camofox.enabled = true
-  hermes.composio.enabled = true
-  idea.install = { darwin = true }
-  idea.workplaces = ["Zup"]
+**JSDoc/TSDoc:**
+```javascript
+/**
+ * Resolve the registered exit code for a symbolic name. Pure, total: throws
+ * for anything not an exact, registered, exact-case key.
+ *
+ * @param {string} name
+ * @returns {number}
+ */
+function exitCodeFor(name) {
+  // ...
 }
 ```
 
-## Convenções de Configuração JSON
+**Generated Code:**
+- Generated files marked with header comment
+- Source of truth documented: `Source of truth: [path]`
+- Regeneration instructions provided: `Regenerate with: [command]`
+- Byte-comparison tests pin generated sync: `npm run lint:generated-sync`
 
-### Claude Code (`private_config.toml.tmpl`)
-- Model: `opus[1m]`
-- Reasoning: `xhigh`
-- Context window: 400000
-- Hooks: sha256 trust hashes (todos os hooks GSD)
-- MCP: Hindsight server
-- Permissions: explicit allow/deny
+## Function Design
 
-### Codex (`omniroute.config.toml.tmpl`)
-```toml
-model = "omniroute/coding"
-oss_provider = "omniroute"
-model_provider = "omniroute"
-model_reasoning_effort = "xhigh"
-model_context_window = 400000
+**Size:**
+- Functions generally 20-80 lines
+- Single responsibility: one function = one concern
+- Private helpers extracted to separate functions
+
+**Parameters:**
+- Positional parameters for required arguments
+- Options objects for optional configuration
+- Required vs optional checked explicitly: `const file = "${1:?FILE_PATH required}"`
+- Type checking in function body: `if (typeof name !== 'string')`
+
+**Return Values:**
+- Explicit return values, no implicit undefined
+- Null for optional-absence: `return null` when file not found and not required
+- Frozen objects returned for immutability: `Object.freeze([...])`
+- Maps and Sets for efficient lookups
+
+## Module Design
+
+**Exports:**
+```javascript
+module.exports = { functionName1, functionName2, CONSTANT_NAME };
 ```
 
-### Hermes Config (`private_share/apps/hermes-local/config.yaml.tmpl`)
-- Model: omniroute/agents via OMNIROUTE_BASE_URL
-- Reasoning: high
-- Max turns: 150
-- Agention: helpful, concise, technical, creative, teacher, kawaii, catgirl, pirate, shakespeare, surfer, noir
+**Barrel Files:**
+- Not used; each module exports its own public API
+- Relative require paths maintain explicit dependency tracking
 
-### Hindsight Config (`private_share/apps/private_hermes/hindsight/private_config.json.tmpl`)
-- Mode: local_external
-- API: http://hindsight:8888
-- Bank: hermes-bank
-- Memory mode: hybrid
-- Auto retain/recall: true
+**Module Constraints:**
+- hooks/lib/ modules have COLD-LOAD constraint: cannot require gsd-core/bin/lib artifacts
+- Some modules deliberately NOT require certain dependencies to work on unbuilt clones
+- Load-bearing documentation explains why certain patterns are used
 
-### Qwen Config (`home/dot_qwen/settings.json.tmpl`)
-- Auth: qwen-oauth
-- Theme: GitHub dark
-- Vim mode: true
+## Shell Script Conventions
 
-## Convenções de Git
+**Shebang:**
+- `#!/usr/bin/env bash` for Bash scripts (not `/bin/bash`)
+- `#!/bin/sh` for POSIX shell scripts
 
-### Commit Messages
-- Prefixos: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`
-- Escopo: `feat(gitconfig):`, `chore(chezmoi):`, `docs(codebase):`
-- Conventional Commits
+**Style:**
+- `set -euo pipefail` for strict error handling
+- Variable assignment with `=` without spaces
+- Variable substitution with `${VAR}` (safe with `set -u`)
+- Quoted variables: `"${FILE}"` to handle spaces/special characters
+- Conditional test with `[` and `]` or `[[` for Bash
 
-### GitConfig Multi-Perfil
-- `config.tmpl` — Base config + profile-specific include
-- `config.personal.inc.tmpl` — Fabio Souza, signingkey F587673EDB1A5C95
-- `config.personal-ssh.inc.tmpl` — SSH key personal
-- `config.vps.inc.tmpl` — Fabio Souza, signingkey C75A6078DAFE3B88, ssh id_ed25519_vps
-- `config.zup.inc.tmpl` — Fabio Vanderlei (Zup), signingkey BA7F642CFD8466A1
-- `config.agents.inc.tmpl` — Agentic, signingkey 232EFD8553CB22E5
+**Error Handling in Shell:**
+- `mktemp` for temp file creation
+- EXIT trap with cleanup function for guaranteed cleanup
+- Idempotent cleanup: `rm -f "${FILE:-}" 2>/dev/null || true`
+- Exit codes checked: `${VAR:-0}` defaults when unset
 
-### GPG Signing
-Todos os commits assinados via GPG (`gpgsign = true`) com chave E691C031009FB1DAA3A25125212D516F623C5747
+---
 
-## Convenções de Go Templates
-
-### Variáveis
-- Locais: `{{- $var := expression -}}`
-- Contexto: `.chezmoi.*`, `.dirs.*`, `.settings.*`, `.features.*`
-- Compartilhadas: `{{ template "name" . }}`
-
-### Condicionais
-```go template
-{{ if condition }}...{{ end }}
-{{- if .settings.vps }}...{{ else }}...{{ end -}}
-{{- $guiAvailable := ternary true (ternary false ...) ... -}}
-```
-
-### Decrypt
-```go template
-{{ include $path | decrypt | trim }}
-```
-
-### Debug Output
-```go template
-{{- if $interactiveTTY -}}
-{{- writeToStdout "Profile: %s\n" $profile -}}
-{{- end -}}
-```
-
-## Convenções de Criptografia
-
-### age Encryption (primária)
-- Chaves age por máquina (nunca no git)
-- Arquivos: `encrypted_<descricao>.asc`
-- Decrypt via: `{{ include ... | decrypt | trim }}`
-
-### GPG Encryption (secundária)
-- Recipient: E691C031009FB1DAA3A25125212D516F623C5747
-- Config: `.chezmoi.yaml.tmpl` → `gpg: recipient`, `encryption: gpg`
-- Arquivos PGP messages para credenciais AWS
-
-### Nomenclatura
-- `encrypted_<descricao>.asc` — GPG/age
-- `encrypted_private_<descricao>.asc` — Altamente sensível
-
-## Convenções Docker Compose
-
-### Pattern por Stack
-```yaml
-# compose.yaml.tmpl
-services:
-  main:
-    image: ... # ou build: ./
-    env_file: .env  # encrypted_dot_env.asc
-    environment:
-      - PUID={{ .chezmoi.uid }}
-      - PGID={{ .chezmoi.gid }}
-    volumes:
-      - ...
-    restart: unless-stopped
-    networks:
-      - edge-network # ou internal
-```
-
-### Network Strategy
-- **Edge**: Caddy, Open WebUI, Camofox, Uptime Kuma (external: true)
-- **Hindsight internal**: PostgreSQL, Hindsight
-- **Custom**: Camofox network (Hermes ↔ Camofox)
-- **All internal**: Qdrant, Redis, OmniRoute
-
-## Convenção de Numeração de Scripts
-
-| Faixa | Categoria | Exemplo |
-|-------|-----------|---------|
-| 000-099 | Env/Zsh init | N/A |
-| 100-199 | Runtimes/Shell | 100-install-zinit, 103-fzf |
-| 200-299 | Aliases/History | 200-aliases, 201-git-aliases |
-| 300-399 | Ferramentas | 311-ollama, 302-aider |
-| 500-599 | Instalações | 504-zup, 590-install-ai-tools |
-| 600-699 | AI/Config | 604-openclaude, 606-hermes |
-| 999 | Compinit | 999-autoload-compinit |
-
-## Padrões de Segurança
-
-1. **Secrets nunca em texto claro**: age/GPG encrypt em todos os arquivos
-2. **Diretórios privados**: `private_dot_*` para dados sensíveis
-3. **Profile-based access**: personal/work/vps separados
-4. **CI/CD safety**: `script_is_not_ephemeral` guards
-5. **Hooks trust via sha256**: GSD hooks validados
-6. **MCP deny rules**: `.env`, `.env.*`, `.secrets` negados explicitamente
-7. **SSH key isolation**: 3 chaves separadas (personal, VPS, Zup) com diferentes signing keys
-
-## Padrões de Documentação
-
-- `README.md` — Guia principal (badges, quick start, structure)
-- `docs/` — Documentação detalhada (8+ docs)
-- Comentários inline em português
-- Modelines em scripts shell
-- Nomenclatura consistente
-
-## Conventions Específicas Docker Compose
-
-- `restart: unless-stopped` padrão
-- `PUID`/`PGID` para Linux permissions (chezmoi.uid/gid)
-- `env_file: .env` (encrypted) para secrets
-- Build: `diegosouzapw/omniroute` base para OmniRoute
-- Healthchecks: PostgreSQL, Redis, Qdrant (quando habilitados)
-
-## Herder Config Patterns
-- Theme: Tokyo Night (dark)
-- Terminal mode: auto
-- Update channel: stable
-- Keys: ctrl+b prefix (tmux-like)
-- Mouse capture: true
-- Pane borders: true
-
-ça
-
-1. Secrets sempre criptografados (age/GPG)
-2. Diretórios privados: `private_dot_*`
-3. Profile-based access: personal/work/vps
-4. Hooks Claude/Codex com sha256 trust hashes
-5. MCP deny rules: .env, .env.*, .secrets
-6. CI/CD safety: script_is_not_ephemeral guards
-7. SSH key isolation: 3 chaves separadas
-8. GPG commit signing: todos os commits assinados
-
-## Padrões de Documentação
-
-- README.md — Guia principal (badges, quick start, structure)
-- docs/ — Documentação detalhada
-- Comentários inline em português
-- Modelines em scripts shell
-- Nomenclatura consistente (veja STRUCTURE.md)
-
-## Conventions Herder/App Configs
-
-### Herdr (Desktop App)
-- Theme: Tokyo Night, auto_switch: false
-- Terminal: default shell, auto mode
-- Keys: ctrl+b prefix
-- Mouse capture: true, pane borders: true
-
-### Caddyfile (Reverse Proxy)
-- zstd gzip encoding
-- Security headers (nosniff, frame, referrer)
-- JSON log to stdout
-- WebSocket support (Upgrade headers)
-- Health check endpoint /healthz
-- Reverse proxy com transport http timeouts
-
+*Convention analysis: 2026-11-23*

@@ -1,343 +1,326 @@
-# ARCHITECTURE.md — Padrões Arquiteturais, Camadas e Fluxos de Dados
+---
+last_mapped_commit: d1d1c1c967319d6aa2852d6caaee2123acced521
+last_mapped_at: 2026-11-23
+---
+<!-- refreshed: 2026-11-23 -->
+# Architecture
 
-> 🧠 **From Hindsight memory (codebase map)** — Documento gerado pelo mapeamento do codebase fabiosouzadev/dotfiles em 2026-09-17.
+**Analysis Date:** 2026-11-23
 
-## Filosofia Arquitetural
+## System Overview
 
-O repositório implementa uma arquitetura de **dotfiles como infraestrutura** — cada configuração é um recurso declarável, versionado e reprodutível. A arquitetura segue os princípios:
+This is a chezmoi-based dotfiles repository that manages a comprehensive development environment across multiple OS platforms (macOS, Linux WSL, Arch, Ubuntu, Termux, Windows) and deployment contexts (personal workstations, VPS infrastructure, container-based environments).
 
-1. **Declarativa**: Tudo gerenciado pelo chezmoi com templates Go
-2. **Modular**: Zsh modularizado, configs por feature, scripts numerados por ordem de execução
-3. **Multi-plataforma**: Suporte a Linux (Arch/Ubuntu), macOS, Windows (WSL/Scoop), Termux
-4. **Perfilável**: 3 perfis (personal, work/Zup, vps) com detecção automática
-5. **Segura por padrão**: Segredos criptografados com age/GPG, nunca em texto claro
-
-## Padrões Arquiteturais
-
-### Chezmoi Convention Layer
-```
-chezmoi source dir/
-├── home/                    → home dir dotfiles (dot_* → ~/*)
-│   ├── .chezmoi.yaml.tmpl   → Configuração principal (detecção SO/perfil)
-│   ├── .chezmoiexternals/   → Dependências externas (TOML-managed)
-│   ├── .chezmoiscripts/     → Scripts de lifecycle por SO
-│   │   ├── darwin/ linux/ unix/ windows/ termux/ vps/
-│   ├── .chezmoitemplates/   → Templates/guards reutilizáveis
-│   │   ├── common/ (6 guards): is_not_ephemeral, is_not_headless, eval_mise, helper, validate_completions_path, caddyfile_hermes
-│   │   ├── platform/ (darwin/linux/windows/termux)
-│   │   └── workplace/ (is_vps, is_zup, is_not_vps, is_not_zup, is_instivo)
-│   └── dot_*                → Arquivos de configuração
-├── docs/                    → Documentação
-├── .planning/               → Documentação de projeto (GSD)
-└── README.md                → Guia do repositório
-```
-
-### Convenção de Nomenclatura de Scripts
-Os scripts de instalação seguem numeração por prioridade:
-- `run_before_XXX-` → Executado antes dos scripts com número maior
-- `run_once_after_XXX-` → Executado uma vez após instalação
-- `run_onchange_after_XXX-` → Executado quando arquivos mudam
-- Números indicam ordem de execução (ex: `504` antes de `515`)
-
-### Padrão de Templates Go
-```go template
-{{- /* comentário */ -}}
-{{ if condition }}
-...
-{{ end -}}
-
-{{- $var := expression -}}
-{{ include "path/to/template" | decrypt | trim }}
-```
-
-### Template de Detecção de Ambiente
-`.chezmoi.yaml.tmpl` implementa detecção sofisticada:
-1. CI indicators (env vars) — GitHub Actions, GitLab, Travis, etc.
-2. Cloud IDEs (Codespaces, Gitpod, Replit)
-3. Container heuristics (cgroup, .dockerenv)
-4. Remote/SSH session detection
-5. TTY/interactive detection
-6. GUI detection (DISPLAY/WAYLAND)
-7. SO específico (WSL, macOS, Linux distro)
-8. Perfil/Workplace detection (personal/work/VPS)
-9. Hardware hints (Dell 3530/3520, Linux-on-MacBook)
-
-### Fluxo de Dados: Inicialização
-
-```
-Usuário clona repo → chezmoi init --apply
-        ↓
-  .chezmoi.yaml.tmpl renderizado
-        ↓
-  Detecção de SO/Perfil/Ambiente
-        ↓
-  .chezmoiscripts/{os}/ executados em ordem numérica
-        ↓
-  Pacotes instalados → Configs → Services → Secrets decryptados
-        ↓
-  Shell configs carregados (.zshrc → dot_zshrc.d/*.zsh)
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    Environment Detection Layer                           │
+│           `.chezmoi.yaml.tmpl` - Profile, OS, context inference         │
+├──────────────┬──────────────┬──────────────┬────────────┬────────────┬──┤
+│ CI/Ephemeral │ Container    │ GUI Detection│ VPS Probe  │ SSH/Headless   │
+│ (GitHub,     │ (Docker,     │ (Display,    │ (Oracle    │ Terminal mode  │
+│  Codespaces) │  devcontainer) │ Wayland)   │  Cloud)    │ detection      │
+└──────────────┴──────────────┴──────────────┴────────────┴────────────┴──┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│          Bootstrap & Lifecycle Scripts Layer                             │
+│                   `home/.chezmoiscripts/`                                │
+├──────────────┬──────────────┬──────────────┬────────────┬────────────────┤
+│  Darwin      │ Linux        │ Unix Shared  │ Termux     │ VPS Specialized│
+│  (macOS)     │ (Arch/Ubuntu)│ (npm, mise,  │ (mobile)   │ (Caddy, Docker)│
+│  Framework   │  Framework   │ ai-tools)    │ Framework  │ Framework      │
+│  `run_once_` │ `run_once_`  │ `run_once_`  │ `run_once_ │ `run_once_`    │
+│  `run_before_│ `run_before_ │ `run_before_ │ `run_before │ `run_before_`  │
+│  `run_onchange│ `run_onchange│ `run_onchange│ `run_onchan │ `run_onchange` │
+└──────────────┴──────────────┴──────────────┴────────────┴────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│           Templated Configuration Layer                                  │
+│    `home/.chezmoitemplates/` → Reusable guards and template snippets    │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│         File Deployment & Encryption Layer                              │
+│                    Generated Home Directory                              │
+├──────────────┬──────────────┬──────────────┬────────────┬────────────────┤
+│ Shell config │ App configs  │ SSH keys &   │ Encrypted  │ Docker Compose │
+│ `.zshrc.d/`  │ `.config/`   │ certs        │ state      │ stacks (.local/│
+│ Modular      │ (kitty,      │ `.ssh/`      │ (Hermes,   │ opt/stacks/)   │
+│ 24 modules   │  tmux, nvim, │ (private)    │ OmniRoute) │ (caddy,        │
+│ (zinit,      │  git, etc)   │ (private)    │ (private)  │  ollama,       │
+│ aliases,     │ `.hermes/`   │              │ (encrypted │  omniroute)    │
+│ history,     │ skill state  │              │  .asc)     │                │
+│ keybinds)    │ AI tools     │              │            │                │
+└──────────────┴──────────────┴──────────────┴────────────┴────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                  External & AI Integration Layer                         │
+│         Hermes, OmniRoute, Composio, Coding Orchestrator                │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Fluxo de Dados: Criptografia de Segredos
+## Component Responsibilities
 
-```
-Arquivo original (texto claro)
-        ↓
-  age encrypt (ou GPG)
-        ↓
-  encrypted_*.asc armazenado no git
-        ↓
-  Template usa: {{ include $path | decrypt | trim }}
-        ↓
-  Valor descriptografado injetado em runtime
-```
+| Component | Responsibility | File |
+|-----------|----------------|------|
+| **Config Detection** | Multi-environment profile resolution (CI, containers, VPS, GUI, headless) | `home/.chezmoi.yaml.tmpl` |
+| **Data Source** | Platform-specific package lists, feature flags, paths | `home/.chezmoidata/{linux,darwin,vps,windows,termux}/` |
+| **Lifecycle Hooks** | OS-specific bootstrap (kernel, drivers, package managers, tools) | `home/.chezmoiscripts/{linux,darwin,unix,vps,termux}/` |
+| **Template Reuse** | Common script guards and patterns | `home/.chezmoitemplates/{common,linux,darwin,workplace}/` |
+| **Shell Environment** | Modular zsh config, plugins, aliases, keybindings | `home/.zshrc.d/` (24 modules) |
+| **Application Configs** | App-specific settings managed by chezmoi | `home/private_dot_config/` |
+| **SSH & Certificates** | Private key & cert management | `home/private_dot_ssh/` (private) |
+| **Encrypted State** | Versioned secrets (Hermes, OmniRoute, AWS creds) | Encrypted `.asc` files |
+| **AI/Automation** | AI tools, Hermes skills, OmniRoute gateway | `home/dot_hermes/`, `home/dot_local/bin/` |
+| **Service Infrastructure** | Docker Compose stacks for persistent services | `home/dot_local/opt/stacks/` |
 
-### Fluxo de Dados: IA Stack
+## Pattern Overview
 
-```
-Usuário → Claude Code / Codex / Gemini / Aider
-        ↓
-  OmniRoute (gateway local)
-        ↓
-  ├── Modelo local: Ollama (11434)
-  ├── Modelo remoto: Anthropic/GPT/Gemini via proxy
-  └── Fallback automático entre provedores
-        ↓
-  Resposta → Usuário / Agente / Cron Job
-```
+**Overall:** Multi-layered deterministic environment builder with platform abstraction, feature flags, and encrypted state management.
 
-### Fluxo de Dados: Hermes
+**Key Characteristics:**
+- **Declarative**: All configuration as code (templates, scripts, data files) — no manual CLI commands required
+- **Platform-agnostic**: Single source-of-truth auto-adapts to OS, container type, CI, SSH, GUI availability
+- **Phased execution**: chezmoi's `run_before_`, `run_once_`, `run_onchange_` ordering ensures dependency resolution
+- **Encrypted secrets**: age-encrypted `.asc` files committed alongside templates; GPG decryption at apply time
+- **Feature-flagged**: `.chezmoi.yaml.tmpl` data drives conditional installation and service deployment
+- **Externally sourced**: `.chezmoiexternals/` pulls stable theme/config files from upstream (Catppuccin, etc)
+- **Self-contained**: No external bootstrap repos; everything versioned in this single chezmoi directory
 
-```
-Hermes Agent (serviço Docker)
-        ↓
-  ├── Skills: private_skills/ (devops, productivity, research)
-  ├── Memórias: Qdrant (vector store, PostgreSQL+pgvector)
-  ├── Dashboard: Porta 9119 (via Caddy reverse proxy)
-  ├── Gateway: systemd service / Docker container (porta 8642)
-  ├── Telegram: Interação via bot
-  ├── Multi-personalidades: helpful, concise, technical, creative,
-  │   teacher, kawaii, catgirl, pirate, shakespeare, surfer, noir
-  └── MCP: Hindsight, Notion, Composio
-```
+## Layers
 
-### Fluxo de Dados: Coding Orchestrator
+**Environment Detection:**
+- Purpose: Probe runtime context and infer optimal configuration
+- Location: `home/.chezmoi.yaml.tmpl`
+- Contains: Shell probes for CI, containers, GUI, VPS, SSH, TTY, WSL, Termux
+- Depends on: OS detection (chezmoi built-ins), environment variables
+- Used by: All downstream scripts and templates to conditionally execute
 
-```
-Trigger (GitHub label / Telegram / Webhook / Cron 02:00 UTC)
-        ↓
-  Coding Orchestrator
-        ↓
-  Context gathering (GitHub API, Git diff, Notion MCP, mem0)
-        ↓
-  Seleção de agente (Aider padrão via OmniRoute, Claude, Codex, Gemini, OpenCode)
-        ↓
-  Worktree isolada: ~/worktrees/task-<id>
-        ↓
-  Execução com budget ($5/noite, $2/task)
-        ↓
-  Delivery (Telegram, Notion, GitHub PR comments)
-```
+**Data & Configuration:**
+- Purpose: Store platform-specific package lists, feature flags, and settings
+- Location: `home/.chezmoidata/` (per-OS subdirectories)
+- Contains: YAML/JSON defining `ai_tools`, `packages`, `features` keyed by OS/platform
+- Depends on: Environment detection output
+- Used by: Bootstrap scripts to conditionally install
 
-### Fluxo de Dados: Docker Networking
+**Bootstrap & Lifecycle Scripts:**
+- Purpose: Execute OS-specific installation and configuration steps
+- Location: `home/.chezmoiscripts/{linux,darwin,unix,vps,termux}/`
+- Contains: Bash scripts numbered `run_before_*/run_once_*/run_onchange_*` for each stage
+- Depends on: Data layer, environment context, template guards
+- Used by: chezmoi apply orchestration
 
-```
-Edge Network (external):
-  Caddy (80/443) ←→ reverse proxy para:
-    ├── hermes:8642 (API) e hermes:9119 (Dashboard)
-    ├── omniroute:20128/20129/20132 (API/Dashboard)
-    ├── camofox:9377 (Browser automation)
-    └── openwebui:8080 (Ollama UI)
+**Template Reuse Library:**
+- Purpose: Provide common guards and snippets to reduce script duplication
+- Location: `home/.chezmoitemplates/{common,linux,darwin,workplace}/`
+- Contains: Reusable `script_is_ephemeral`, `script_eval_mise`, `script_helper`, etc.
+- Depends on: Nothing (pure includes)
+- Used by: All bootstrap scripts via `{{ template "..." . }}`
 
-Internal Network:
-  ├── postgres-hindsight (PostgreSQL 18 + pgvector)
-  ├── redis (8.6.5-alpine, persistence on)
-  ├── qdrant (v1.19.1, vector store)
-  └── omniroute (build from source, turbo)
-```
+**Shell Configuration:**
+- Purpose: Set up interactive shell environment (zsh)
+- Location: `home/dot_zshrc.d/` (24 modular files)
+- Contains: Zinit plugin loading, aliases, keybindings, fzf, atuin, Hermes/OmniRoute initialization
+- Depends on: Installed tools (fzf, atuin, zinit)
+- Used by: Interactive terminal sessions
 
-## Camadas do Sistema
+**Application Configuration:**
+- Purpose: Manage app-specific dotfiles and settings
+- Location: `home/private_dot_config/{kitty,tmux,nvim,git,mise,...}/`
+- Contains: Per-app config files (templates or static)
+- Depends on: Application installation (from bootstrap)
+- Used by: Applications at runtime
 
-### Camada 1 — OS Kernel & Init
-- systemd (Linux) / launchd (macOS) / service management (Termux)
-- Kernel management: `run_once_before_100-install-linux-kernels.sh.tmpl`
-- RTL8821CE WiFi driver: `run_once_before_103-install-rtl8821ce-driver.sh.tmpl`
-- Cirrus driver (MacBook): `run_once_before_104-install-cirrus-driver-for-macbook.tmpl`
-- Bluetooth (Arch): `run_once_before_220-configure-bluetooth-arch.sh.tmpl`
+**Encrypted State:**
+- Purpose: Version control sensitive data (credentials, keys, internal state)
+- Location: Scattered across repo as `.asc` files (GPG-encrypted)
+- Contains: API keys, SSH keys, database credentials, Hermes/OmniRoute internal state
+- Depends on: `age` and GPG key (chezmoi configured recipient)
+- Used by: Bootstrap scripts and runtime environments (decrypted on apply)
 
-### Camada 2 — Package Manager
-- pacman/paru (Arch), apt (Ubuntu), brew/macports (macOS), scoop/winget (Windows), pkg (Termux)
-- Package lists via templates: `.packages.linux.arch.{core,extra,multilib,aur,devops,virtualisation}`, `.packages.linux.ubuntu.{apt,gui,ppas}`
-- Managed by scripts numerados por SO
+**Service Infrastructure:**
+- Purpose: Define long-running services (Caddy, Ollama, Hermes, OmniRoute)
+- Location: `home/dot_local/opt/stacks/{caddy,ollama,hermes,omniroute,openknowledge}/`
+- Contains: Docker Compose files, Dockerfiles, encrypted env files, restore scripts
+- Depends on: Docker/Podman installed (via bootstrap)
+- Used by: Dockge UI or manual `docker-compose up`
 
-### Camada 3 — Runtimes
-- **mise**: versionamento de runtimes (Node, Go, Python, Rust, etc.) — `run_once_after_503-install-mise.sh.tmpl`
-- Install scripts com `mise implode` para upgrade clean
+## Data Flow
 
-### Camada 4 — Shell & Terminal
-- Zsh + zinit + plugins (fast-syntax-highlighting, autosuggestions, completions, history-search)
-- Starship prompt, Atuin history, fzf fuzzy finder
-- Terminal multiplexing: tmux (compiled from source on non-managed) + TPM
-- Window managers: i3 (X11) e Niri (Wayland) — feature-flagged, VPS skip
-- **Niri config**: `private_dot_config/niri/` (config.kdl + cfg/{autostart,keybinds,input,display,layout,animations,rules,misc}.kdl)
+### Primary Apply Flow (chezmoi apply)
 
-### Camada 5 — Editor & IDE
-- Neovim (default editor, compiled from source on non-managed VMs)
-  - `run_once_before_223-compile-nvim.tmpl` — nightly build for managed, release for non-managed + tree-sitter
-- Claude Code, Cursor, Codex, Gemini CLI, OpenCode
-- Coderabbit CLI (`run_once_after_515-install-coderabbit-cli.sh.tmpl`)
-- IntelliJ IDEA Community (Darwin, Linux — feature-flagged by workplace)
-- Speckit GitHub CLI (`run_once_after_521-install-speckit-github-cli.sh.tmpl`)
+1. **Environment Detection** (`home/.chezmoi.yaml.tmpl`)
+   - Probes OS, container type, GUI, VPS, CI, SSH, TTY
+   - Builds `$data.settings` dict with boolean flags and paths
+   - Outputs profile (personal/work/vps) and feature toggles
 
-### Camada 6 — AI & Agents
-- **OmniRoute**: Gateway AI (Docker, v3.8.50, turbo build, multi-port)
-  - Dockerfile: `dot_local/opt/stacks/omniroute/Dockerfile`
-  - Image: `diegosouzapw/omniroute:3.8.49-web` base + qoder-ai/qodercli
-- **Ollama**: LLM local (user/root mode by platform)
-  - Models: `run_onchange_after_505-install-ollama-models.sh.tmpl` (template-driven list)
-  - Open WebUI (`:8080`, OLLAMA_BASE_URL=http://ollama:11434)
-- **Hermes Agent**: Agente pessoal com Docker stack
-  - Config: `private_share/apps/hermes-local/config.yaml.tmpl` (311 linhas)
-  - Features: hermes.dashboard, hermes.agentmemory, hermes.camofox, hermes.composio
-  - Personalidades: helpful, concise, technical, creative, teacher, kawaii, catgirl, pirate, shakespeare, surfer, noir
-  - MCP Servers: Hindsight, Notion, Composio
-- **Camofox**: Browser automation (`:9377`)
-  - Cookies, profiles, traces dirs persistentes
-- **Coding Orchestrator**: Agentes autônomos noturnos
-  - Install: `run_once_after_540-install-coding-orchestrator.sh.tmpl`
-  - Cron deploy: `run_onchange_after_610-deploy-hermes-cron-jobs.sh.tmpl`
-- **Agentmemory**: Persistent memory server (VPS only)
-  - Install: `run_once_after_531-install-agentmemory.sh.tmpl`
+2. **Data Loading** (`home/.chezmoidata/{os}/`)
+   - Loads platform-specific package lists and tool definitions
+   - Feature flags resolved against `$.features.*` from template data
+   - Conditional compilation of install commands
 
-### Camada 7 — Infrastructure & DevOps
-- **Docker Compose** (11+ stacks em `dot_local/opt/stacks/`):
-  - Caddy (reverse proxy, edge network, UFWS auto-config), Camofox, Hermes, Hindsight (pg18+pgvector), Omniroute, Ollama, Open WebUI, Qdrant (v1.19.1), Redis (8.6.5-alpine), Uptime Kuma (`:3001`), Dockge (stack manager)
-  - Cada stack: compose.yaml.tmpl + encrypted_dot_env.asc
-- **Caddy**: Reverse proxy (portas 8642/9119/20128/20129/20132)
-  - Caddyfile: `private_share/apps/caddy/Caddyfile.tmpl` (reverse proxy + WebSocket + healthz)
-- **Tailscale**: VPN ponto a ponto
-- **AWS SSO** (ClaroCorp): `private_dot_config/git/config.tmpl` integrado
-- **Dockge**: Stack manager UI (VPS only, feature-flagged)
+3. **Pre-Apply Hooks** (`run_before_*` scripts)
+   - Install system kernels, drivers, package managers (paru, apt, brew)
+   - Set up keyboard layouts, swap, networking (if not ephemeral)
+   - Install Nix, fzf, devops tools
 
-### Camada 8 — Secrets & Security
-- age encryption, GPG, encrypted files
-- private_dot_* directories (chezmoi-managed private)
-- SSH keys, API keys, credentials (todos criptografados)
-- Swap/ZRAM extreme config: `run_once_before_102-configure-swapfile-zram.sh.tmpl`
-- Keyboard X11 config: `run_once_before_205-configure-keyboard-xorg.sh.tmpl`
+4. **Core Installation** (`run_once_*` scripts)
+   - Install language runtimes (mise, Node, Python, Rust)
+   - Install Ollama, Delta, IDEA, Coderabbit CLI, Atuin
+   - Install AI tools (Aider, Claude, OpenCode) via npm/curl/git
+   - Deploy Hermes dashboard, OmniRoute gateway, Dockge
+   - Deploy cron jobs (coding orchestrator)
 
-## Abstrações Principais
+5. **Change-Triggered** (`run_onchange_*` scripts)
+   - Install system packages whenever `.chezmoidata/` changes
+   - Install Ollama models when tool version changes
+   - Deploy cron jobs when script changes
+   - Clone/pull personal repos
 
-### Perfiles (`.chezmoi.yaml.tmpl`)
-- **personal**: Desktop pessoal, sem sudo, sem systemd
-- **work (Zup)**: Workplace, chaves Zup, APIs corporativas
-- **vps**: Oracle Cloud, auto-detectado, com sudo e systemd
+6. **File Deployment**
+   - Chezmoi copies templated files from `home/` to `~`
+   - Templated paths respect `dot_` → `.` and `private_` → encryption
+   - `.zshrc.d/` modules auto-sourced by modular zshrc
 
-### Feature Flags
-Configurados em `.chezmoi.yaml.tmpl`:
-- `features.ai.*`: hermes (enabled, dashboard, composio, camofox, agentmemory), coding_orchestrator, coding_assistants, spec_tools, multiplexer, ollama (install, mode, version, path, localmodels, models), i3, niri, sudo, systemd, kernels, rtl8821ce, dockge
-- `features.idea.install/workplaces`: IntelliJ per-workplace install
+### Shell Initialization Flow
 
-### Guard Templates (`.chezmoitemplates/`)
-- **common/**: `script_is_not_ephemeral`, `script_is_not_headless`, `script_eval_mise`, `script_helper`, `script_validate_completions_path`, `caddyfile_hermes.tmpl` (define)
-- **platform/**: `darwin_only`, `linux_only`, `ubuntu_only`, `arch_based_only` (endeavouros/cachyos), `windows_only`
-- **workplace/**: `script_is_vps`, `script_is_zup`, `script_is_not_vps`, `script_is_not_zup`, `script_is_instivo`
+1. **Login shell** (`~/.zprofile` / `~/.zshrc`)
+   - Sources `~/.zshrc.d/*.zsh` in alphabetical order
 
-### Template Data Structures
-- `.dirs.local/bin/src` — Caminhos para ~/.local
-- `.dirs.workspaces.{personal,others,work,zup}` — Diretórios de trabalho
-- `.packages.linux.arch.{core,extra,multilib,aur,devops,virtualisation}` — Listas de pacotes Arch
-- `.packages.linux.ubuntu.{apt,gui,ppas}` — Listas de pacotes Ubuntu
-- `.features.hermes.{enabled,dashboard.port/host/domain,isolated,agentmemory.enabled,camofox.enabled,composio.enabled}` — Feature Hermes
+2. **Module load order** (via `home/dot_zshrc.d/`)
+   - `099-zshenv.zsh`: Environment variables
+   - `100-install-zinit.zsh`: Bootstrap zinit plugin manager
+   - `101-zinit-plugins.zsh`: Load plugins (fzf-tab, zsh-vi-mode, etc)
+   - `102-history.zsh`: History config
+   - `103-fzf.zsh`: Fuzzy find
+   - `104-keybindings.zsh`: Vim bindings
+   - `200-aliases.zsh`: General aliases
+   - `200-atuin.zsh`: Shell history search
+   - `300-ai-api-keys.zsh`: (encrypted) API keys from `encrypted_300-ai-api-keys.zsh.asc`
+   - `302-aider.zsh`: Aider CLI config
+   - `311-ollama.zsh`: Ollama setup
+   - `605-omniroute.zsh`: OmniRoute client init
+   - `606-hermes.zsh`: Hermes CLI aliases
+
+**State Management:**
+- **Persistent**: `.zshrc.d/encrypted_*.asc` holds API keys, tokens, secrets
+- **Runtime**: Hermes/OmniRoute daemons manage in-memory state; synced via `hermes-sync` and `omniroute-sync` scripts
+- **Versioned**: Encrypted state committed to git; decrypted at each apply
+
+## Key Abstractions
+
+**Environment Profile:**
+- Purpose: Encapsulate OS, container, GUI, VPS, TTY detection into named profiles (personal/work/vps/ephemeral)
+- Examples: `home/.chezmoi.yaml.tmpl` lines 50–127 (profile inference)
+- Pattern: Boolean flags + string profile name used by all downstream scripts
+
+**Conditional Execution Guards:**
+- Purpose: Template snippets that gate script execution based on environment
+- Examples: `{{ template "common/script_is_not_ephemeral" . }}`, `{{ template "workplace/script_is_vps" . }}`
+- Pattern: If guard condition fails, script exits silently with `exit 0`
+
+**Platform-Specific Data Structures:**
+- Purpose: Store tool/package lists in YAML, keyed by OS and feature flag
+- Examples: `home/.chezmoidata/linux/` contains `packages.yaml`, `ai_tools.yaml` with per-distro variants
+- Pattern: Loop over data arrays, conditionally execute based on feature flag and blocklist
+
+**Feature Flags:**
+- Purpose: Control which optional services/tools install
+- Examples: `features.ai.hermes.enabled`, `features.ai.omniroute.dashboard_port`
+- Pattern: Defined in `.chezmoi.yaml.tmpl` data section; override via `CHEZMOI_*` env vars
+
+**Encrypted Asset:**
+- Purpose: Version-control secrets without exposing values
+- Examples: `home/private_dot_ssh/`, `home/.zshrc.d/encrypted_*.asc`, `home/dot_local/opt/stacks/*/encrypted_*.asc`
+- Pattern: `.asc` extension signals age/GPG encryption; chezmoi decrypts on apply
 
 ## Entry Points
 
-| Entry Point | Propósito |
-|-------------|-----------|
-| `home/.chezmoi.yaml.tmpl` | Configuração central do chezmoi + detecção |
-| `home/dot_zprofile.tmpl` | Zsh login shell (PATH, MacPorts) |
-| `home/dot_zshrc.tmpl` | Zsh config loader (ZDOTDIR, .zshrc.d) |
-| `home/dot_bashrc` | Bash config (herança Ubuntu default) |
-| `home/dot_zshrc.d/099-zshenv.zsh.tmpl` | Env vars base (EDITOR, DISPLAY, PATH) |
-| `home/dot_zshrc.d/999-autoload-compinit.zsh.tmpl` | Compinit autoload |
-| `.chezmoiscripts/{os}/run_once_*` | Bootstrap scripts por SO |
-| `home/dot_local/bin/executable_*` | Ferramentas customizadas (hermes-sync, omniroute-sync) |
+**chezmoi init:**
+- Location: (external CLI, invoked by user)
+- Triggers: User runs `chezmoi init --apply fabiosouzadev`
+- Responsibilities: Clone repo, decrypt secrets, run all scripts, deploy dotfiles
 
-## Ferramentas de Backup/Sync
+**chezmoi apply:**
+- Location: (chezmoi built-in, uses `.chezmoi.yaml.tmpl` as config)
+- Triggers: User runs `chezmoi apply` or `chezmoi update && chezmoi apply`
+- Responsibilities: Re-run environment detection, execute changed scripts, update dotfiles
 
-### hermes-sync (`home/local/bin/executable_hermes-sync`)
-Modelo sustentável para backup do Hermes:
-- **Entra**: config.yaml, .env, auth.json, memories, cron jobs, gateway state, manifests (SQL, TSV)
-- **Não entra**: state.db, sessions, logs, cache, node_modules, backups tar.gz
-- Modelo: arquivos pequenos estáveis + SQL seletivo + manifest → chezmoi add --encrypt → git push
+**Run script ordering:**
+- Location: `home/.chezmoiscripts/` subdirectories
+- Triggers: chezmoi detects platform OS/location
+- Responsibilities: Execute `run_before_*` → `run_onchange_*` → `run_once_*` → deploy files
 
-### omniroute-sync (`home/local/bin/executable_omniroute-sync`)
-Sincronização seletiva de estado OmniRoute:
-- **Criptografados**: .env, config.sql, sync/manifest.json, sync/backup-note.txt
-- **Forbidden patterns**: private_backup.tar.gz, private_storage.sqlite, private_call_logs, private_logs
-- Modelo: config pequena + secrets + export seletivo SQLite + manifest
+**Interactive shell:**
+- Location: `~/.zshrc` → `~/.zshrc.d/*.zsh`
+- Triggers: User opens terminal
+- Responsibilities: Load plugins, set aliases, initialize Hermes/OmniRoute clients
 
-## Abordagem Multi-OS
+## Architectural Constraints
 
-```
-                    ┌───────────┐
-                    │  macOS    │ ← brew, macports, zsh, i3 (não), Docker
-                    └─────┬─────┘
-                          │
-         ┌────────────────┼────────────────┐
-         │                │                │
-    ┌────▼────┐    ┌─────▼─────┐   ┌──────▼──────┐
-    │ Linux   │    │  WSL      │   │   Termux    │
-    │ Arch    │    │ (Windows) │   │ (Android)   │
-    │ Ubuntu  │    │           │   │             │
-    └────┬────┘    └─────┬─────┘   └──────┬──────┘
-         │               │                │
-         └───────────────┼────────────────┘
-                         │
-                    ┌────▼────┐
-                    │Shared   │ ← git, chezmoi, zsh, AI tools
-                    │ Tools   │
-                    └─────────┘
-```
+- **Single source of truth**: All config lives in chezmoi directory; no external bootstrap tools required
+- **Deterministic apply**: `.chezmoi.yaml.tmpl` templates scripts to be idempotent; `run_once_` gates ensure scripts run once only
+- **Phased execution**: chezmoi enforces `run_before_` → `run_onchange_` → `run_once_*` ordering; scripts cannot assume parallel execution
+- **Encrypted at rest**: All `.asc` files assumed age/GPG encrypted; chezmoi's `encryption: gpg` decrypts transparently
+- **Platform abstraction**: No hardcoded paths; all paths derive from `$chezmoi.homeDir` and `$chezmoi.os`
+- **Feature-flagged conditionals**: Scripts gate on `$.features.*` boolean flags; no inline OS checks
+- **Modular shell config**: `.zshrc.d/` modules sourced alphabetically; order-dependent (100 before 200) — documented via numbering
+- **Externally-sourced themes**: Catppuccin and other themes pulled via `.chezmoiexternals/` from upstream (not versioned)
+- **Credential isolation**: `.zup-worker/` and `.hermes/` are workspace-scoped; personal and VPS profiles use separate secrets
 
-## Docker Networking Layout
+## Anti-Patterns
 
-```
-                    Internet
-                       │
-                   ┌───▼───┐
-                   │ Caddy │ (80/443 → edge network)
-                   └───┬───┘
-                       │
-          ┌────────────┼──────────────┐
-          │            │              │
-     hermes:9119  omniroute:20128  openwebui:8080
-     hermes:8642  omniroute:20129  camofox:9377
-     (via HTTPS)  (via HTTPS)      (via HTTPS)
-          │
-    ┌─────┼──────┐
-    │     │      │
-  pg18   Redis  Qdrant  (hindsight internal network)
-  +pgvector         (expose only, no ports)
-```
+### Hardcoded Absolute Paths in Scripts
 
-## Conventions Detalhadas de Script
+**What happens:** Scripts like `run_once_after_590-install-ai-tools.sh.tmpl` use `$HOME/.local/bin` and `$HOME/.local/src` directly
 
-### Pattern de Script Linux
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-{{ template "common/script_helper" . }}
-{{ template "linux/script_linux_only" . }}
-{{ template "common/script_is_not_ephemeral" . }}
-{{ template "workplace/script_is_not_zup" . }}
-info ">>>>>> Título <<<<"
-# Lógica principal
-success "Sucesso"
-```
+**Why it's wrong:** `.local` path is OS-dependent on some systems (macOS uses `~/Library`); chezmoi's path context should be used throughout
 
-### Success/Error Helpers
-- `info "msg"` — Log informativo
-- `success "msg"` — Log de sucesso (magenta)
-- `warn "msg"` — Log de aviso
-- `die "msg"` — Log de erro e exit 1
+**Do this instead:** Use chezmoi template functions like `{{ joinPath .chezmoi.homeDir ".local" "bin" }}` to construct paths in all scripts (`home/.chezmoiscripts/*/*.tmpl`)
+
+### Conditional Feature Checks Mixed with OS Checks
+
+**What happens:** Scripts sometimes check both `{{ template "common/script_is_not_ephemeral" . }}` AND `{{ if $.features.ai.herness }}` — guards nested unpredictably
+
+**Why it's wrong:** Makes script flow hard to trace; feature flags should be the primary gate, OS checks secondary
+
+**Do this instead:** Always gate on feature flags first, then OS guards. Order: (1) feature enabled? (2) OS/environment supports? (3) execute
+
+### Unencrypted Credential Comments
+
+**What happens:** `.env` files and scripts sometimes contain placeholder comments like `# API_KEY=sk-...` that could leak secrets
+
+**Why it's wrong:** Comments can be accidentally exposed in logs, diffs, or when file is read carelessly
+
+**Do this instead:** Use only `.asc` encrypted files for ANY credential placeholder, even comments. Store ALL secrets encrypted.
+
+## Error Handling
+
+**Strategy:** Fail-fast with explicit status codes; each bootstrap script template includes `set -euo pipefail` and uses helper functions for clean error output.
+
+**Patterns:**
+- `info()`, `warn()`, `error()`, `success()` color-coded output via `home/.chezmoitemplates/common/script_helper`
+- Scripts exit `1` on error; chezmoi aborts apply and reports which script failed
+- Guards (`{{ template "common/script_is_not_ephemeral" . }}`) exit `0` when condition unmet — prevents cascading failures on skipped stages
+- No inline error handling in scripts; errors bubble up to chezmoi orchestration
+
+## Cross-Cutting Concerns
+
+**Logging:** All bootstrap scripts source `script_helper` and use `info()`, `warn()`, `error()`, `success()` helpers. Colored output for readability; no structured logging.
+
+**Validation:** 
+- `script_validate_completions_path` checks `~/.local/share/zsh/site-functions/` exists before writing completions
+- No runtime validation of credentials or deployed configs — assumes `.asc` files are correct
+
+**Authentication:**
+- SSH keys in `home/private_dot_ssh/` (encrypted + private)
+- API keys in `home/.zshrc.d/encrypted_300-ai-api-keys.zsh.asc` (encrypted)
+- Hermes/OmniRoute credentials in respective `.asc` files
+- All decrypted by chezmoi at apply time using GPG recipient configured in `.chezmoi.yaml.tmpl`
+
+---
+
+*Architecture analysis: 2026-11-23*

@@ -1,204 +1,188 @@
-# STACK.md — Stack Tecnológico e Dependências
+---
+last_mapped_commit: d1d1c1c967319d6aa2852d6caaee2123acced521
+last_mapped_at: 2026-11-23
+---
+# Technology Stack
 
-> 🧠 **From Hindsight memory (codebase map)** — Documento gerado pelo mapeamento do codebase fabiosouzadev/dotfiles em 2026-09-17.
+**Analysis Date:** 2026-11-23
 
-## Visão Geral
+## Languages
 
-Repositório de dotfiles gerenciado pelo [chezmoi](https://chezmoi.io) (`~/.local/share/chezmoi`), focado em reprodutibilidade, versionamento de configurações e bootstrap limpo de máquinas. Codifica um ambiente de operação completo: shell, editor, terminal, ferramentas modernas, segredos criptografados, integração com IA local/remota e fluxos de sincronização.
+**Primary:**
+- **Bash/Shell (sh, bash, zsh)** - Primary scripting language for chezmoi automation, dotfiles management, and system bootstrap
+- **Zsh** - Interactive shell configuration and aliases; primary shell environment with zinit plugin manager
+- **Go** - Chezmoi itself is built in Go; used for template rendering and file management
+- **YAML/TOML** - Configuration files, data files, and chezmoi templates
+- **JSON** - Configuration for Claude Code (`.claude/settings.json.tmpl`), Auth configs, and application settings
+- **PowerShell (.ps1)** - Windows-specific package installation scripts (`home/.chezmoiscripts/windows/`)
+- **TypeScript/JavaScript** - Node.js-based tools and hooks (Claude Code hooks in `.claude/hooks/`)
 
-## Linguagens e Runtimes
+**Secondary:**
+- **Python** - Through tools like Atuin, WakaTime CLI, and various development utilities
+- **Lua** - Configuration for Neovim and other Lua-based tools
 
-| Linguagem | Uso | Versão |
-|-----------|-----|--------|
-| **Zsh** | Shell principal | 5.x |
-| **Bash** | Shell secundário | 4.x |
-| **Go** | OmniRoute (build Docker) | 1.x |
-| **Node.js** (via mise) | OmniRoute, Herdr, Claude, Codex | LTS |
-| **Python** | Wakatime CLI, hermes-agent, scripts | 3.x |
-| **Rust** (via mise) | tree-sitter, ferramentas | latest |
-| **Age** | Criptografia de segredos | v1.x |
-| **GPG** | Criptografia alternativa | 2.x |
-| **Docker/Compose** | 11+ stacks locais | 24.x |
+## Runtime
 
-## Gerenciador de Runtimes — mise
+**Environment:**
+- **Mise (Multi-language version manager)** - Manages Node.js, Python, Rust, and other language runtimes
+  - Installation: `home/.chezmoiscripts/unix/run_once_after_503-install-mise.sh.tmpl`
+  - Node.js: LTS version via mise; used for OmniRoute, AI tools, and npm packages
+  - Path: `~/.local/share/mise/shims` and `~/.local/share/mise/installs`
 
-- **mise**: versionamento unificado de runtimes (Node, Python, Go, Rust, etc.)
-- Install: `curl https://mise.run | sh` → `~/.local/bin/mise`
-- Upgrade: `mise implode -y` + reinstall
-- Ativado nos shells via `eval "$(mise activate zsh --shims)"`
-- Install script: `run_once_after_503-install-mise.sh.tmpl`
+**Package Managers:**
+- **npm** - Global Node.js packages for AI tools and CLI utilities
+  - Lockfile: Implicit from package specs in `home/.chezmoidata/ai_tools.yaml`
+- **Linux Distribution Package Managers:**
+  - **pacman** (Arch Linux) - via paru for AUR packages
+  - **apt** (Ubuntu/Debian)
+  - **Homebrew** (macOS)
+  - **MacPorts** (macOS alternative)
+- **Scoop** (Windows) - Windows package manager with buckets: main, extras, versions, nerd-fonts
+- **Winget** (Windows) - Microsoft's package manager for modern Windows apps
+- **Nix** (Linux optional) - Declarative package manager on select platforms
 
-## Gerenciador de Pacotes por Plataforma
+## Frameworks
 
-| SO | Gerenciador | Scripts |
-|----|-------------|---------|
-| Linux (Arch/EndeavourOS/CachyOS) | pacman + paru/yay (AUR) | `run_onchange_before_201-install-arch-packages.sh.tmpl`, `run_once_before_199-install-paru.sh.tmpl` |
-| Linux (Ubuntu) | apt + PPAs | `run_onchange_before_202-install-ubuntu-packages.sh.tmpl` |
-| macOS | Homebrew + MacPorts | `run_onchange_after_502-install-darwin-packages-homebrew.sh.tmpl`, `run_onchange_after_501-install-darwin-packages-macports.sh.tmpl` |
-| Windows (WSL) | Scoop + Winget | `run_onchange_before_201-install-winget-packages.ps1.tmpl` |
-| Termux (Android) | pkg | `run_once_before_099-termux-base-packages.sh.tmpl` |
+**Core Infrastructure:**
+- **Chezmoi** (`https://chezmoi.io`) - Dotfiles management, template rendering, encrypted secret handling
+  - Configuration: `home/.chezmoi.yaml.tmpl` - Complex environment detection and feature flags
+  - Encryption: GPG-based encryption with recipient: `E691C031009FB1DAA3A25125212D516F623C5747`
 
-## Template Data — Listas de Pacotes
+**Terminal & Shell:**
+- **Zsh** with **Zinit** - Zsh plugin manager for modular plugin loading
+  - Plugins: Defined in `home/dot_zshrc.d/101-zinit-plugins.zsh.tmpl`
+- **Starship** - Minimal prompt styling
+- **Atuin** - Shell history management with sync
+- **Fzf** - Fuzzy finder for file/command selection
+- **Yazi** - Terminal file manager
+- **Eza** - Modern `ls` replacement
+- **LazGit** - Interactive git UI
 
-Scripts usam template data para listas de pacotes dinâmicas:
-- `.packages.linux.arch.{core,extra,multilib,aur,devops,virtualisation}` — Arch packages
-- `.packages.linux.ubuntu.{apt,gui,ppas,not_in_repos}` — Ubuntu packages
-- `.packages.linux.wm` — Window managers (i3, niri)
-- `.linux.arch.kernels` — Kernel packages (Arch)
+**Testing & Quality:**
+- Not detected in this dotfiles repository
 
-## Ferramentas CLI Instaladas
+**Build/Dev:**
+- **Just** - Command runner for tasks
+- **Make** - Traditional build automation
+- **Git** - Version control with Git Bash/Git CLI integration
 
-### Shell & Terminal
-- **zsh** + **zinit** (plugins: fast-syntax-highlighting, autosuggestions, completions, history-search-multi-word)
-- **Starship** prompt (via zinit, auto-install from gh-r)
-- **eza** (modern ls replacement)
-- **bat** (modern cat, cat→bat alias on non-Ubuntu)
-- **fzf** (fuzzy finder + key bindings)
-- **Atuin** (magical shell history with sync, zsh-vi-mode compat)
-- **zsh-vi-mode** (ZVM)
-- **tmux** (compiled from source on non-managed) + TPM
+## Key Dependencies
 
-### Editor & IDE
-- **Neovim** (default editor, compiled from source — nightly for managed, release + tree-sitter v0.25.10 for non-managed)
-- **Claude Code** (`private_config.toml.tmpl`)
-- **Cursor** CLI
-- **Codex** CLI
-- **Gemini CLI**, **OpenCode**
-- **Coderabbit** CLI, **Speckit** GitHub CLI, **gh** (GitHub CLI)
-- **IntelliJ IDEA Community** (Darwin/Linux, per-workplace install)
+**Critical AI/Coding Tools (NPM & Curl):**
+- **OmniRoute** (`3.8.46` via source) - Smart AI router with auto-fallback; Node.js-based
+  - Config: `home/.chezmoidata/omniroute.yaml`
+  - Service: `home/private_dot_config/private_systemd/private_user/omniroute.service.tmpl`
+  - Environment: `~/.omniroute/.env`
+- **AI Harness Tools** (NPM global):
+  - `@opengsd/gsd-core@latest` - GSD coding orchestrator framework
+  - `aider` - Pair programming AI via curl installer
+  - `claude` - Claude AI CLI via curl installer
+  - `@qwen-code/qwen-code` - Qwen code completion
+  - `@kilocode/cli` - Kilo code assistant
+  - `@sourcegraph/amp@latest` - Sourcegraph Cody
+  - `@openai/codex@latest` - OpenAI Codex CLI
+  - `@github/copilot@prerelease` - GitHub Copilot CLI
+  - Other tools: OpenCode, Freebuff, KimChi, Beads
+- **Ollama** - Local LLM hosting
+  - Models: qwen2.5-coder:0.5b, qwen2.5-coder:1.5b, gemma4:e2b, gemma4:e4b
+  - Config: `home/.chezmoidata/ollama.yaml`
+  - Env: `OLLAMA_HOST=127.0.0.1:11434`, context length 8192, CPU-only
 
-### IA / LLM
-- **Ollama** (user/root mode) + **Open WebUI** (`:8080`)
-- **OmniRoute** (v3.8.50, Docker, turbo build, multi-port)
-- **Hermes Agent** (multi-agent, 12 personalities, Docker stack)
-- **Coding Orchestrator** (autonomous nightly coding)
-- **Agentmemory** (VPS — persistent memory server)
-- **Camofox** (VPS — browser automation)
+**Infrastructure:**
+- **Tailscale** - Zero-trust VPN and mesh networking for remote access
+- **Caddy** (VPS only) - Reverse proxy with automatic TLS
+  - Config: `home/.chezmoitemplates/common/caddyfile_hermes.tmpl`
+- **Dockge** (VPS) - Docker GUI management
+- **Hermes** - Personal AI assistant and automation orchestrator
+  - Dashboard service: `home/private_dot_config/private_systemd/private_user/hermes-dashboard.service.tmpl`
+  - Port: 9119 (default), domain: `hermes.fabiosouzadev.duckdns.org`
+  - Feature flags in `home/.chezmoidata/vps/features.yaml`
+- **AgentMemory** - Persistent memory server for AI coding agents (VPS only)
+  - NPM: `@agentmemory/agentmemory`
+- **Composio** - Tool integration framework for AI agents (optional, VPS)
+- **CamoFox** (VPS) - Browser automation/privacy tool
 
-### Dev/Productivity
-- **lazygit**, **delta**, **gh**, **glab**, **wakatime**, **himalaya** (email)
-- **hermes-sync**, **omniroute-sync** (backup tools)
-- **Docker** + **Compose**
-- **Caddy** (reverse proxy, VPS-only install)
-- **Dockge** (stack manager, VPS-only, feature-flagged)
-- **Tailscale** (VPN), **OpenVPN3**, **Instivo** (VPN)
+**Development Utilities:**
+- **GitHub CLI** (`gh`) - GitHub API automation
+- **GitLab CLI** (`glab`) - GitLab API automation
+- **DBeaver** - Database client
+- **Postman** - API testing tool
+- **Bruno** - API client alternative
+- **Obsidian** - Note-taking application
+- **Delta** - Git diff enhancer
+- **WakaTime CLI** - Activity tracking
+- **Cursor CLI** - Cursor IDE CLI wrapper
+- **CodeRabbit CLI** - Code review automation
+- **SpecKit** - OpenAPI/Spec tooling
+- **LocalSend** - LAN file sharing
+- **Brave Browser** - Privacy-focused Chromium browser
 
-### System (Linux)
-- Kernel management (100), ZRAM+ZSWAP extreme (102), Bluetooth (220), X11 keyboard (205), virtualization (215), devops (214), WMs (216), RTL8821CE (103), Cirrus/macbook (104), Nix (207), paru (199), nvim compile (223), tmux compile (224), swapfile (102), nix (207)
+**Docker/Virtualization:**
+- **Docker** - Container runtime (Linux)
+- **Podman** - Podman container runtime (Linux alternative)
+- **Docker Compose** / **Podman Compose** - Multi-container orchestration
+- **Nerdctl** - containerd CLI compatibility
+- **Distrobox** - Container-based distro environment
+- **QEMU/KVM** - Full virtualization
+- **Libvirt** - Virtualization management
 
-## Shell e Terminal
+**Cryptography & Security:**
+- **age** (`age-encryption.org`) - Modern encryption for secrets
+- **GPG** - GNU Privacy Guard for encryption/decryption
+  - Windows path: `~/scoop/apps/gnupg/current/bin/gpg.exe`
+  - Linux: `gpg` or `gpg2`
+- **Bitwarden** - Password manager
+- **SOPS** - Secrets Operations for encrypted file management
 
-- **Shell principal**: Zsh modular em `home/dot_zshrc.d/` (numerada 099-999)
-- **Prompt**: Starship via zinit
-- **Histórico**: Atuin
-- **Edição**: Neovim (default, `edit: command: nvim`)
-- **Multiplexador**: tmux + TPM
-- **Display**: i3 (X11), Niri (Wayland), multi-monitor xrandr
+**Fonts:**
+- **Nerd Fonts** - Monospace fonts with icon glyphs for terminal and editor
+  - Arch: via `nerd-fonts` scoop bucket
+  - Darwin/Linux: Custom font installation scripts
 
-## Gerenciador de Dotfiles
+## Configuration
 
-- **chezmoi**: gerencia todos com templates Go
-- Scripts de lifecycle: `.chezmoiscripts/` por SO (darwin/linux/unix/windows/termux/vps) — 60+ scripts
-- Dependências externas: `.chezmoiexternals/` (TOML-managed: git repos, archives)
-- Templates reutilizáveis: `.chezmoitemplates/` (6 common + platform + workplace guards)
+**Environment:**
+- **Chezmoi template engine** (`Go text/template`) - Conditional rendering based on OS, profile, and features
+  - Variables: `$profile`, `$ephemeral`, `$headless`, `$interactive`, `$isVps`, `$osID`, `$hostname`
+  - Conditionals for: CI environments, cloud IDEs, containers, WSL, SSH, managed vs personal, VPS vs local
+- **Feature flags** (`home/.chezmoidata/` and `home/.chezmoi.yaml.tmpl`):
+  - `features.ai.harness` - Install coding assistant tools
+  - `features.ai.hermes.enabled` - Enable Hermes personal assistant
+  - `features.ai.hermes.dashboard.enabled` - Hermes web dashboard
+  - `features.ai.hermes.agentmemory.enabled` - AgentMemory server
+  - `features.ollama.install` - Install Ollama LLM
+  - `features.systemd.enabled` - Systemd user services
+  - Environ overrides: `CHEZMOI_*` prefix env vars
 
-## Docker Stacks — 11+ Stacks
+**Build:**
+- **Mise configuration** (`.tool-versions` via mise install)
+- **GPG encryption** in chezmoi for secrets:
+  - Encrypted files: `home/dot_keys/encrypted_*.txt.asc`
+  - Recipient: `E691C031009FB1DAA3A25125212D516F623C5747`
+  - Args: `--quiet`
 
-| Stack | Portas | Propósito |
-|-------|--------|-----------|
-| Caddy | 80/443 → 8642/9119/20128/20129/20132 | Reverse proxy multi-serviço |
-| Hermes | 8642 (API), 9119 (Dashboard) | Agent gateway multi-agent |
-| Hindsight | (internal) | PostgreSQL 18 + pgvector + v0.9.2 |
-| OmniRoute | (build turbo) | AI Gateway v3.8.50 |
-| Ollama | 11434 (expose) | LLM local |
-| Open WebUI | 8080 | Ollama UI |
-| Qdrant | 6333/6334/6335 | Vector store |
-| Redis | 6379 | Cache (persistence on) |
-| Uptime Kuma | 3001 | Monitoring |
-| Camofox | 9377 | Browser automation |
-| Dockge | 5001 (implied) | Stack manager (VPS) |
+## Platform Requirements
 
-### Docker Networking
-- **Edge** (external: true): Caddy, Open WebUI, Camofox, Uptime Kuma
-- **Hindsight internal**: PostgreSQL + Hindsight
-- **Camofox network**: Hermes ↔ Camofox
-- **All internal**: Qdrant, Redis, OmniRoute
+**Development:**
+- Bash/POSIX shell support (WSL on Windows, native on Linux/macOS)
+- Git 2.0+
+- Chezmoi binary in PATH
+- Age key pair for secret decryption
+- Nerd Font for terminal icons
 
-## Portas Expostas
+**Production (VPS):**
+- Ubuntu Linux on Oracle Cloud (auto-detected as `instance-*` hostname)
+- Systemd user services enabled
+- Node.js LTS via mise
+- 2+ CPU cores recommended
+- Outbound HTTPS (443) for Caddy ACME/TLS
 
-| Porta | Serviço | Acesso |
-|-------|---------|--------|
-| 80/443 | Caddy | Internet |
-| 8642/9119 | Hermes | Via Caddy + direct VPS |
-| 20128/20129/20132 | OmniRoute | Via Caddy + direct IP |
-| 3001 | Uptime Kuma | Docker only |
-| 8080 | Open WebUI | Docker only |
-| 9377 | Camofox | Docker only |
-| 11434/6333/6379 | Ollama/Qdrant/Redis | Docker only |
+**Supported OS:**
+- **Linux**: Arch Linux, Ubuntu, Debian, Termux (Android)
+- **macOS**: Darwin (Intel & ARM/Apple Silicon via linuxonmac detection)
+- **Windows**: Windows 11 (via WSL or native PowerShell)
+- **Docker/Containers**: Codespaces, Gitpod, Replit, Distrobox, Lima VM, Docker containers
 
-## Ferramentas de IA e Agentes — Detalhamento
+---
 
-### OmniRoute (Gateway)
-- Deploy: Docker Compose, build from GitHub (turbo, 4096MB)
-- Base: `diegosouzapw/omniroute:3.8.49-web` + `@qoder-ai/qodercli`
-- Ports: 20128 (dashboard), 20129 (API), 20132 (aux)
-- Auth: Password via INITIAL_PASSWORD
-- Sync: `home/dot_local/bin/executable_omniroute-sync`
-
-### Claude Code (Anthropic via OmniRoute)
-- Config: `home/dot_claude/private_config.toml.tmpl`
-- Auth: `home/dot_codex/auth.json.tmpl` (age decrypt)
-- Hooks: GSD lifecycle with sha256 trust hashes
-- MCP: Hindsight server
-
-### Hermes Agent
-- Config: `private_share/apps/hermes-local/config.yaml.tmpl` (311 linhas)
-- 12 personalities: helpful, concise, technical, creative, teacher, kawaii, catgirl, pirate, shakespeare, surfer, noir
-- Feature-flagged: dashboard, agentmemory (VPS), camofox (VPS), composio (Zup)
-- MCP: Hindsight, Notion, Composio
-- Sync: `home/local/bin/executable_hermes-sync`
-
-### Coding Orchestrator
-- Triggers: GitHub `coding-agent` label, Telegram, webhook, cron 02:00 UTC
-- Budget: $5/noite, $2/task
-- Worktree isolation: `~/worktrees/task-<id>`
-
-## Configuração de Editor — Neovim
-
-### Build
-- **Managed**: GitHub nightly + tree-sitter v0.25.10
-- **Non-managed**: Compile from source (`run_once_before_223-compile-nvim.tmpl`)
-
-## Detecção de Ambiente (`.chezmoi.yaml.tmpl`)
-
-### Perfis
-- **personal**: Default, hostname ≠ zwpe0f96cn
-- **work (Zup)**: hostname contém `zwpe0f96cn` ou `CHEZMOI_PROFILE=work`
-- **vps**: hostname `instance-*`, `CHEZMOI_VPS=true`, Ubuntu+Ubuntu user+SSH no GUI
-
-### Indicadores
-- CI/CD: GitHub Actions, GitLab, Travis, etc.
-- Cloud IDE: Codespaces, Gitpod, Replit
-- Container: DISTROBOX, LIMA, .dockerenv, cgroup, root/vscode/ubuntu
-- Remote: SSH_CONNECTION, SSH_CLIENT, SSH_TTY
-- GUI: DISPLAY, WAYLAND, macOS, WSL, CHEZMOI_FORCE_GUI/HEADLESS
-- Mobile: TERMUX_VERSION
-
-## Ferramentas de Backup/Sync
-
-| Tool | Script | Propósito |
-|------|--------|-----------|
-| hermes-sync | `dot_local/bin/executable_hermes-sync` | Backup Hermes (config, secrets, memories, manifests) |
-| omniroute-sync | `dot_local/bin/executable_omniroute-sync` | Backup OmniRoute (config, SQL, manifest) |
-
-### Modelo Sustentável
-- Arquivos pequenos estáveis + SQL seletivo + manifest
-- `chezmoi add --encrypt` → git push
-- NÃO inclui: state.db, logs, cache, tar.gz monolíticos
-
-## Ferramentas Desktop
-
-- **Herdr**: Desktop app config (`private_dot_config/herdr/config.toml.tmpl` — Tokyo Night)
-- **Hermes Dashboard**: systemd service (porta 9119, --isolated)
-- **Niri**: Wayland compositor (`private_dot_config/niri/`)
-
+*Stack analysis: 2026-11-23*

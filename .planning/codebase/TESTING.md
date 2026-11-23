@@ -1,132 +1,181 @@
-# TESTING.md — Estrutura de Testes e Validação
+---
+last_mapped_commit: d1d1c1c967319d6aa2852d6caaee2123acced521
+last_mapped_at: 2026-11-23
+---
+# Testing Patterns
 
-> 🧠 **From Hindsight memory (codebase map)** — Documento gerado pelo mapeamento do codebase fabiosouzadev/dotfiles em 2026-09-17.
+**Analysis Date:** 2026-11-23
 
-## Abordagem de Testes
+## Test Framework
 
-O repositório não possui testes automatizados tradicionais. A validação é feita via:
+**Runner:**
+- Not detected in this codebase
 
-### 1. Chezmoi Apply (Teste Principal)
-```bash
-chezmoi apply --verbose
-```
-Verifica se todos os templates renderizam sem erros.
+**Assertion Library:**
+- Not detected in this codebase
 
-### 2. Chezmoi Diff
-```bash
-chezmoi diff
-```
-Compara estado atual vs. fonte — detecta drift.
+**Run Commands:**
+- No test runner scripts found in package.json or project root
 
-### 3. Chezmoi Verify
-```bash
-chezmoi cd && chezmoi verify
-```
-Valida correspondência destino/template.
+## Test File Organization
 
-### 4. Shell Syntax Validation
-```bash
-zsh -n ~/.zshrc
-for f in ~/.zshrc.d/*.zsh; do zsh -n "$f"; done
-```
+**Location:**
+- Not applicable — no test files detected in codebase
 
-### 5. CI Detection
-`.chezmoi.yaml.tmpl` detecta CI automaticamente. Em CI: hooks desativados, scripts ephemeral ignorados.
+**Naming:**
+- Not applicable — no test files detected
 
-### 6. Docker Compose Config Validation
-```bash
-docker compose -f <stack>/compose.yaml config
-```
+**Structure:**
+- Not applicable — no test files detected
 
-### 7. GPG/Age Decrypt Verification
-```bash
-gpg --decrypt encrypted_file.asc    # GPG
-age -d -i ~/.age/key.txt file.asc   # age
-chezmoi cat ~/path/to/encrypted      # Chezmoi decrypt
-```
+## Testing Approach
 
-## Smoked Checks por Área
+**Current State:**
+This dotfiles repository (`~/.local/share/chezmoi`) is a configuration management system built on:
+- Shell scripts (.sh files)
+- JavaScript hook modules (.js files)
+- Configuration templates (.tmpl files)
+- Chezmoi-managed dotfiles
 
-### Shell
-- Zsh syntax: `zsh -n ~/.zshrc` + cada `.zshrc.d/*.zsh`
-- Module sourcing na inicialização
+**Testing Strategy:**
+- Tests are run in GSD core repository (not in this dotfiles repository)
+- Hooks and utilities defined here (`/.claude/hooks/`) are tested in upstream GSD codebase
+- Generated files (`exit-code-registry.js`, `cli-exit.js`) are byte-compared for parity: `npm run lint:generated-sync`
+- Module mirrors verified to stay in sync via test assertions
 
-### IA Stack
-- **OmniRoute**: `curl http://localhost:20128/health`
-- **Ollama**: `curl http://localhost:11434/api/tags`
-- **Open WebUI**: `curl http://localhost:8080`
-- **Claude Code**: `codex --version`
-- **Hermes Dashboard**: `curl http://localhost:9119/healthz`
+## Code Validation Patterns
 
-### Docker
-```bash
-docker compose -f <stack>/compose.yaml config  # valide configs
-docker compose -f <stack>/compose.yaml ps      # verifique containers
-docker compose -f <stack>/compose.yaml logs    # verifique logs
-```
+**Manual Testing Approach:**
+- Hooks validated by running in actual Claude/Windsurf session
+- Shell scripts tested by execution in target shells (bash, sh, zsh)
+- JavaScript modules required and called to verify they load on unbuilt clones
+- Configuration validation through YAML/JSON parsing attempts
 
-### Network/Proxy
-- Caddy: `curl http://localhost:8642/healthz`
-- Verificar portas: `ss -tlnp`
+**Verification by Testing Infrastructure:**
+- **Generated file sync:** Byte-compared by `npm run lint:generated-sync` (#3911, ADR-3889 Phase 7)
+  - Verifies `gsd-core/bin/lib/exit-code-registry.cjs` = `hooks/lib/exit-code-registry.js` = `scripts/lib/exit-code-registry.cjs`
+  - Verifies `gsd-core/bin/lib/cli-exit.cjs` = `hooks/lib/cli-exit.js` = `scripts/lib/cli-exit.js`
 
-### SSH
-```bash
-ssh -T git@github.com                # GitHub access
-ssh -o ConnectTimeout=5 vps-host     # VPS connectivity
-ssh -i ~/.ssh/id_ed25519_vps ...     # VPS key
-```
+- **Mirror tests:** Specialized tests pin that duplicate code stays in sync
+  - `tests/dispatch-identity.test.cjs`: Verifies `hooks/lib/dispatch-identity.js` mirrors `src/phase-id.cts`
+  - Cold-tree load test: Monkeypatches `Module._load` to assert hooks load without requiring gsd-core/bin/lib
 
-## Testes por Plataforma
+- **Parity testing:** For cold-load modules that must work on unbuilt clones
+  - `hooks/lib/config-read.js` → mirrors `gsd-core/bin/lib/config-file-read.cjs`
+  - Test ensures both have identical capability for reading bounded config files
 
-| Plataforma | O que testar |
-|------------|------------|
-| **Linux (Arch)** | pacman/paru, i3, Niri, systemd, kernel, zram |
-| **Linux (Ubuntu)** | apt, Caddy, systemd |
-| **macOS** | brew, macports, Launchd, tmux compile |
-| **Windows WSL** | Scoop, Winget, GUI detection |
-| **Termux** | pkg, SSH setup, Tailscale |
+## Module Load Testing
 
-## Testes de Criptografia
+**Cold Load Constraint:**
+Hooks must load on a raw, unbuilt clone where build artifacts (`gsd-core/bin/lib/*.cjs`) don't exist.
 
-### age
-```bash
-age -d -i <keyfile> < encrypted_file.asc
+**Validation:**
+- Modules marked with `// COLD-LOAD CONSTRAINT` explicitly state they cannot require certain paths
+- `hooks/lib/dispatch-identity.js` requires NOTHING (no fs, no path, no gsd-core)
+- Load test verifies modules load by monkeypatching Module._load to block forbidden paths
+
+## Error Path Testing
+
+**Patterns Observed:**
+- Functions tested for error conditions: null returns, throws, structured errors
+- Exit code tests verify correct code emitted for each outcome
+- File system error codes tested: ENOENT, EISDIR, ENXIO, EFBIG
+
+**Error Handling Test Pattern:**
+```javascript
+// Example: testing optional file absence
+if (err && err.code === 'ENOENT' && !(options && options.required)) return null;
+// Throw for non-optional
+throw err;
 ```
 
-### GPG
-```bash
-gpg --decrypt encrypted_file.asc
-gpg --list-keys E691C031009FB1DAA3A25125212D516F623C5747
+**Structured Error Objects:**
+- Error.code property checked: `if (!st.isFile()) throw coded(..., 'EISDIR');`
+- Errors created with explicit code: `function coded(message, code) { return Object.assign(new Error(message), { code }); }`
+
+## Git Integration Testing
+
+**Patterns:**
+- Git command classification tested in `git-cmd.js`
+- Test cases cover four git invocation forms:
+  1. bare: `git commit -m "..."`
+  2. -C path: `git -C /some/path commit -m "..."`
+  3. env-prefix: `GIT_AUTHOR_NAME=x git commit "..."`
+  4. full-path: `/usr/bin/git commit -m "..."`
+
+- Token walker skips git options correctly (ARGUMENT_TAKING_FLAGS and BOOLEAN_FLAGS)
+- Glued flag form tested: `-cfoo=value` correctly parsed
+
+## Hook Protocol Testing
+
+**Contract Verification:**
+- Exit codes match registered names: code 2 = HOOK_DENY, code 0 = PASS
+- JSON payload structure verified for structured output
+- Fail-safe behavior: hooks exit 0 on advisory errors (don't block tool)
+- Fail-closed behavior: security hooks exit 2 to block dangerous operations
+
+**Test Patterns:**
+- Hook exit code contracts defined in `exit-codes.json` (source of truth)
+- Generated registries byte-compared to verify no divergence
+- Exit code lookup tested: `exitCodeFor()` returns correct number for name, throws for unregistered
+
+## Coverage Gaps
+
+**Untested Areas:**
+- `~/.local/share/chezmoi/home/` dotfiles not tested in this repository
+- Chezmoi template execution not validated in codebase
+- Shell initialization (.zshrc, .bashrc equivalents) not tested
+- Configuration file modifications not verified programmatically
+- Actual hook execution in Claude/Windsurf session not automated in this repo
+
+**Risk:**
+- Hooks could have silent failures that only manifest when tool is invoked
+- Chezmoi template rendering errors only discovered during apply
+- Configuration changes could break shell initialization
+
+## Common Patterns
+
+**Defensive Programming:**
+```javascript
+// Defensive type checking
+if (typeof name !== 'string' || name.length === 0) {
+  throw new Error(...);
+}
+
+// Optional chaining with defaults
+const envDir = process.env.CLAUDE_CONFIG_DIR;
+if (envDir && fs.existsSync(path.join(envDir, 'gsd-core', 'VERSION'))) {
+  return envDir;
+}
 ```
 
-### Chezmoi
+**Shell Script Patterns:**
 ```bash
-chezmoi cat ~/.path/to/encrypted  # requer chave local
-chezmoi diff                        # detecta drift incluindo secrets
+# Pre-initialize status variables to prevent inherited env pollution
+CONFIG_STATUS=0
+CMD_STATUS=0
+CLASSIFY_STATUS=0
+
+# Idempotent cleanup
+cleanup_temp_files() {
+  rm -f "${ENABLED_ERR:-}" "${CMD_ERR:-}" "${CLASSIFY_ERR:-}" 2>/dev/null || true
+}
+trap cleanup_temp_files EXIT
 ```
 
-## Áreas que Precisam de Testes
+**Async/Background Patterns:**
+- Not applicable for hooks (synchronous execution required)
+- Background workers spawn for non-blocking operations (gsd-graphify-rebuild.sh)
+- Worker tracks status via lockfile and status file
 
-1. **Templates Go complexos**: `.chezmoi.yaml.tmpl` (~400 linhas de lógica) — validar todos os paths de detecção
-2. **Fluxo de criptografia**: age decrypt em todos os 30+ encrypted_* files
-3. **Multi-OS matrix**: 5 SOs × 3 perfis = 15 combinações
-4. **CI/CD pipeline**: GitHub Actions para validação automática de templates
-5. **OmniRoute config**: model_provider, model, reasoning_effort validations
-6. **Docker networking**: edge vs internal networks, Caddy routing
-7. **Hermes config**: 311 linhas de YAML, múltiplas personalidades, MCP servers
-8. **Feature flags**: todas as combinações de features.enabled/disabled
+## Documentation Testing
 
-## Convenções de Smoke Checks (docs/TESTING.md)
+**Patterns:**
+- Generated files include instruction comments for regeneration
+- Source of truth documented in generated file header
+- Comments explain WHY generated file exists (not just WHAT it is)
+- Test assertions verify that documentation in comments stays accurate
 
-A documentação de testes detalhada vive em `docs/TESTING.md`.
+---
 
-## Monitoramento Contínuo
-
-| Check | Frequência | Como |
-|-------|-----------|------|
-| Docker health | Semanal | `docker ps` + healthchecks |
-| Secrets validity | Semestral | age/GPG key rotation |
-| AI stack connectivity | Diária | curl endpoints |
-| VPS disk/backups | Semanal | manual |
-| Feature flag drift | Mensal | `chezmoi diff` |
-
+*Testing analysis: 2026-11-23*
