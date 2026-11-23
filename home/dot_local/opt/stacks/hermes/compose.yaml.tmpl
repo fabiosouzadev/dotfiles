@@ -11,18 +11,19 @@ services:
       - 9119 # dashboard (only reached when HERMES_DASHBOARD=1)
     volumes:
       - {{ .chezmoi.homeDir }}/.hermes:/opt/data
-      - {{ .chezmoi.homeDir }}/.camofox/cookies:/home/node/.camofox/cookies:ro
+      - {{ .chezmoi.homeDir }}/.camofox/cookies:  :ro
     environment:
       - PUID={{ .chezmoi.uid }}
       - PGID={{ .chezmoi.gid }}
       - OMNIROUTE_BASE_URL=http://omniroute:20129/v1
       - CAMOFOX_URL=http://camofox:9377
+      - CAMOFOX_API_KEY=${CAMOFOX_API_KEY}
       - HERMES_DASHBOARD=1
     networks:
       - edge-network
       - hindsight-network
       - camofox-network
-    shm_size: 1g  
+    shm_size: 1g
     deploy:
       resources:
         limits:
