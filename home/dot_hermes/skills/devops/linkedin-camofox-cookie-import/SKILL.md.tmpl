@@ -1,0 +1,106 @@
+---
+name: linkedin-camofox-cookie-import
+description: Use to import/export LinkedIn cookies via Camofox session.
+---
+
+# Importação/Exportação de Cookies LinkedIn via Camofox
+
+## Contexto
+O Camofox roda em `http://camofox:9377` com autenticação via `CAMOFOX_API_KEY` (header `Authorization: Bearer <key>`). A conta do usuário é `fabio` (ou `hermes` dependendo do contexto).
+
+## Importar cookies para nova sessão
+
+1. **Exportar cookies da sessão ativa** (se já existe login manual via VNC):
+```bash
+source /opt/data/.env 2>/dev/null
+curl -s "http://camofox:9377/sessions/fabio/storage_state" \
+  -H "Authorization: Bearer $CAMOFOX_API_KEY" > /tmp/state_fabio.json
+```
+
+2. **Filtrar apenas cookies do LinkedIn** e converter para formato Playwright:
+```bash
+python3 - <<'PYEOF'
+import json
+with open('/tmp/state_fabio.json') as f:
+    state = json.load(f)
+linkedin_cookies = [c for c in state.get('cookies', []) if 'linkedin' in c.get('domain','')]
+for c in linkedin_cookies:
+    print(f"{c['name']}: {c['value'][:30]}...")
+PYEOF
+```
+
+3. **Importar cookies para a sessão** via endpoint `/sessions/{userId}/cookies`:
+```bash
+curl -s -X POST "http://camofox:9377/sessions/fabio/cookies" \
+  -H "Authorization: Bearer $CAMOFOX_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"cookies": [{"name": "li_at", "value": "AQE...", "domain": ".www.linkedin.com", "path": "/", "secure": true, "httpOnly": false, "sameSite": "Lax"}]}'
+```
+
+Resposta: `{"ok":true,"userId":"fabio","count":N}`
+
+4. **Limpar sessão antes** (remove storage persistido):
+```bash
+curl -s -X DELETE "http://camofox:9377/sessions/fabio/storage_state" \
+  -H "Authorization: Bearer $CAMOFOX_API_KEY"
+```
+
+5. **Abrir feed**:
+```bash
+curl -s -X POST "http://camofox:9377/tabs" \
+  -H "Authorization: Bearer $CAMOFOX_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"fabio","sessionKey":"linkedin-test","url":"https://www.linkedin.com/feed/"}'
+```
+
+## Conversão Netscape → Playwright
+
+Arquivo `linkedin.txt` em formato Netscape:
+```
+.linkedin.com	TRUE	/	TRUE	1826966149	li_at	AQEDAQVv6q4AzM4DAAABogf57hsAAAGiLAZyG00AoqCNqV-LTnSt55i9WcJhig2WTnigoPjLZbM1Gi9DtkJyQmfo89PLglfepmQqbCvsNmNc22NVLFcLNNK8szUQkMfK3JYII7TgjfAMnD4Zg-3ntCxe
+```
+
+Converter para JSON do Playwright:
+```python
+cookie = {
+    "name": parts[5],
+    "value": parts[6],
+    "domain": parts[0],
+    "path": parts[2],
+    "secure": parts[3] == 'TRUE',
+    "httpOnly": False,
+    "sameSite": "Lax"
+}
+if parts[4] != '-1':
+    cookie["expires"] = int(parts[4])
+```
+
+## Limitações do LinkedIn + Camofox
+
+- **Checkpoint de segurança (`captchaV2Challenge`)**: O LinkedIn sempre detecta o Camoufox/Camofox como navegador automatizado quando a sessão é nova, redirecionando para `/uas/login` ou `/checkpoint/challenge/...`.
+- **Login automatizado não funciona**: Preencher e-mail + senha via API resulta em `captchaV2Challenge`.
+- **Cookies importados não são suficientes**: Mesmo exportando os 24 cookies completos (`li_at`, `JSESSIONID`, `bcookie`, `bscookie`, etc.) da sessão ativa e reimportando, o LinkedIn continua bloqueando.
+
+## Workaround: VNC Interativo
+
+O único caminho confiável é login manual via VNC:
+1. Verificar se VNC está ativo: `curl -s -H "Authorization: Bearer $CAMOFOX_API_KEY" http://camofox:9377/vnc/status`
+2. Acessar `http://<IP-DO-CAMOFOX>:6080/vnc.html` em navegador externo
+3. Fazer login manual (incluindo captcha)
+4. Após login, os cookies da sessão são atualizados automaticamente
+5. A partir daí, o `browser_navigate('https://www.linkedin.com/feed/')` funciona autenticado
+
+## Endpoints úteis
+
+- `POST /sessions/{userId}/cookies` — importar cookies (Playwright format)
+- `GET /sessions/{userId}/storage_state` — exportar storage completo
+- `DELETE /sessions/{userId}/storage_state` — limpar sessão
+- `POST /tabs` — criar nova tab `{userId, sessionKey, url}`
+- `GET /vnc/status` — status do VNC
+- `GET /tabs?userId={id}` — listar tabs ativas
+
+## Notas
+
+- O arquivo `/home/node/.camofox/cookies/` pode ser read-only em alguns setups.
+- `browser_import_cookies` do plugin Camofox exige caminho relativo dentro de `~/.camofox/cookies/`.
+- Alternativa: usar endpoint REST direto com Bearer token.
