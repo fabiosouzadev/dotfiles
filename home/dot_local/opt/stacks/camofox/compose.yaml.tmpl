@@ -1,6 +1,6 @@
 services:
   camofox:
-    image: ghcr.io/jo-inc/camofox-browser:latest
+    image: ghcr.io/jo-inc/camofox-browser:1.19.0
     container_name: camofox
     restart: unless-stopped
     # ports: [ "9377:9377" "6080:6080", "5901:5900"]
@@ -40,9 +40,9 @@ services:
       # - DISPLAY=:109 # Forçando o display que o Xvfb está usando
 
     volumes:
-      - ./data/profiles:/home/node/.camofox/profiles:rw # RW - ESSENCIAL!
-      - ./data/cookies:/home/node/.camofox/cookies:ro
-      - ./data/traces:/home/node/.camofox/traces:rw
+      - {{ .chezmoi.homeDir }}/.camofox/profiles:/home/node/.camofox/profiles:rw # RW - ESSENCIAL!
+      - {{ .chezmoi.homeDir }}/.camofox/cookies:/home/node/.camofox/cookies:ro
+      - {{ .chezmoi.homeDir }}/.camofox/traces:/home/node/.camofox/traces:rw
     
     shm_size: 2g # necessário para Firefox/Camoufox
     ulimits:
