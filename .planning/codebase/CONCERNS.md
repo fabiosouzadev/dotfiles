@@ -1,5 +1,5 @@
 ---
-last_mapped_commit: d1d1c1c967319d6aa2852d6caaee2123acced521
+last_mapped_commit: c2840b6cdfa7b1cdccbfa7c030396b2c931328a2
 last_mapped_at: 2026-11-23
 ---
 # Codebase Concerns
@@ -13,11 +13,11 @@ last_mapped_at: 2026-11-23
 **Issue:** Multiple Docker images and package installations reference unversioned or dynamic "latest" tags, reducing reproducibility and increasing the risk of breaking changes between deployments.
 
 **Files:**
-- `home/dot_local/opt/stacks/ollama/compose.yaml.tmpl` - `ollama/ollama:latest`
+- `home/dot_local/opt/stacks/ollama/compose.yaml.tmpl` - Line 3: `ollama/ollama:latest`
 - `home/dot_local/opt/stacks/openknowledge/compose.yaml.tmpl` - `openknowledge:latest`
-- `home/.chezmoidata/ollama.yaml` - `version: "latest"`
-- `home/.chezmoiscripts/linux/run_once_after_504-install-ollama.sh.tmpl` - Dynamic version via GitHub API
-- `home/private_dot_config/mise/config.toml.tmpl` - `@inkeep/open-knowledge` with `version = "latest"`
+- `home/.chezmoidata/ollama.yaml` - Line 3: `version: "latest"`
+- `home/.chezmoiscripts/linux/run_once_after_504-install-ollama.sh.tmpl` - Lines 22-26: Dynamic version via GitHub API
+- `home/private_dot_config/mise/config.toml.tmpl` - Line 9: `@inkeep/open-knowledge` with `version = "latest"`
 
 **Impact:** 
 - Cannot guarantee reproducible environments across machines or time
@@ -38,8 +38,8 @@ last_mapped_at: 2026-11-23
 **Issue:** External service endpoints and VPS configuration are hardcoded throughout templates, making the dotfiles difficult to fork or reuse and creating a single point of failure if infrastructure changes.
 
 **Files:**
-- `home/dot_local/opt/stacks/omniroute/compose.yaml.tmpl` - Lines 24-27 hardcode `fabiosouzadev.duckdns.org` and IP `193.123.97.209`
-- `home/dot_local/opt/stacks/caddy/Caddyfile.tmpl` - Multiple hardcoded `fabiosouzadev.duckdns.org` subdomains
+- `home/dot_local/opt/stacks/omniroute/compose.yaml.tmpl` - Line 24: Hardcoded `193.123.97.209` and `omniroute-fabiosouzadev.duckdns.org`
+- `home/dot_local/opt/stacks/caddy/Caddyfile.tmpl` - Lines 17, 27, 32, 37, 63: Multiple hardcoded `fabiosouzadev.duckdns.org` subdomains
 - `home/dot_hermes/config.yaml.tmpl` - `matrix-fabiosouzadev.duckdns.org` and `notes-fabiosouzadev.duckdns.org`
 - `home/.chezmoidata/termux/data.yaml` - `vps_host: "fabiosouzadev.duckdns.org"`
 
@@ -61,10 +61,10 @@ last_mapped_at: 2026-11-23
 **Issue:** Setup scripts use nested OS-specific conditionals and templates, increasing complexity and making it difficult to maintain or test across platforms.
 
 **Files:**
-- `home/.chezmoiscripts/linux/run_once_after_504-install-ollama.sh.tmpl` - Lines 18-66 have deeply nested conditionals for "user" vs "root" modes
+- `home/.chezmoiscripts/linux/run_once_after_504-install-ollama.sh.tmpl` - Lines 20-87: Deeply nested conditionals for "user" vs "root" modes
 - `home/.chezmoiscripts/darwin/run_once_after_530-install-idea-community.sh.tmpl` - Complex macOS-specific installation with hdiutil mount operations
 - `home/.chezmoiscripts/windows/run_once_after_530-install-idea-community.ps1.tmpl` - PowerShell variant with different logic paths
-- 58 total script files across `.chezmoiscripts/` with platform-specific branching
+- 56 total script files across `.chezmoiscripts/` with platform-specific branching
 
 **Impact:**
 - Bug fixes in one platform variant may not be applied to others
@@ -73,21 +73,21 @@ last_mapped_at: 2026-11-23
 - Logic divergence between platforms over time
 
 **Fix approach:**
-1. Extract common logic into shared shell functions in `.chezmoitemplates/`
+1. Extract common logic into shared shell functions in `.chezmoidata/`
 2. Use cross-platform tools (e.g., `mise` for version management) instead of platform-specific installers
 3. Create test harness that validates installation on all platforms
-4. Consider unified approach using mise/nix for deterministic tool provisioning
+4. Consider unified approach using mise for deterministic tool provisioning
 
 ---
 
 ### 4. Shell Script Error Handling Gaps
 
-**Issue:** Some shell scripts lack robust error handling, with missing `set -e` guards, unquoted variables, and operations that could silently fail.
+**Issue:** Some shell scripts lack robust error handling, with missing `set -euo pipefail` guards, unquoted variables, and operations that could silently fail.
 
 **Files:**
 - `home/dot_local/opt/stacks/openknowledge/entrypoint.sh` - Uses `set -eu` correctly ✓, but lines 49-52 risk non-obvious behavior if `find` output changes
-- `home/.chezmoiscripts/linux/run_once_after_504-install-ollama.sh.tmpl` - Line 23 uses `sed` with unquoted substitution; `curl` with `| grep` chain lacks intermediate error checks
-- `home/.chezmoiscripts/darwin/run_once_after_504-install-ollama-darwin.sh.tmpl` - Similar `curl | sed | grep` pipeline; missing validation of extracted values
+- `home/.chezmoiscripts/linux/run_once_after_504-install-ollama.sh.tmpl` - Line 23: Uses `sed` with unquoted substitution; `curl` with `| grep` chain lacks intermediate error checks
+- `home/.chezmoiscripts/unix/run_once_after_528-install-glab.sh.tmpl` - Lines 38-39: Uses `grep` on JSON without `jq`, brittle string parsing
 
 **Impact:**
 - Silent failures during installation could leave system in broken state
@@ -155,9 +155,14 @@ last_mapped_at: 2026-11-23
 
 ### 2. Encrypted Files Without Key Material in Repository
 
-**Risk:** Repository contains 41 `.asc` (encrypted GPG) files but no key material. If GPG key is lost, encrypted data becomes inaccessible.
+**Risk:** Repository contains 41 encrypted `.asc` (GPG) files but no key material. If GPG key is lost, encrypted data becomes inaccessible.
 
-**Files:** `home/dot_hermes/encrypted_private_*.asc` (multiple files); `home/dot_local/opt/stacks/omniroute/restore/encrypted_private_config.sql.asc`
+**Files:** 
+- `home/dot_aws/encrypted_private_credentials.asc`
+- `home/dot_hermes/encrypted_private_*.asc` (multiple)
+- `home/dot_keys/encrypted_*.asc` (multiple)
+- `home/dot_camofox/cookies/encrypted_linkedin.txt.asc`
+- `home/dot_local/opt/stacks/omniroute/restore/encrypted_private_config.sql.asc`
 
 **Current mitigation:**
 - GPG key is managed separately (recipient ID: E691C031009FB1DAA3A25125212D516F623C5747)
@@ -213,7 +218,7 @@ last_mapped_at: 2026-11-23
 
 **Risk:** Zsh history is configured for 1 billion lines (`HISTSIZE=1000000000`), which could consume excessive disk space and slow shell startup.
 
-**Files:** `home/dot_zshrc.d/102-history.zsh.tmpl` - `export HISTSIZE=1000000000`
+**Files:** `home/dot_zshrc.d/102-history.zsh.tmpl` - Line 1: `export HISTSIZE=1000000000`
 
 **Problem:** 
 - History file could grow to multiple GB
@@ -254,14 +259,14 @@ last_mapped_at: 2026-11-23
 **Files:**
 - `home/.chezmoiscripts/linux/run_once_after_504-install-ollama.sh.tmpl` - Lines 22-26
 - `home/.chezmoiscripts/darwin/run_once_after_504-install-ollama-darwin.sh.tmpl` - Similar pattern
-- `home/.chezmoiscripts/unix/run_once_after_528-install-glab.sh.tmpl` - GitHub API version fetch
+- `home/.chezmoiscripts/unix/run_once_after_528-install-glab.sh.tmpl` - Lines 38-39
 - `home/.chezmoiscripts/unix/run_once_after_529-install-lazygit.sh.tmpl` - GitHub API version fetch
 - `home/.chezmoiscripts/unix/run_once_after_536-install-atuin.sh.tmpl` - GitHub API version fetch
 
 **Why fragile:**
 - Depends on GitHub API being available and unchanged format
 - No fallback if API rate limit is hit or service is down
-- `sed` parsing is brittle; tag name format changes would break extraction
+- `sed | grep` parsing is brittle; tag name format changes would break extraction
 - No validation that extracted version is a valid semver
 
 **Safe modification:**
@@ -289,7 +294,7 @@ last_mapped_at: 2026-11-23
 
 **Safe modification:**
 1. Create separate health check script with error handling
-2. Add logging to `health check.mjs`
+2. Add logging to `healthcheck.mjs`
 3. Verify health check script exists and is executable before service starts
 4. Add timeout guard (`timeout 4s` to stay under 5s limit)
 
@@ -297,7 +302,9 @@ last_mapped_at: 2026-11-23
 
 ### 3. Synapse Matrix Server Configuration
 
-**Files:** `home/dot_local/opt/stacks/synapse/data/matrix-fabiosouzadev.duckdns.org.log.config.tmpl` and `homeserver.yaml.tmpl`
+**Files:** 
+- `home/dot_local/opt/stacks/synapse/data/matrix-fabiosouzadev.duckdns.org.log.config.tmpl`
+- `home/dot_local/opt/stacks/synapse/data/homeserver.yaml.tmpl`
 
 **Why fragile:**
 - Multiple configuration files with no validation
@@ -489,7 +496,7 @@ last_mapped_at: 2026-11-23
 - Volume mount permissions
 
 **Files with gaps:**
-- All files in `home/dot_local/opt/stacks/*/compose.yaml.tmpl`
+- All 13 files in `home/dot_local/opt/stacks/*/compose.yaml.tmpl`
 
 **Risk:** Service startup failures; misconfigured networking; permission errors with mounted volumes
 

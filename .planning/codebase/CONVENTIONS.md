@@ -1,5 +1,5 @@
 ---
-last_mapped_commit: d1d1c1c967319d6aa2852d6caaee2123acced521
+last_mapped_commit: c2840b6cdfa7b1cdccbfa7c030396b2c931328a2
 last_mapped_at: 2026-11-23
 ---
 # Coding Conventions
