@@ -121,8 +121,8 @@ fi
 # ── Utilidades SSH/VPS ──────────────────────────────────────────────────────
 # Gerar QR code de conexão (para compartilhar acesso)
 qr-ssh() {
-  local vps_ip="{{ .features.ai.omniroute.domain | default "fabiosouzadev.duckdns.org" }}"
-  local qr_text="ssh ubuntu@${vps_ip}"
+  local vps_ip="{{ .termux.ssh.vps_host }}"
+  local qr_text="ssh {{ .termux.ssh.vps_user }}@${vps_ip}"
   if command -v qrencode &>/dev/null; then
     qrencode -t ANSIUTF8 "$qr_text"
   else

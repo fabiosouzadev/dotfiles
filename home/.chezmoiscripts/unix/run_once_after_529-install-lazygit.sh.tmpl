@@ -2,6 +2,7 @@
 
 {{ template "common/script_is_not_ephemeral" . }}
 {{ template "common/script_helper" . }}
+{{ template "common/script_release_helpers" . }}
 
 # Install lazygit (Terminal UI for git)
 info ">>>>>> 🦥 Installing lazygit 🦥 <<<<<<"
@@ -26,32 +27,30 @@ case "$ARCH" in
         ;;
 esac
 
-# Detect OS
-LG_OS="Linux"
+# Detect OS (use lowercase for asset names)
+LG_OS="linux"
 case "$(uname -s)" in
-    Darwin) LG_OS="Darwin" ;;
+    Darwin) LG_OS="darwin" ;;
 esac
 
 # Get latest release version from GitHub API
 info "Fetching latest lazygit release..."
-LG_VERSION=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
-    | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
-
-if [ -z "$LG_VERSION" ]; then
-    error "Could not determine latest lazygit version"
-    exit 1
-fi
+LG_TAG=$(github_latest_tag jesseduffield/lazygit) || exit 1
+LG_VERSION="${LG_TAG#v}"
 
 info "Installing lazygit ${LG_VERSION} for ${LG_OS}/${LG_ARCH}..."
 
 LG_FILE="lazygit_${LG_VERSION}_${LG_OS}_${LG_ARCH}.tar.gz"
-LG_URL="https://github.com/jesseduffield/lazygit/releases/download/v${LG_VERSION}/${LG_FILE}"
+LG_URL="https://github.com/jesseduffield/lazygit/releases/download/${LG_TAG}/${LG_FILE}"
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
 info "Downloading: ${LG_URL}"
-curl -fsSL "$LG_URL" -o "$TMPDIR/$LG_FILE"
+if ! curl -fsSL "$LG_URL" -o "$TMPDIR/$LG_FILE"; then
+    error "Failed to download $LG_URL"
+    exit 1
+fi
 
 info "Extracting..."
 tar -xzf "$TMPDIR/$LG_FILE" -C "$TMPDIR"

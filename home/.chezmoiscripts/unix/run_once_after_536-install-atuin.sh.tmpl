@@ -2,6 +2,7 @@
 
 {{ template "common/script_is_not_ephemeral" . }}
 {{ template "common/script_helper" . }}
+{{ template "common/script_release_helpers" . }}
 
 # Install Atuin (Magical shell history)
 info ">>>>>> 🐢 Installing Atuin 🐢 <<<<<<"
@@ -33,18 +34,13 @@ esac
 
 # Get latest release version from GitHub API
 info "Fetching latest atuin release..."
-ATUIN_VERSION=$(curl -fsSL "https://api.github.com/repos/atuinsh/atuin/releases/latest" \
-    | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
-
-if [ -z "$ATUIN_VERSION" ]; then
-    error "Could not determine latest atuin version"
-    exit 1
-fi
+ATUIN_TAG=$(github_latest_tag atuinsh/atuin) || exit 1
+ATUIN_VERSION="${ATUIN_TAG#v}"
 
 info "Installing atuin ${ATUIN_VERSION} for ${ATUIN_ARCH}-${ATUIN_OS}..."
 
 ATUIN_FILE="atuin-${ATUIN_ARCH}-${ATUIN_OS}.tar.gz"
-ATUIN_URL="https://github.com/atuinsh/atuin/releases/download/v${ATUIN_VERSION}/${ATUIN_FILE}"
+ATUIN_URL="https://github.com/atuinsh/atuin/releases/download/${ATUIN_TAG}/${ATUIN_FILE}"
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT

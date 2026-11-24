@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 {{ template "common/script_helper" . -}}
+{{ template "common/script_release_helpers" . -}}
 {{- template "darwin/script_darwin_only" . -}}
 {{ template "common/script_is_not_ephemeral" . }}
 
@@ -9,14 +10,17 @@
 info ">>> 🐑 Installing Ollama on macOS 🐑"
 
 {{- if eq .features.ollama.version "latest" }}
-OLLAMA_VERSION=$(curl -s https://api.github.com/repos/ollama/ollama/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+OLLAMA_VERSION=$(github_latest_tag ollama/ollama) || exit 1
 {{- else }}
-OLLAMA_VERSION="{{ .features.ai.ollama.version }}"
+OLLAMA_VERSION="{{ .features.ollama.version }}"
 {{- end }}
 
 info ">>> Downloading Ollama version ${OLLAMA_VERSION}..."
 
-curl -fL "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/Ollama-darwin.zip" -o /tmp/Ollama-darwin.zip
+if ! curl -fsSL "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/Ollama-darwin.zip" -o /tmp/Ollama-darwin.zip; then
+  error "Failed to download Ollama ${OLLAMA_VERSION}"
+  exit 1
+fi
 
 info ">>> Extracting to /Applications..."
 unzip -q -o /tmp/Ollama-darwin.zip -d /Applications

@@ -4,6 +4,7 @@
 {{ template "workplace/script_is_zup" . }}
 
 {{ template "common/script_helper" . }}
+{{ template "common/script_release_helpers" . }}
 
 # Install glab (GitLab CLI)
 info ">>>>>> 🦊 Installing glab (GitLab CLI) 🦊 <<<<<<"
@@ -20,6 +21,7 @@ ARCH="$(uname -m)"
 case "$ARCH" in
     x86_64)  GLAB_ARCH="amd64" ;;
     aarch64) GLAB_ARCH="arm64" ;;
+    arm64)   GLAB_ARCH="arm64" ;; # Apple Silicon reports arm64
     armv7l)  GLAB_ARCH="armv6" ;;
     *)
         error "Unsupported architecture: $ARCH"
@@ -30,29 +32,27 @@ esac
 # Detect OS
 GLAB_OS="linux"
 case "$(uname -s)" in
-    Darwin) GLAB_OS="macOS" ;;
+    Darwin) GLAB_OS="darwin" ;;
 esac
 
 # Get latest release version from GitLab API
 info "Fetching latest glab release..."
-GLAB_VERSION=$(curl -fsSL "https://gitlab.com/api/v4/projects/34675721/releases" \
-    | grep -oP '"tag_name":"\K[^"]+' | head -1)
-
-if [ -z "$GLAB_VERSION" ]; then
-    error "Could not determine latest glab version"
-    exit 1
-fi
+GLAB_TAG=$(gitlab_latest_tag 34675721) || exit 1
+GLAB_VERSION="${GLAB_TAG#v}"
 
 info "Installing glab ${GLAB_VERSION} for ${GLAB_OS}/${GLAB_ARCH}..."
 
-GLAB_FILE="glab_${GLAB_VERSION#v}_${GLAB_OS}_${GLAB_ARCH}.tar.gz"
-GLAB_URL="https://gitlab.com/gitlab-org/cli/-/releases/${GLAB_VERSION}/downloads/${GLAB_FILE}"
+GLAB_FILE="glab_${GLAB_VERSION}_${GLAB_OS}_${GLAB_ARCH}.tar.gz"
+GLAB_URL="https://gitlab.com/gitlab-org/cli/-/releases/${GLAB_TAG}/downloads/${GLAB_FILE}"
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
 info "Downloading: ${GLAB_URL}"
-curl -fsSL "$GLAB_URL" -o "$TMPDIR/$GLAB_FILE"
+if ! curl -fsSL "$GLAB_URL" -o "$TMPDIR/$GLAB_FILE"; then
+    error "Failed to download $GLAB_URL"
+    exit 1
+fi
 
 info "Extracting..."
 tar -xzf "$TMPDIR/$GLAB_FILE" -C "$TMPDIR"

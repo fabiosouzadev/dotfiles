@@ -1,6 +1,6 @@
 features:
   ollama:
-    version: "latest"
+    version: "latest" # "latest" ou uma tag de release do GitHub (ex.: "v0.40.18"); a tag entra direto na URL de download
     path:
       logs: $HOME/.ollama/logs
     environments:

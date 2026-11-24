@@ -137,16 +137,16 @@ fi
 DEB_FILE=""
 
 # Caso via URL
-if [ -n "{{.url}}" ]; then
-    DEB_FILE="$TEMP_DIR/{{.name}}.deb"
+{{- if .url }}
+DEB_FILE="$TEMP_DIR/{{.name}}.deb"
 
-    if [ ! -f "$DEB_FILE" ]; then
-        info "Downloading {{.name}}"
-        curl -fL -o "$DEB_FILE" "{{.url}}"
-    else
-        warn "Deb already downloaded: $DEB_FILE"
-    fi
+if [ ! -f "$DEB_FILE" ]; then
+    info "Downloading {{.name}}"
+    curl -fL -o "$DEB_FILE" "{{.url}}"
+else
+    warn "Deb already downloaded: $DEB_FILE"
 fi
+{{- end }}
 
 info "Installing {{.name}}"
 sudo dpkg -i "$DEB_FILE" || {

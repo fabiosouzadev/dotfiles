@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
 {{ template "common/script_helper" . -}}
+{{ template "common/script_release_helpers" . -}}
 {{ template "linux/script_linux_only" . -}}
 {{ template "common/script_is_not_ephemeral" . -}}
 {{ template "workplace/script_is_not_vps" . }}
-
-INSTALL_DIR= {{- .dirs.local }}
-LOG_DIR={{ .features.ollama.path.logs }}
-SRC_DIR={{ .dirs.src }}
-BIN_DIR={{ .dirs.bin }}
 
 {{- if .features.ollama.install }}
 
@@ -19,30 +15,37 @@ info ">>> 🐑 Installing Ollama in mode {{ .features.ollama.mode }}  🐑"
 # --------------------------------------------------------------------
 {{-  if eq .features.ollama.mode "user" }}
 
+INSTALL_DIR="{{ .dirs.local }}"
+LOG_DIR="{{ .features.ollama.path.logs }}"
+SRC_DIR="{{ .dirs.src }}"
+
 {{- if eq .features.ollama.version "latest" }}
-OLLAMA_VERSION=$(curl -s https://api.github.com/repos/ollama/ollama/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+OLLAMA_VERSION=$(github_latest_tag ollama/ollama) || exit 1
 {{- else }}
 OLLAMA_VERSION="{{ .features.ollama.version }}"
 {{- end }}
 
-rm -rf "$HOME/.ollama"
+# Remove apenas binários e libs; preserva modelos e chave de identidade
+# ~/.ollama/models e ~/.ollama/id_ed25519* são mantidos (M4)
 rm -f "$INSTALL_DIR/bin/ollama"
 rm -rf "$INSTALL_DIR/lib/ollama"
 
-# garante zstd local
+# zstd é necessário para extrair o arquivo .tar.zst
+# Upstream não publica binário Linux (URL antiga retornava 404 em 2026-11-24)
 if ! command -v zstd >/dev/null 2>&1; then
-  echo ">>> Installing zstd local"
-  curl -L https://github.com/facebook/zstd/releases/latest/download/zstd-linux-amd64 -o "$BIN_DIR/zstd"
-  chmod +x "$BIN_DIR/zstd"
-  export PATH="$BIN_DIR:$PATH"
+  error "zstd is required to extract the Ollama .tar.zst archive; install it with your package manager (apt install zstd / pacman -S zstd) and run chezmoi apply again"
+  exit 1
 fi
 
-mkdir -p "$INSTALL_DIR"
+mkdir -p "$INSTALL_DIR" "$SRC_DIR"
 cd "$SRC_DIR"
 
 export PATH="${INSTALL_DIR}/bin:${PATH}"
 
-curl -fL https://github.com/ollama/ollama/releases/download/$OLLAMA_VERSION/ollama-linux-amd64.tar.zst -o ollama-linux-amd64.tar.zst
+if ! curl -fsSL "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst" -o ollama-linux-amd64.tar.zst; then
+  error "Failed to download Ollama ${OLLAMA_VERSION}"
+  exit 1
+fi
 tar --zstd -xvf ollama-linux-amd64.tar.zst -C "${INSTALL_DIR}"
 
 export PATH="${INSTALL_DIR}/bin:${PATH}"
@@ -66,8 +69,9 @@ success "🐑 Ollama Installed in $INSTALL_DIR version: $(ollama -v) 🐑 "
 {{-  else if eq .features.ollama.mode "root" }}
 
 {{ if .features.systemd.enabled }}
-sudo systemctl stop ollama
-sudo systemctl disable ollama
+# Tolerante à primeira instalação (unit não existe ainda)
+sudo systemctl stop ollama 2>/dev/null || true
+sudo systemctl disable ollama 2>/dev/null || true
 
 if [ -f /etc/systemd/system/ollama.service ]; then
   sudo rm /etc/systemd/system/ollama.service
@@ -91,9 +95,10 @@ success "Ollama Installed version: $(ollama -v) 🐑"
 
 [ -d /etc/systemd/system/ollama.service.d ] || sudo mkdir /etc/systemd/system/ollama.service.d/
 
+# Reescreve o override em toda execução (tee sem -a)
 sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null <<'EOF'
 [Service]
-{{ range .features.ai.ollama.environments -}}
+{{ range .features.ollama.environments -}}
 Environment={{.}}
 {{ end -}}
 

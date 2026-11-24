@@ -7,7 +7,7 @@ set -euo pipefail
 {{- template "linux/script_linux_only" . }}
 {{- template "common/script_helper" . }}
 
-{{-   if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{-   if or (.settings.osid | lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos") }}
 
 sudo pacman -Syyu --noconfirm --needed linux-headers dkms bc
 
@@ -17,7 +17,7 @@ elif type -P yay >/dev/null 2>&1; then
   yay -Syyu --noconfirm --needed rtl8821ce-dkms-git
 fi
 
-{{-   else if.settings.osid | lower | contains "ubuntu" }}
+{{-   else if .settings.osid | lower | contains "ubuntu" }}
 sudo apt install -y bc module-assistant build-essential dkms
 sudo m-a prepare
 git clone https://github.com/tomaspinho/rtl8821ce.git /tmp/rtl8821ce

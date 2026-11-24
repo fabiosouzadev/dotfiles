@@ -22,7 +22,7 @@ sudo apt install -y wget make gcc linux-headers-generic
 # ----------------------------
 # Arch / EndeavourOS / CachyOS
 # ----------------------------
-{{- if or (.osid | lower | contains "endeavouros") (.osid | lower | contains "cachyos") }}
+{{- if or (.settings.osid | lower | contains "endeavouros") (.settings.osid | lower | contains "cachyos") }}
 
 info ">>> Install dependencies to build Cirrus Driver (Arch)"
 

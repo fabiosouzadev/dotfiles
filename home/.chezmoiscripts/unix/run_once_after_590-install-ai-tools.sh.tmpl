@@ -10,12 +10,13 @@ info ">>>>>> 🤖 Installing AI Tools 🤖 <<<<<<<"
 {{- $chezmoi := .chezmoi -}}
 
 {{- /* Install NPM tools */ -}}
+{{- /* Dentro de {{ if }}, a flag deve ser reatribuída com =, porque := cria uma variável local ao bloco (M2) */ -}}
 {{ range .ai_tools.npm }}
 {{- $featureEnabled := false -}}
 {{- if eq .feature_flag "harness" }}{{ $featureEnabled = $.features.ai.harness }}{{- end -}}
 {{- if eq .feature_flag "harness_tools" }}{{ $featureEnabled = $.features.ai.harness_tools }}{{- end -}}
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
-{{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled := and (not $.settings.vps ) ($.features.ai.multiplexer) }}{{- end -}}
+{{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled = and (not $.settings.vps ) ($.features.ai.multiplexer) }}{{- end -}}
 {{- $blocked := false -}}
 {{- if and (hasKey . "block_on_workplace") (eq .block_on_workplace $.settings.workplace) }}{{ $blocked = true }}{{- end -}}
 
@@ -37,7 +38,7 @@ info ">>>> Installing {{ .name }} (NPM) <<<"
 {{- if eq .feature_flag "harness_tools" }}{{ $featureEnabled = $.features.ai.harness_tools }}{{- end -}}
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
 {{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled = $.features.ai.multiplexer }}{{- end -}}
-{{- if eq .feature_flag "composio.install" }}{{ $featureEnabled := and (not $.settings.vps ) ($.features.hermes.enabled) ($.features.hermes.composio.enabled) }}{{- end -}}
+{{- if eq .feature_flag "composio.install" }}{{ $featureEnabled = and (not $.settings.vps ) ($.features.hermes.enabled) ($.features.hermes.composio.enabled) }}{{- end -}}
 {{- $blocked := false -}}
 {{- if and (hasKey . "block_on_workplace") (eq .block_on_workplace $.settings.workplace) }}{{ $blocked = true }}{{- end -}}
 
@@ -54,7 +55,7 @@ info ">>>> Installing {{ .name }} (Curl) <<<<<<"
 {{- if eq .feature_flag "harness_tools" }}{{ $featureEnabled = $.features.ai.harness_tools }}{{- end -}}
 {{- if eq .feature_flag "spec_tools" }}{{ $featureEnabled = $.features.ai.spec_tools }}{{- end -}}
 {{- if eq .feature_flag "multiplexer" }}{{ $featureEnabled = $.features.ai.multiplexer }}{{- end -}}
-{{- if eq .feature_flag "composio.install" }}{{ $featureEnabled := and (not $.settings.vps ) ($.features.hermes.enabled) ($.features.hermes.composio.enabled) }}{{- end -}}
+{{- if eq .feature_flag "composio.install" }}{{ $featureEnabled = and (not $.settings.vps ) ($.features.hermes.enabled) ($.features.hermes.composio.enabled) }}{{- end -}}
 {{- $blocked := false -}}
 {{- if and (hasKey . "block_on_workplace") (eq .block_on_workplace $.settings.workplace) }}{{ $blocked = true }}{{- end -}}
 

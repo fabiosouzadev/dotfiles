@@ -11,7 +11,7 @@ info "Installing virtualisation tools"
 
 sudo pacman -Syyu --noconfirm --needed {{ range .packages.linux.arch.virtualisation.arch }} {{.}}{{ end }}
 sudo systemctl enable --now libvirtd.service
-sudo usermod -a -G libvirt $(whoami)
+sudo usermod -a -G libvirt "$(whoami)"
 
 sudo sed -i -e 's/^#unix_sock_group/unix_sock_group/' -e "s/^#unix_sock_rw_perms/unix_sock_rw_perms/" -e "s/^#unix_sock_rw_perms/unix_sock_rw_perms/"  /etc/libvirt/libvirtd.conf
 
