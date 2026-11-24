@@ -233,5 +233,5 @@ A documentação técnica detalhada (arquitetura, estrutura, stack, convenções
 [chezmoi](https://chezmoi.io) · [zinit](https://github.com/zdharma-continuum/zinit) · [starship](https://starship.rs) · [mise](https://mise.jdx.dev) · [atuin](https://atuin.sh) · [Tailscale](https://tailscale.com) · [Catppuccin](https://catppuccin.com)
 
 <p align="center">
-  Feito por <a href="https://codeberg.org/fabiosouzadev">**@fabiosouzadev**</a>
+  Feito por <a href="https://codeberg.org/fabiosouzadev">@fabiosouzadev</a>
 </p>
