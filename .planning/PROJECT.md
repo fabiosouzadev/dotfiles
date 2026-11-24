@@ -30,7 +30,7 @@ Repositório chezmoi que descreve o ambiente completo do Fabio (shell, editores,
 <!-- Os 26 itens de docs/pontos-de-atencao.md. IDs entre parênteses. -->
 
 **Exposição da VPS e segurança**
-- [ ] (A1) Só 80/443 publicadas na VPS; demais serviços atrás do Caddy, painéis administrativos só via Tailscale
+- [ ] (A1) Security list da Oracle reduzida a 80/443 (mais SSH/Tailscale) e documentada; containers publicam só 80/443 ou em `127.0.0.1`/IP do Tailscale; painéis administrativos só via Tailscale
 - [ ] (A2) Clientes (Claude Code, Codex, opencode, openclaude) falam com o OmniRoute só por HTTPS ou Tailscale, nunca `http://` no IP público
 - [ ] (A3) `docker.sock` não fica acessível por painel exposto (Dockge só via Tailscale; Uptime Kuma via proxy de socket somente leitura ou sem socket)
 - [ ] (M1) `ALLOW_API_KEY_REVEAL=false` no OmniRoute
@@ -77,7 +77,7 @@ Repositório chezmoi que descreve o ambiente completo do Fabio (shell, editores,
 ## Context
 
 - Brownfield: mapa do código em `.planning/codebase/` (com erros conhecidos) e documentação verificada em `docs/` (pt-BR). `docs/pontos-de-atencao.md` é a fonte dos requisitos.
-- A VPS fica na Oracle Cloud (Always Free) e **não tem firewall no provedor: todas as portas estão abertas**. Portas publicadas pelo Docker passam por fora do `ufw`. Por isso A1 é o item mais urgente.
+- A VPS fica na Oracle Cloud (Always Free) e **tem firewall no provedor (security list)**: o usuário abre uma porta manualmente para cada serviço novo. A exposição real é o conjunto de portas abertas na security list, que não está versionado no repositório. Portas publicadas pelo Docker passam por fora do `ufw`, então a security list é a única barreira hoje. A1 passa a ser: levantar as portas abertas, reduzir a 80/443 (mais o necessário para Tailscale/SSH) e documentar.
 - Tailscale já está habilitado na VPS (`home/.chezmoidata/vps/features.yaml`).
 - Os bugs de template (A4, A5, M2) foram confirmados com `chezmoi execute-template` (chezmoi v2.73.3).
 - O usuário trabalha em pt-BR; documentação voltada a ele em `docs/` deve ser em pt-BR.
@@ -89,14 +89,15 @@ Repositório chezmoi que descreve o ambiente completo do Fabio (shell, editores,
 - **Segredos**: nenhum valor sensível em texto claro; tudo como `encrypted_*.asc` (GPG, recipient em `home/.chezmoi.yaml.tmpl`)
 - **Custo**: soluções grátis ou dentro de cotas grátis (Oracle Always Free, Backblaze B2 10 GB)
 - **Acesso à VPS**: mexer em portas e firewall não pode trancar o acesso SSH/Tailscale; cada mudança de rede precisa de caminho de volta
-- **Ação manual**: criar conta e bucket no Backblaze é feito pelo usuário quando a fase de backup chegar
+- **Ação manual**: criar conta e bucket no Backblaze e alterar a security list da Oracle são feitos pelo usuário no console, quando a fase correspondente chegar
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Escopo v1 = os 26 itens (Alta, Média e Baixa) | Escolha do usuário | — Pending |
-| Público só pelo Caddy em 80/443; painéis administrativos só via Tailscale, também servidos pelo Caddy | Sem firewall no provedor; Tailscale já existe; Caddy pode emitir certificado para `*.ts.net` | — Pending |
+| Público só pelo Caddy em 80/443; painéis administrativos só via Tailscale, também servidos pelo Caddy | Hoje cada serviço novo exige abrir porta na security list e trafega em HTTP; com Tailscale não é preciso abrir porta nenhuma para painéis. Caddy pode emitir certificado para `*.ts.net` | — Pending |
+| Security list da Oracle documentada em `docs/` | Regras de firewall não estão no repositório; precisam de registro para auditar e recriar | — Pending |
 | Backup no Backblaze B2 com restic | Fora da conta Oracle, 10 GB grátis, sem cartão, suporte nativo no restic | — Pending |
 | Documentar a configuração do backup em `docs/` ao chegar na fase | Pedido do usuário | — Pending |
 | Documentação voltada ao usuário em pt-BR | Preferência do usuário | ✓ Good |

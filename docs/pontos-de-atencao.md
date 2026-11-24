@@ -32,8 +32,8 @@ Critério usado:
   - `home/dot_local/opt/stacks/caddy/Caddyfile.tmpl` (blocos `http://:<porta>`)
   - `home/dot_local/opt/stacks/camofox/compose.yaml.tmpl`
   - `home/dot_local/opt/dockge/compose.yaml.tmpl`
-- **Impacto:** o script `home/.chezmoiscripts/vps/run_once_after_530-install-caddy.sh.tmpl` libera só 80/443 no `ufw`, mas portas publicadas pelo Docker passam por fora do `ufw`, porque o Docker escreve as próprias regras de iptables. Sem um firewall externo (security list do provedor), esses serviços ficam acessíveis pela internet em HTTP puro. Isso inclui o Qdrant, os dashboards e o navegador do Camofox, que guarda cookies de sessão. O repositório não mostra se existe esse firewall externo.
-- **Sugestão:** publicar só 80/443 e servir os demais serviços por subdomínio HTTPS no Caddy. Para acesso administrativo, publicar em `127.0.0.1:<porta>` ou no IP do Tailscale, que já está habilitado em `home/.chezmoidata/vps/features.yaml`. Conferir e documentar as regras do firewall do provedor.
+- **Impacto:** o script `home/.chezmoiscripts/vps/run_once_after_530-install-caddy.sh.tmpl` libera só 80/443 no `ufw`, mas portas publicadas pelo Docker passam por fora do `ufw`, porque o Docker escreve as próprias regras de iptables. A única barreira é o firewall do provedor (security list da Oracle Cloud), onde cada porta é aberta manualmente por serviço. Toda porta aberta lá fica acessível pela internet em HTTP puro, e as regras não estão versionadas no repositório. Entre os serviços que podem estar expostos assim estão o Qdrant, os dashboards e o navegador do Camofox, que guarda cookies de sessão.
+- **Sugestão:** publicar só 80/443 e servir os demais serviços por subdomínio HTTPS no Caddy. Para acesso administrativo, publicar em `127.0.0.1:<porta>` ou no IP do Tailscale, que já está habilitado em `home/.chezmoidata/vps/features.yaml`, e assim não precisar abrir porta na security list. Levantar as portas abertas hoje, fechar as desnecessárias e documentar as regras.
 
 ### A2. Chave da API do OmniRoute trafegando em texto claro
 
