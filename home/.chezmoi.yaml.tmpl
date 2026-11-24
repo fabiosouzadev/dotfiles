@@ -198,8 +198,19 @@ Headless:
 {{- $gpgProgram := "" -}}
 {{- if (eq .chezmoi.os "windows") -}}
 {{-   $gpgProgram = ((joinPath .chezmoi.homeDir "scoop" "apps" "gnupg" "current" "bin" "gpg.exe") | replace "\\" "/")   -}}
+{{-   if (eq $workplace "Itau") -}}
+{{-     $gpgProgram = "gpg" -}}
+{{-   end -}}
 {{- else -}}
 {{-   $gpgProgram = or (lookPath "gpg") (lookPath "gpg2")   -}}
+{{- end -}}
+
+{{- /* Pager */ -}}
+{{- $pager := "" -}}
+{{- if (eq .chezmoi.os "windows") -}}
+{{-   $pager = "less -R"  -}}
+{{- else -}}
+{{-   $pager = "delta"   -}}
 {{- end -}}
 
 {{- $gpg := dict
@@ -259,6 +270,7 @@ Headless:
   "dirs"             $dirs
   "features"         $features
   "gpg"              $gpg
+  "pager"            $pager   
 -}}
 
 data:
@@ -277,7 +289,7 @@ gpg:
 
 diff:
   format: git
-  pager: delta
+  pager: $pager
 
 # -*-mode:sh-*- vim:ft=yaml.gotexttmpl
 # vim: filetype=yaml

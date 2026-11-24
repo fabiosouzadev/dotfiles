@@ -1,0 +1,15 @@
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[user]
+	name = Fabio Vanderlei de Souza
+	email = fabio-vanderlei.souza@mailer.com.br
+	signingkey = 212D516F623C5747
+[http]
+	sslVerify = false
+[credential "https://codeberg.org"]
+	provider = generic
+[core]
+	autocrlf = input
