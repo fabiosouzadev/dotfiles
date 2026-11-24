@@ -1,0 +1,51 @@
+# Perfil simulado: Zup managed laptop (WSL Ubuntu 24.04, Ollama modo user, glab Zup-only).
+# Laptop gerenciado da Zup rodando WSL, Ollama em modo user (M4 test case).
+chezmoi:
+  os: linux
+  arch: amd64
+  hostname: ci-linux-user
+  username: ci
+  homeDir: /home/ci
+  osRelease: {id: ubuntu, idLike: debian, name: Ubuntu, versionID: "24.04", versionCodename: noble, ubuntuCodename: noble}
+  kernel: {osrelease: 5.15.167.4-microsoft-standard-WSL2}
+settings:
+  vps: false
+  ephemeral: false
+  headless: true
+  interactive: false
+  ci: false
+  codespaces: false
+  devContainer: false
+  gitpod: false
+  replit: false
+  inContainer: false
+  ssh: false
+  tty: true
+  guiAvailable: false
+  wsl: true
+  termux: false
+  hostname: ci-linux-user
+  osid: linux-ubuntu
+  linuxonmac: false
+  ismanaged: true
+  profile: work
+  dell3530: false
+  dell3520: false
+  username: ci
+  workplace: Zup
+dirs:
+  local: /home/ci/.local
+  src: /home/ci/.local/src
+  bin: /home/ci/.local/bin
+  workspaces: {prefix: /home/ci/Workspaces, personal: /home/ci/Workspaces/Personal, others: /home/ci/Workspaces/Others, work: /home/ci/Workspaces/Work, zup: /home/ci/Workspaces/Work/Zup}
+features:
+  sudo: {enabled: false}
+  systemd: {enabled: false}
+  runtime: {background_services: false}
+  kernels: {install: false}
+  rtl8821ce: {install: false}
+  i3: {enabled: true}
+  niri: {enabled: true}
+  ollama: {install: true, mode: user}
+gpg:
+  program: /usr/bin/gpg

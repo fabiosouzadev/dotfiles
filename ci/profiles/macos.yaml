@@ -1,0 +1,49 @@
+# Perfil simulado: macOS Apple Silicon (personal Mac, renderizado no Linux per D-06).
+# Mac pessoal com Apple Silicon, Ollama modo user, Homebrew GPG.
+chezmoi:
+  os: darwin
+  arch: arm64
+  hostname: ci-macos
+  username: ci
+  homeDir: /Users/ci
+settings:
+  vps: false
+  ephemeral: false
+  headless: false
+  interactive: true
+  ci: false
+  codespaces: false
+  devContainer: false
+  gitpod: false
+  replit: false
+  inContainer: false
+  ssh: false
+  tty: true
+  guiAvailable: true
+  wsl: false
+  termux: false
+  hostname: ci-macos
+  osid: darwin
+  linuxonmac: false
+  ismanaged: false
+  profile: personal
+  dell3530: false
+  dell3520: false
+  username: ci
+  workplace: ""
+dirs:
+  local: /Users/ci/.local
+  src: /Users/ci/.local/src
+  bin: /Users/ci/.local/bin
+  workspaces: {prefix: /Users/ci/Workspaces, personal: /Users/ci/Workspaces/Personal, others: /Users/ci/Workspaces/Others, work: /Users/ci/Workspaces/Work, zup: /Users/ci/Workspaces/Work/Zup}
+features:
+  sudo: {enabled: true}
+  systemd: {enabled: false}
+  runtime: {background_services: true}
+  kernels: {install: false}
+  rtl8821ce: {install: false}
+  i3: {enabled: true}
+  niri: {enabled: true}
+  ollama: {install: true, mode: user}
+gpg:
+  program: /opt/homebrew/bin/gpg

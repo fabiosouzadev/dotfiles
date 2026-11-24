@@ -1,0 +1,49 @@
+# Perfil simulado: Termux on Android (headless, sem systemd, A5 test case).
+# Termux rodando em Android, ambiente limitado sem systemd/sudo.
+chezmoi:
+  os: android
+  arch: arm64
+  hostname: localhost
+  username: u0_a100
+  homeDir: /data/data/com.termux/files/home
+settings:
+  vps: false
+  ephemeral: false
+  headless: true
+  interactive: false
+  ci: false
+  codespaces: false
+  devContainer: false
+  gitpod: false
+  replit: false
+  inContainer: false
+  ssh: false
+  tty: true
+  guiAvailable: false
+  wsl: false
+  termux: true
+  hostname: localhost
+  osid: android
+  linuxonmac: false
+  ismanaged: false
+  profile: personal
+  dell3530: false
+  dell3520: false
+  username: u0_a100
+  workplace: ""
+dirs:
+  local: /data/data/com.termux/files/home/.local
+  src: /data/data/com.termux/files/home/.local/src
+  bin: /data/data/com.termux/files/home/.local/bin
+  workspaces: {prefix: /data/data/com.termux/files/home/Workspaces, personal: /data/data/com.termux/files/home/Workspaces/Personal, others: /data/data/com.termux/files/home/Workspaces/Others, work: /data/data/com.termux/files/home/Workspaces/Work, zup: /data/data/com.termux/files/home/Workspaces/Work/Zup}
+features:
+  sudo: {enabled: false}
+  systemd: {enabled: false}
+  runtime: {background_services: false}
+  kernels: {install: false}
+  rtl8821ce: {install: false}
+  i3: {enabled: true}
+  niri: {enabled: true}
+  ollama: {install: true, mode: user}
+gpg:
+  program: /data/data/com.termux/files/usr/bin/gpg

@@ -1,0 +1,51 @@
+# Perfil simulado: VPS Oracle (Ubuntu 24.04, usuário ubuntu, headless, via SSH).
+# Espelha o que home/.chezmoi.yaml.tmpl calcula nessa máquina. Usado com --override-data-file.
+chezmoi:
+  os: linux
+  arch: arm64
+  hostname: instance-ci
+  username: ubuntu
+  homeDir: /home/ubuntu
+  osRelease: {id: ubuntu, idLike: debian, name: Ubuntu, versionID: "24.04", versionCodename: noble, ubuntuCodename: noble}
+  kernel: {osrelease: 6.8.0-1015-oracle}
+settings:
+  vps: true
+  ephemeral: false
+  headless: true
+  interactive: false
+  ci: false
+  codespaces: false
+  devContainer: false
+  gitpod: false
+  replit: false
+  inContainer: false
+  ssh: true
+  tty: true
+  guiAvailable: false
+  wsl: false
+  termux: false
+  hostname: instance-ci
+  osid: linux-ubuntu
+  linuxonmac: false
+  ismanaged: false
+  profile: vps
+  dell3530: false
+  dell3520: false
+  username: ubuntu
+  workplace: ""
+dirs:
+  local: /home/ubuntu/.local
+  src: /home/ubuntu/.local/src
+  bin: /home/ubuntu/.local/bin
+  workspaces: {prefix: /home/ubuntu/Workspaces, personal: /home/ubuntu/Workspaces/Personal, others: /home/ubuntu/Workspaces/Others, work: /home/ubuntu/Workspaces/Work, zup: /home/ubuntu/Workspaces/Work/Zup}
+features:
+  sudo: {enabled: true}
+  systemd: {enabled: true}
+  runtime: {background_services: true}
+  kernels: {install: false}
+  rtl8821ce: {install: false}
+  i3: {enabled: false}
+  niri: {enabled: false}
+  ollama: {install: false, mode: root}
+gpg:
+  program: /usr/bin/gpg

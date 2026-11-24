@@ -1,0 +1,51 @@
+# Perfil simulado: EndeavourOS personal desktop (Arch Linux, GUI, Ollama modo root).
+# Desktop pessoal do Fabio com i3/niri, Ollama instalado em modo root (A4 test case).
+chezmoi:
+  os: linux
+  arch: amd64
+  hostname: ci-linux-arch
+  username: ci
+  homeDir: /home/ci
+  osRelease: {id: endeavouros, idLike: arch, name: EndeavourOS}
+  kernel: {osrelease: 6.12.10-arch1-1}
+settings:
+  vps: false
+  ephemeral: false
+  headless: false
+  interactive: true
+  ci: false
+  codespaces: false
+  devContainer: false
+  gitpod: false
+  replit: false
+  inContainer: false
+  ssh: false
+  tty: true
+  guiAvailable: true
+  wsl: false
+  termux: false
+  hostname: ci-linux-arch
+  osid: linux-endeavouros
+  linuxonmac: false
+  ismanaged: false
+  profile: personal
+  dell3530: false
+  dell3520: false
+  username: ci
+  workplace: ""
+dirs:
+  local: /home/ci/.local
+  src: /home/ci/.local/src
+  bin: /home/ci/.local/bin
+  workspaces: {prefix: /home/ci/Workspaces, personal: /home/ci/Workspaces/Personal, others: /home/ci/Workspaces/Others, work: /home/ci/Workspaces/Work, zup: /home/ci/Workspaces/Work/Zup}
+features:
+  sudo: {enabled: true}
+  systemd: {enabled: true}
+  runtime: {background_services: true}
+  kernels: {install: false}
+  rtl8821ce: {install: false}
+  i3: {enabled: true}
+  niri: {enabled: true}
+  ollama: {install: true, mode: root}
+gpg:
+  program: /usr/bin/gpg
