@@ -1,0 +1,54 @@
+# Validação de templates chezmoi e Docker Compose por perfil.
+#
+# O que este workflow valida:
+# - Renderização de templates chezmoi para 5 perfis (linux-arch, linux-user, vps, macos, termux)
+# - Shellcheck --severity=warning em todos os scripts renderizados
+# - Drift de chaves nos fixtures (settings/dirs/features/gpg)
+# - docker compose config -q em 14 stacks da VPS
+#
+# macOS roda no runner Linux com dados simulados (D-06). Arquivos encrypted_*.asc
+# nunca são lidos (D-09): decrypt calls são stubbed com "ci-placeholder-secret".
+#
+# Se o runner codeberg-small não estiver disponível, o fallback é mudar runs-on
+# para um self-hosted runner (ver docs/convencoes-e-testes.md, D-04).
+
+name: validate
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI_FORCE_PINNED: "1"
+  CI_TOOLS_DIR: /tmp/dotfiles-ci-tools
+
+jobs:
+  templates:
+    runs-on: codeberg-small
+    timeout-minutes: 5
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+
+      - name: Install pinned tools
+        run: bash ci/bootstrap-tools.sh
+
+      - name: Validate templates
+        run: bash ci/render.sh gate
+
+  compose:
+    runs-on: codeberg-small
+    timeout-minutes: 5
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+
+      - name: Install pinned tools
+        run: bash ci/bootstrap-tools.sh
+
+      - name: Validate compose files
+        run: bash ci/compose-config.sh
