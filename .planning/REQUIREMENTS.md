@@ -43,7 +43,7 @@ Fonte: `docs/pontos-de-atencao.md` (ID original entre parênteses).
 - [ ] **REL-01**: Caddy e Uptime Kuma sobem juntos sem conflito na porta 3001, e o volume do Uptime Kuma usa `{{ .chezmoi.homeDir }}` (M3)
 - [ ] **REL-02**: Imagens e ferramentas com versão fixa: `ollama/ollama`, Ollama nativo, `caddy`, ferramentas do mise e `@inkeep/open-knowledge` no Dockerfile (M5)
 - [ ] **REL-03**: OmniRoute tem uma única fonte de versão lida pelo compose; Dockerfile órfão e referências antigas removidos (M6)
-- [ ] **REL-04**: Instaladores de Ollama, lazygit, atuin e glab descobrem a versão sem `grep`/`sed` frágil, falham com mensagem clara, e o glab funciona no macOS (M7)
+- [x] **REL-04**: Instaladores de Ollama, lazygit, atuin e glab descobrem a versão sem `grep`/`sed` frágil, falham com mensagem clara, e o glab funciona no macOS (M7)
 - [ ] **REL-05**: CI renderiza os templates por perfil (Linux, VPS, macOS, Termux) com dados simulados, roda `shellcheck` nos scripts renderizados e `docker compose config` nas stacks (M8)
 - [ ] **REL-06**: Uptime Kuma tem monitores de disco e memória, e o healthcheck do Hindsight está ativo (B10)
 
@@ -100,7 +100,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REL-01 | Phase 2 | Pending |
 | REL-02 | Phase 4 | Pending |
 | REL-03 | Phase 4 | Pending |
-| REL-04 | Phase 1 | Pending |
+| REL-04 | Phase 1 | Complete |
 | REL-05 | Phase 1 | Pending |
 | REL-06 | Phase 3 | Pending |
 | HYG-01 | Phase 2 | Pending |

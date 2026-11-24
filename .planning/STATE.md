@@ -1,10 +1,17 @@
 ---
-gsd_state_version: '1.0'
-status: planning
+gsd_state_version: "1.0"
+current_phase: 01
+current_phase_name: Apply em todo perfil e CI
+status: executing
+stopped_at: Phase 1 context gathered
+last_updated: "2026-11-24T17:18:08.487Z"
+last_activity: 2026-11-24
+last_activity_desc: Phase 01 execution started
+state_head: 2521f289c91d71334d22090bd501ed40e5a64389
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 6
   completed_plans: 0
   percent: 0
 ---
@@ -16,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-24)
 
 **Core value:** `chezmoi apply` funciona em todo perfil suportado, e a VPS não expõe nada administrativo à internet; o que é público passa só pelo Caddy em 80/443 com HTTPS.
-**Current focus:** Phase 1 - Apply em todo perfil e CI
+**Current focus:** Phase 01 — Apply em todo perfil e CI
 
 ## Current Position
 
-Phase: 1 of 4 (Apply em todo perfil e CI)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-11-24 — Roadmap criado (4 fases, 33/33 requisitos mapeados)
+Phase: 01 (Apply em todo perfil e CI) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 01
+Last activity: 2026-11-24 — Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -77,6 +84,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-24
-Stopped at: Roadmap e STATE criados; próximo passo é `/gsd-discuss-phase 1` ou `/gsd-plan-phase 1`
-Resume file: None
+Last session: 2026-11-24T15:10:19.581Z
+Stopped at: Phase 1 context gathered
+Resume file: .planning/phases/01-apply-em-todo-perfil-e-ci/01-CONTEXT.md

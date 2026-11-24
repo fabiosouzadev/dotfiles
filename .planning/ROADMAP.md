@@ -29,7 +29,23 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Um script protegido por `script_is_instivo` roda quando o contexto Instivo está ativo, e o comportamento de `script_arch_based_only` em Arch puro é intencional e está documentado no próprio guard.
   4. Os instaladores de Ollama, lazygit, atuin e glab descobrem a versão sem `grep`/`sed` frágil, abortam com mensagem clara quando a consulta falha, e o glab instala no macOS.
   5. Cada push no Codeberg dispara um CI que renderiza os templates dos perfis Linux, VPS, macOS e Termux com dados simulados, roda `shellcheck` nos scripts renderizados e `docker compose config` nas stacks, e falha se um bug como A4 ou A5 voltar.
-**Plans**: TBD
+**Plans:** 3/6 plans executed
+
+Plans:
+**Wave 1**
+- [x] 01-01-PLAN.md — Harness de CI (`ci/render.sh` com 5 perfis simulados, shellcheck, `docker compose config`) e workflow Forgejo no Codeberg (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 01-02-PLAN.md — Instaladores: helper de versão com jq (Ollama, lazygit, atuin, glab), A4, M4, B7 e glab no macOS (wave 2)
+- [x] 01-03-PLAN.md — Templates: A5 (Termux), M2 (Composio), quebras de render em Arch e drivers, avisos de shellcheck (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 01-04-PLAN.md — Guards documentados (Instivo legado, Arch puro), remoção do coderabbit, docs do CI e do plano B, texto de APPLY-06 (wave 3)
+- [ ] 01-05-PLAN.md — Regressões nomeadas e autoteste por mutação: o CI falha se A4/A5/M2/M4/B7 voltarem (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 01-06-PLAN.md — Ativar Actions no Codeberg, push e confirmar a primeira execução verde (checkpoint, wave 4)
+
 **Notas**: o remoto é o Codeberg (não há `.github/`), então o CI roda em Forgejo Actions ou Woodpecker, a decidir no planejamento. Os `encrypted_*.asc` exigem descriptografia desligada ou dados falsos no CI. Os guards de APPLY-06 ficam em `home/.chezmoitemplates/workplace/script_is_instivo` e `home/.chezmoitemplates/linux/script_arch_based_only`; esse item não consta de `docs/pontos-de-atencao.md`.
 
 ### Phase 2: Rede da VPS com Caddy e Tailscale
@@ -79,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Apply em todo perfil e CI | 0/TBD | Not started | - |
+| 1. Apply em todo perfil e CI | 3/6 | In Progress | - |
 | 2. Rede da VPS com Caddy e Tailscale | 0/TBD | Not started | - |
 | 3. Backup, restore e monitoramento | 0/TBD | Not started | - |
 | 4. Reprodutibilidade e higiene | 0/TBD | Not started | - |
