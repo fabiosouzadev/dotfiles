@@ -113,6 +113,7 @@ workplace/ script_is_vps  script_is_not_vps  script_is_zup  script_is_not_zup  s
 .
 ├── .chezmoiroot                 # aponta o source state para home/
 ├── README.md
+├── docs/                        # documentação técnica (não é aplicada no $HOME)
 └── home/
     ├── .chezmoi.yaml.tmpl       # detecção de ambiente, perfis, feature flags, GPG
     ├── .chezmoidata/            # pacotes e ferramentas por plataforma
@@ -160,7 +161,7 @@ workplace/ script_is_vps  script_is_not_vps  script_is_zup  script_is_not_zup  s
 | `999-autoload-compinit` | completions (sempre por último) |
 | `encrypted_3xx/4xx-*.zsh.asc` | chaves de API e tokens (criptografados) |
 
-Fallback para bash em `~/.bashrc`.
+`~/.bashrc` é um bashrc padrão e não carrega os módulos de `~/.zshrc.d/`.
 
 ---
 
@@ -170,7 +171,7 @@ Definidas em `home/.chezmoidata/ai_tools.yaml` e instaladas por `unix/run_once_a
 
 - **npm:** OpenCode, GitHub Copilot CLI, Qwen Code, Kilo Code, Amp, Codex, OpenClaude, OpenSpec, GSD, Hindsight coding agents…
 - **curl / github:** Claude Code, Aider, Kiro, Beads, herdr, Composio, Antigravity CLI…
-- **Local:** Ollama com modelos pequenos (`home/.chezmoidata/ollama.yaml`), instalado fora da VPS.
+- **Local:** Ollama, instalado fora da VPS. Os modelos listados em `home/.chezmoidata/ollama.yaml` só são baixados com `localmodels.enabled: true` (hoje `false`).
 
 ---
 
@@ -220,10 +221,10 @@ Convenções:
 
 - Gate por feature flag primeiro, depois pelo guard de OS/ambiente.
 - Caminhos derivados de `.chezmoi.homeDir`, nunca absolutos.
-- Scripts bash com `set -euo pipefail`; PowerShell com `$ErrorActionPreference = "Stop"`.
+- Scripts bash incluem `common/script_helper`, que ativa `set -euo pipefail`; PowerShell com `$ErrorActionPreference = "Stop"`.
 - Um script, uma responsabilidade, numerado na faixa correta.
 
-O mapeamento detalhado do código fica em `.planning/codebase/`.
+A documentação técnica detalhada (arquitetura, estrutura, stack, convenções e [pontos de atenção](docs/pontos-de-atencao.md)) fica em [`docs/`](docs/README.md).
 
 ---
 
