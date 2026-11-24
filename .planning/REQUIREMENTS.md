@@ -78,12 +78,45 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| NET-01 | Phase 2 | Pending |
+| NET-02 | Phase 2 | Pending |
+| NET-03 | Phase 2 | Pending |
+| NET-04 | Phase 2 | Pending |
+| NET-05 | Phase 2 | Pending |
+| NET-06 | Phase 2 | Pending |
+| SEC-01 | Phase 2 | Pending |
+| SEC-02 | Phase 2 | Pending |
+| SEC-03 | Phase 3 | Pending |
+| APPLY-01 | Phase 1 | Pending |
+| APPLY-02 | Phase 1 | Pending |
+| APPLY-03 | Phase 1 | Pending |
+| APPLY-04 | Phase 1 | Pending |
+| APPLY-05 | Phase 1 | Pending |
+| APPLY-06 | Phase 1 | Pending |
+| BKP-01 | Phase 3 | Pending |
+| BKP-02 | Phase 3 | Pending |
+| BKP-03 | Phase 3 | Pending |
+| BKP-04 | Phase 3 | Pending |
+| REL-01 | Phase 2 | Pending |
+| REL-02 | Phase 4 | Pending |
+| REL-03 | Phase 4 | Pending |
+| REL-04 | Phase 1 | Pending |
+| REL-05 | Phase 1 | Pending |
+| REL-06 | Phase 3 | Pending |
+| HYG-01 | Phase 2 | Pending |
+| HYG-02 | Phase 4 | Pending |
+| HYG-03 | Phase 4 | Pending |
+| HYG-04 | Phase 4 | Pending |
+| HYG-05 | Phase 4 | Pending |
+| HYG-06 | Phase 4 | Pending |
+| HYG-07 | Phase 3 | Pending |
+| HYG-08 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 33 total
-- Mapped to phases: 0
-- Unmapped: 33 ⚠️
+- Mapped to phases: 33
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-11-24*
-*Last updated: 2026-11-24 after initial definition*
+*Last updated: 2026-11-24 after roadmap creation (traceability)*
