@@ -1,7 +1,5 @@
-# Detecta automaticamente arquivos de texto e normaliza para LF no repositório
-* text=auto eol=lf
+# Set to LF for all files
+* text=auto
 
-# Força CRLF apenas em scripts específicos do Windows, se houver
+# Set to CRLF for specific files (e.g., Windows batch scripts)
 *.bat text eol=crlf
-*.ps1 text eol=crlf
-
