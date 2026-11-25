@@ -1,5 +1,6 @@
 
-# Helpers para descobrir versões de releases no GitHub e GitLab
+{{/*
+Helpers para descobrir versões de releases no GitHub e GitLab
 #
 # Funções oferecidas:
 # - require_jq: garante que jq está disponível (instala fallback se necessário)
@@ -20,6 +21,7 @@
 # require_jq: garante que jq está disponível
 # Retorna 0 se jq está no PATH ou foi instalado com sucesso.
 # Retorna 1 se a instalação falhar.
+*/}}
 require_jq() {
   # Se jq já está disponível, retorna imediatamente
   if command -v jq >/dev/null 2>&1; then
